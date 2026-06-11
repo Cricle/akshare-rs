@@ -659,7 +659,6 @@ impl AkShareClient {
                     "cumulative_dividend": arr[3].as_f64().unwrap_or(0.0),
                 }));
             }
-            }
         }
 
         if result.is_empty() {
