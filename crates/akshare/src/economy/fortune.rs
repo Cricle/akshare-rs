@@ -139,7 +139,8 @@ impl AkShareClient {
         let mut list_urls: Vec<(String, String)> = Vec::new();
         for line in body.lines() {
             let trimmed = line.trim();
-            if trimmed.contains("href=") && trimmed.contains("/lists/")
+            if trimmed.contains("href=")
+                && trimmed.contains("/lists/")
                 && let (Some(href_start), Some(href_end)) =
                     (trimmed.find("href=\""), trimmed.find("\""))
             {

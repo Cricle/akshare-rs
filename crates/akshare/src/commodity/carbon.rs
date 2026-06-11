@@ -96,8 +96,7 @@ impl AkShareClient {
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("")
                                 .to_string();
-                            let price =
-                                entry.get("cjj").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                            let price = entry.get("cjj").and_then(|v| v.as_f64()).unwrap_or(0.0);
                             if !date.is_empty() {
                                 items.push(MacroDataPoint {
                                     date: date.get(..10).unwrap_or(&date).to_string(),
