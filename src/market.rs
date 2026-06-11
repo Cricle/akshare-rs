@@ -1,3 +1,5 @@
+//! Market detection and symbol normalization utilities.
+
 use crate::types::MarketKind;
 
 /// Detect market from symbol. Returns None if unrecognized.

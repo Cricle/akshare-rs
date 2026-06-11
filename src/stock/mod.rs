@@ -1,3 +1,19 @@
+//! Stock data: A-share, HK, US equities from multiple providers.
+//!
+//! ## Sub-modules
+//!
+//! | Sub-module | Description |
+//! |------------|-------------|
+//! | [`feature`] | Real-time quotes, candles, billboard, capital flow, financials |
+//! | [`fundamental`] | Financial statements, IPO data, restricted releases |
+//! | [`a_share`] | A-share market segment data |
+//! | [`hk`] / [`hk_extra`] | Hong Kong stock data |
+//! | [`us`] / [`us_extra`] | US stock data with fallback sources |
+//! | [`board_em`] / [`board_ths`] | Sector/concept board rankings |
+//! | [`sina_stock`] | Sina Finance intraday ticks, sector spot |
+//! | [`xueqiu`] | Xueqiu (Snowball) stock data |
+//! | `eastmoney_*` | Various Eastmoney data endpoints |
+
 pub mod a_share;
 pub mod feature;
 pub mod fundamental;

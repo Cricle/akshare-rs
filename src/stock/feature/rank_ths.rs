@@ -44,7 +44,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-创新低-持续创新低
-    /// https://data.10jqka.com.cn/rank/cxd/
+    /// <https://data.10jqka.com.cn/rank/cxd/>
     pub async fn stock_rank_cxd_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -69,7 +69,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-创新低-放量创新低
-    /// https://data.10jqka.com.cn/rank/cxfl/
+    /// <https://data.10jqka.com.cn/rank/cxfl/>
     pub async fn stock_rank_cxfl_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -94,7 +94,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-创新高-持续创新高
-    /// https://data.10jqka.com.cn/rank/cxg/
+    /// <https://data.10jqka.com.cn/rank/cxg/>
     pub async fn stock_rank_cxg_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -119,7 +119,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-创新高-持续缩量新高
-    /// https://data.10jqka.com.cn/rank/cxsl/
+    /// <https://data.10jqka.com.cn/rank/cxsl/>
     pub async fn stock_rank_cxsl_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -144,7 +144,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-连涨-连涨
-    /// https://data.10jqka.com.cn/rank/lxsz/
+    /// <https://data.10jqka.com.cn/rank/lxsz/>
     pub async fn stock_rank_lxsz_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -169,7 +169,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-连涨-连跌
-    /// https://data.10jqka.com.cn/rank/lxxd/
+    /// <https://data.10jqka.com.cn/rank/lxxd/>
     pub async fn stock_rank_lxxd_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -194,7 +194,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-量比-量比排名
-    /// https://data.10jqka.com.cn/rank/ljqd/
+    /// <https://data.10jqka.com.cn/rank/ljqd/>
     pub async fn stock_rank_ljqd_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -219,7 +219,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-量比-量能趋势
-    /// https://data.10jqka.com.cn/rank/ljqs/
+    /// <https://data.10jqka.com.cn/rank/ljqs/>
     pub async fn stock_rank_ljqs_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self
             .clist_spot_fetch(
@@ -244,21 +244,21 @@ impl AkShareClient {
     }
 
     /// 同花顺-跌幅-跌幅排名
-    /// https://data.10jqka.com.cn/rank/xstp/
+    /// <https://data.10jqka.com.cn/rank/xstp/>
     pub async fn stock_rank_xstp_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self.cistock_rank_fetch("f3", "-1").await?;
         Ok(data)
     }
 
     /// 同花顺-跌幅-跌停排名
-    /// https://data.10jqka.com.cn/rank/xxtp/
+    /// <https://data.10jqka.com.cn/rank/xxtp/>
     pub async fn stock_rank_xxtp_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self.cistock_rank_fetch("f3", "-1").await?;
         Ok(data)
     }
 
     /// 同花顺-涨幅-涨幅排名
-    /// https://data.10jqka.com.cn/rank/xzjp/
+    /// <https://data.10jqka.com.cn/rank/xzjp/>
     pub async fn stock_rank_xzjp_ths(&self) -> Result<Vec<RankThsEntry>> {
         let data = self.cistock_rank_fetch("f3", "1").await?;
         Ok(data)

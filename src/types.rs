@@ -1,3 +1,8 @@
+//! Shared types used across all modules.
+//!
+//! Core data structures: [`QuoteSnapshot`], [`CandlePoint`], [`MacroDataPoint`],
+//! [`Row`] (flexible key-value map), [`MarketKind`], and more.
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

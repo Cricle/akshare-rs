@@ -1,3 +1,8 @@
+//! HTTP client with mock-server support for testing.
+//!
+//! [`AkShareClient`] is the main entry point for all API calls.
+//! Use [`AkShareClientBuilder`] for custom configuration (proxy, timeout, tokens).
+
 use std::time::Duration;
 
 /// AkShare Rust client — 100% pure Rust, no Python/JS/FFI.

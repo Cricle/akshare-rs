@@ -1,3 +1,7 @@
+//! Error types for akshare-rs.
+//!
+//! All API methods return [`Result<T>`](crate::Result) which wraps [`Error`].
+
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

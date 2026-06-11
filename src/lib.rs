@@ -1,19 +1,9 @@
-//! # akshare-rust
+//! # akshare-rs
 //!
 //! 100% pure Rust implementation of [akshare](https://github.com/akfamily/akshare) —
 //! unified access to Chinese and global financial market data APIs.
 //!
-//! ## Supported data sources
-//!
-//! - **Tencent Finance** — A-share/HK real-time quotes and klines
-//! - **Eastmoney** — A-share search, klines, sectors, billboard, announcements, capital flow, financials, macro data
-//! - **Sina Finance** — A-share real-time quotes, US daily data
-//! - **Yahoo Finance** — HK/US/global stock charts
-//! - **Stooq** — US/global stock CSV data (fallback)
-//! - **SEC EDGAR** — US company fundamentals and filings
-//! - **Tushare Pro** — Chinese market daily data, financials, trade calendar
-//!
-//! ## Usage
+//! ## Quick Start
 //!
 //! ```rust,no_run
 //! use akshare::AkShareClient;
@@ -35,28 +25,107 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! ## Data Sources
+//!
+//! | Provider | Coverage |
+//! |----------|----------|
+//! | **Eastmoney** | A-share search, quotes, klines, sectors, billboard, capital flow |
+//! | **Sina Finance** | A-share real-time, US daily, bonds, forex |
+//! | **Tencent Finance** | A-share/HK real-time quotes and klines |
+//! | **Yahoo Finance** | HK/US/global stock charts |
+//! | **Stooq** | US/global stock CSV data (fallback) |
+//! | **SEC EDGAR** | US company fundamentals and filings |
+//! | **Tushare Pro** | Chinese market daily data, financials, trade calendar |
+//!
+//! ## Module Overview
+//!
+//! ### Equity Markets
+//!
+//! | Module | Description | Functions |
+//! |--------|-------------|-----------|
+//! | [`stock`] | A-share, HK, US stock data | 433 |
+//! | [`index`] | A-share, HK, global indices | 97 |
+//!
+//! ### Derivatives
+//!
+//! | Module | Description | Functions |
+//! |--------|-------------|-----------|
+//! | [`futures`] | Domestic exchanges, spot prices, warehouse stocks | 109 |
+//! | [`option`] | SSE, CZCE, CFFEX, commodity options | 48 |
+//!
+//! ### Funds & Fixed Income
+//!
+//! | Module | Description | Functions |
+//! |--------|-------------|-----------|
+//! | [`fund`] | ETF, LOF, ranked lists, holdings | 98 |
+//! | [`bond`] | Government, corporate, convertible bonds | 51 |
+//! | [`reits`] | REITs data from Eastmoney | 5 |
+//!
+//! ### Macro & Economy
+//!
+//! | Module | Description | Functions |
+//! |--------|-------------|-----------|
+//! | [`macro_data`] | China, US, EU, UK, Japan GDP/CPI/PMI | 423 |
+//! | [`economy`] | Events, articles, NLP sentiment | 62 |
+//!
+//! ### FX, Crypto & Commodities
+//!
+//! | Module | Description | Functions |
+//! |--------|-------------|-----------|
+//! | [`forex`] | BOC rates, cross rates, real-time | 19 |
+//! | [`crypto`] | Bitcoin and major crypto data | 4 |
+//! | [`commodity`] | Commodity prices, carbon trading | 9 |
+//! | [`spot`] | Spot market prices (SGE, hog, futures) | 14 |
+//!
+//! ### Other
+//!
+//! | Module | Description | Functions |
+//! |--------|-------------|-----------|
+//! | [`news`] | Financial news from multiple sources | 6 |
+//! | [`bank`] | Banking regulatory data | 1 |
+//! | [`cal`] | Calendar, volatility calculations | 2 |
+//! | [`tool`] | Trade calendar, utilities | 2 |
+//! | [`provider`] | Data provider abstractions | 12 |
+//!
+//! ## MSRV
+//!
+//! Rust **1.85** (edition 2024)
 
-pub mod bank;
+// Equity Markets
+pub mod stock;
+pub mod index;
+
+// Derivatives
+pub mod futures;
+pub mod option;
+
+// Funds & Fixed Income
 pub mod bond;
-pub mod cal;
-mod client;
+pub mod fund;
+pub mod reits;
+
+// Macro & Economy
+pub mod economy;
+pub mod macro_data;
+
+// FX, Crypto & Commodities
 pub mod commodity;
 pub mod crypto;
-pub mod economy;
-mod error;
 pub mod forex;
-pub mod fund;
-pub mod futures;
-pub mod index;
-pub mod macro_data;
-pub mod market;
-pub mod news;
-pub mod option;
-pub mod provider;
-pub mod reits;
 pub mod spot;
-pub mod stock;
+
+// Other
+pub mod bank;
+pub mod cal;
+pub mod news;
+pub mod provider;
 pub mod tool;
+
+// Internal
+mod client;
+mod error;
+pub mod market;
 pub mod types;
 mod util;
 
