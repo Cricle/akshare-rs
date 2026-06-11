@@ -74,17 +74,17 @@ impl AkShareClient {
             if detail_body.is_empty() {
                 continue;
             }
-            if let Ok(detail_data) = serde_json::from_str::<serde_json::Value>(&detail_body) {
-                if let Some(arr) = detail_data.as_array() {
-                    for entry in arr {
-                        let mut row = Row::new();
-                        row.insert("market_name".into(), entry["mktname"].clone());
-                        row.insert("contract_name".into(), entry["name"].clone());
-                        row.insert("contract_code".into(), entry["code"].clone());
-                        row.insert("variety_code".into(), entry["vcode"].clone());
-                        row.insert("variety_name".into(), entry["vname"].clone());
-                        items.push(row);
-                    }
+            if let Ok(detail_data) = serde_json::from_str::<serde_json::Value>(&detail_body)
+                && let Some(arr) = detail_data.as_array()
+            {
+                for entry in arr {
+                    let mut row = Row::new();
+                    row.insert("market_name".into(), entry["mktname"].clone());
+                    row.insert("contract_name".into(), entry["name"].clone());
+                    row.insert("contract_code".into(), entry["code"].clone());
+                    row.insert("variety_code".into(), entry["vcode"].clone());
+                    row.insert("variety_name".into(), entry["vname"].clone());
+                    items.push(row);
                 }
             }
         }

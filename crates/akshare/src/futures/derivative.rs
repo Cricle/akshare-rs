@@ -732,13 +732,13 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for entry in arr.iter().skip(1) {
-            if let Some(arr_entry) = entry.as_array() {
-                if arr_entry.len() >= 2 {
-                    let mut r = Row::new();
-                    r.insert("symbol".into(), arr_entry[0].clone());
-                    r.insert("mark".into(), arr_entry[1].clone());
-                    items.push(r);
-                }
+            if let Some(arr_entry) = entry.as_array()
+                && arr_entry.len() >= 2
+            {
+                let mut r = Row::new();
+                r.insert("symbol".into(), arr_entry[0].clone());
+                r.insert("mark".into(), arr_entry[1].clone());
+                items.push(r);
             }
         }
         Ok(items)
@@ -791,10 +791,10 @@ impl AkShareClient {
             }
             let date_str = row[0].as_str().unwrap_or("");
             let dt = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d");
-            if let Ok(dt) = dt {
-                if dt < start_dt || dt > end_dt {
-                    continue;
-                }
+            if let Ok(dt) = dt
+                && (dt < start_dt || dt > end_dt)
+            {
+                continue;
             }
             let mut r = Row::new();
             r.insert("date".into(), row[0].clone());

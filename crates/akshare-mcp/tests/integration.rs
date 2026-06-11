@@ -27,7 +27,10 @@ async fn test_stdio_roundtrip_server_info() {
 
     let client_service = client.serve(client_transport).await.unwrap();
 
-    let info = client_service.send_request(make_init_request()).await.unwrap();
+    let info = client_service
+        .send_request(make_init_request())
+        .await
+        .unwrap();
 
     match info {
         rmcp::model::ServerResult::InitializeResult(result) => {
@@ -62,7 +65,10 @@ async fn test_stdio_list_all_tools() {
 
     let client_service = client.serve(client_transport).await.unwrap();
 
-    let _ = client_service.send_request(make_init_request()).await.unwrap();
+    let _ = client_service
+        .send_request(make_init_request())
+        .await
+        .unwrap();
 
     let tools_result = client_service
         .send_request(rmcp::model::ClientRequest::ListToolsRequest(
@@ -175,7 +181,10 @@ async fn test_stdio_tool_has_description() {
 
     let client_service = client.serve(client_transport).await.unwrap();
 
-    let _ = client_service.send_request(make_init_request()).await.unwrap();
+    let _ = client_service
+        .send_request(make_init_request())
+        .await
+        .unwrap();
 
     let tools_result = client_service
         .send_request(rmcp::model::ClientRequest::ListToolsRequest(

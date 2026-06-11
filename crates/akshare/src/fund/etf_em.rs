@@ -647,17 +647,18 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for item in data {
-            if let Some(arr) = item.as_array() {
-                if arr.len() >= 4 {
-                    let date = arr[0].as_str().unwrap_or("");
-                    if date == "1900-01-01" {
-                        continue;
-                    }
-                    result.push(serde_json::json!({
-                        "date": date,
-                        "cumulative_dividend": arr[3].as_f64().unwrap_or(0.0),
-                    }));
+            if let Some(arr) = item.as_array()
+                && arr.len() >= 4
+            {
+                let date = arr[0].as_str().unwrap_or("");
+                if date == "1900-01-01" {
+                    continue;
                 }
+                result.push(serde_json::json!({
+                    "date": date,
+                    "cumulative_dividend": arr[3].as_f64().unwrap_or(0.0),
+                }));
+            }
             }
         }
 

@@ -27,8 +27,7 @@ enum Commands {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .with_writer(std::io::stderr)
         .with_ansi(false)
@@ -59,12 +58,9 @@ async fn main() -> anyhow::Result<()> {
                 rmcp::transport::streamable_http_server::StreamableHttpServerConfig::default(),
             );
 
-            let app = axum::Router::new()
-                .nest_service("/mcp", mcp_service)
-                .layer(axum::middleware::from_fn_with_state(
-                    mcp_key,
-                    auth::auth_middleware,
-                ));
+            let app = axum::Router::new().nest_service("/mcp", mcp_service).layer(
+                axum::middleware::from_fn_with_state(mcp_key, auth::auth_middleware),
+            );
 
             let listener = tokio::net::TcpListener::bind(&cfg.http.bind).await?;
             tracing::info!("MCP HTTP server listening on {}", cfg.http.bind);

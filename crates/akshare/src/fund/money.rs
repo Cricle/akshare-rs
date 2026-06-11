@@ -37,13 +37,13 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: HbRankEnvelope = response.json().await.map_err(Error::from)?;
-        if let Some(code) = payload.err_code {
-            if code != 0 {
-                let msg = payload.err_msg.unwrap_or_else(|| "unknown".to_string());
-                return Err(Error::upstream(format!(
-                    "money fund API error {code}: {msg}"
-                )));
-            }
+        if let Some(code) = payload.err_code
+            && code != 0
+        {
+            let msg = payload.err_msg.unwrap_or_else(|| "unknown".to_string());
+            return Err(Error::upstream(format!(
+                "money fund API error {code}: {msg}"
+            )));
         }
 
         let items = payload.datas.unwrap_or_default();

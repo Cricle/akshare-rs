@@ -349,10 +349,10 @@ impl AkShareClient {
                     }
                     // Filter by end_month
                     let exercise_date = arr[6].as_str().unwrap_or("");
-                    if let Some(mm) = extract_month(exercise_date) {
-                        if mm != month_suffix {
-                            continue;
-                        }
+                    if let Some(mm) = extract_month(exercise_date)
+                        && mm != month_suffix
+                    {
+                        continue;
                     }
 
                     all_rows.push(OptionFinanceBoardRow {
@@ -414,12 +414,12 @@ impl AkShareClient {
             if let Some(idx) = instrument_idx {
                 let instrument = fields[idx];
                 // Extract month from instrument code like "IO2306-C-4000" -> "06"
-                if let Some(code_part) = instrument.split('-').next() {
-                    if code_part.len() >= 6 {
-                        let mm = &code_part[code_part.len() - 2..];
-                        if mm != month_suffix {
-                            continue;
-                        }
+                if let Some(code_part) = instrument.split('-').next()
+                    && code_part.len() >= 6
+                {
+                    let mm = &code_part[code_part.len() - 2..];
+                    if mm != month_suffix {
+                        continue;
                     }
                 }
             }

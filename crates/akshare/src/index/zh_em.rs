@@ -69,16 +69,15 @@ impl AkShareClient {
                 .map_err(Error::from)?;
 
             let payload: EmKlineEnvelope = response.json().await.map_err(Error::from)?;
-            if let Some(data) = payload.data {
-                if let Some(klines) = data.klines {
-                    if !klines.is_empty() {
-                        let points: Vec<IndexZhAHistPoint> = klines
-                            .iter()
-                            .map(|line| parse_zh_a_hist_line(line))
-                            .collect::<Result<Vec<_>>>()?;
-                        return Ok(points);
-                    }
-                }
+            if let Some(data) = payload.data
+                && let Some(klines) = data.klines
+                && !klines.is_empty()
+            {
+                let points: Vec<IndexZhAHistPoint> = klines
+                    .iter()
+                    .map(|line| parse_zh_a_hist_line(line))
+                    .collect::<Result<Vec<_>>>()?;
+                return Ok(points);
             }
         }
 

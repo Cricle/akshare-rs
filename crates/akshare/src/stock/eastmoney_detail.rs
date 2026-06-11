@@ -390,13 +390,13 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for (key, label) in &code_name_map {
-            if let Some(val) = payload.get(key) {
-                if !val.is_null() {
-                    items.push(StockInfoItem {
-                        item: label.to_string(),
-                        value: val.clone(),
-                    });
-                }
+            if let Some(val) = payload.get(key)
+                && !val.is_null()
+            {
+                items.push(StockInfoItem {
+                    item: label.to_string(),
+                    value: val.clone(),
+                });
             }
         }
 

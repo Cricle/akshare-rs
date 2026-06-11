@@ -117,18 +117,18 @@ impl AkShareClient {
 
         let mut entries = Vec::new();
         for item in &s2n {
-            if let Some(arr) = item.as_array() {
-                if arr.len() >= 3 {
-                    entries.push(HsgtFlowEntry {
-                        date: arr[0].as_str().unwrap_or("").to_string(),
-                        north_net_flow: arr.get(1).and_then(|v| v.as_f64()),
-                        south_net_flow: arr.get(2).and_then(|v| v.as_f64()),
-                        north_acc_flow: None,
-                        south_acc_flow: None,
-                        sh_index: arr.get(3).and_then(|v| v.as_f64()),
-                        sh_change_pct: arr.get(4).and_then(|v| v.as_f64()),
-                    });
-                }
+            if let Some(arr) = item.as_array()
+                && arr.len() >= 3
+            {
+                entries.push(HsgtFlowEntry {
+                    date: arr[0].as_str().unwrap_or("").to_string(),
+                    north_net_flow: arr.get(1).and_then(|v| v.as_f64()),
+                    south_net_flow: arr.get(2).and_then(|v| v.as_f64()),
+                    north_acc_flow: None,
+                    south_acc_flow: None,
+                    sh_index: arr.get(3).and_then(|v| v.as_f64()),
+                    sh_change_pct: arr.get(4).and_then(|v| v.as_f64()),
+                });
             }
         }
 

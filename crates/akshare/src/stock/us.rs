@@ -57,17 +57,17 @@ impl AkShareClient {
                 .text()
                 .await?;
             // Parse JSONP response
-            if let Some(start) = resp.find("({") {
-                if let Some(end) = resp.rfind(");") {
-                    let json_str = &resp[start + 1..end + 1];
-                    if let Ok(data) = serde_json::from_str::<serde_json::Value>(json_str) {
-                        if let Some(arr) = data.get("data").and_then(|d| d.as_array()) {
-                            if arr.is_empty() {
-                                break;
-                            }
-                            all_stocks.extend(arr.clone());
-                        }
+            if let Some(start) = resp.find("({")
+                && let Some(end) = resp.rfind(");")
+            {
+                let json_str = &resp[start + 1..end + 1];
+                if let Ok(data) = serde_json::from_str::<serde_json::Value>(json_str)
+                    && let Some(arr) = data.get("data").and_then(|d| d.as_array())
+                {
+                    if arr.is_empty() {
+                        break;
                     }
+                    all_stocks.extend(arr.clone());
                 }
             }
         }

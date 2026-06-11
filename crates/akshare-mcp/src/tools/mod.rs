@@ -6,8 +6,8 @@
 pub mod bond;
 pub mod crypto;
 pub mod economy;
-pub mod fund;
 pub mod forex;
+pub mod fund;
 pub mod futures;
 pub mod index;
 pub mod macro_data;
@@ -185,9 +185,11 @@ impl AkShareMcpService {
     #[tool(description = "Get individual stock fund flow from Eastmoney")]
     async fn stock_individual_fund_flow(
         &self,
-        Parameters(stock::FundFlowParams { symbol, market, limit }): Parameters<
-            stock::FundFlowParams,
-        >,
+        Parameters(stock::FundFlowParams {
+            symbol,
+            market,
+            limit,
+        }): Parameters<stock::FundFlowParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -455,11 +457,9 @@ impl AkShareMcpService {
     #[tool(description = "Get CZCE option history data")]
     async fn option_hist_czce(
         &self,
-        Parameters(option::OptionHistParams {
-            symbol,
-            date,
-            ..
-        }): Parameters<option::OptionHistParams>,
+        Parameters(option::OptionHistParams { symbol, date, .. }): Parameters<
+            option::OptionHistParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
