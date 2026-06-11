@@ -202,7 +202,6 @@ impl AkShareClient {
                     name: symbol.to_string(),
                 });
             }
-            }
         }
         Ok(items)
     }
