@@ -93,8 +93,8 @@
 //! Rust **1.85** (edition 2024)
 
 // Equity Markets
-pub mod stock;
 pub mod index;
+pub mod stock;
 
 // Derivatives
 pub mod futures;
