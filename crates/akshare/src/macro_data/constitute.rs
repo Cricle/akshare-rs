@@ -114,26 +114,25 @@ impl AkShareClient {
                 .json()
                 .await?;
 
-            if let Some(data) = resp.get("data") {
-                if let Some(values) = data.get("values").and_then(|v| v.as_array()) {
-                    if let Some(keys) = data.get("keys").and_then(|k| k.as_array()) {
-                        let col_names: Vec<String> = keys
-                            .iter()
-                            .filter_map(|k| {
-                                k.get("name").and_then(|n| n.as_str()).map(String::from)
-                            })
-                            .collect();
-                        // Get last row (total OPEC production)
-                        if let Some(last_row) = values.last().and_then(|r| r.as_array()) {
-                            for (i, col_name) in col_names.iter().enumerate() {
-                                if let Some(val) = last_row.get(i).and_then(|v| v.as_f64()) {
-                                    items.push(MacroDataPoint {
-                                        date: date_str.to_string(),
-                                        value: val,
-                                        name: format!("OPEC {}", col_name),
-                                    });
-                                }
-                            }
+            if let Some(data) = resp.get("data")
+                && let Some(values) = data.get("values").and_then(|v| v.as_array())
+                && let Some(keys) = data.get("keys").and_then(|k| k.as_array())
+            {
+                let col_names: Vec<String> = keys
+                    .iter()
+                    .filter_map(|k| {
+                        k.get("name").and_then(|n| n.as_str()).map(String::from)
+                    })
+                    .collect();
+                // Get last row (total OPEC production)
+                if let Some(last_row) = values.last().and_then(|r| r.as_array()) {
+                    for (i, col_name) in col_names.iter().enumerate() {
+                        if let Some(val) = last_row.get(i).and_then(|v| v.as_f64()) {
+                            items.push(MacroDataPoint {
+                                date: date_str.to_string(),
+                                value: val,
+                                name: format!("OPEC {}", col_name),
+                            });
                         }
                     }
                 }

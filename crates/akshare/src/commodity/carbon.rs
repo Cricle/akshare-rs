@@ -85,25 +85,25 @@ impl AkShareClient {
             let trimmed = line.trim();
             if trimmed.contains("cjj") && trimmed.contains("riqi") {
                 // Try to extract JSON array
-                if let Some(start) = trimmed.find("'[") {
-                    if let Some(end) = trimmed.rfind("]'") {
-                        let json_str = &trimmed[start + 1..=end];
-                        if let Ok(arr) = serde_json::from_str::<Vec<serde_json::Value>>(json_str) {
-                            for entry in &arr {
-                                let date = entry
-                                    .get("riqi")
-                                    .and_then(|v| v.as_str())
-                                    .unwrap_or("")
-                                    .to_string();
-                                let price =
-                                    entry.get("cjj").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                                if !date.is_empty() {
-                                    items.push(MacroDataPoint {
-                                        date: date.get(..10).unwrap_or(&date).to_string(),
-                                        value: price,
-                                        name: "Hubei Carbon".to_string(),
-                                    });
-                                }
+                if let Some(start) = trimmed.find("'[")
+                    && let Some(end) = trimmed.rfind("]'")
+                {
+                    let json_str = &trimmed[start + 1..=end];
+                    if let Ok(arr) = serde_json::from_str::<Vec<serde_json::Value>>(json_str) {
+                        for entry in &arr {
+                            let date = entry
+                                .get("riqi")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string();
+                            let price =
+                                entry.get("cjj").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                            if !date.is_empty() {
+                                items.push(MacroDataPoint {
+                                    date: date.get(..10).unwrap_or(&date).to_string(),
+                                    value: price,
+                                    name: "Hubei Carbon".to_string(),
+                                });
                             }
                         }
                     }

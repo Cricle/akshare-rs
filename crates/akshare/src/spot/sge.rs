@@ -167,29 +167,27 @@ fn parse_benchmark(resp: SgeBenchmarkResp, label: &str) -> Result<Vec<MacroDataP
 
     let mut items = Vec::new();
     for row in &wp {
-        if row.len() >= 2 {
-            if let (Some(ts), Some(val)) = (row[0].as_f64(), row[1].as_f64()) {
-                if let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64) {
-                    items.push(MacroDataPoint {
-                        date: dt.format("%Y-%m-%d").to_string(),
-                        value: val,
-                        name: format!("{label} late"),
-                    });
-                }
-            }
+        if row.len() >= 2
+            && let (Some(ts), Some(val)) = (row[0].as_f64(), row[1].as_f64())
+            && let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64)
+        {
+            items.push(MacroDataPoint {
+                date: dt.format("%Y-%m-%d").to_string(),
+                value: val,
+                name: format!("{label} late"),
+            });
         }
     }
     for row in &zp {
-        if row.len() >= 2 {
-            if let (Some(ts), Some(val)) = (row[0].as_f64(), row[1].as_f64()) {
-                if let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64) {
-                    items.push(MacroDataPoint {
-                        date: dt.format("%Y-%m-%d").to_string(),
-                        value: val,
-                        name: format!("{label} early"),
-                    });
-                }
-            }
+        if row.len() >= 2
+            && let (Some(ts), Some(val)) = (row[0].as_f64(), row[1].as_f64())
+            && let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64)
+        {
+            items.push(MacroDataPoint {
+                date: dt.format("%Y-%m-%d").to_string(),
+                value: val,
+                name: format!("{label} early"),
+            });
         }
     }
 

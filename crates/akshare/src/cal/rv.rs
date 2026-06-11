@@ -205,10 +205,10 @@ impl AkShareClient {
         let mut items = Vec::new();
         for window_start in 0..=(data.len() - window_size - 1) {
             let window = &data[window_start..window_start + window_size + 1];
-            if let Ok(mut result) = self.volatility_yz_rv(window) {
-                if let Some(point) = result.pop() {
-                    items.push(point);
-                }
+            if let Ok(mut result) = self.volatility_yz_rv(window)
+                && let Some(point) = result.pop()
+            {
+                items.push(point);
             }
         }
         Ok(items)

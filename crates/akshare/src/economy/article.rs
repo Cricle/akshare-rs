@@ -283,17 +283,16 @@ impl AkShareClient {
             if parts.len() >= 2
                 && let (Ok(date_val), Ok(rv_val)) =
                     (parts[0].parse::<i64>(), parts[1].parse::<f64>())
+                && date_val > 19000000
             {
-                if date_val > 19000000 {
-                    in_data = true;
-                    let date_str =
-                        format!("{}-{}-{}", &parts[0][..4], &parts[0][4..6], &parts[0][6..8]);
-                    items.push(MacroDataPoint {
-                        date: date_str,
-                        value: rv_val,
-                        name: format!("RLab RV - {}", symbol),
-                    });
-                }
+                in_data = true;
+                let date_str =
+                    format!("{}-{}-{}", &parts[0][..4], &parts[0][4..6], &parts[0][6..8]);
+                items.push(MacroDataPoint {
+                    date: date_str,
+                    value: rv_val,
+                    name: format!("RLab RV - {}", symbol),
+                });
             }
         }
 

@@ -256,15 +256,15 @@ impl AkShareClient {
         let mut items = Vec::new();
         if let Some(obj) = values.as_object() {
             for (date, row) in obj {
-                if let Some(arr) = row.as_array() {
-                    if arr.len() >= 2 {
-                        let count = arr[0].as_f64().unwrap_or(0.0);
-                        items.push(MacroDataPoint {
-                            date: date.clone(),
-                            value: count,
-                            name: "US Rig Count".to_string(),
-                        });
-                    }
+                if let Some(arr) = row.as_array()
+                    && arr.len() >= 2
+                {
+                    let count = arr[0].as_f64().unwrap_or(0.0);
+                    items.push(MacroDataPoint {
+                        date: date.clone(),
+                        value: count,
+                        name: "US Rig Count".to_string(),
+                    });
                 }
             }
         }
@@ -283,14 +283,14 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(arr) = row.as_array() {
                     // First key is total US crude production
-                    if let Some(inner) = arr.first().and_then(|v| v.as_array()) {
-                        if let Some(val) = inner.first().and_then(|v| v.as_f64()) {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: "US Crude Production".to_string(),
-                            });
-                        }
+                    if let Some(inner) = arr.first().and_then(|v| v.as_array())
+                        && let Some(val) = inner.first().and_then(|v| v.as_f64())
+                    {
+                        items.push(MacroDataPoint {
+                            date: date.clone(),
+                            value: val,
+                            name: "US Crude Production".to_string(),
+                        });
                     }
                 }
             }
@@ -554,14 +554,14 @@ async fn fetch_cftc_holding(
         for (date, row) in obj {
             if let Some(cols) = row.as_object() {
                 for (col_name, col_data) in cols {
-                    if let Some(arr) = col_data.as_array() {
-                        if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("{} {}", name_label, col_name),
-                            });
-                        }
+                    if let Some(arr) = col_data.as_array()
+                        && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                    {
+                        items.push(MacroDataPoint {
+                            date: date.clone(),
+                            value: val,
+                            name: format!("{} {}", name_label, col_name),
+                        });
                     }
                 }
             }

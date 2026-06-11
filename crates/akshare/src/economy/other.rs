@@ -86,17 +86,16 @@ impl AkShareClient {
                 // Each entry is an array of arrays
                 if let Some(arr) = entry.as_array() {
                     // Current year data is typically first
-                    if let Some(year_data) = arr.first() {
-                        if let Some(year_arr) = year_data.as_array() {
-                            if let Some(val) = year_arr.get(indicator_idx) {
-                                let value = val.as_f64().unwrap_or(0.0);
-                                items.push(MacroDataPoint {
-                                    date: month.clone(),
-                                    value,
-                                    name: format!("{}-{}", symbol, indicator),
-                                });
-                            }
-                        }
+                    if let Some(year_data) = arr.first()
+                        && let Some(year_arr) = year_data.as_array()
+                        && let Some(val) = year_arr.get(indicator_idx)
+                    {
+                        let value = val.as_f64().unwrap_or(0.0);
+                        items.push(MacroDataPoint {
+                            date: month.clone(),
+                            value,
+                            name: format!("{}-{}", symbol, indicator),
+                        });
                     }
                 }
             }
@@ -199,19 +198,19 @@ impl AkShareClient {
         let mut items = Vec::new();
 
         for (i, month) in months.iter().enumerate() {
-            if let Some(entry) = data_list.get(i) {
-                if let Some(arr) = entry.as_array() {
-                    let value = arr
-                        .get(1)
-                        .and_then(|v| v.as_f64())
-                        .or_else(|| arr.first().and_then(|v| v.as_f64()))
-                        .unwrap_or(0.0);
-                    items.push(MacroDataPoint {
-                        date: month.clone(),
-                        value,
-                        name: format!("{}-{}", symbol, indicator),
-                    });
-                }
+            if let Some(entry) = data_list.get(i)
+                && let Some(arr) = entry.as_array()
+            {
+                let value = arr
+                    .get(1)
+                    .and_then(|v| v.as_f64())
+                    .or_else(|| arr.first().and_then(|v| v.as_f64()))
+                    .unwrap_or(0.0);
+                items.push(MacroDataPoint {
+                    date: month.clone(),
+                    value,
+                    name: format!("{}-{}", symbol, indicator),
+                });
             }
         }
         Ok(items)
@@ -247,15 +246,15 @@ impl AkShareClient {
         let mut items = Vec::new();
 
         for (i, month) in months.iter().enumerate() {
-            if let Some(entry) = data_list.get(i) {
-                if let Some(arr) = entry.as_array() {
-                    let value = arr.get(2).and_then(|v| v.as_f64()).unwrap_or(0.0);
-                    items.push(MacroDataPoint {
-                        date: month.clone(),
-                        value,
-                        name: format!("NEV - {}", symbol),
-                    });
-                }
+            if let Some(entry) = data_list.get(i)
+                && let Some(arr) = entry.as_array()
+            {
+                let value = arr.get(2).and_then(|v| v.as_f64()).unwrap_or(0.0);
+                items.push(MacroDataPoint {
+                    date: month.clone(),
+                    value,
+                    name: format!("NEV - {}", symbol),
+                });
             }
         }
         Ok(items)
