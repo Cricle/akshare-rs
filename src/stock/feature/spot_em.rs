@@ -1,11 +1,12 @@
 //! Spot market data from Eastmoney (stock_zh_a_spot_em, stock_sh_a_spot_em, etc.)
 
-use crate::client::AkShareClient;
-use crate::error::Result;
 use super::helpers::*;
 use super::types::SpotQuote;
+use crate::client::AkShareClient;
+use crate::error::Result;
 
-const SPOT_FIELDS: &str = "f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62";
+const SPOT_FIELDS: &str =
+    "f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62";
 
 fn parse_spot_quote(v: &serde_json::Value) -> Option<SpotQuote> {
     let code = v.get("f12")?.as_str()?.to_string();

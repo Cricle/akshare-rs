@@ -190,7 +190,7 @@ impl AkShareClient {
         let url = "http://www.dce.com.cn/dcereport/publicweb/dailystat/dayQuotes";
 
         let resp: serde_json::Value = self
-                        .post(url)
+            .post(url)
             .json(&serde_json::json!({
                 "contractId": "",
                 "lang": "zh",
@@ -255,7 +255,7 @@ impl AkShareClient {
         );
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await
             .map_err(Error::from)?
@@ -316,13 +316,15 @@ impl AkShareClient {
         symbol: &str,
         trade_date: &str,
     ) -> Result<Vec<ShfeOptionRow>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/tradedata/option/dailydata/kx{trade_date}.dat"
-        );
+        let url =
+            format!("https://www.shfe.com.cn/data/tradedata/option/dailydata/kx{trade_date}.dat");
 
         let resp: serde_json::Value = self
-                        .get(&url)
-            .header("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)")
+            .get(&url)
+            .header(
+                "User-Agent",
+                "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)",
+            )
             .send()
             .await
             .map_err(Error::from)?
@@ -372,18 +374,16 @@ impl AkShareClient {
     ///
     /// `symbol` is the Chinese name, e.g. "\u{94dd}\u{9009}\u{6743}".
     /// `trade_date` is "YYYYMMDD".
-    pub async fn option_vol_shfe(
-        &self,
-        symbol: &str,
-        trade_date: &str,
-    ) -> Result<Vec<ShfeVolRow>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/tradedata/option/dailydata/kx{trade_date}.dat"
-        );
+    pub async fn option_vol_shfe(&self, symbol: &str, trade_date: &str) -> Result<Vec<ShfeVolRow>> {
+        let url =
+            format!("https://www.shfe.com.cn/data/tradedata/option/dailydata/kx{trade_date}.dat");
 
         let resp: serde_json::Value = self
-                        .get(&url)
-            .header("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)")
+            .get(&url)
+            .header(
+                "User-Agent",
+                "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)",
+            )
             .send()
             .await
             .map_err(Error::from)?
@@ -430,10 +430,16 @@ impl AkShareClient {
         let body = format!("trade_date={trade_date}&trade_type=1");
 
         let resp: serde_json::Value = self
-                        .post(url)
-            .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+            .post(url)
+            .header(
+                "Content-Type",
+                "application/x-www-form-urlencoded; charset=UTF-8",
+            )
             .header("X-Requested-With", "XMLHttpRequest")
-            .header("Referer", "http://www.gfex.com.cn/gfex/rihq/hqsj_tjsj.shtml")
+            .header(
+                "Referer",
+                "http://www.gfex.com.cn/gfex/rihq/hqsj_tjsj.shtml",
+            )
             .body(body)
             .send()
             .await
@@ -482,11 +488,7 @@ impl AkShareClient {
     ///
     /// `symbol` is the Chinese name, e.g. "\u{78b3}\u{9178}\u{9502}".
     /// `trade_date` is "YYYYMMDD".
-    pub async fn option_vol_gfex(
-        &self,
-        symbol: &str,
-        trade_date: &str,
-    ) -> Result<Vec<GfexVolRow>> {
+    pub async fn option_vol_gfex(&self, symbol: &str, trade_date: &str) -> Result<Vec<GfexVolRow>> {
         let symbol_code = match symbol {
             "\u{5de5}\u{4e1a}\u{7845}" => "si",
             "\u{78b3}\u{9178}\u{9502}" => "lc",
@@ -494,7 +496,7 @@ impl AkShareClient {
             other => {
                 return Err(Error::invalid_input(format!(
                     "unsupported GFEX vol symbol: {other}"
-                )))
+                )));
             }
         };
 
@@ -502,10 +504,16 @@ impl AkShareClient {
         let body = format!("trade_date={trade_date}");
 
         let resp: serde_json::Value = self
-                        .post(url)
-            .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+            .post(url)
+            .header(
+                "Content-Type",
+                "application/x-www-form-urlencoded; charset=UTF-8",
+            )
             .header("X-Requested-With", "XMLHttpRequest")
-            .header("Referer", "http://www.gfex.com.cn/gfex/rihq/hqsj_tjsj.shtml")
+            .header(
+                "Referer",
+                "http://www.gfex.com.cn/gfex/rihq/hqsj_tjsj.shtml",
+            )
             .body(body)
             .send()
             .await

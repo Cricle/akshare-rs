@@ -253,13 +253,16 @@ impl AkShareClient {
     pub async fn stock_zh_ah_spot_em(&self, limit: usize) -> Result<Vec<AhComparisonRow>> {
         let pz = limit.to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("np", "1"),
                 ("fltt", "1"),
                 ("invt", "2"),
                 ("fs", "b:DLMK0101"),
-                ("fields", "f193,f191,f192,f12,f13,f14,f1,f2,f4,f3,f152,f186,f190,f187,f189,f188"),
+                (
+                    "fields",
+                    "f193,f191,f192,f12,f13,f14,f1,f2,f4,f3,f152,f186,f190,f187,f189,f188",
+                ),
                 ("fid", "f3"),
                 ("pn", "1"),
                 ("pz", pz.as_str()),
@@ -280,7 +283,9 @@ impl AkShareClient {
 
         let items = parse_ah_rows(&diff, limit);
         if items.is_empty() {
-            return Err(Error::not_found("eastmoney returned no AH comparison items"));
+            return Err(Error::not_found(
+                "eastmoney returned no AH comparison items",
+            ));
         }
         Ok(items)
     }
@@ -307,7 +312,7 @@ impl AkShareClient {
     async fn fetch_spot_list(&self, fs: &str, limit: usize) -> Result<Vec<SpotRow>> {
         let pz = limit.to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),
@@ -385,13 +390,16 @@ impl AkShareClient {
     async fn fetch_hsgt_stocks(&self, fs: &str, limit: usize) -> Result<Vec<HsgtStockRow>> {
         let pz = limit.to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("np", "1"),
                 ("fltt", "1"),
                 ("invt", "2"),
                 ("fs", fs),
-                ("fields", "f12,f13,f14,f19,f1,f2,f4,f3,f152,f17,f18,f15,f16,f5,f6"),
+                (
+                    "fields",
+                    "f12,f13,f14,f19,f1,f2,f4,f3,f152,f17,f18,f15,f16,f5,f6",
+                ),
                 ("fid", "f12"),
                 ("pn", "1"),
                 ("pz", pz.as_str()),
@@ -493,8 +501,7 @@ fn parse_board_rows(diff: &serde_json::Value, limit: usize) -> Vec<BoardRow> {
                 rising_count: get_i64(item, "f104"),
                 falling_count: get_i64(item, "f105"),
                 leading_stock: get_string(item, "f128").or_else(|| get_string(item, "f136")),
-                leading_stock_change_pct: get_f64(item, "f136")
-                    .or_else(|| get_f64(item, "f33")),
+                leading_stock_change_pct: get_f64(item, "f136").or_else(|| get_f64(item, "f33")),
             })
         })
         .collect()
@@ -508,11 +515,11 @@ fn parse_ah_rows(diff: &serde_json::Value, limit: usize) -> Vec<AhComparisonRow>
 
     arr.iter()
         .take(limit)
-        .filter_map(|item| {
+        .map(|item| {
             let name = get_string(item, "f193").unwrap_or_default();
             let h_code = get_string(item, "f12").unwrap_or_default();
             let a_code = get_string(item, "f191").unwrap_or_default();
-            Some(AhComparisonRow {
+            AhComparisonRow {
                 name,
                 h_code,
                 h_latest_price_hkd: get_f64(item, "f2").map(|v| v / 1000.0),
@@ -522,7 +529,7 @@ fn parse_ah_rows(diff: &serde_json::Value, limit: usize) -> Vec<AhComparisonRow>
                 a_change_pct: get_f64(item, "f187").map(|v| v / 100.0),
                 price_ratio: get_f64(item, "f189").map(|v| v / 100.0),
                 premium: get_f64(item, "f188").map(|v| v / 100.0),
-            })
+            }
         })
         .collect()
 }

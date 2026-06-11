@@ -13,7 +13,7 @@ impl AkShareClient {
         // First, get the FTSE index data from Eastmoney to calculate the archive number
         let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("secid", "100.STI"),
                 ("klt", "101"),
@@ -22,7 +22,10 @@ impl AkShareClient {
                 ("end", date),
                 ("iscca", "1"),
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+                ),
                 ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
                 ("forcect", "1"),
             ])
@@ -47,19 +50,17 @@ impl AkShareClient {
             num
         );
 
-        let _zip_body = self
-                        .get(&zip_url)
-            .send()
-            .await?
-            .bytes()
-            .await?;
+        let _zip_body = self.get(&zip_url).send().await?.bytes().await?;
 
         let mut items = Vec::new();
         let mut row = Row::new();
         row.insert("source".into(), serde_json::json!("sgx"));
         row.insert("date".into(), serde_json::json!(date));
         row.insert("archive_num".into(), serde_json::json!(num));
-        row.insert("note".into(), serde_json::json!("ZIP archive - requires zip parser"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("ZIP archive - requires zip parser"),
+        );
         items.push(row);
         Ok(items)
     }

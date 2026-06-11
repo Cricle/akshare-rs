@@ -33,7 +33,7 @@ impl AkShareClient {
         // Fetch spot commodity quotes from the Eastmoney datacenter.
         // RPT_SPOT_COMMODITY covers major domestic spot commodity prices.
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_SPOT_COMMODITY"),
                 ("columns", "ALL"),

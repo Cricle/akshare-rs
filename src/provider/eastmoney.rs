@@ -192,7 +192,7 @@ impl AkShareClient {
 
         let count = limit.clamp(1, 20).to_string();
         let response = self
-                        .get("https://searchapi.eastmoney.com/api/suggest/get")
+            .get("https://searchapi.eastmoney.com/api/suggest/get")
             .query(&[
                 ("input", trimmed),
                 ("type", "14"),
@@ -221,9 +221,10 @@ impl AkShareClient {
                     item.security_type_name.as_deref(),
                 )?;
                 if let Some(expected) = market
-                    && expected != market_name {
-                        return None;
-                    }
+                    && expected != market_name
+                {
+                    return None;
+                }
                 Some(StockSearchResult {
                     symbol,
                     name,
@@ -253,12 +254,16 @@ impl AkShareClient {
             "qfq" => "1",
             "hfq" => "2",
             "none" => "0",
-            other => return Err(Error::invalid_input(format!("unsupported adjust mode: {other}"))),
+            other => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported adjust mode: {other}"
+                )));
+            }
         };
         let lmt = limit.max(5).to_string();
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
@@ -314,13 +319,13 @@ impl AkShareClient {
             other => {
                 return Err(Error::invalid_input(format!(
                     "unsupported sector_type: {other}"
-                )))
+                )));
             }
         };
 
         let pz = limit.to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),
@@ -371,7 +376,7 @@ impl AkShareClient {
         let pz = limit.to_string();
         let fs = format!("b:{sector_code}+f:!50");
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),
@@ -446,7 +451,7 @@ impl AkShareClient {
         let page_size = limit.to_string();
 
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("reportName", "RPT_DAILYBILLBOARD_DETAILSNEW"),
                 ("columns", "ALL"),
@@ -473,9 +478,7 @@ impl AkShareClient {
             .into_iter()
             .map(|item| BillboardEntry {
                 trade_date: item.trade_date.unwrap_or_default(),
-                symbol: item
-                    .security_code
-                    .unwrap_or_else(|| code.to_string()),
+                symbol: item.security_code.unwrap_or_else(|| code.to_string()),
                 name: item.security_name.unwrap_or_else(|| "未知股票".to_string()),
                 close_price: item.close_price.unwrap_or_default(),
                 change_rate_pct: item.change_rate.unwrap_or_default(),
@@ -489,9 +492,7 @@ impl AkShareClient {
             .collect::<Vec<_>>();
 
         if items.is_empty() {
-            return Err(Error::not_found(
-                "eastmoney returned no billboard entries",
-            ));
+            return Err(Error::not_found("eastmoney returned no billboard entries"));
         }
         Ok(items)
     }
@@ -512,7 +513,7 @@ impl AkShareClient {
             other => {
                 return Err(Error::invalid_input(format!(
                     "unsupported billboard side: {other}"
-                )))
+                )));
             }
         };
         let code = strip_exchange_suffix(symbol);
@@ -520,7 +521,7 @@ impl AkShareClient {
         let page_size = limit.to_string();
 
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("reportName", report_name),
                 ("columns", "ALL"),
@@ -547,9 +548,7 @@ impl AkShareClient {
             .into_iter()
             .map(|item| BillboardSeatDetail {
                 trade_date: item.trade_date.unwrap_or_default(),
-                symbol: item
-                    .security_code
-                    .unwrap_or_else(|| code.to_string()),
+                symbol: item.security_code.unwrap_or_else(|| code.to_string()),
                 department_name: item
                     .department_name
                     .unwrap_or_else(|| "未知席位".to_string()),
@@ -580,7 +579,7 @@ impl AkShareClient {
         let page_size = limit.clamp(1, 100).to_string();
 
         let response = self
-                        .get("https://np-anotice-stock.eastmoney.com/api/security/ann")
+            .get("https://np-anotice-stock.eastmoney.com/api/security/ann")
             .query(&[
                 ("page_size", page_size.as_str()),
                 ("page_index", "1"),
@@ -604,9 +603,7 @@ impl AkShareClient {
                 let art_code = item.art_code.unwrap_or_default();
                 AnnouncementItem {
                     url: (!art_code.is_empty()).then(|| {
-                        format!(
-                            "https://data.eastmoney.com/notices/detail/{code}/{art_code}.html"
-                        )
+                        format!("https://data.eastmoney.com/notices/detail/{code}/{art_code}.html")
                     }),
                     art_code,
                     symbol: code.to_string(),
@@ -618,9 +615,7 @@ impl AkShareClient {
             .collect::<Vec<_>>();
 
         if items.is_empty() {
-            return Err(Error::not_found(
-                "eastmoney returned no announcement items",
-            ));
+            return Err(Error::not_found("eastmoney returned no announcement items"));
         }
         items.truncate(limit);
         Ok(items)
@@ -632,7 +627,7 @@ impl AkShareClient {
         art_code: &str,
     ) -> Result<AnnouncementDetail> {
         let response = self
-                        .get("https://np-cnotice-stock.eastmoney.com/api/content/ann")
+            .get("https://np-cnotice-stock.eastmoney.com/api/content/ann")
             .query(&[
                 ("art_code", art_code),
                 ("client_source", "web"),
@@ -644,8 +639,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: AnnouncementContentEnvelope =
-            response.json().await.map_err(Error::from)?;
+        let payload: AnnouncementContentEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload
             .data
             .ok_or_else(|| Error::upstream("eastmoney announcement detail missing data"))?;
@@ -663,14 +657,10 @@ impl AkShareClient {
     // -- private helpers ----------------------------------------------------
 
     /// Shared implementation for individual-stock and sector capital flow.
-    async fn fetch_capital_flow(
-        &self,
-        secid: &str,
-        limit: usize,
-    ) -> Result<Vec<CapitalFlowPoint>> {
+    async fn fetch_capital_flow(&self, secid: &str, limit: usize) -> Result<Vec<CapitalFlowPoint>> {
         let lmt = limit.to_string();
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
             .query(&[
                 ("secid", secid),
                 ("lmt", lmt.as_str()),
@@ -700,9 +690,7 @@ impl AkShareClient {
             .collect::<Result<Vec<_>>>()?;
 
         if items.is_empty() {
-            return Err(Error::not_found(
-                "eastmoney returned no capital flow items",
-            ));
+            return Err(Error::not_found("eastmoney returned no capital flow items"));
         }
         items.truncate(limit);
         Ok(items)

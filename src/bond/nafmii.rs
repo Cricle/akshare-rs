@@ -17,7 +17,7 @@ impl AkShareClient {
     /// Returns bond names, types, amounts, registration numbers, and dates.
     pub async fn bond_debt_nafmii(&self, page: u32) -> Result<Vec<serde_json::Value>> {
         let resp: NafmiiResp = self
-                        .post("http://zhuce.nafmii.org.cn/fans/publicQuery/releFileProjDataGrid")
+            .post("http://zhuce.nafmii.org.cn/fans/publicQuery/releFileProjDataGrid")
             .form(&[
                 ("regFileName", ""),
                 ("itemType", ""),

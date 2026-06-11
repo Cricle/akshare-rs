@@ -89,7 +89,7 @@ impl AkShareClient {
         let url = format!("https://hq.sinajs.cn/?list={}", list_param);
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://finance.sina.com.cn/")
             .header("Host", "hq.sinajs.cn")
             .send()
@@ -130,10 +130,7 @@ impl AkShareClient {
             let open = parse_f64(fields[8]);
             let hold = parse_f64(fields[9]);
             let date = fields.get(12).unwrap_or(&"").to_string();
-            let current_price_rmb = fields
-                .get(14)
-                .map(|s| parse_f64(s))
-                .unwrap_or(0.0);
+            let current_price_rmb = fields.get(14).map(|s| parse_f64(s)).unwrap_or(0.0);
 
             let change_amount = current_price - last_settle;
             let change_pct = if last_settle > 0.0 {

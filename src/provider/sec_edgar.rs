@@ -26,7 +26,7 @@ impl AkShareClient {
         );
 
         let facts_resp = self
-                        .get(&facts_url)
+            .get(&facts_url)
             .header("User-Agent", "akshare-rust/0.1 (contact@example.com)")
             .header("Accept", "application/json")
             .send()
@@ -62,9 +62,7 @@ impl AkShareClient {
                     diluted_shares_outstanding: None,
                 })
             }
-            _ => Err(Error::not_found(format!(
-                "SEC EDGAR: no data for {symbol}"
-            ))),
+            _ => Err(Error::not_found(format!("SEC EDGAR: no data for {symbol}"))),
         }
     }
 }

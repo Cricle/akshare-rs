@@ -55,7 +55,7 @@ impl AkShareClient {
     /// Uses the clist API with `fs=m:119,m:120` (forex markets).
     pub async fn forex_em_rates(&self) -> Result<Vec<ForexRate>> {
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "100"),
@@ -137,7 +137,7 @@ impl AkShareClient {
         };
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", symbol),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
@@ -184,7 +184,7 @@ impl AkShareClient {
         let lmt = limit.max(5).to_string();
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", symbol),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),

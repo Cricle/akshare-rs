@@ -14,12 +14,7 @@ impl AkShareClient {
     /// Fetches data from Beijing Carbon Emission Trading Center.
     pub async fn energy_carbon_bj(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.bjets.com.cn/article/jyxx/";
-        let body = self
-                        .get(url)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.get(url).send().await?.text().await?;
 
         let mut items = Vec::new();
         // Parse HTML table for carbon trading data
@@ -91,31 +86,27 @@ impl AkShareClient {
             if trimmed.contains("cjj") && trimmed.contains("riqi") {
                 // Try to extract JSON array
                 if let Some(start) = trimmed.find("'[")
-                    && let Some(end) = trimmed.rfind("]'") {
-                        let json_str = &trimmed[start + 1..=end];
-                        if let Ok(arr) =
-                            serde_json::from_str::<Vec<serde_json::Value>>(json_str)
-                        {
-                            for entry in &arr {
-                                let date = entry
-                                    .get("riqi")
-                                    .and_then(|v| v.as_str())
-                                    .unwrap_or("")
-                                    .to_string();
-                                let price = entry
-                                    .get("cjj")
-                                    .and_then(|v| v.as_f64())
-                                    .unwrap_or(0.0);
-                                if !date.is_empty() {
-                                    items.push(MacroDataPoint {
-                                        date: date.get(..10).unwrap_or(&date).to_string(),
-                                        value: price,
-                                        name: "Hubei Carbon".to_string(),
-                                    });
-                                }
+                    && let Some(end) = trimmed.rfind("]'")
+                {
+                    let json_str = &trimmed[start + 1..=end];
+                    if let Ok(arr) = serde_json::from_str::<Vec<serde_json::Value>>(json_str) {
+                        for entry in &arr {
+                            let date = entry
+                                .get("riqi")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string();
+                            let price = entry.get("cjj").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                            if !date.is_empty() {
+                                items.push(MacroDataPoint {
+                                    date: date.get(..10).unwrap_or(&date).to_string(),
+                                    value: price,
+                                    name: "Hubei Carbon".to_string(),
+                                });
                             }
                         }
                     }
+                }
             }
         }
         Ok(items)
@@ -127,7 +118,7 @@ impl AkShareClient {
     pub async fn energy_carbon_gz(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "http://ets.cnemission.com/carbon/portalIndex/markethistory";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("Top", "1"),
                 ("beginTime", "2010-01-01"),
@@ -152,7 +143,7 @@ impl AkShareClient {
 
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPTA_WEB_YJ_JH"),
                 ("columns", "ALL"),

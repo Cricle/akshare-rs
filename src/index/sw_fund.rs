@@ -64,12 +64,9 @@ impl AkShareClient {
     /// 申万宏源研究 — 基金指数实时行情.
     ///
     /// `symbol` is one of: "基础一级", "基础二级", "基础三级", "特色指数".
-    pub async fn index_realtime_fund_sw(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<SwFundRealtime>> {
+    pub async fn index_realtime_fund_sw(&self, symbol: &str) -> Result<Vec<SwFundRealtime>> {
         let response = self
-                        .post("https://www.swsresearch.com/insWechatSw/fundIndex/pageList")
+            .post("https://www.swsresearch.com/insWechatSw/fundIndex/pageList")
             .json(&serde_json::json!({
                 "pageNo": 1,
                 "pageSize": 50,
@@ -85,10 +82,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: SwFundPageEnvelope = response.json().await.map_err(Error::from)?;
-        let items = payload
-            .data
-            .and_then(|d| d.list)
-            .unwrap_or_default();
+        let items = payload.data.and_then(|d| d.list).unwrap_or_default();
 
         let result: Vec<SwFundRealtime> = items
             .into_iter()
@@ -121,11 +115,15 @@ impl AkShareClient {
             "day" => "DAY",
             "week" => "WEEK",
             "month" => "MONTH",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
 
         let response = self
-                        .post("https://www.swsresearch.com/insWechatSw/fundIndex/getFundKChartData")
+            .post("https://www.swsresearch.com/insWechatSw/fundIndex/getFundKChartData")
             .json(&serde_json::json!({
                 "swIndexCode": symbol,
                 "type": period_upper,

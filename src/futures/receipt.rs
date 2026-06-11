@@ -23,16 +23,13 @@ impl AkShareClient {
             "varietyId": "all",
         });
 
-        let body = self
-                        .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.post(url).json(&payload).send().await?.text().await?;
 
         let data: serde_json::Value = serde_json::from_str(&body)?;
-        let entities = data["data"]["entityList"].as_array().cloned().unwrap_or_default();
+        let entities = data["data"]["entityList"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
 
         let mut items = Vec::new();
         for row in &entities {
@@ -62,7 +59,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -73,7 +70,8 @@ impl AkShareClient {
         let rows = data["o_cursor"].as_array().cloned().unwrap_or_default();
 
         // Aggregate by variety
-        let mut variety_map: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
+        let mut variety_map: std::collections::HashMap<String, f64> =
+            std::collections::HashMap::new();
         for row in &rows {
             let var_name = row["VARNAME"].as_str().unwrap_or("");
             let variety = var_name.split('$').next().unwrap_or("").to_string();

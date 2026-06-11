@@ -11,10 +11,14 @@ impl AkShareClient {
             .ok_or_else(|| Error::invalid_input(format!("invalid A-share symbol: {symbol}")))?;
 
         // Try Tencent first
-        if let Ok(quote) = self.tencent_a_share_quote(symbol).await { return Ok(quote) }
+        if let Ok(quote) = self.tencent_a_share_quote(symbol).await {
+            return Ok(quote);
+        }
 
         // Fallback to Sina realtime
-        if let Ok(quote) = self.sina_a_share_realtime(symbol).await { return Ok(quote) }
+        if let Ok(quote) = self.sina_a_share_realtime(symbol).await {
+            return Ok(quote);
+        }
 
         // Fallback to Tushare (convert last candle to quote)
         let candle = self
@@ -59,7 +63,11 @@ impl AkShareClient {
         let ts_code = normalize_a_share_symbol(symbol)
             .ok_or_else(|| Error::invalid_input(format!("invalid A-share symbol: {symbol}")))?;
         let mut items = self
-            .tushare_daily(&ts_code, &days_ago_yyyymmdd(limit as i64 * 2), &today_yyyymmdd())
+            .tushare_daily(
+                &ts_code,
+                &days_ago_yyyymmdd(limit as i64 * 2),
+                &today_yyyymmdd(),
+            )
             .await?;
         if items.len() > limit {
             items = items[items.len() - limit..].to_vec();

@@ -11,10 +11,7 @@ impl AkShareClient {
     /// 新浪 — 股票指数成份股 (新版接口).
     ///
     /// Only supports HS300 via paginated JSON.
-    pub async fn index_stock_cons_sina(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn index_stock_cons_sina(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         if symbol == "000300" {
             // HS300 uses a special endpoint
             let count_resp = self
@@ -52,8 +49,7 @@ impl AkShareClient {
                     .error_for_status()
                     .map_err(Error::from)?;
 
-                let items: Vec<serde_json::Value> =
-                    resp.json().await.map_err(Error::from)?;
+                let items: Vec<serde_json::Value> = resp.json().await.map_err(Error::from)?;
                 all.extend(items);
             }
 
@@ -94,7 +90,7 @@ impl AkShareClient {
     /// Returns index code, display name, and publish date.
     pub async fn index_stock_info(&self) -> Result<Vec<IndexInfoItem>> {
         let response = self
-                        .get("https://www.joinquant.com/data/dict/indexData")
+            .get("https://www.joinquant.com/data/dict/indexData")
             .send()
             .await
             .map_err(Error::from)?
@@ -132,10 +128,7 @@ impl AkShareClient {
     /// 新浪 — 股票指数成份股 (老接口).
     ///
     /// Scrapes HTML pages; returns raw JSON values.
-    pub async fn index_stock_cons(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn index_stock_cons(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         Err(Error::upstream(format!(
             "index_stock_cons for {symbol} requires HTML scraping with pagination; \
              use index_stock_cons_sina() or a dedicated HTML parser"
@@ -145,10 +138,7 @@ impl AkShareClient {
     /// 中证指数网站 — 成份股目录.
     ///
     /// The upstream returns an XLS file which cannot be parsed in pure Rust.
-    pub async fn index_stock_cons_csindex(
-        &self,
-        _symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn index_stock_cons_csindex(&self, _symbol: &str) -> Result<Vec<serde_json::Value>> {
         Err(Error::upstream(
             "csindex constituents are returned as XLS — not supported in pure Rust",
         ))

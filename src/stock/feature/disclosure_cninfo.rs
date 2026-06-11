@@ -18,7 +18,8 @@ impl AkShareClient {
         for page in 1..=5 {
             let pn = page.to_string();
             let se_date = format!("{}~{}", start_date, end_date);
-            let resp = self.post("https://www.cninfo.com.cn/new/hisAnnouncement/query")
+            let resp = self
+                .post("https://www.cninfo.com.cn/new/hisAnnouncement/query")
                 .form(&[
                     ("pageNum", pn),
                     ("pageSize", "30".to_string()),
@@ -35,21 +36,51 @@ impl AkShareClient {
                     ("sortType", "".to_string()),
                     ("isHLtitle", "true".to_string()),
                 ])
-                .send().await?
+                .send()
+                .await?
                 .error_for_status()?
-                .json::<serde_json::Value>().await?;
-            let data = resp.get("announcements").and_then(|d| d.as_array()).cloned().unwrap_or_default();
-            if data.is_empty() { break; }
+                .json::<serde_json::Value>()
+                .await?;
+            let data = resp
+                .get("announcements")
+                .and_then(|d| d.as_array())
+                .cloned()
+                .unwrap_or_default();
+            if data.is_empty() {
+                break;
+            }
             for v in &data {
-                let code = v.get("secCode").and_then(|x| x.as_str()).unwrap_or("").to_string();
-                let name = v.get("secName").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                let code = v
+                    .get("secCode")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let name = v
+                    .get("secName")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_string();
                 all.push(DisclosureReport {
                     code: if code.is_empty() { None } else { Some(code) },
                     name: if name.is_empty() { None } else { Some(name) },
-                    title: v.get("announcementTitle").and_then(|x| x.as_str()).unwrap_or("").to_string(),
-                    publish_date: v.get("announcementTime").and_then(|x| x.as_str()).unwrap_or("").to_string(),
-                    url: v.get("adjunctUrl").and_then(|x| x.as_str()).map(|u| format!("https://static.cninfo.com.cn/{}", u)),
-                    category: v.get("announcementType").and_then(|x| x.as_str()).map(|s| s.to_string()),
+                    title: v
+                        .get("announcementTitle")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    publish_date: v
+                        .get("announcementTime")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    url: v
+                        .get("adjunctUrl")
+                        .and_then(|x| x.as_str())
+                        .map(|u| format!("https://static.cninfo.com.cn/{}", u)),
+                    category: v
+                        .get("announcementType")
+                        .and_then(|x| x.as_str())
+                        .map(|s| s.to_string()),
                 });
             }
         }
@@ -61,25 +92,55 @@ impl AkShareClient {
         &self,
         announcement_id: &str,
     ) -> Result<Vec<DisclosureReport>> {
-        let resp = self.post("https://www.cninfo.com.cn/new/announcement/query")
-            .form(&[
-                ("announcementId", announcement_id.to_string()),
-            ])
-            .send().await?
+        let resp = self
+            .post("https://www.cninfo.com.cn/new/announcement/query")
+            .form(&[("announcementId", announcement_id.to_string())])
+            .send()
+            .await?
             .error_for_status()?
-            .json::<serde_json::Value>().await?;
-        let data = resp.get("announcements").and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(data.iter().map(|v| {
-            let code = v.get("secCode").and_then(|x| x.as_str()).unwrap_or("").to_string();
-            let name = v.get("secName").and_then(|x| x.as_str()).unwrap_or("").to_string();
-            DisclosureReport {
-                code: if code.is_empty() { None } else { Some(code) },
-                name: if name.is_empty() { None } else { Some(name) },
-                title: v.get("announcementTitle").and_then(|x| x.as_str()).unwrap_or("").to_string(),
-                publish_date: v.get("announcementTime").and_then(|x| x.as_str()).unwrap_or("").to_string(),
-                url: v.get("adjunctUrl").and_then(|x| x.as_str()).map(|u| format!("https://static.cninfo.com.cn/{}", u)),
-                category: v.get("announcementType").and_then(|x| x.as_str()).map(|s| s.to_string()),
-            }
-        }).collect())
+            .json::<serde_json::Value>()
+            .await?;
+        let data = resp
+            .get("announcements")
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(data
+            .iter()
+            .map(|v| {
+                let code = v
+                    .get("secCode")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let name = v
+                    .get("secName")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                DisclosureReport {
+                    code: if code.is_empty() { None } else { Some(code) },
+                    name: if name.is_empty() { None } else { Some(name) },
+                    title: v
+                        .get("announcementTitle")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    publish_date: v
+                        .get("announcementTime")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    url: v
+                        .get("adjunctUrl")
+                        .and_then(|x| x.as_str())
+                        .map(|u| format!("https://static.cninfo.com.cn/{}", u)),
+                    category: v
+                        .get("announcementType")
+                        .and_then(|x| x.as_str())
+                        .map(|s| s.to_string()),
+                }
+            })
+            .collect())
     }
 }

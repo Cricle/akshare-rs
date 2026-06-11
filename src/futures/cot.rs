@@ -12,7 +12,10 @@ static RE_ALPHA: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z_]+").unwrap());
 
 fn extract_variety(sym: &str) -> String {
-    RE_ALPHA.find(sym).map(|m| m.as_str().to_uppercase()).unwrap_or_default()
+    RE_ALPHA
+        .find(sym)
+        .map(|m| m.as_str().to_uppercase())
+        .unwrap_or_default()
 }
 
 fn parse_f64(v: &serde_json::Value) -> f64 {
@@ -42,16 +45,13 @@ impl AkShareClient {
     /// SHFE position rank data for a given date.
     ///
     /// Returns top 20 members by volume, long OI, and short OI for each contract.
-    pub async fn futures_shfe_position_rank(
-        &self,
-        date: &str,
-    ) -> Result<Vec<FuturesPositionRank>> {
+    pub async fn futures_shfe_position_rank(&self, date: &str) -> Result<Vec<FuturesPositionRank>> {
         let url = format!(
             "https://www.shfe.com.cn/data/dailydata/kx/pm{}_new.dat",
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -94,10 +94,7 @@ impl AkShareClient {
     ///
     /// Fetches Excel file from CZCE and returns top 20 rank data.
     /// Data available from 20151008.
-    pub async fn futures_czce_position_rank(
-        &self,
-        date: &str,
-    ) -> Result<Vec<FuturesPositionRank>> {
+    pub async fn futures_czce_position_rank(&self, date: &str) -> Result<Vec<FuturesPositionRank>> {
         let year = &date[..4];
         // After 20251101 uses .xlsx, before uses .xls
         let ext = if date > "20251101" { "xlsx" } else { "xls" };
@@ -106,7 +103,7 @@ impl AkShareClient {
             year, date, ext
         );
         let _body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -135,7 +132,7 @@ impl AkShareClient {
                 var
             );
             let body = match self
-                                .get(&url)
+                .get(&url)
                 .header("User-Agent", "Mozilla/5.0")
                 .send()
                 .await
@@ -170,10 +167,16 @@ impl AkShareClient {
                     vol_chg: fields.get(4).and_then(|s| s.parse().ok()).unwrap_or(0.0),
                     long_party_name: fields.get(5).unwrap_or(&"").to_string(),
                     long_open_interest: fields.get(6).and_then(|s| s.parse().ok()).unwrap_or(0.0),
-                    long_open_interest_chg: fields.get(7).and_then(|s| s.parse().ok()).unwrap_or(0.0),
+                    long_open_interest_chg: fields
+                        .get(7)
+                        .and_then(|s| s.parse().ok())
+                        .unwrap_or(0.0),
                     short_party_name: fields.get(8).unwrap_or(&"").to_string(),
                     short_open_interest: fields.get(9).and_then(|s| s.parse().ok()).unwrap_or(0.0),
-                    short_open_interest_chg: fields.get(10).and_then(|s| s.parse().ok()).unwrap_or(0.0),
+                    short_open_interest_chg: fields
+                        .get(10)
+                        .and_then(|s| s.parse().ok())
+                        .unwrap_or(0.0),
                     symbol: symbol.clone(),
                     variety: extract_variety(&symbol),
                 });
@@ -185,11 +188,9 @@ impl AkShareClient {
     /// DCE position rank data for a given date.
     ///
     /// Uses DCE's batch download API. Data available from 20200720.
-    pub async fn futures_dce_position_rank(
-        &self,
-        date: &str,
-    ) -> Result<Vec<FuturesPositionRank>> {
-        let url = "http://www.dce.com.cn/dcereport/publicweb/dailystat/memberDealPosi/batchDownload";
+    pub async fn futures_dce_position_rank(&self, date: &str) -> Result<Vec<FuturesPositionRank>> {
+        let url =
+            "http://www.dce.com.cn/dcereport/publicweb/dailystat/memberDealPosi/batchDownload";
         let payload = serde_json::json!({
             "tradeDate": date,
             "varietyId": "a",
@@ -198,27 +199,18 @@ impl AkShareClient {
             "lang": "zh",
         });
 
-        let _body = self
-                        .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .bytes()
-            .await?;
+        let _body = self.post(url).json(&payload).send().await?.bytes().await?;
 
         // ZIP parsing requires additional library
         Ok(vec![])
     }
 
     /// GFEX position rank data for a given date.
-    pub async fn futures_gfex_position_rank(
-        &self,
-        date: &str,
-    ) -> Result<Vec<FuturesPositionRank>> {
+    pub async fn futures_gfex_position_rank(&self, date: &str) -> Result<Vec<FuturesPositionRank>> {
         // First get the variety list
         let var_url = "http://www.gfex.com.cn/u/interfacesWebVariety/loadList";
         let var_body = self
-                        .post(var_url)
+            .post(var_url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -237,9 +229,10 @@ impl AkShareClient {
             }
 
             // Get contract list
-            let contract_url = "http://www.gfex.com.cn/u/interfacesWebTiMemberDealPosiQuotes/loadListContract_id";
+            let contract_url =
+                "http://www.gfex.com.cn/u/interfacesWebTiMemberDealPosiQuotes/loadListContract_id";
             let contract_body = self
-                                .post(contract_url)
+                .post(contract_url)
                 .form(&[("variety", var_id), ("trade_date", date)])
                 .header("User-Agent", "Mozilla/5.0")
                 .send()
@@ -248,7 +241,10 @@ impl AkShareClient {
                 .await?;
 
             let contract_data: serde_json::Value = serde_json::from_str(&contract_body)?;
-            let contracts = contract_data["data"].as_array().cloned().unwrap_or_default();
+            let contracts = contract_data["data"]
+                .as_array()
+                .cloned()
+                .unwrap_or_default();
 
             for contract in &contracts {
                 let contract_id = contract.as_str().unwrap_or("");
@@ -257,10 +253,11 @@ impl AkShareClient {
                 }
 
                 // Fetch data for each data_type (1=volume, 2=long, 3=short)
-                let data_url = "http://www.gfex.com.cn/u/interfacesWebTiMemberDealPosiQuotes/loadList";
+                let data_url =
+                    "http://www.gfex.com.cn/u/interfacesWebTiMemberDealPosiQuotes/loadList";
                 for data_type in 1..=3 {
                     let body = self
-                                                .post(data_url)
+                        .post(data_url)
                         .form(&[
                             ("trade_date", date),
                             ("trade_type", "0"),
@@ -373,13 +370,7 @@ impl AkShareClient {
             "lang": "zh",
         });
 
-        let body = self
-                        .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.post(url).json(&payload).send().await?.text().await?;
 
         let data: serde_json::Value = serde_json::from_str(&body)?;
         let rows = data["data"].as_array().cloned().unwrap_or_default();
@@ -424,7 +415,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://vip.stock.finance.sina.com.cn/q/view/vFutures_Positions_cjcc.php";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("t_breed", contract), ("t_date", &date_fmt)])
             .send()
             .await?

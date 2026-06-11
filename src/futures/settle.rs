@@ -30,7 +30,10 @@ fn str_val(v: &serde_json::Value) -> String {
 }
 
 fn extract_variety(sym: &str) -> String {
-    RE_ALPHA.find(sym).map(|m| m.as_str().to_uppercase()).unwrap_or_default()
+    RE_ALPHA
+        .find(sym)
+        .map(|m| m.as_str().to_uppercase())
+        .unwrap_or_default()
 }
 
 impl AkShareClient {
@@ -43,7 +46,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -91,7 +94,7 @@ impl AkShareClient {
             year, date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -142,7 +145,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -153,7 +156,7 @@ impl AkShareClient {
         let rows = data["o_cursor"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for row in rows {
             let sym = row
                 .get("INSTRUMENTID")
                 .or(row.get("symbol"))
@@ -193,7 +196,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -204,7 +207,7 @@ impl AkShareClient {
         let rows = data["o_cursor"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for row in rows {
             let sym = row
                 .get("INSTRUMENTID")
                 .or(row.get("symbol"))
@@ -241,7 +244,7 @@ impl AkShareClient {
     pub async fn futures_settle_gfex(&self, _date: &str) -> Result<Vec<Row>> {
         let url = "http://www.gfex.com.cn/u/interfacesWebTtQueryTradPara/loadDayList";
         let body = self
-                        .post(url)
+            .post(url)
             .form(&[("trade_type", "0")])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -256,7 +259,7 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for mut row in rows {
             let sym = row["contractId"].as_str().unwrap_or("").to_string();
             if sym.contains('-') || sym.is_empty() {
                 continue;
@@ -264,10 +267,28 @@ impl AkShareClient {
             let mut r = Row::new();
             r.insert("symbol".into(), serde_json::json!(sym));
             r.insert("variety".into(), serde_json::json!(extract_variety(&sym)));
-            r.insert("spec_buy_rate".into(), row["specBuyRate"].clone());
-            r.insert("hedge_buy_rate".into(), row["hedgeBuyRate"].clone());
-            r.insert("rise_limit_rate".into(), row["riseLimitRate"].clone());
-            r.insert("client_buy_posi_quota".into(), row["clientBuyPosiQuota"].clone());
+            r.insert(
+                "spec_buy_rate".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("specBuyRate"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "hedge_buy_rate".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("hedgeBuyRate"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "rise_limit_rate".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("riseLimitRate"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "client_buy_posi_quota".into(),
+                row["clientBuyPosiQuota"].clone(),
+            );
             items.push(r);
         }
         Ok(items)

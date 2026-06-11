@@ -45,15 +45,16 @@ impl AkShareClient {
     /// 新浪财经 — 商品现货价格指数.
     ///
     /// `symbol` is one of: "波罗的海干散货指数", "钢坯价格指数", "澳大利亚粉矿价格".
-    pub async fn spot_goods(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<SpotGoodsPoint>> {
+    pub async fn spot_goods(&self, symbol: &str) -> Result<Vec<SpotGoodsPoint>> {
         let code = match symbol {
             "波罗的海干散货指数" => "BDI",
             "钢坯价格指数" => "GP",
             "澳大利亚粉矿价格" => "PB",
-            _ => return Err(Error::invalid_input(format!("unsupported spot symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported spot symbol: {symbol}"
+                )));
+            }
         };
 
         let response = self

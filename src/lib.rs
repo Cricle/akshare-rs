@@ -37,30 +37,30 @@
 //! ```
 
 pub mod bank;
+pub mod bond;
 pub mod cal;
 mod client;
-mod error;
-pub mod market;
-pub mod provider;
-pub mod stock;
-pub mod index;
-pub mod fund;
-pub mod bond;
-pub mod futures;
-pub mod option;
-pub mod macro_data;
-pub mod forex;
-pub mod crypto;
 pub mod commodity;
-pub mod spot;
-pub mod reits;
+pub mod crypto;
 pub mod economy;
+mod error;
+pub mod forex;
+pub mod fund;
+pub mod futures;
+pub mod index;
+pub mod macro_data;
+pub mod market;
 pub mod news;
+pub mod option;
+pub mod provider;
+pub mod reits;
+pub mod spot;
+pub mod stock;
 pub mod tool;
 pub mod types;
 mod util;
 
 pub use client::{AkShareClient, AkShareClientBuilder};
 pub use error::{Error, ErrorKind, Result};
-pub use types::*;
 pub use market::{detect_market, normalize_a_share_symbol, normalize_hk_symbol};
+pub use types::*;

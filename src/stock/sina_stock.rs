@@ -69,12 +69,7 @@ impl AkShareClient {
         date: &str,
         limit: usize,
     ) -> Result<Vec<SinaIntradayTick>> {
-        let date_fmt = format!(
-            "{}-{}-{}",
-            &date[..4],
-            &date[4..6],
-            &date[6..8]
-        );
+        let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
 
         // Step 1: Get total count
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_Bill.GetBillListCount";
@@ -194,33 +189,26 @@ impl AkShareClient {
     /// Python equivalent: `stock_sector_spot(indicator)`
     ///
     /// `indicator` is one of: "new_sina", "qmx", "concept", "area", "industry".
-    pub async fn stock_sector_spot(
-        &self,
-        indicator: &str,
-    ) -> Result<Vec<SinaSectorSpot>> {
+    pub async fn stock_sector_spot(&self, indicator: &str) -> Result<Vec<SinaSectorSpot>> {
         let url = match indicator {
-            "new_sina" => {
-                "http://vip.stock.finance.sina.com.cn/q/view/newSinaHy.php".to_string()
-            }
+            "new_sina" => "http://vip.stock.finance.sina.com.cn/q/view/newSinaHy.php".to_string(),
             "qmx" => "http://biz.finance.sina.com.cn/hq/qmxIndustryHq.php".to_string(),
             "concept" => {
                 "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=class".to_string()
             }
-            "area" => {
-                "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=area".to_string()
-            }
+            "area" => "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=area".to_string(),
             "industry" => {
                 "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=industry".to_string()
             }
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported indicator: {indicator}"
-                )))
+                )));
             }
         };
 
         let response = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await
             .map_err(Error::from)?
@@ -230,13 +218,13 @@ impl AkShareClient {
         let text = response.text().await.map_err(Error::from)?;
 
         // Sina returns JS-like JSON, extract the JSON object
-        let json_start = text.find('{').ok_or_else(|| {
-            Error::decode("sina sector response does not contain JSON object")
-        })?;
+        let json_start = text
+            .find('{')
+            .ok_or_else(|| Error::decode("sina sector response does not contain JSON object"))?;
         let json_text = &text[json_start..];
 
-        let data: serde_json::Value =
-            serde_json::from_str(json_text).map_err(|e| Error::decode(format!("sina JSON parse: {e}")))?;
+        let data: serde_json::Value = serde_json::from_str(json_text)
+            .map_err(|e| Error::decode(format!("sina JSON parse: {e}")))?;
 
         let obj = data
             .as_object()

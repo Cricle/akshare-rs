@@ -30,7 +30,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_CINEMA_DAILY"),
                 ("columns", "ALL"),
@@ -57,7 +57,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_CINEMA_WEEKLY"),
                 ("columns", "ALL"),
@@ -84,7 +84,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_DAILY"),
                 ("columns", "ALL"),
@@ -112,7 +112,7 @@ impl AkShareClient {
         let month = &date[4..];
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_MONTHLY"),
                 ("columns", "ALL"),
@@ -122,7 +122,10 @@ impl AkShareClient {
                 ("sortColumns", "BOX_OFFICE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", format!("(YEAR='{}')(MONTH='{}')", year, month).as_str()),
+                (
+                    "filter",
+                    format!("(YEAR='{}')(MONTH='{}')", year, month).as_str(),
+                ),
             ])
             .send()
             .await?
@@ -136,7 +139,7 @@ impl AkShareClient {
     pub async fn movie_boxoffice_realtime(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_REALTIME"),
                 ("columns", "ALL"),
@@ -162,7 +165,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_WEEKLY"),
                 ("columns", "ALL"),
@@ -188,7 +191,7 @@ impl AkShareClient {
     pub async fn movie_boxoffice_yearly(&self, year: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_YEARLY"),
                 ("columns", "ALL"),
@@ -211,10 +214,13 @@ impl AkShareClient {
     /// Movie box office — yearly first week data (首周票房).
     ///
     /// `year`: format YYYY
-    pub async fn movie_boxoffice_yearly_first_week(&self, year: &str) -> Result<Vec<MacroDataPoint>> {
+    pub async fn movie_boxoffice_yearly_first_week(
+        &self,
+        year: &str,
+    ) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_YEARLY_FIRST_WEEK"),
                 ("columns", "ALL"),
@@ -241,7 +247,7 @@ impl AkShareClient {
     pub async fn economy_box_office(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_MOVIE_BOXOFFICE"),
                 ("columns", "ALL"),

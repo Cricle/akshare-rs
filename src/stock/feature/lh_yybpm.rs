@@ -4,9 +4,9 @@
 //! implemented in pure Rust. These functions are stub implementations
 //! that return empty results.
 
+use super::types::*;
 use crate::client::AkShareClient;
 use crate::error::Result;
-use super::types::*;
 
 impl AkShareClient {
     /// 同花顺-营业部排名-上榜次数最多

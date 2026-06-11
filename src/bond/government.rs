@@ -21,15 +21,11 @@ impl AkShareClient {
     /// Fetch China government bond yield curve data.
     ///
     /// `start` and `end` are date strings in "YYYY-MM-DD" format.
-    pub async fn bond_china_yield(
-        &self,
-        start: &str,
-        end: &str,
-    ) -> Result<Vec<BondSnapshot>> {
+    pub async fn bond_china_yield(&self, start: &str, end: &str) -> Result<Vec<BondSnapshot>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let filter = format!("(SOLAR_DATE>='{}')(SOLAR_DATE<='{}')", start, end);
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_BOND_GOV_CN_YIELD"),
                 ("columns", "ALL"),

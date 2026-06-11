@@ -11,7 +11,7 @@ impl AkShareClient {
     pub async fn futures_fees_info_openctp(&self) -> Result<Vec<Row>> {
         let url = "http://openctp.cn/fees.html";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -39,7 +39,7 @@ impl AkShareClient {
         );
 
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("tb_name", "_vir_26"),
                 ("search", search.as_str()),
@@ -59,21 +59,84 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for mut row in rows {
             let mut r = Row::new();
-            r.insert("date".into(), row["date"].clone());
-            r.insert("contract_name".into(), row["heyue_name"].clone());
-            r.insert("contract_code".into(), row["heyue_code"].clone());
-            r.insert("price".into(), row["heyue_price"].clone());
-            r.insert("up_limit".into(), row["up_limit_num"].clone());
-            r.insert("down_limit".into(), row["down_limit_num"].clone());
-            r.insert("buy_margin".into(), row["buy_ratio"].clone());
-            r.insert("sell_margin".into(), row["sell_ratio"].clone());
-            r.insert("per_lot_margin".into(), row["per_lot_price"].clone());
-            r.insert("open_fee".into(), row["buy_commission"].clone());
-            r.insert("close_yesterday_fee".into(), row["sell_yesterday_commission"].clone());
-            r.insert("close_today_fee".into(), row["sell_cur_commission"].clone());
-            r.insert("exchange".into(), row["jys"].clone());
+            r.insert(
+                "date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("date"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "contract_name".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("heyue_name"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "contract_code".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("heyue_code"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "price".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("heyue_price"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "up_limit".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("up_limit_num"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "down_limit".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("down_limit_num"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "buy_margin".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("buy_ratio"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "sell_margin".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("sell_ratio"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "per_lot_margin".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("per_lot_price"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "open_fee".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("buy_commission"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "close_yesterday_fee".into(),
+                row["sell_yesterday_commission"].clone(),
+            );
+            r.insert(
+                "close_today_fee".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("sell_cur_commission"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "exchange".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("jys"))
+                    .unwrap_or_default(),
+            );
             items.push(r);
         }
         Ok(items)
@@ -86,7 +149,7 @@ impl AkShareClient {
         // Try 9qihuo first
         let url = "https://www.9qihuo.com/qihuoshouxufei";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("q", symbol)])
             .header("User-Agent", "Mozilla/5.0")
             .header("Referer", "https://www.9qihuo.com/")
@@ -110,7 +173,7 @@ impl AkShareClient {
     pub async fn futures_comm_info(&self, _symbol: &str) -> Result<Vec<Row>> {
         let url = "https://www.9qihuo.com/qihuoshouxufei";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Referer", "https://www.9qihuo.com/")
             .send()

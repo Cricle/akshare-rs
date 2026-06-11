@@ -1,15 +1,18 @@
 //! Fund scale data from Sina Finance.
 
 use crate::client::AkShareClient;
-use crate::types::FundSnapshot;
 use crate::error::{Error, Result};
+use crate::types::FundSnapshot;
 
 impl AkShareClient {
     /// Fetch open-end fund scale data from Sina Finance.
     pub async fn fund_scale_open_sina(&self, symbol: &str) -> Result<Vec<FundSnapshot>> {
         let type_map: &[(&str, &str)] = &[
-            ("股票型基金", "2"), ("混合型基金", "1"), ("债券型基金", "3"),
-            ("货币型基金", "5"), ("QDII基金", "6"),
+            ("股票型基金", "2"),
+            ("混合型基金", "1"),
+            ("债券型基金", "3"),
+            ("货币型基金", "5"),
+            ("QDII基金", "6"),
         ];
         let type_code = type_map
             .iter()
@@ -34,7 +37,9 @@ impl AkShareClient {
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("sina fund scale JSON parse: {e}")))?;
 
-        let data = root.get("data").and_then(|v| v.as_array())
+        let data = root
+            .get("data")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("sina fund scale missing data"))?;
 
         let snapshots: Vec<FundSnapshot> = data
@@ -44,10 +49,18 @@ impl AkShareClient {
                 let name = item.get("sname")?.as_str()?.to_string();
                 let nav = item.get("dwjz").and_then(|v| v.as_f64()).unwrap_or(0.0);
                 let scale = item.get("zmjgm").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                let date = item.get("jzrq").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                let date = item
+                    .get("jzrq")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
                 Some(FundSnapshot {
-                    symbol: code, name, date, nav,
-                    acc_nav: scale, change_pct: 0.0,
+                    symbol: code,
+                    name,
+                    date,
+                    nav,
+                    acc_nav: scale,
+                    change_pct: 0.0,
                     fund_type: Some(symbol.to_string()),
                 })
             })
@@ -75,7 +88,9 @@ impl AkShareClient {
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("sina close fund scale JSON parse: {e}")))?;
 
-        let data = root.get("data").and_then(|v| v.as_array())
+        let data = root
+            .get("data")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("sina close fund scale missing data"))?;
 
         let snapshots: Vec<FundSnapshot> = data
@@ -85,10 +100,18 @@ impl AkShareClient {
                 let name = item.get("sname")?.as_str()?.to_string();
                 let nav = item.get("dwjz").and_then(|v| v.as_f64()).unwrap_or(0.0);
                 let scale = item.get("zmjgm").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                let date = item.get("jzrq").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                let date = item
+                    .get("jzrq")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
                 Some(FundSnapshot {
-                    symbol: code, name, date, nav,
-                    acc_nav: scale, change_pct: 0.0,
+                    symbol: code,
+                    name,
+                    date,
+                    nav,
+                    acc_nav: scale,
+                    change_pct: 0.0,
                     fund_type: Some("closed".to_string()),
                 })
             })

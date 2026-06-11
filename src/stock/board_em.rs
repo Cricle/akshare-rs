@@ -166,10 +166,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_board_concept_spot_em(symbol)`
     ///
     /// Returns key-value pairs of board metrics.
-    pub async fn stock_board_concept_spot_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<BoardSpotItem>> {
+    pub async fn stock_board_concept_spot_em(&self, symbol: &str) -> Result<Vec<BoardSpotItem>> {
         let secid = self.resolve_board_secid(symbol, "concept").await?;
         self.fetch_board_spot(&secid).await
     }
@@ -228,10 +225,7 @@ impl AkShareClient {
     /// Get industry board spot data from Eastmoney.
     ///
     /// Python equivalent: `stock_board_industry_spot_em(symbol)`
-    pub async fn stock_board_industry_spot_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<BoardSpotItem>> {
+    pub async fn stock_board_industry_spot_em(&self, symbol: &str) -> Result<Vec<BoardSpotItem>> {
         let secid = self.resolve_board_secid(symbol, "industry").await?;
         self.fetch_board_spot(&secid).await
     }
@@ -243,10 +237,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_board_change_em(symbol)`
     ///
     /// `symbol` is a board filter like "行业板块" or "概念板块".
-    pub async fn stock_board_change_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<BoardChangeRow>> {
+    pub async fn stock_board_change_em(&self, symbol: &str) -> Result<Vec<BoardChangeRow>> {
         let fs = match symbol {
             "行业板块" => "m:90 t:2 f:!50",
             "概念板块" => "m:90 t:3 f:!50",
@@ -254,7 +245,7 @@ impl AkShareClient {
         };
 
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "100"),
@@ -265,10 +256,7 @@ impl AkShareClient {
                 ("invt", "2"),
                 ("fid", "f62"),
                 ("fs", fs),
-                (
-                    "fields",
-                    "f2,f3,f4,f5,f6,f8,f12,f14,f62,f184",
-                ),
+                ("fields", "f2,f3,f4,f5,f6,f8,f12,f14,f62,f184"),
             ])
             .send()
             .await
@@ -330,11 +318,15 @@ impl AkShareClient {
         let fs = match board_type {
             "concept" => "m:90 t:3 f:!50",
             "industry" => "m:90 t:2 f:!50",
-            _ => return Err(Error::invalid_input(format!("invalid board type: {board_type}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "invalid board type: {board_type}"
+                )));
+            }
         };
 
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -371,10 +363,9 @@ impl AkShareClient {
         for item in &diff {
             let name = item.get("f14").and_then(|v| v.as_str()).unwrap_or("");
             if name == symbol {
-                let code = item
-                    .get("f12")
-                    .and_then(|v| v.as_str())
-                    .ok_or_else(|| Error::not_found(format!("board code not found for: {symbol}")))?;
+                let code = item.get("f12").and_then(|v| v.as_str()).ok_or_else(|| {
+                    Error::not_found(format!("board code not found for: {symbol}"))
+                })?;
                 return Ok(format!("90.{code}"));
             }
         }
@@ -392,7 +383,7 @@ impl AkShareClient {
         end: &str,
     ) -> Result<Vec<BoardHistPoint>> {
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -454,7 +445,7 @@ impl AkShareClient {
         if period == "1" {
             // 1-minute uses trends endpoint
             let response = self
-                                .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
+                .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
                 .query(&[
                     ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
                     ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
@@ -500,7 +491,7 @@ impl AkShareClient {
         } else {
             // 5/15/30/60-minute uses kline endpoint
             let response = self
-                                .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+                .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
                 .query(&[
                     ("secid", secid),
                     ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -569,7 +560,7 @@ impl AkShareClient {
             .join(",");
 
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/stock/get")
+            .get("https://push2.eastmoney.com/api/qt/stock/get")
             .query(&[
                 ("fields", fields.as_str()),
                 ("mpi", "1000"),

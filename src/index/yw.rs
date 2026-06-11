@@ -13,15 +13,14 @@ impl AkShareClient {
     /// 义乌小商品指数.
     ///
     /// `symbol` is one of: "周价格指数", "月价格指数", "月景气指数".
-    pub async fn index_yw(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<YwIndexPoint>> {
+    pub async fn index_yw(&self, symbol: &str) -> Result<Vec<YwIndexPoint>> {
         match symbol {
             "月景气指数" => self.index_yw_bi().await,
             "周价格指数" => self.index_yw_price("piweek").await,
             "月价格指数" => self.index_yw_price("month").await,
-            _ => Err(Error::invalid_input(format!("unsupported YW symbol: {symbol}"))),
+            _ => Err(Error::invalid_input(format!(
+                "unsupported YW symbol: {symbol}"
+            ))),
         }
     }
 
@@ -45,7 +44,7 @@ impl AkShareClient {
         }
 
         let response = self
-                        .get("https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/bi")
+            .get("https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/bi")
             .query(&[("gcCode", "")])
             .send()
             .await
@@ -85,7 +84,7 @@ impl AkShareClient {
             "https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/{path}"
         );
         let response = self
-                        .get(&url)
+            .get(&url)
             .query(&[("gcCode", "")])
             .send()
             .await

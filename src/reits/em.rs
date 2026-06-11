@@ -59,7 +59,7 @@ impl AkShareClient {
         let today = today_iso();
 
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),
@@ -130,7 +130,7 @@ impl AkShareClient {
 
         let secid = reits_eastmoney_secid(symbol)?;
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
@@ -170,14 +170,10 @@ impl AkShareClient {
     ///
     /// `symbol`: REIT code, e.g. "508000"
     /// `period`: "1", "5", "15", "30", "60"
-    pub async fn reits_hist_min_em(
-        &self,
-        symbol: &str,
-        period: &str,
-    ) -> Result<Vec<CandlePoint>> {
+    pub async fn reits_hist_min_em(&self, symbol: &str, period: &str) -> Result<Vec<CandlePoint>> {
         let secid = reits_eastmoney_secid(symbol)?;
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
@@ -208,7 +204,9 @@ impl AkShareClient {
             .collect::<Result<Vec<_>>>()?;
 
         if items.is_empty() {
-            return Err(Error::not_found("eastmoney returned no REIT min kline items"));
+            return Err(Error::not_found(
+                "eastmoney returned no REIT min kline items",
+            ));
         }
         Ok(items)
     }
@@ -230,7 +228,7 @@ impl AkShareClient {
         let lmt = limit.max(5).to_string();
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
@@ -284,7 +282,11 @@ fn reits_eastmoney_secid(symbol: &str) -> Result<String> {
         let market = match suffix_upper.as_str() {
             "SH" => "1",
             "SZ" => "0",
-            _ => return Err(Error::invalid_input(format!("unsupported REIT exchange: {suffix}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported REIT exchange: {suffix}"
+                )));
+            }
         };
         return Ok(format!("{market}.{code}"));
     }

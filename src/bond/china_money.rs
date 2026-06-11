@@ -68,15 +68,10 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let ed = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
         let resp: ChinaMoneyResp = self
-                        .get("https://www.chinamoney.com.cn/ags/ms/cm-u-bk-currency/ClsYldCurvHis")
+            .get("https://www.chinamoney.com.cn/ags/ms/cm-u-bk-currency/ClsYldCurvHis")
             .query(&[
                 ("lang", "CN"),
                 ("reference", "1,2,3"),
@@ -132,15 +127,10 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let ed = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
         let resp: ChinaMoneyResp = self
-                        .post("https://www.chinamoney.com.cn/ags/ms/cm-u-bk-shibor/IfccHis")
+            .post("https://www.chinamoney.com.cn/ags/ms/cm-u-bk-shibor/IfccHis")
             .form(&[
                 ("cfgItemType", "72"),
                 ("interestRateType", "0"),
@@ -159,9 +149,7 @@ impl AkShareClient {
 
         let records = resp.records.unwrap_or_default();
         if records.is_empty() {
-            return Err(Error::not_found(
-                "chinamoney returned no swap rate data",
-            ));
+            return Err(Error::not_found("chinamoney returned no swap rate data"));
         }
         Ok(records)
     }
@@ -173,7 +161,7 @@ impl AkShareClient {
         let mut all_records = Vec::new();
         for page in 1..=limit {
             let resp: ChinaMoneyPagedResp = self
-                                .post("https://www.chinamoney.com.cn/ags/ms/cm-u-bond-an/bnBondEmit")
+                .post("https://www.chinamoney.com.cn/ags/ms/cm-u-bond-an/bnBondEmit")
                 .form(&[
                     ("enty", ""),
                     ("bondType", ""),
@@ -207,6 +195,32 @@ impl AkShareClient {
     }
 }
 
+/// Fetches the current yield curve snapshot from ChinaMoney.
+/// Returns the latest yield curve data points.
+pub async fn bond_china_close_return_map() -> crate::error::Result<Vec<serde_json::Value>> {
+    use reqwest::Client;
+    let client = Client::new();
+    let resp = client
+        .get("https://www.chinamoney.com.cn/ags/ms/cm-u-bk-currency/ClsYldCurvCurvGO")
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        )
+        .header(
+            "Referer",
+            "https://www.chinamoney.com.cn/chinese/bkcurvclosedyhis/",
+        )
+        .send()
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
+    let records = resp
+        .get("records")
+        .and_then(|r| r.as_array())
+        .cloned()
+        .unwrap_or_default();
+    Ok(records)
+}
 #[cfg(test)]
 mod tests {
     use super::*;

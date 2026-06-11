@@ -158,7 +158,7 @@ impl AkShareClient {
         // Get page count first
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
         let count_resp = self
-                        .get(count_url)
+            .get(count_url)
             .query(&[("node", "hs_a")])
             .send()
             .await
@@ -181,7 +181,7 @@ impl AkShareClient {
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
             let response = self
-                                .get(list_url)
+                .get(list_url)
                 .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
@@ -265,7 +265,7 @@ impl AkShareClient {
         };
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -349,7 +349,7 @@ impl AkShareClient {
 
         let url = "https://quotes.sina.cn/cn/api/jsonp_v2.php/=/CN_MarketDataService.getKLineData";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("symbol", sina_symbol.as_str()),
                 ("scale", period),
@@ -364,12 +364,17 @@ impl AkShareClient {
         let text = response.text().await.map_err(Error::from)?;
 
         // Parse JSONP response: =(JSON);
-        let json_start = text.find("=(").ok_or_else(|| Error::decode("invalid JSONP response"))? + 2;
-        let json_end = text.rfind(");").ok_or_else(|| Error::decode("invalid JSONP response"))?;
+        let json_start = text
+            .find("=(")
+            .ok_or_else(|| Error::decode("invalid JSONP response"))?
+            + 2;
+        let json_end = text
+            .rfind(");")
+            .ok_or_else(|| Error::decode("invalid JSONP response"))?;
         let json_text = &text[json_start..json_end];
 
-        let data: Vec<serde_json::Value> =
-            serde_json::from_str(json_text).map_err(|e| Error::decode(format!("JSON parse error: {e}")))?;
+        let data: Vec<serde_json::Value> = serde_json::from_str(json_text)
+            .map_err(|e| Error::decode(format!("JSON parse error: {e}")))?;
 
         let items: Vec<ZhAMinuteCandle> = data
             .iter()
@@ -407,7 +412,7 @@ impl AkShareClient {
     pub async fn stock_zh_a_new(&self) -> Result<Vec<ZhANewStock>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
         let count_resp = self
-                        .get(count_url)
+            .get(count_url)
             .query(&[("node", "new_stock")])
             .send()
             .await
@@ -430,7 +435,7 @@ impl AkShareClient {
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
             let response = self
-                                .get(list_url)
+                .get(list_url)
                 .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
@@ -450,9 +455,21 @@ impl AkShareClient {
 
             for item in &data {
                 all_stocks.push(ZhANewStock {
-                    symbol: item.get("symbol").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    code: item.get("code").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    name: item.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    symbol: item
+                        .get("symbol")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    code: item
+                        .get("code")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    name: item
+                        .get("name")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                     open: parse_json_f64(item, "open"),
                     high: parse_json_f64(item, "high"),
                     low: parse_json_f64(item, "low"),
@@ -475,7 +492,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_a_stop_em()`
     pub async fn stock_zh_a_stop_em(&self) -> Result<Vec<ZhAStopStock>> {
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -550,7 +567,7 @@ impl AkShareClient {
         let secid = eastmoney_secid(symbol)?;
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -621,7 +638,7 @@ impl AkShareClient {
         let secid = eastmoney_secid(symbol)?;
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
             .query(&[
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
@@ -780,7 +797,7 @@ impl AkShareClient {
         for page in 0..100 {
             let page_str = page.to_string();
             let response = self
-                                .get("http://stock.gtimg.cn/data/index.php")
+                .get("http://stock.gtimg.cn/data/index.php")
                 .query(&[
                     ("appn", "detail"),
                     ("action", "data"),

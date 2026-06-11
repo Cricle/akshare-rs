@@ -1,7 +1,7 @@
 mod common;
 use common::*;
-use wiremock::{MockServer, Mock, ResponseTemplate};
 use wiremock::matchers::{method, path_regex};
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 // ===========================================================================
 // exchange.rs — get_* wrapper methods
@@ -23,7 +23,12 @@ async fn test_get_cffex_daily() {
 #[tokio::test]
 async fn test_get_cffex_rank_table() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "header\nIF2403,1,TraderA,5000,100,TraderB,4800,80,TraderC,4600,70\n").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "header\nIF2403,1,TraderA,5000,100,TraderB,4800,80,TraderC,4600,70\n",
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.get_cffex_rank_table("20240315", "IF").await;
     let _ = result;
@@ -205,7 +210,9 @@ async fn test_get_roll_yield_bar() {
     let dce_body = serde_json::json!({"data": []});
     mock_any_post(&server, ".*", dce_body).await;
     let client = mock_client(&server);
-    let result = client.get_roll_yield_bar("20240315", None, None, None).await;
+    let result = client
+        .get_roll_yield_bar("20240315", None, None, None)
+        .await;
     let _ = result;
 }
 
@@ -523,16 +530,25 @@ async fn test_futures_dce_position_rank_other() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.futures_dce_position_rank_other("20240315", "a").await;
+    let result = client
+        .futures_dce_position_rank_other("20240315", "a")
+        .await;
     let _ = result;
 }
 
 #[tokio::test]
 async fn test_futures_hold_pos_sina() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><table><tr><td>test data</td></tr></table></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><table><tr><td>test data</td></tr></table></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let result = client.futures_hold_pos_sina("成交量", "rb2405", "20240315").await;
+    let result = client
+        .futures_hold_pos_sina("成交量", "rb2405", "20240315")
+        .await;
     let _ = result;
 }
 
@@ -730,7 +746,12 @@ async fn test_futures_gfex_warehouse_receipt() {
 #[tokio::test]
 async fn test_futures_spot_price() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><table>100ppi spot data</table></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><table>100ppi spot data</table></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.futures_spot_price("20240315").await;
     let _ = result;
@@ -741,7 +762,9 @@ async fn test_futures_spot_price_daily() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
-    let result = client.futures_spot_price_daily("20240301", "20240315").await;
+    let result = client
+        .futures_spot_price_daily("20240301", "20240315")
+        .await;
     let _ = result;
 }
 
@@ -1124,14 +1147,18 @@ async fn test_futures_inventory_em() {
     // Both calls go to the same URL pattern; we need the mock to handle both
     // Since both are GET to the same datacenter endpoint, wiremock will respond
     // in order. For simplicity, return the product mapping first.
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body1))
         .up_to_n_times(1)
         .expect(1)
-        .mount(&server).await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body2))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let result = client.futures_inventory_em("铜").await;
     let _ = result;
@@ -1325,8 +1352,18 @@ async fn test_futures_contract_detail_sina() {
 async fn test_futures_contract_detail() {
     let server = MockServer::start().await;
     // delegates to futures_contract_detail_em which needs HTML + JSON
-    mock_any_get_text(&server, ".*", "<html><a href=\"#futures_rb2405\">detail</a></html>").await;
-    mock_any_get(&server, ".*", serde_json::json!({"vname": "螺纹钢", "vcode": "RB"})).await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><a href=\"#futures_rb2405\">detail</a></html>",
+    )
+    .await;
+    mock_any_get(
+        &server,
+        ".*",
+        serde_json::json!({"vname": "螺纹钢", "vcode": "RB"}),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.futures_contract_detail("rb2405").await;
     let _ = result;
@@ -1764,9 +1801,11 @@ async fn test_futures_zh_spot() {
     let server = MockServer::start().await;
     // hq.sinajs.cn returns text in var hq_str_nf_XXX="field1,field2,..." format
     let body = r#"var hq_str_nf_V2309="塑料2309,2024-03-15 15:00:00,7500.0,7550.0,7480.0,7520.0,7510.0,7500.0,7515.0,7512.0,7505.0,5000,3000,80000,200000";"#;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_string(body))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let result = client.futures_zh_spot("V2309", "CF").await;
     let _ = result;
@@ -1807,14 +1846,18 @@ async fn test_futures_hist_table_em() {
     let detail = serde_json::json!([
         {"name": "铜2405", "code": "cu2405", "vcode": "cu", "vname": "铜", "mktid": 113, "mktname": "上期所"}
     ]);
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(market_list))
         .up_to_n_times(1)
         .expect(1)
-        .mount(&server).await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(detail))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let result = client.futures_hist_table_em().await;
     let _ = result;

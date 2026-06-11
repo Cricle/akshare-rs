@@ -114,9 +114,7 @@ pub struct OptionRiskAnalysisRow {
 
 impl AkShareClient {
     /// Option premium analysis from Eastmoney.
-    pub async fn option_premium_analysis_em(
-        &self,
-    ) -> Result<Vec<OptionPremiumAnalysisRow>> {
+    pub async fn option_premium_analysis_em(&self) -> Result<Vec<OptionPremiumAnalysisRow>> {
         let resp = self
             .fetch_em_option_clist(
                 "f250",
@@ -153,9 +151,7 @@ impl AkShareClient {
     }
 
     /// Option value analysis from Eastmoney.
-    pub async fn option_value_analysis_em(
-        &self,
-    ) -> Result<Vec<OptionValueAnalysisRow>> {
+    pub async fn option_value_analysis_em(&self) -> Result<Vec<OptionValueAnalysisRow>> {
         let resp = self
             .fetch_em_option_clist(
                 "f301",
@@ -192,9 +188,7 @@ impl AkShareClient {
     }
 
     /// Option risk analysis from Eastmoney.
-    pub async fn option_risk_analysis_em(
-        &self,
-    ) -> Result<Vec<OptionRiskAnalysisRow>> {
+    pub async fn option_risk_analysis_em(&self) -> Result<Vec<OptionRiskAnalysisRow>> {
         let resp = self
             .fetch_em_option_clist(
                 "f12",
@@ -249,7 +243,7 @@ impl AkShareClient {
             let pn = page.to_string();
 
             let resp: ClistEnvelope = self
-                                .get("https://push2.eastmoney.com/api/qt/clist/get")
+                .get("https://push2.eastmoney.com/api/qt/clist/get")
                 .query(&[
                     ("fid", fid),
                     ("po", "1"),
@@ -284,7 +278,11 @@ impl AkShareClient {
                     all_data.push(arr.clone());
                 } else if let Some(obj) = item.as_object() {
                     let mut arr = Vec::new();
-                    let max_key = obj.keys().filter_map(|k| k.parse::<usize>().ok()).max().unwrap_or(0);
+                    let max_key = obj
+                        .keys()
+                        .filter_map(|k| k.parse::<usize>().ok())
+                        .max()
+                        .unwrap_or(0);
                     for i in 0..=max_key {
                         let key = i.to_string();
                         arr.push(obj.get(&key).cloned().unwrap_or(serde_json::Value::Null));

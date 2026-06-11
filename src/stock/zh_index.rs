@@ -122,7 +122,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_index_spot_em()`
     pub async fn stock_zh_index_spot_em(&self) -> Result<Vec<IndexSpotEm>> {
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -173,7 +173,10 @@ impl AkShareClient {
                     low: item.get("f16").and_then(|v| v.as_f64()),
                     open: item.get("f17").and_then(|v| v.as_f64()),
                     prev_close: item.get("f18").and_then(|v| v.as_f64()),
-                    internal_id: item.get("f13").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                    internal_id: item
+                        .get("f13")
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string()),
                 })
             })
             .collect();
@@ -204,7 +207,7 @@ impl AkShareClient {
         let secid = format!("{}.{}", market, symbol);
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -335,7 +338,7 @@ impl AkShareClient {
     pub async fn stock_zh_index_spot_sina(&self) -> Result<Vec<IndexSpotSina>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getNameCount";
         let count_resp = self
-                        .get(count_url)
+            .get(count_url)
             .query(&[("node", "hs_s")])
             .send()
             .await
@@ -358,7 +361,7 @@ impl AkShareClient {
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
             let response = self
-                                .get(list_url)
+                .get(list_url)
                 .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
@@ -415,16 +418,13 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_index_value_csindex(symbol)`
     ///
     /// - `symbol`: index code like "H30374"
-    pub async fn stock_zh_index_value_csindex(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CsIndexValue>> {
+    pub async fn stock_zh_index_value_csindex(&self, symbol: &str) -> Result<Vec<CsIndexValue>> {
         let url = "https://www.csindex.com.cn/csindex-home/perf/index-perf";
         let start_date = "20000101";
         let end_date = chrono::Utc::now().format("%Y%m%d").to_string();
 
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("indexCode", symbol),
                 ("startDate", start_date),

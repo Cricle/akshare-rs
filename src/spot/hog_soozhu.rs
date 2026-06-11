@@ -22,12 +22,12 @@ struct SoozhuValueItem {
 
 /// Indicator ID mapping for different hog/soybean products.
 const SOOZHU_INDICATORS: &[(&str, &str)] = &[
-    ("hog_lean", ""),       // 全国瘦肉型肉猪
-    ("three_way", "4"),     // 全国三元仔猪
-    ("crossbred", "6"),     // 全国后备二元母猪
-    ("corn", "8"),          // 全国玉米价格
-    ("soybean", "9"),       // 全国豆粕价格
-    ("mixed_feed", "11"),   // 全国育肥猪合料
+    ("hog_lean", ""),     // 全国瘦肉型肉猪
+    ("three_way", "4"),   // 全国三元仔猪
+    ("crossbred", "6"),   // 全国后备二元母猪
+    ("corn", "8"),        // 全国玉米价格
+    ("soybean", "9"),     // 全国豆粕价格
+    ("mixed_feed", "11"), // 全国育肥猪合料
 ];
 
 impl AkShareClient {
@@ -37,7 +37,7 @@ impl AkShareClient {
     pub async fn spot_hog_soozhu(&self) -> Result<Vec<MacroDataPoint>> {
         let session = self.fetch_soozhu_session().await?;
         let resp: SoozhuPriceResp = self
-                        .post("https://www.soozhu.com/price/data/center/")
+            .post("https://www.soozhu.com/price/data/center/")
             .form(&[("act", "mapdata"), ("csrfmiddlewaretoken", &session)])
             .send()
             .await?
@@ -107,7 +107,7 @@ impl AkShareClient {
     async fn fetch_soozhu_session(&self) -> Result<String> {
         // Soozhu requires CSRF token from page load
         let resp = self
-                        .get("https://www.soozhu.com/price/data/center/")
+            .get("https://www.soozhu.com/price/data/center/")
             .send()
             .await
             .map_err(Error::from)?
@@ -123,7 +123,7 @@ impl AkShareClient {
     async fn fetch_soozhu_trend(&self, act: &str, label: &str) -> Result<Vec<MacroDataPoint>> {
         let session = self.fetch_soozhu_session().await?;
         let resp: SoozhuPriceResp = self
-                        .post("https://www.soozhu.com/price/data/center/")
+            .post("https://www.soozhu.com/price/data/center/")
             .form(&[("act", act), ("csrfmiddlewaretoken", &session)])
             .send()
             .await?
@@ -164,7 +164,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let session = self.fetch_soozhu_session().await?;
         let resp: SoozhuPriceResp = self
-                        .post("https://www.soozhu.com/price/data/center/")
+            .post("https://www.soozhu.com/price/data/center/")
             .form(&[
                 ("act", "pricetrend"),
                 ("indid", indid),

@@ -71,7 +71,7 @@ impl AkShareClient {
         );
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await
             .map_err(Error::from)?
@@ -91,10 +91,7 @@ impl AkShareClient {
             if trimmed.is_empty() || trimmed.starts_with("----") {
                 continue;
             }
-            let fields: Vec<String> = trimmed
-                .split('|')
-                .map(|s| s.trim().to_string())
-                .collect();
+            let fields: Vec<String> = trimmed.split('|').map(|s| s.trim().to_string()).collect();
             if fields.len() < 2 {
                 continue;
             }

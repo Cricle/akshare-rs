@@ -1,7 +1,7 @@
 pub mod eastmoney;
-pub mod tencent;
-pub mod sina;
-pub mod yahoo;
-pub mod stooq;
 pub mod sec_edgar;
+pub mod sina;
+pub mod stooq;
+pub mod tencent;
 pub mod tushare;
+pub mod yahoo;

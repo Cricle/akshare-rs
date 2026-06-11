@@ -29,7 +29,7 @@ impl AkShareClient {
     /// 数库 — A股新闻情绪指数.
     pub async fn index_news_sentiment_scope(&self) -> Result<Vec<NewsSentimentPoint>> {
         let response = self
-                        .get("https://www.chinascope.com/inews/senti/index")
+            .get("https://www.chinascope.com/inews/senti/index")
             .query(&[("period", "YEAR")])
             .send()
             .await

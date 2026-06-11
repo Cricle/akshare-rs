@@ -100,7 +100,7 @@ impl AkShareClient {
         let url = "http://query.sse.com.cn/commonQuery.do";
 
         let resp: SseQueryEnvelope = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("isPagination", "false"),
                 ("expireDate", ""),
@@ -144,7 +144,7 @@ impl AkShareClient {
         let url = "https://www.sse.org.cn/api/report/ShowReport";
 
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("SHOWTYPE", "JSON"),
                 ("CATALOGID", "option_drhy"),
@@ -158,8 +158,8 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         // SZSE returns a JSON array (sometimes wrapped in a specific format)
-        let json_val: serde_json::Value =
-            serde_json::from_str(&body).map_err(|e| Error::decode(format!("szse option json: {e}")))?;
+        let json_val: serde_json::Value = serde_json::from_str(&body)
+            .map_err(|e| Error::decode(format!("szse option json: {e}")))?;
 
         // Try to extract data from the response
         let data = if let Some(arr) = json_val.as_array() {

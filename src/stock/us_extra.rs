@@ -144,7 +144,7 @@ impl AkShareClient {
         };
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -209,7 +209,7 @@ impl AkShareClient {
     pub async fn stock_us_spot(&self) -> Result<Vec<UsSpotSina>> {
         // Use Eastmoney US spot API as a more reliable alternative
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -276,10 +276,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_us_famous_spot_em(symbol)`
     ///
     /// - `symbol`: category like "科技类", "金融类", "医药食品类", "媒体类", "汽车能源类", "制造零售类"
-    pub async fn stock_us_famous_spot_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<UsFamousStock>> {
+    pub async fn stock_us_famous_spot_em(&self, symbol: &str) -> Result<Vec<UsFamousStock>> {
         let market_map: std::collections::HashMap<&str, &str> = [
             ("科技类", "0216"),
             ("金融类", "0217"),
@@ -299,7 +296,7 @@ impl AkShareClient {
         let fs = format!("b:MK{}", code);
 
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -394,7 +391,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_us_pink_spot_em()`
     pub async fn stock_us_pink_spot_em(&self) -> Result<Vec<UsPinkStock>> {
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -472,7 +469,7 @@ impl AkShareClient {
     ) -> Result<Vec<UsValuationBaidu>> {
         let url = "https://gushitong.baidu.com/opendata";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("openapi", "1"),
                 ("dspName", "iphone"),

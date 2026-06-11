@@ -52,12 +52,12 @@ impl AkShareClient {
     /// Get HSGT fund flow summary (KAMT kline) from Eastmoney.
     ///
     /// For the comprehensive datacenter version, see `feature::hsgt_em`.
-    pub async fn stock_hsgt_kamt_flow_em(
-        &self,
-        limit: usize,
-    ) -> Result<Vec<HsgtFlowEntry>> {
-        self.fetch_hsgt_flow("f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64", limit)
-            .await
+    pub async fn stock_hsgt_kamt_flow_em(&self, limit: usize) -> Result<Vec<HsgtFlowEntry>> {
+        self.fetch_hsgt_flow(
+            "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+            limit,
+        )
+        .await
     }
 
     /// Get northbound net flow data from Eastmoney (KAMT kline).
@@ -65,8 +65,11 @@ impl AkShareClient {
         &self,
         limit: usize,
     ) -> Result<Vec<HsgtFlowEntry>> {
-        self.fetch_hsgt_flow("f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64", limit)
-            .await
+        self.fetch_hsgt_flow(
+            "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+            limit,
+        )
+        .await
     }
 
     /// Get southbound net flow data from Eastmoney (KAMT kline).
@@ -74,20 +77,19 @@ impl AkShareClient {
         &self,
         limit: usize,
     ) -> Result<Vec<HsgtFlowEntry>> {
-        self.fetch_hsgt_flow("f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64", limit)
-            .await
+        self.fetch_hsgt_flow(
+            "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+            limit,
+        )
+        .await
     }
 
     // -- Private helpers ----------------------------------------------------
 
-    async fn fetch_hsgt_flow(
-        &self,
-        fields: &str,
-        limit: usize,
-    ) -> Result<Vec<HsgtFlowEntry>> {
+    async fn fetch_hsgt_flow(&self, fields: &str, limit: usize) -> Result<Vec<HsgtFlowEntry>> {
         let lmt = limit.to_string();
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/kamt.kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/kamt.kline/get")
             .query(&[
                 ("fields1", "f1,f2,f3,f7"),
                 ("fields2", fields),
@@ -116,17 +118,18 @@ impl AkShareClient {
         let mut entries = Vec::new();
         for item in &s2n {
             if let Some(arr) = item.as_array()
-                && arr.len() >= 3 {
-                    entries.push(HsgtFlowEntry {
-                        date: arr[0].as_str().unwrap_or("").to_string(),
-                        north_net_flow: arr.get(1).and_then(|v| v.as_f64()),
-                        south_net_flow: arr.get(2).and_then(|v| v.as_f64()),
-                        north_acc_flow: None,
-                        south_acc_flow: None,
-                        sh_index: arr.get(3).and_then(|v| v.as_f64()),
-                        sh_change_pct: arr.get(4).and_then(|v| v.as_f64()),
-                    });
-                }
+                && arr.len() >= 3
+            {
+                entries.push(HsgtFlowEntry {
+                    date: arr[0].as_str().unwrap_or("").to_string(),
+                    north_net_flow: arr.get(1).and_then(|v| v.as_f64()),
+                    south_net_flow: arr.get(2).and_then(|v| v.as_f64()),
+                    north_acc_flow: None,
+                    south_acc_flow: None,
+                    sh_index: arr.get(3).and_then(|v| v.as_f64()),
+                    sh_change_pct: arr.get(4).and_then(|v| v.as_f64()),
+                });
+            }
         }
 
         if entries.is_empty() {

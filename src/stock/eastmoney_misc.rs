@@ -260,7 +260,7 @@ impl AkShareClient {
     pub async fn stock_dzjy_sctj(&self, limit: usize) -> Result<Vec<BlockTradeStat>> {
         let page_size = limit.to_string();
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("sortColumns", "TRADE_DATE"),
                 ("sortTypes", "-1"),
@@ -290,7 +290,10 @@ impl AkShareClient {
         let items: Vec<BlockTradeStat> = data
             .into_iter()
             .map(|v| BlockTradeStat {
-                trade_date: v.get("TRADE_DATE").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                trade_date: v
+                    .get("TRADE_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
                 sh_index: v.get("SZ_INDEX").and_then(|v| v.as_f64()),
                 sh_change_rate: v.get("SZ_CHANGE_RATE").and_then(|v| v.as_f64()),
                 blocktrade_deal_amt: v.get("BLOCKTRADE_DEAL_AMT").and_then(|v| v.as_f64()),
@@ -302,9 +305,7 @@ impl AkShareClient {
             .collect();
 
         if items.is_empty() {
-            return Err(Error::not_found(
-                "eastmoney returned no block trade stats",
-            ));
+            return Err(Error::not_found("eastmoney returned no block trade stats"));
         }
         Ok(items)
     }
@@ -329,7 +330,7 @@ impl AkShareClient {
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported asset type: {asset_type}"
-                )))
+                )));
             }
         };
 
@@ -339,12 +340,7 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let ed = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
         let filter = format!(
             "(MARKET_TYPE=\"{}\")(TRADE_DATE>='{}')(TRADE_DATE<='{}')",
             asset_code, sd, ed
@@ -352,7 +348,7 @@ impl AkShareClient {
         let page_size = limit.min(5000).to_string();
 
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("sortColumns", "SECURITY_CODE"),
                 ("sortTypes", "1"),
@@ -383,17 +379,32 @@ impl AkShareClient {
         let items: Vec<BlockTradeDetail> = data
             .into_iter()
             .map(|v| BlockTradeDetail {
-                trade_date: v.get("TRADE_DATE").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                symbol: v.get("SECURITY_CODE").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                name: v.get("SECURITY_NAME_ABBR").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                trade_date: v
+                    .get("TRADE_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                symbol: v
+                    .get("SECURITY_CODE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                name: v
+                    .get("SECURITY_NAME_ABBR")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
                 close_price: v.get("CLOSE_PRICE").and_then(|v| v.as_f64()),
                 change_rate: v.get("CHANGE_RATE").and_then(|v| v.as_f64()),
                 deal_price: v.get("DEAL_PRICE").and_then(|v| v.as_f64()),
                 deal_volume: v.get("DEAL_VOLUME").and_then(|v| v.as_f64()),
                 deal_amount: v.get("DEAL_AMT").and_then(|v| v.as_f64()),
                 premium_ratio: v.get("PREMIUM_RATIO").and_then(|v| v.as_f64()),
-                buyer: v.get("BUYER_NAME").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                seller: v.get("SELLER_NAME").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                buyer: v
+                    .get("BUYER_NAME")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                seller: v
+                    .get("SELLER_NAME")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
             })
             .collect();
 
@@ -413,7 +424,7 @@ impl AkShareClient {
     pub async fn stock_repurchase_em(&self, limit: usize) -> Result<Vec<RepurchaseEntry>> {
         let page_size = limit.min(500).to_string();
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("sortColumns", "UPD,DIM_DATE,DIM_SCODE"),
                 ("sortTypes", "-1,-1,-1"),
@@ -438,19 +449,34 @@ impl AkShareClient {
         let items: Vec<RepurchaseEntry> = data
             .into_iter()
             .map(|v| RepurchaseEntry {
-                symbol: v.get("DIM_SCODE").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                name: v.get("SECURITYSHORTNAME").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                symbol: v
+                    .get("DIM_SCODE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                name: v
+                    .get("SECURITYSHORTNAME")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
                 latest_price: v.get("NEWPRICE").and_then(|v| v.as_f64()),
                 repurchase_price_cap: v.get("REPURPRICECAP").and_then(|v| v.as_f64()),
                 repurchase_num_lower: v.get("REPURNUMLOWER").and_then(|v| v.as_f64()),
                 repurchase_num_cap: v.get("REPURNUMCAP").and_then(|v| v.as_f64()),
                 repurchase_amount_lower: v.get("JEXX").and_then(|v| v.as_f64()),
                 repurchase_amount_cap: v.get("JESX").and_then(|v| v.as_f64()),
-                start_date: v.get("DIM_TRADEDATE").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                progress: v.get("REPURPROGRESS").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                start_date: v
+                    .get("DIM_TRADEDATE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                progress: v
+                    .get("REPURPROGRESS")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
                 repurchased_num: v.get("REPURNUM").and_then(|v| v.as_f64()),
                 repurchased_amount: v.get("REPURAMOUNT").and_then(|v| v.as_f64()),
-                update_date: v.get("UPDATEDATE").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                update_date: v
+                    .get("UPDATEDATE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
             })
             .collect();
 
@@ -466,15 +492,10 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_gsrl_gsdt_em(date)`
     pub async fn stock_gsrl_gsdt_em(&self, date: &str) -> Result<Vec<CompanyEvent>> {
-        let date_fmt = format!(
-            "{}-{}-{}",
-            &date[..4],
-            &date[4..6],
-            &date[6..8]
-        );
+        let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let filter = format!("(TRADE_DATE='{}')", date_fmt);
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("sortColumns", "SECURITY_CODE"),
                 ("sortTypes", "1"),
@@ -504,18 +525,31 @@ impl AkShareClient {
         let items: Vec<CompanyEvent> = data
             .into_iter()
             .map(|v| CompanyEvent {
-                symbol: v.get("SECURITY_CODE").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                name: v.get("SECURITY_NAME_ABBR").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                event_type: v.get("EVENT_TYPE").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                event_content: v.get("EVENT_CONTENT").and_then(|v| v.as_str()).map(|s| s.to_string()),
-                trade_date: v.get("TRADE_DATE").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                symbol: v
+                    .get("SECURITY_CODE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                name: v
+                    .get("SECURITY_NAME_ABBR")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                event_type: v
+                    .get("EVENT_TYPE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                event_content: v
+                    .get("EVENT_CONTENT")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
+                trade_date: v
+                    .get("TRADE_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
             })
             .collect();
 
         if items.is_empty() {
-            return Err(Error::not_found(
-                "eastmoney returned no company events",
-            ));
+            return Err(Error::not_found("eastmoney returned no company events"));
         }
         Ok(items)
     }
@@ -544,19 +578,14 @@ impl AkShareClient {
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported holder type: {holder_type}"
-                )))
+                )));
             }
         };
-        let date_fmt = format!(
-            "{}-{}-{}",
-            &date[..4],
-            &date[4..6],
-            &date[6..8]
-        );
+        let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let page_size = limit.min(500).to_string();
 
         let response = self
-                        .get("http://data.eastmoney.com/dataapi/zlsj/list")
+            .get("http://data.eastmoney.com/dataapi/zlsj/list")
             .query(&[
                 ("date", date_fmt.as_str()),
                 ("type", type_code),
@@ -584,14 +613,31 @@ impl AkShareClient {
             .iter()
             .take(limit)
             .map(|v| FundHoldEntry {
-                symbol: v.get("SECURITY_CODE").and_then(|v| v.as_str()).map(|s| s.to_string())
-                    .or_else(|| v.get("SCODE").and_then(|v| v.as_str()).map(|s| s.to_string())),
-                name: v.get("SECURITY_NAME_ABBR").and_then(|v| v.as_str()).map(|s| s.to_string())
-                    .or_else(|| v.get("SNAME").and_then(|v| v.as_str()).map(|s| s.to_string())),
+                symbol: v
+                    .get("SECURITY_CODE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string())
+                    .or_else(|| {
+                        v.get("SCODE")
+                            .and_then(|v| v.as_str())
+                            .map(|s| s.to_string())
+                    }),
+                name: v
+                    .get("SECURITY_NAME_ABBR")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string())
+                    .or_else(|| {
+                        v.get("SNAME")
+                            .and_then(|v| v.as_str())
+                            .map(|s| s.to_string())
+                    }),
                 holder_count: v.get("HOULD_NUM").and_then(|v| v.as_i64()),
                 hold_shares: v.get("HOLD_NUM").and_then(|v| v.as_f64()),
                 hold_market_value: v.get("HOLD_MARKET_CAP").and_then(|v| v.as_f64()),
-                change: v.get("HOLD_CHANGE").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                change: v
+                    .get("HOLD_CHANGE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
                 change_amount: v.get("HOLDCHANGE").and_then(|v| v.as_f64()),
                 change_ratio: v.get("HOLD_RATIO_CHANGE").and_then(|v| v.as_f64()),
             })
@@ -609,14 +655,9 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_sse_summary(date)`
     pub async fn stock_sse_summary(&self, date: &str) -> Result<Vec<MarketSummary>> {
-        let date_fmt = format!(
-            "{}-{}-{}",
-            &date[..4],
-            &date[4..6],
-            &date[6..8]
-        );
+        let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let response = self
-                        .get("https://query.sse.com.cn/commonQuery.do")
+            .get("https://query.sse.com.cn/commonQuery.do")
             .query(&[
                 ("isPagination", "false"),
                 ("sqlId", "COMMON_SSE_XXPL_LSSJL_S"),
@@ -639,7 +680,10 @@ impl AkShareClient {
         let items: Vec<MarketSummary> = data
             .iter()
             .map(|v| MarketSummary {
-                category: v.get("STAT_NAME").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                category: v
+                    .get("STAT_NAME")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
                 count: v.get("STAT_NUM").and_then(|v| v.as_i64()),
                 trade_amount: v.get("TRADE_AMOUNT").and_then(|v| v.as_f64()),
                 total_market_cap: v.get("TOTAL_MARKET_CAP").and_then(|v| v.as_f64()),
@@ -657,10 +701,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_growth_comparison_em(symbol)`
     ///
     /// `symbol` uses the format "SZ000895" or "SH600000".
-    pub async fn stock_zh_growth_comparison_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<PeerComparison>> {
+    pub async fn stock_zh_growth_comparison_em(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
         let secucode = if symbol.len() >= 8 {
             let (prefix, code) = symbol.split_at(2);
             format!("{code}.{prefix}")
@@ -693,11 +734,11 @@ impl AkShareClient {
     /// Get HK growth comparison from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_growth_comparison_em(symbol)`
-    pub async fn stock_hk_growth_comparison_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<PeerComparison>> {
-        let filter = format!("(SECUCODE=\"{}.HK\")(CORRE_SECUCODE=\"{}.HK\")", symbol, symbol);
+    pub async fn stock_hk_growth_comparison_em(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
+        let filter = format!(
+            "(SECUCODE=\"{}.HK\")(CORRE_SECUCODE=\"{}.HK\")",
+            symbol, symbol
+        );
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_HKGROWTH", &filter, "F10")
             .await
     }
@@ -709,7 +750,10 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<PeerComparison>> {
-        let filter = format!("(SECUCODE=\"{}.HK\")(CORRE_SECUCODE=\"{}.HK\")", symbol, symbol);
+        let filter = format!(
+            "(SECUCODE=\"{}.HK\")(CORRE_SECUCODE=\"{}.HK\")",
+            symbol, symbol
+        );
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_HKCVALUE", &filter, "F10")
             .await
     }
@@ -723,7 +767,7 @@ impl AkShareClient {
         source: &str,
     ) -> Result<Vec<PeerComparison>> {
         let response = self
-                        .get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
+            .get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
             .query(&[
                 ("reportName", report_name),
                 ("columns", "ALL"),

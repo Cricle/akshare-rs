@@ -15,7 +15,7 @@ impl AkShareClient {
         let page_size = limit.clamp(1, 500).to_string();
 
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("reportName", "RPT_BOND_ISSUE"),
                 ("columns", "ALL"),
@@ -51,38 +51,37 @@ impl AkShareClient {
             .into_iter()
             .take(limit)
             .filter_map(|v| {
-                let symbol = extract_str(&v, &["SECURITY_CODE", "BOND_CODE", "SECCODE"])
-                    .unwrap_or_default();
+                let symbol =
+                    extract_str(&v, &["SECURITY_CODE", "BOND_CODE", "SECCODE"]).unwrap_or_default();
                 if symbol.is_empty() {
                     return None;
                 }
-                let name = extract_str(&v, &[
-                    "SECURITY_NAME_ABBR",
-                    "BOND_NAME",
-                    "SECNAME",
-                    "SHORT_NAME",
-                ])
+                let name = extract_str(
+                    &v,
+                    &["SECURITY_NAME_ABBR", "BOND_NAME", "SECNAME", "SHORT_NAME"],
+                )
                 .unwrap_or_else(|| symbol.clone());
 
                 let date = extract_str(&v, &["ISSUE_DATE", "DECLAREDATE"])
                     .unwrap_or_else(|| today.clone());
 
                 // Try to extract price or face value
-                let close = extract_f64(&v, &[
-                    "ISSUE_PRICE",
-                    "PAR_VALUE",
-                    "FACE_VALUE",
-                    "CURRENT_BOND_PRICE",
-                ])
+                let close = extract_f64(
+                    &v,
+                    &[
+                        "ISSUE_PRICE",
+                        "PAR_VALUE",
+                        "FACE_VALUE",
+                        "CURRENT_BOND_PRICE",
+                    ],
+                )
                 .unwrap_or(100.0);
 
                 // Try to extract coupon rate / yield
-                let yield_rate = extract_f64(&v, &[
-                    "COUPON_RATE",
-                    "INTEREST_RATE",
-                    "YIELD_RATE",
-                    "ACTUAL_RATE",
-                ]);
+                let yield_rate = extract_f64(
+                    &v,
+                    &["COUPON_RATE", "INTEREST_RATE", "YIELD_RATE", "ACTUAL_RATE"],
+                );
 
                 Some(BondSnapshot {
                     symbol,

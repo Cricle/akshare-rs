@@ -37,7 +37,7 @@ impl AkShareClient {
     pub async fn index_bloomberg_billionaires(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.bloomberg.com/billionaires";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0 (compatible; akshare-rust/0.1)")
             .send()
             .await?
@@ -104,22 +104,24 @@ impl AkShareClient {
             // Parse table rows
             if trimmed.contains("<tr") || trimmed.contains("<td") {
                 let cells = extract_html_cells(trimmed);
-                if !cells.is_empty() && !headers.is_empty()
+                if !cells.is_empty()
+                    && !headers.is_empty()
                     && let Some(rank_str) = cells.first()
-                        && rank_str.chars().all(|c| c.is_ascii_digit()) {
-                            let net_worth = cells
-                                .get(3)
-                                .and_then(|s| s.parse::<f64>().ok())
-                                .unwrap_or(0.0);
-                            items.push(MacroDataPoint {
-                                date: year.to_string(),
-                                value: net_worth,
-                                name: cells
-                                    .get(1)
-                                    .cloned()
-                                    .unwrap_or_else(|| "Unknown".to_string()),
-                            });
-                        }
+                    && rank_str.chars().all(|c| c.is_ascii_digit())
+                {
+                    let net_worth = cells
+                        .get(3)
+                        .and_then(|s| s.parse::<f64>().ok())
+                        .unwrap_or(0.0);
+                    items.push(MacroDataPoint {
+                        date: year.to_string(),
+                        value: net_worth,
+                        name: cells
+                            .get(1)
+                            .cloned()
+                            .unwrap_or_else(|| "Unknown".to_string()),
+                    });
+                }
             }
         }
         Ok(items)
@@ -131,31 +133,24 @@ impl AkShareClient {
     /// `symbol` is the list name (e.g., "2021福布斯中国创投人100").
     pub async fn forbes_rank(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.forbeschina.com/lists";
-        let body = self
-                        .get(url)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.get(url).send().await?.text().await?;
 
         // Extract list URLs from the main page
         let mut list_urls: Vec<(String, String)> = Vec::new();
         for line in body.lines() {
             let trimmed = line.trim();
-            if trimmed.contains("href=") && trimmed.contains("/lists/")
+            if trimmed.contains("href=")
+                && trimmed.contains("/lists/")
                 && let (Some(href_start), Some(href_end)) =
                     (trimmed.find("href=\""), trimmed.find("\""))
-                {
-                    let href = &trimmed[href_start + 6..href_end];
-                    // Extract text content
-                    let text = extract_text_between_tags(trimmed);
-                    if !text.is_empty() && href.contains("/lists/") {
-                        list_urls.push((
-                            text,
-                            format!("https://www.forbeschina.com{}", href),
-                        ));
-                    }
+            {
+                let href = &trimmed[href_start + 6..href_end];
+                // Extract text content
+                let text = extract_text_between_tags(trimmed);
+                if !text.is_empty() && href.contains("/lists/") {
+                    list_urls.push((text, format!("https://www.forbeschina.com{}", href)));
                 }
+            }
         }
 
         // Find the matching list
@@ -208,7 +203,7 @@ impl AkShareClient {
         let params = build_hurun_params(indicator, year);
 
         let resp: HurunResponse = self
-                        .get(list_url)
+            .get(list_url)
             .query(&params)
             .send()
             .await?
@@ -254,7 +249,7 @@ impl AkShareClient {
     pub async fn xincaifu_rank(&self, year: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "http://service.ikuyu.cn/XinCaiFu2/pcremoting/bdListAction.do";
         let resp: XincaifuResponse = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("method", "getPage"),
                 ("callback", "jsonpCallback"),
@@ -272,10 +267,7 @@ impl AkShareClient {
             .json()
             .await?;
 
-        let rows = resp
-            .data
-            .and_then(|d| d.rows)
-            .unwrap_or_default();
+        let rows = resp.data.and_then(|d| d.rows).unwrap_or_default();
 
         let mut items = Vec::new();
         for row in &rows {
@@ -425,9 +417,6 @@ mod tests {
 
     #[test]
     fn test_get_hurun_wealth_key() {
-        assert_eq!(
-            get_hurun_wealth_key("胡润百富榜"),
-            "hs_Rank_Rich_Wealth"
-        );
+        assert_eq!(get_hurun_wealth_key("胡润百富榜"), "hs_Rank_Rich_Wealth");
     }
 }

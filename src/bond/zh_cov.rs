@@ -2,8 +2,8 @@
 //! Convertible bond list, comparison, info and value analysis from Eastmoney.
 
 use crate::client::AkShareClient;
-use crate::types::BondSnapshot;
 use crate::error::{Error, Result};
+use crate::types::BondSnapshot;
 
 /// Wire type for Eastmoney datacenter generic response.
 #[derive(Debug, serde::Deserialize)]
@@ -55,7 +55,9 @@ impl AkShareClient {
 
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         if data.is_empty() {
-            return Err(Error::not_found("eastmoney returned no convertible bond data"));
+            return Err(Error::not_found(
+                "eastmoney returned no convertible bond data",
+            ));
         }
 
         let today = crate::util::today_iso();
@@ -72,9 +74,7 @@ impl AkShareClient {
                     .get("CURRENT_BOND_PRICE")
                     .and_then(|x| x.as_f64())
                     .unwrap_or(100.0);
-                let premium = v
-                    .get("TRANSFER_PREMIUM_RATIO")
-                    .and_then(|x| x.as_f64());
+                let premium = v.get("TRANSFER_PREMIUM_RATIO").and_then(|x| x.as_f64());
                 let credit_rating = v
                     .get("RATING")
                     .and_then(|x| x.as_str())
@@ -154,7 +154,7 @@ impl AkShareClient {
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported indicator: {indicator}"
-                )))
+                )));
             }
         };
 
@@ -166,7 +166,7 @@ impl AkShareClient {
 
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let resp: EmDatacenterResp = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("reportName", report_name),
                 ("columns", "ALL"),
@@ -196,7 +196,7 @@ impl AkShareClient {
     pub async fn bond_zh_hs_cov_daily(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let secid = format!("1.{}", symbol);
         let resp: serde_json::Value = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -247,7 +247,7 @@ impl AkShareClient {
     ) -> Result<Vec<serde_json::Value>> {
         let secid = format!("1.{}", symbol);
         let resp: serde_json::Value = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -293,7 +293,7 @@ impl AkShareClient {
     pub async fn bond_zh_hs_cov_pre_min(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let secid = format!("1.{}", symbol);
         let resp: serde_json::Value = self
-                        .get("https://push2.eastmoney.com/api/qt/stock/trends2/get")
+            .get("https://push2.eastmoney.com/api/qt/stock/trends2/get")
             .query(&[
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
@@ -381,13 +381,10 @@ impl AkShareClient {
     ///
     /// Returns historical data of conversion value, pure bond value, and
     /// premium ratios for a given convertible bond symbol.
-    pub async fn bond_zh_cov_value_analysis(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn bond_zh_cov_value_analysis(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let filter = format!("(zcode=\"{symbol}\")");
         let resp: EmDatacenterResp = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/get")
             .query(&[
                 ("sty", "ALL"),
                 ("token", "894050c76af8597a853f5b408b759f5d"),

@@ -10,7 +10,8 @@ impl AkShareClient {
     pub async fn sina_a_share_realtime(&self, symbol: &str) -> Result<QuoteSnapshot> {
         let normalized = crate::market::normalize_a_share_symbol(symbol)
             .ok_or_else(|| Error::invalid_input(format!("invalid A-share symbol: {symbol}")))?;
-        let (code, suffix) = normalized.split_once('.')
+        let (code, suffix) = normalized
+            .split_once('.')
             .ok_or_else(|| Error::invalid_input(format!("invalid symbol format: {normalized}")))?;
         let prefix = match suffix {
             "SH" => "sh",
@@ -20,7 +21,7 @@ impl AkShareClient {
         let sina_symbol = format!("{prefix}{code}");
         let url = format!("https://hq.sinajs.cn/list={sina_symbol}");
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://finance.sina.com.cn")
             .send()
             .await?
@@ -48,11 +49,7 @@ impl AkShareClient {
     }
 
     /// Sina US daily candles.
-    pub async fn sina_us_daily(
-        &self,
-        symbol: &str,
-        limit: usize,
-    ) -> Result<Vec<CandlePoint>> {
+    pub async fn sina_us_daily(&self, symbol: &str, limit: usize) -> Result<Vec<CandlePoint>> {
         let url = format!(
             "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/IO.XSRV2.CallbackList/US_MinKService.getDailyK?symbol={symbol}&_var=kline_dayqfq&range={limit}d"
         );
@@ -87,7 +84,10 @@ impl AkShareClient {
         }
 
         let entries: Vec<KlineEntry> = serde_json::from_str(json_str).map_err(|e| {
-            Error::decode(format!("sina US kline JSON parse failed: {e}; raw={}", &json_str[..json_str.len().min(200)]))
+            Error::decode(format!(
+                "sina US kline JSON parse failed: {e}; raw={}",
+                &json_str[..json_str.len().min(200)]
+            ))
         })?;
         let mut items = Vec::with_capacity(entries.len());
         for e in &entries {

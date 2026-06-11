@@ -4,9 +4,9 @@
 
 #![allow(dead_code)]
 
-use wiremock::{MockServer, Mock, ResponseTemplate};
-use wiremock::matchers::{method, path_regex};
 use akshare::AkShareClient;
+use wiremock::matchers::{method, path_regex};
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 /// Create an AkShareClient that talks to a local mock server.
 pub fn mock_client(server: &MockServer) -> AkShareClient {
@@ -91,7 +91,10 @@ pub fn sample_em_stock_row(code: &str, name: &str) -> serde_json::Value {
 
 /// Sample candlestick kline string: "2024-01-02,10.00,10.50,10.80,9.90,100000,10500000,2.0,1.5,0.15,1.2"
 pub fn sample_kline_str(date: &str) -> String {
-    format!("{},10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2", date)
+    format!(
+        "{},10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
+        date
+    )
 }
 
 /// Sample MacroDataPoint-style JSON from Eastmoney datacenter.

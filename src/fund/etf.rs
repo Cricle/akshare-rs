@@ -24,7 +24,9 @@ fn etf_secid(symbol: &str) -> Result<String> {
         };
         return Ok(format!("{prefix}.{s}"));
     }
-    Err(Error::invalid_input(format!("invalid ETF symbol: {symbol}")))
+    Err(Error::invalid_input(format!(
+        "invalid ETF symbol: {symbol}"
+    )))
 }
 
 impl AkShareClient {

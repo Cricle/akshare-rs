@@ -1,7 +1,7 @@
 mod common;
 
-use wiremock::{MockServer, Mock, ResponseTemplate};
 use wiremock::matchers::{method, path_regex};
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 #[tokio::test]
 async fn test_mock_eastmoney_datacenter() {
@@ -10,10 +10,12 @@ async fn test_mock_eastmoney_datacenter() {
     // Mock POST for eastmoney datacenter
     Mock::given(method("POST"))
         .and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(common::em_datacenter_response(vec![
-            common::sample_em_stock_row("000001", "平安银行"),
-            common::sample_em_stock_row("600000", "浦发银行"),
-        ])))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(common::em_datacenter_response(vec![
+                common::sample_em_stock_row("000001", "平安银行"),
+                common::sample_em_stock_row("600000", "浦发银行"),
+            ])),
+        )
         .mount(&server)
         .await;
 
@@ -28,9 +30,11 @@ async fn test_mock_em_push2() {
 
     Mock::given(method("GET"))
         .and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(common::em_push2_response(vec![
-            common::sample_em_stock_row("000001", "平安银行"),
-        ])))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(common::em_push2_response(vec![
+                common::sample_em_stock_row("000001", "平安银行"),
+            ])),
+        )
         .mount(&server)
         .await;
 
@@ -43,10 +47,12 @@ async fn test_mock_em_kline() {
 
     Mock::given(method("GET"))
         .and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(common::em_kline_response(vec![
-            &common::sample_kline_str("2024-01-02"),
-            &common::sample_kline_str("2024-01-03"),
-        ])))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(common::em_kline_response(vec![
+                &common::sample_kline_str("2024-01-02"),
+                &common::sample_kline_str("2024-01-03"),
+            ])),
+        )
         .mount(&server)
         .await;
 

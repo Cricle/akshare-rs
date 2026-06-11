@@ -95,7 +95,7 @@ impl AkShareClient {
             date = now
         );
         let resp = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await
             .map_err(Error::from)?
@@ -104,7 +104,9 @@ impl AkShareClient {
 
         let text = resp.text().await.map_err(Error::from)?;
         if text.is_empty() {
-            return Err(Error::not_found(format!("sina returned no data for {symbol}")));
+            return Err(Error::not_found(format!(
+                "sina returned no data for {symbol}"
+            )));
         }
 
         // Sina returns encrypted JS; we attempt to parse the data section.

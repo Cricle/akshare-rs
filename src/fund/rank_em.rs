@@ -13,11 +13,20 @@ impl AkShareClient {
         limit: usize,
     ) -> Result<Vec<FundSnapshot>> {
         let type_map: &[(&str, &str)] = &[
-            ("全部", "all"), ("股票型", "gp"), ("混合型", "hh"),
-            ("债券型", "zq"), ("指数型", "zs"), ("QDII", "qdii"),
-            ("LOF", "lof"), ("FOF", "fof"),
+            ("全部", "all"),
+            ("股票型", "gp"),
+            ("混合型", "hh"),
+            ("债券型", "zq"),
+            ("指数型", "zs"),
+            ("QDII", "qdii"),
+            ("LOF", "lof"),
+            ("FOF", "fof"),
         ];
-        let ft = type_map.iter().find(|(n, _)| *n == symbol).map(|(_, c)| *c).unwrap_or("all");
+        let ft = type_map
+            .iter()
+            .find(|(n, _)| *n == symbol)
+            .map(|(_, c)| *c)
+            .unwrap_or("all");
 
         let now = chrono::Utc::now().format("%Y-%m-%d").to_string();
         let pn = limit.max(1).to_string();
@@ -26,14 +35,26 @@ impl AkShareClient {
             .get("https://fund.eastmoney.com/data/rankhandler.aspx")
             .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
             .query(&[
-                ("op", "ph"), ("dt", "kf"), ("ft", ft), ("rs", ""),
-                ("gs", "0"), ("sc", "1nzf"), ("st", "desc"),
-                ("sd", now.as_str()), ("ed", now.as_str()),
-                ("qdii", ""), ("tabSubtype", ",,,,,"), ("pi", "1"),
-                ("pn", pn.as_str()), ("dx", "1"),
+                ("op", "ph"),
+                ("dt", "kf"),
+                ("ft", ft),
+                ("rs", ""),
+                ("gs", "0"),
+                ("sc", "1nzf"),
+                ("st", "desc"),
+                ("sd", now.as_str()),
+                ("ed", now.as_str()),
+                ("qdii", ""),
+                ("tabSubtype", ",,,,,"),
+                ("pi", "1"),
+                ("pn", pn.as_str()),
+                ("dx", "1"),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);
@@ -43,15 +64,20 @@ impl AkShareClient {
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("fund rank JSON parse: {e}")))?;
 
-        let datas = root.get("datas").and_then(|v| v.as_array())
+        let datas = root
+            .get("datas")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("fund rank missing datas"))?;
 
         let today = crate::util::today_iso();
         let snapshots: Vec<FundSnapshot> = datas
-            .iter().take(limit)
+            .iter()
+            .take(limit)
             .filter_map(|item| {
                 let arr = item.as_array()?;
-                if arr.len() < 8 { return None; }
+                if arr.len() < 8 {
+                    return None;
+                }
                 Some(FundSnapshot {
                     symbol: arr[0].as_str().unwrap_or("").to_string(),
                     name: arr[1].as_str().unwrap_or("").to_string(),
@@ -76,12 +102,21 @@ impl AkShareClient {
             .get("https://fund.eastmoney.com/data/rankhandler.aspx")
             .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
             .query(&[
-                ("op", "ph"), ("dt", "fb"), ("ft", "ct"), ("rs", ""),
-                ("gs", "0"), ("sc", "1nzf"), ("st", "desc"),
-                ("pi", "1"), ("pn", "30000"),
+                ("op", "ph"),
+                ("dt", "fb"),
+                ("ft", "ct"),
+                ("rs", ""),
+                ("gs", "0"),
+                ("sc", "1nzf"),
+                ("st", "desc"),
+                ("pi", "1"),
+                ("pn", "30000"),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);
@@ -91,14 +126,18 @@ impl AkShareClient {
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("exchange rank JSON parse: {e}")))?;
 
-        let datas = root.get("datas").and_then(|v| v.as_array())
+        let datas = root
+            .get("datas")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("exchange rank missing datas"))?;
 
         let mut result = Vec::new();
         for (i, item) in datas.iter().enumerate() {
             let s = item.as_str().unwrap_or("");
             let fields: Vec<&str> = s.split(',').collect();
-            if fields.len() < 23 { continue; }
+            if fields.len() < 23 {
+                continue;
+            }
             result.push(FundExchangeRankItem {
                 rank: (i + 1) as i32,
                 fund_code: fields[0].to_string(),

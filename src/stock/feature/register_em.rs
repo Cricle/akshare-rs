@@ -1,9 +1,9 @@
 //! Registration data (注册制/新股注册) from Eastmoney.
 
-use crate::client::AkShareClient;
-use crate::error::Result;
 use super::helpers::*;
 use super::types::*;
+use crate::client::AkShareClient;
+use crate::error::Result;
 
 impl AkShareClient {
     /// Fetch registration data from Eastmoney datacenter.
@@ -17,25 +17,30 @@ impl AkShareClient {
             "深市主板" => "(MARKET=\"深市主板\")",
             _ => "",
         };
-        let data = self.dc_fetch_all(
-            "RPT_REGISTERED_VIEW",
-            "SECURITY_CODE,SECURITY_NAME_ABBR,INDUSTRY,LISTING_DATE,ISSUE_PRICE,PE_RATIO",
-            filter,
-            "LISTING_DATE",
-            "-1",
-            500,
-            10,
-            &[],
-        ).await?;
-        Ok(data.iter().map(|v| RegisterEntry {
-            code: json_str(v, "SECURITY_CODE"),
-            name: json_str(v, "SECURITY_NAME_ABBR"),
-            industry: json_str_opt(v, "INDUSTRY"),
-            list_date: json_str_opt(v, "LISTING_DATE"),
-            issue_price: json_f64_opt(v, "ISSUE_PRICE"),
-            pe_ratio: json_f64_opt(v, "PE_RATIO"),
-            extra: None,
-        }).collect())
+        let data = self
+            .dc_fetch_all(
+                "RPT_REGISTERED_VIEW",
+                "SECURITY_CODE,SECURITY_NAME_ABBR,INDUSTRY,LISTING_DATE,ISSUE_PRICE,PE_RATIO",
+                filter,
+                "LISTING_DATE",
+                "-1",
+                500,
+                10,
+                &[],
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RegisterEntry {
+                code: json_str(v, "SECURITY_CODE"),
+                name: json_str(v, "SECURITY_NAME_ABBR"),
+                industry: json_str_opt(v, "INDUSTRY"),
+                list_date: json_str_opt(v, "LISTING_DATE"),
+                issue_price: json_f64_opt(v, "ISSUE_PRICE"),
+                pe_ratio: json_f64_opt(v, "PE_RATIO"),
+                extra: None,
+            })
+            .collect())
     }
 
     /// 全部注册制

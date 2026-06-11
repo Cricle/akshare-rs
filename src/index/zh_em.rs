@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::util::{parse_f64_safe, parse_csv_line};
+use crate::util::{parse_csv_line, parse_f64_safe};
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -40,14 +40,18 @@ impl AkShareClient {
             "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
 
         // Try market prefixes in order: 1 (SH), 0 (SZ), 2 (CSI), 47
         for market in &["1", "0", "2", "47"] {
             let secid = format!("{market}.{symbol}");
             let response = self
-                                .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+                .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
                 .query(&[
                     ("secid", secid.as_str()),
                     ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
@@ -67,13 +71,14 @@ impl AkShareClient {
             let payload: EmKlineEnvelope = response.json().await.map_err(Error::from)?;
             if let Some(data) = payload.data
                 && let Some(klines) = data.klines
-                    && !klines.is_empty() {
-                        let points: Vec<IndexZhAHistPoint> = klines
-                            .iter()
-                            .map(|line| parse_zh_a_hist_line(line))
-                            .collect::<Result<Vec<_>>>()?;
-                        return Ok(points);
-                    }
+                && !klines.is_empty()
+            {
+                let points: Vec<IndexZhAHistPoint> = klines
+                    .iter()
+                    .map(|line| parse_zh_a_hist_line(line))
+                    .collect::<Result<Vec<_>>>()?;
+                return Ok(points);
+            }
         }
 
         Err(Error::not_found(format!(
@@ -113,7 +118,7 @@ impl AkShareClient {
         }
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", &format!("1.{symbol}")[..]),
                 ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
@@ -131,10 +136,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: EmKlineEnvelope = response.json().await.map_err(Error::from)?;
-        let klines = payload
-            .data
-            .and_then(|d| d.klines)
-            .unwrap_or_default();
+        let klines = payload.data.and_then(|d| d.klines).unwrap_or_default();
 
         let points: Vec<IndexZhAHistMinPoint> = klines
             .iter()
@@ -166,13 +168,10 @@ impl AkShareClient {
     }
 
     // Private: 1-min trends
-    async fn index_zh_a_hist_trends(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<IndexZhAHistMinPoint>> {
+    async fn index_zh_a_hist_trends(&self, symbol: &str) -> Result<Vec<IndexZhAHistMinPoint>> {
         let secid = format!("1.{symbol}");
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
             .query(&[
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
@@ -196,10 +195,7 @@ impl AkShareClient {
         }
 
         let payload: TrendsEnvelope = response.json().await.map_err(Error::from)?;
-        let trends = payload
-            .data
-            .and_then(|d| d.trends)
-            .unwrap_or_default();
+        let trends = payload.data.and_then(|d| d.trends).unwrap_or_default();
 
         let points: Vec<IndexZhAHistMinPoint> = trends
             .iter()
@@ -228,6 +224,30 @@ impl AkShareClient {
             return Err(Error::not_found("eastmoney returned no trend data"));
         }
         Ok(points)
+    }
+
+    /// 东方财富-股票和市场代码 (Python: index_code_id_map_em)
+    ///
+    /// Returns a mapping of stock codes to market IDs.
+    pub async fn index_code_id_map_em(&self) -> Result<std::collections::HashMap<String, i64>> {
+        let items = self
+            .clist_spot_fetch(
+                "b:MK0010,m:1+t:1,m:0 t:5,m:1+s:3,m:0+t:5,m:2",
+                "f3,f12,f13",
+                "100",
+                "f3",
+            )
+            .await?;
+        let mut map = std::collections::HashMap::new();
+        for item in &items {
+            if let (Some(code), Some(id)) = (
+                item.get("f12").and_then(|v| v.as_str()),
+                item.get("f13").and_then(|v| v.as_i64()),
+            ) {
+                map.insert(code.to_string(), id);
+            }
+        }
+        Ok(map)
     }
 }
 

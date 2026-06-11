@@ -16,11 +16,26 @@ struct CninfoResp {
 
 /// CNINFO API endpoint mapping for different bond issuance types.
 const CNINFO_ENDPOINTS: &[(&str, &str)] = &[
-    ("treasure", "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1120"),
-    ("local_government", "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1121"),
-    ("corporate", "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1122"),
-    ("convertible", "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1123"),
-    ("convertible_stock", "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1124"),
+    (
+        "treasure",
+        "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1120",
+    ),
+    (
+        "local_government",
+        "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1121",
+    ),
+    (
+        "corporate",
+        "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1122",
+    ),
+    (
+        "convertible",
+        "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1123",
+    ),
+    (
+        "convertible_stock",
+        "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1124",
+    ),
 ];
 
 impl AkShareClient {
@@ -32,7 +47,8 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        self.fetch_cninfo_issue("treasure", start_date, end_date).await
+        self.fetch_cninfo_issue("treasure", start_date, end_date)
+            .await
     }
 
     /// Fetch local government bond issuance data from CNINFO.
@@ -41,7 +57,8 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        self.fetch_cninfo_issue("local_government", start_date, end_date).await
+        self.fetch_cninfo_issue("local_government", start_date, end_date)
+            .await
     }
 
     /// Fetch corporate bond issuance data from CNINFO.
@@ -50,7 +67,8 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        self.fetch_cninfo_issue("corporate", start_date, end_date).await
+        self.fetch_cninfo_issue("corporate", start_date, end_date)
+            .await
     }
 
     /// Fetch convertible bond issuance data from CNINFO.
@@ -59,7 +77,8 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        self.fetch_cninfo_issue("convertible", start_date, end_date).await
+        self.fetch_cninfo_issue("convertible", start_date, end_date)
+            .await
     }
 
     /// Fetch local government bond issuance data from CNINFO (exact Python name).
@@ -74,12 +93,7 @@ impl AkShareClient {
     /// Fetch convertible bond stock conversion data from CNINFO.
     pub async fn bond_cov_stock_issue_cninfo(&self) -> Result<Vec<serde_json::Value>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1124";
-        let resp: CninfoResp = self
-                        .post(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: CninfoResp = self.post(url).send().await?.json().await?;
 
         let records = resp.records.unwrap_or_default();
         if records.is_empty() {
@@ -108,15 +122,10 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let ed = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
         let resp: CninfoResp = self
-                        .post(url)
+            .post(url)
             .query(&[("sdate", sd.as_str()), ("edate", ed.as_str())])
             .send()
             .await?

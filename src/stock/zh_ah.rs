@@ -77,11 +77,8 @@ impl AkShareClient {
         for page in 0..10 {
             let page_str = page.to_string();
             let response = self
-                                .get(url)
-                .query(&[
-                    ("reqPage", page_str.as_str()),
-                    ("type", "AH"),
-                ])
+                .get(url)
+                .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
                 .send()
                 .await
                 .map_err(Error::from)?
@@ -188,7 +185,7 @@ impl AkShareClient {
             let r: String = format!("{}", chrono::Utc::now().timestamp_millis() as f64 / 1000.0);
 
             let response = self
-                                .get(&url)
+                .get(&url)
                 .query(&[
                     ("_var", format!("kline_day{}{}", adjust, year).as_str()),
                     (param_key, param_value.as_str()),
@@ -269,11 +266,8 @@ impl AkShareClient {
         for page in 0..10 {
             let page_str = page.to_string();
             let response = self
-                                .get(url)
-                .query(&[
-                    ("reqPage", page_str.as_str()),
-                    ("type", "AH"),
-                ])
+                .get(url)
+                .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
                 .send()
                 .await
                 .map_err(Error::from)?

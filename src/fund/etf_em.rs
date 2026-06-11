@@ -53,13 +53,21 @@ impl AkShareClient {
             .take(limit)
             .filter_map(|v| {
                 let code = v.get("f12")?.as_str()?.to_string();
-                let name = v.get("f14").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                let name = v
+                    .get("f14")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_string();
                 let price = v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0);
                 let change_pct = v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0);
                 Some(FundSnapshot {
-                    symbol: code, name, date: today.clone(),
-                    nav: price, acc_nav: price,
-                    change_pct, fund_type: Some("etf".to_string()),
+                    symbol: code,
+                    name,
+                    date: today.clone(),
+                    nav: price,
+                    acc_nav: price,
+                    change_pct,
+                    fund_type: Some("etf".to_string()),
                 })
             })
             .collect();
@@ -88,13 +96,21 @@ impl AkShareClient {
             "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let adjust_map = match adjust {
             "qfq" => "1",
             "hfq" => "2",
             "" | "none" => "0",
-            _ => return Err(Error::invalid_input(format!("unsupported adjust: {adjust}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported adjust: {adjust}"
+                )));
+            }
         };
         let market_id = etf_market_id(symbol);
 
@@ -102,7 +118,10 @@ impl AkShareClient {
             .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f116"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f116",
+                ),
                 ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
                 ("klt", period_map),
                 ("fqt", adjust_map),
@@ -165,7 +184,11 @@ impl AkShareClient {
             "qfq" => "1",
             "hfq" => "2",
             "" | "none" => "0",
-            _ => return Err(Error::invalid_input(format!("unsupported adjust: {adjust}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported adjust: {adjust}"
+                )));
+            }
         };
         let market_id = etf_market_id(symbol);
 
@@ -245,7 +268,9 @@ impl AkShareClient {
                 .get("data")
                 .and_then(|d| d.get("klines"))
                 .and_then(|k| k.as_array())
-                .ok_or_else(|| Error::not_found(format!("no minute kline data for ETF {symbol}")))?;
+                .ok_or_else(|| {
+                    Error::not_found(format!("no minute kline data for ETF {symbol}"))
+                })?;
 
             let mut candles = Vec::new();
             for kline in klines {
@@ -292,7 +317,10 @@ impl AkShareClient {
                 ("invt", "2"),
                 ("fid", "f12"),
                 ("fs", "b:MK0021,b:MK0022,b:MK0023,b:MK0024,b:MK0827"),
-                ("fields", "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21,f38,f62,f184,f402,f441,f297"),
+                (
+                    "fields",
+                    "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21,f38,f62,f184,f402,f441,f297",
+                ),
             ])
             .send()
             .await
@@ -313,7 +341,11 @@ impl AkShareClient {
             .filter_map(|v| {
                 Some(EtfSpotItem {
                     code: v.get("f12")?.as_str()?.to_string(),
-                    name: v.get("f14").and_then(|x| x.as_str()).unwrap_or("").to_string(),
+                    name: v
+                        .get("f14")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                     latest_price: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
                     change_pct: v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0),
                     change_amount: v.get("f4").and_then(|x| x.as_f64()).unwrap_or(0.0),
@@ -330,7 +362,11 @@ impl AkShareClient {
                     shares: v.get("f38").and_then(|x| x.as_f64()).unwrap_or(0.0),
                     circ_mv: v.get("f21").and_then(|x| x.as_f64()).unwrap_or(0.0),
                     total_mv: v.get("f20").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    data_date: v.get("f297").and_then(|x| x.as_str()).unwrap_or("").to_string(),
+                    data_date: v
+                        .get("f297")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                 })
             })
             .collect();
@@ -351,12 +387,25 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<FundNavHistory>> {
-        let sd = format!("{}-{}-{}", &start_date[0..4], &start_date[4..6], &start_date[6..8]);
-        let ed = format!("{}-{}-{}", &end_date[0..4], &end_date[4..6], &end_date[6..8]);
+        let sd = format!(
+            "{}-{}-{}",
+            &start_date[0..4],
+            &start_date[4..6],
+            &start_date[6..8]
+        );
+        let ed = format!(
+            "{}-{}-{}",
+            &end_date[0..4],
+            &end_date[4..6],
+            &end_date[6..8]
+        );
 
         let response = self
             .get("https://api.fund.eastmoney.com/f10/lsjz")
-            .header("Referer", format!("https://fundf10.eastmoney.com/jjjz_{fund}.html"))
+            .header(
+                "Referer",
+                format!("https://fundf10.eastmoney.com/jjjz_{fund}.html"),
+            )
             .query(&[
                 ("fundCode", fund),
                 ("pageIndex", "1"),
@@ -436,10 +485,26 @@ impl AkShareClient {
         for (i, item) in items.iter().enumerate() {
             result.push(EtfScaleItem {
                 rank: (i + 1) as i32,
-                fund_code: item.get("SEC_CODE").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                fund_name: item.get("SEC_NAME").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                etf_type: item.get("ETF_TYPE").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                stat_date: item.get("STAT_DATE").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                fund_code: item
+                    .get("SEC_CODE")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
+                fund_name: item
+                    .get("SEC_NAME")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
+                etf_type: item
+                    .get("ETF_TYPE")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
+                stat_date: item
+                    .get("STAT_DATE")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
                 shares: item.get("TOT_VOL").and_then(|v| v.as_f64()).unwrap_or(0.0) * 10000.0,
             });
         }
@@ -455,7 +520,9 @@ impl AkShareClient {
     /// Returns ETF fund shares data from Shenzhen Stock Exchange.
     pub async fn fund_etf_scale_szse(&self) -> Result<Vec<serde_json::Value>> {
         // SZSE returns xlsx content; cannot parse in pure Rust without a library.
-        Err(Error::decode("SZSE ETF scale data requires xlsx parsing (not supported in pure Rust)"))
+        Err(Error::decode(
+            "SZSE ETF scale data requires xlsx parsing (not supported in pure Rust)",
+        ))
     }
 
     // --- THS functions ---
@@ -464,11 +531,21 @@ impl AkShareClient {
     ///
     /// `symbol`: "ETF", "LOF", "股票型", "债券型", "混合型", "QDII", "保本型", "指数型", or "" for all.
     /// `date`: format "YYYYMMDD" or "" for latest.
-    pub async fn fund_etf_category_ths(&self, symbol: &str, date: &str) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_etf_category_ths(
+        &self,
+        symbol: &str,
+        date: &str,
+    ) -> Result<Vec<serde_json::Value>> {
         let symbol_map: &[(&str, &str)] = &[
-            ("股票型", "gpx"), ("债券型", "zqx"), ("混合型", "hhx"),
-            ("ETF", "ETF"), ("LOF", "LOF"), ("QDII", "QDII"),
-            ("保本型", "bbx"), ("指数型", "zsx"), ("", "all"),
+            ("股票型", "gpx"),
+            ("债券型", "zqx"),
+            ("混合型", "hhx"),
+            ("ETF", "ETF"),
+            ("LOF", "LOF"),
+            ("QDII", "QDII"),
+            ("保本型", "bbx"),
+            ("指数型", "zsx"),
+            ("", "all"),
         ];
         let inner_symbol = symbol_map
             .iter()
@@ -571,16 +648,17 @@ impl AkShareClient {
         let mut result = Vec::new();
         for item in data {
             if let Some(arr) = item.as_array()
-                && arr.len() >= 4 {
-                    let date = arr[0].as_str().unwrap_or("");
-                    if date == "1900-01-01" {
-                        continue;
-                    }
-                    result.push(serde_json::json!({
-                        "date": date,
-                        "cumulative_dividend": arr[3].as_f64().unwrap_or(0.0),
-                    }));
+                && arr.len() >= 4
+            {
+                let date = arr[0].as_str().unwrap_or("");
+                if date == "1900-01-01" {
+                    continue;
                 }
+                result.push(serde_json::json!({
+                    "date": date,
+                    "cumulative_dividend": arr[3].as_f64().unwrap_or(0.0),
+                }));
+            }
         }
 
         if result.is_empty() {

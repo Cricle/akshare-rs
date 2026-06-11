@@ -55,13 +55,17 @@ impl AkShareClient {
         date: &str,
     ) -> Result<Vec<MacroDataPoint>> {
         // Determine if it's a province or city
-        let dt_flag = if is_province(area) { "province" } else { "city" };
+        let dt_flag = if is_province(area) {
+            "province"
+        } else {
+            "city"
+        };
         let area_id = get_area_id(area)
             .ok_or_else(|| Error::invalid_input(format!("unknown area: {}", area)))?;
 
         let url = "https://huiyan.baidu.com/migration/cityrank.jsonp";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("dt", dt_flag),
                 ("id", &area_id),
@@ -75,13 +79,10 @@ impl AkShareClient {
 
         // Parse JSONP: ({ ... })
         let json_str = extract_jsonp(&body)?;
-        let resp: MigrationAreaResponse =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("migration area JSON: {e}")))?;
+        let resp: MigrationAreaResponse = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("migration area JSON: {e}")))?;
 
-        let list = resp
-            .data
-            .and_then(|d| d.list)
-            .unwrap_or_default();
+        let list = resp.data.and_then(|d| d.list).unwrap_or_default();
 
         let mut items = Vec::new();
         for entry in &list {
@@ -113,13 +114,17 @@ impl AkShareClient {
         area: &str,
         indicator: &str,
     ) -> Result<Vec<MacroDataPoint>> {
-        let dt_flag = if is_province(area) { "province" } else { "city" };
+        let dt_flag = if is_province(area) {
+            "province"
+        } else {
+            "city"
+        };
         let area_id = get_area_id(area)
             .ok_or_else(|| Error::invalid_input(format!("unknown area: {}", area)))?;
 
         let url = "https://huiyan.baidu.com/migration/historycurve.jsonp";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("dt", dt_flag), ("id", &area_id), ("type", indicator)])
             .send()
             .await?
@@ -127,13 +132,10 @@ impl AkShareClient {
             .await?;
 
         let json_str = extract_jsonp(&body)?;
-        let resp: MigrationScaleResponse =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("migration scale JSON: {e}")))?;
+        let resp: MigrationScaleResponse = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("migration scale JSON: {e}")))?;
 
-        let list = resp
-            .data
-            .and_then(|d| d.list)
-            .unwrap_or_default();
+        let list = resp.data.and_then(|d| d.list).unwrap_or_default();
 
         let mut items = Vec::new();
         for (date_str, value) in &list {

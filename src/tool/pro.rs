@@ -25,7 +25,7 @@ impl AkShareClient {
         });
 
         let body = self
-                        .post(url)
+            .post(url)
             .json(&payload)
             .header("Content-Type", "application/json")
             .send()

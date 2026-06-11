@@ -1,8 +1,8 @@
 //! ETF fund data from Sina Finance.
 
 use crate::client::AkShareClient;
-use crate::types::FundSnapshot;
 use crate::error::{Error, Result};
+use crate::types::FundSnapshot;
 
 impl AkShareClient {
     /// Fetch ETF/LOF/closed fund category list from Sina Finance.
@@ -48,14 +48,22 @@ impl AkShareClient {
             .into_iter()
             .filter_map(|v| {
                 let arr = v.as_array()?;
-                if arr.len() < 5 { return None; }
+                if arr.len() < 5 {
+                    return None;
+                }
                 Some(FundSnapshot {
                     symbol: arr[0].as_str().unwrap_or("").to_string(),
                     name: arr[1].as_str().unwrap_or("").to_string(),
                     date: today.clone(),
-                    nav: arr[2].as_f64().or_else(|| arr[2].as_str().and_then(|s| s.parse().ok())).unwrap_or(0.0),
+                    nav: arr[2]
+                        .as_f64()
+                        .or_else(|| arr[2].as_str().and_then(|s| s.parse().ok()))
+                        .unwrap_or(0.0),
                     acc_nav: 0.0,
-                    change_pct: arr[4].as_f64().or_else(|| arr[4].as_str().and_then(|s| s.parse().ok())).unwrap_or(0.0),
+                    change_pct: arr[4]
+                        .as_f64()
+                        .or_else(|| arr[4].as_str().and_then(|s| s.parse().ok()))
+                        .unwrap_or(0.0),
                     fund_type: Some(symbol.to_string()),
                 })
             })

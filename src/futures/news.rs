@@ -52,13 +52,7 @@ impl AkShareClient {
             })
         };
 
-        let body = self
-                        .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.post(url).json(&payload).send().await?.text().await?;
 
         let data: serde_json::Value = serde_json::from_str(&body)?;
         let rows = data["data"]["dataList"]

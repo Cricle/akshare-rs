@@ -11,8 +11,8 @@
 
 mod common;
 use common::*;
-use wiremock::{MockServer, Mock, ResponseTemplate};
 use wiremock::matchers::{method, path_regex};
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 // ============================================================================
 // a_share.rs
@@ -24,7 +24,12 @@ async fn test_index_a_share_candles() {
     let k1 = sample_kline_str("2024-01-02");
     let k2 = sample_kline_str("2024-01-03");
     let klines: Vec<&str> = vec![&k1, &k2];
-    mock_any_get(&server, "/api/qt/stock/kline/get", em_kline_response(klines)).await;
+    mock_any_get(
+        &server,
+        "/api/qt/stock/kline/get",
+        em_kline_response(klines),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.index_a_share_candles("000300", 10).await;
     assert!(result.is_ok());
@@ -74,7 +79,12 @@ async fn test_index_stock_zh_spot_sina() {
 #[tokio::test]
 async fn test_stock_zh_index_daily() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, "/hisdata/klc_kl.js", "function d(){eval(\"test\")}").await;
+    mock_any_get_text(
+        &server,
+        "/hisdata/klc_kl.js",
+        "function d(){eval(\"test\")}",
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.stock_zh_index_daily("sh000300").await;
     assert!(result.is_err());
@@ -164,7 +174,9 @@ async fn test_index_hist_cni() {
     let body = serde_json::json!({"data": {"data": [row]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.index_hist_cni("399001", "20240101", "20240131").await;
+    let result = client
+        .index_hist_cni("399001", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -176,9 +188,11 @@ async fn test_index_detail_cni() {
     ]);
     Mock::given(method("GET"))
         .and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200)
-            .set_body_json(body)
-            .insert_header("content-type", "application/json"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(body)
+                .insert_header("content-type", "application/json"),
+        )
         .mount(&server)
         .await;
     let client = mock_client(&server);
@@ -190,17 +204,24 @@ async fn test_index_detail_cni() {
 async fn test_index_detail_hist_cni() {
     let server = MockServer::start().await;
     let row = vec![
-        serde_json::json!("2024-01-02"), serde_json::json!(null),
-        serde_json::json!(10100.0), serde_json::json!(10000.0),
-        serde_json::json!(9950.0), serde_json::json!(10050.0),
-        serde_json::json!(null), serde_json::json!("0.50%"),
-        serde_json::json!(50000000.0), serde_json::json!(300000000.0),
+        serde_json::json!("2024-01-02"),
+        serde_json::json!(null),
+        serde_json::json!(10100.0),
+        serde_json::json!(10000.0),
+        serde_json::json!(9950.0),
+        serde_json::json!(10050.0),
+        serde_json::json!(null),
+        serde_json::json!("0.50%"),
+        serde_json::json!(50000000.0),
+        serde_json::json!(300000000.0),
         serde_json::json!(null),
     ];
     let body = serde_json::json!({"data": {"data": [row]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.index_detail_hist_cni("399001", "20240101", "20240131").await;
+    let result = client
+        .index_detail_hist_cni("399001", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -210,9 +231,11 @@ async fn test_index_detail_hist_adjust_cni() {
     let body = serde_json::json!([{"code": "000001", "name": "平安银行"}]);
     Mock::given(method("GET"))
         .and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200)
-            .set_body_json(body)
-            .insert_header("content-type", "application/json"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_json(body)
+                .insert_header("content-type", "application/json"),
+        )
         .mount(&server)
         .await;
     let client = mock_client(&server);
@@ -256,7 +279,8 @@ async fn test_index_stock_info() {
 #[tokio::test]
 async fn test_index_stock_cons() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"result": {"data": [{"symbol": "sh600000", "name": "浦发银行"}]}});
+    let body =
+        serde_json::json!({"result": {"data": [{"symbol": "sh600000", "name": "浦发银行"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.index_stock_cons("000300").await;
@@ -286,7 +310,8 @@ async fn test_index_stock_cons_weight_csindex() {
 #[tokio::test]
 async fn test_index_csindex_all() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": {"list": [{"indexCode": "000300", "indexName": "沪深300"}]}});
+    let body =
+        serde_json::json!({"data": {"list": [{"indexCode": "000300", "indexName": "沪深300"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.index_csindex_all().await;
@@ -311,7 +336,9 @@ async fn test_stock_zh_index_hist_csindex() {
     let body = serde_json::json!({"data": [row]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_index_hist_csindex("000300", "20240101", "20240131").await;
+    let result = client
+        .stock_zh_index_hist_csindex("000300", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -526,7 +553,12 @@ async fn test_index_hk_daily_em() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
     let klines: Vec<&str> = vec![&k1];
-    mock_any_get(&server, "/api/qt/stock/kline/get", em_kline_response(klines)).await;
+    mock_any_get(
+        &server,
+        "/api/qt/stock/kline/get",
+        em_kline_response(klines),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.index_hk_daily_em("HSI", "100", 10).await;
     let _ = result;
@@ -608,19 +640,43 @@ test_qvix_method!(test_index_option_cyb_qvix, index_option_cyb_qvix);
 test_qvix_method!(test_index_option_kcb_qvix, index_option_kcb_qvix);
 test_qvix_method!(test_index_option_100etf_qvix, index_option_100etf_qvix);
 test_qvix_method!(test_index_option_300index_qvix, index_option_300index_qvix);
-test_qvix_method!(test_index_option_1000index_qvix, index_option_1000index_qvix);
+test_qvix_method!(
+    test_index_option_1000index_qvix,
+    index_option_1000index_qvix
+);
 test_qvix_method!(test_index_option_50index_qvix, index_option_50index_qvix);
 
 // Intraday (9)
-test_qvix_method!(test_index_option_50etf_min_qvix, index_option_50etf_min_qvix);
-test_qvix_method!(test_index_option_300etf_min_qvix, index_option_300etf_min_qvix);
-test_qvix_method!(test_index_option_500etf_min_qvix, index_option_500etf_min_qvix);
+test_qvix_method!(
+    test_index_option_50etf_min_qvix,
+    index_option_50etf_min_qvix
+);
+test_qvix_method!(
+    test_index_option_300etf_min_qvix,
+    index_option_300etf_min_qvix
+);
+test_qvix_method!(
+    test_index_option_500etf_min_qvix,
+    index_option_500etf_min_qvix
+);
 test_qvix_method!(test_index_option_cyb_min_qvix, index_option_cyb_min_qvix);
 test_qvix_method!(test_index_option_kcb_min_qvix, index_option_kcb_min_qvix);
-test_qvix_method!(test_index_option_100etf_min_qvix, index_option_100etf_min_qvix);
-test_qvix_method!(test_index_option_300index_min_qvix, index_option_300index_min_qvix);
-test_qvix_method!(test_index_option_1000index_min_qvix, index_option_1000index_min_qvix);
-test_qvix_method!(test_index_option_50index_min_qvix, index_option_50index_min_qvix);
+test_qvix_method!(
+    test_index_option_100etf_min_qvix,
+    index_option_100etf_min_qvix
+);
+test_qvix_method!(
+    test_index_option_300index_min_qvix,
+    index_option_300index_min_qvix
+);
+test_qvix_method!(
+    test_index_option_1000index_min_qvix,
+    index_option_1000index_min_qvix
+);
+test_qvix_method!(
+    test_index_option_50index_min_qvix,
+    index_option_50index_min_qvix
+);
 
 // ============================================================================
 // scope.rs (uses self.http.get(), bypass mock)
@@ -744,7 +800,12 @@ async fn test_sw_index_candles() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
     let klines: Vec<&str> = vec![&k1];
-    mock_any_get(&server, "/api/qt/stock/kline/get", em_kline_response(klines)).await;
+    mock_any_get(
+        &server,
+        "/api/qt/stock/kline/get",
+        em_kline_response(klines),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.sw_index_candles("801010", 10).await;
     assert!(result.is_ok());
@@ -826,7 +887,9 @@ async fn test_index_realtime_sw() {
 async fn test_index_analysis_daily_sw() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.index_analysis_daily_sw("801010", "2024-01-01", "2024-01-31").await;
+    let result = client
+        .index_analysis_daily_sw("801010", "2024-01-01", "2024-01-31")
+        .await;
     let _ = result;
 }
 
@@ -842,7 +905,9 @@ async fn test_index_analysis_week_month_sw() {
 async fn test_index_analysis_weekly_sw() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.index_analysis_weekly_sw("801010", "2024-01-01").await;
+    let result = client
+        .index_analysis_weekly_sw("801010", "2024-01-01")
+        .await;
     let _ = result;
 }
 
@@ -850,7 +915,9 @@ async fn test_index_analysis_weekly_sw() {
 async fn test_index_analysis_monthly_sw() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.index_analysis_monthly_sw("801010", "2024-01-01").await;
+    let result = client
+        .index_analysis_monthly_sw("801010", "2024-01-01")
+        .await;
     let _ = result;
 }
 
@@ -926,7 +993,9 @@ async fn test_index_zh_a_hist_invalid_period() {
 async fn test_index_zh_a_hist_min_em() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.index_zh_a_hist_min_em("000300", "5", "20240101", "20240131", "qfq").await;
+    let result = client
+        .index_zh_a_hist_min_em("000300", "5", "20240101", "20240131", "qfq")
+        .await;
     let _ = result;
 }
 

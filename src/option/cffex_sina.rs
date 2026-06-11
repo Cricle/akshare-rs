@@ -171,7 +171,7 @@ impl AkShareClient {
         symbol_index: usize,
     ) -> Result<Vec<(String, Vec<String>)>> {
         let body = self
-                        .get(url)
+            .get(url)
             .send()
             .await
             .map_err(Error::from)?
@@ -181,8 +181,8 @@ impl AkShareClient {
 
         // Parse HTML to extract symbol and contract list
         // Look for id="option_symbol" <li> elements and id="option_suffix" <li> elements
-        let symbol = extract_html_li_by_id(&body, "option_symbol", symbol_index)
-            .unwrap_or_default();
+        let symbol =
+            extract_html_li_by_id(&body, "option_symbol", symbol_index).unwrap_or_default();
         let contracts = extract_html_li_all_by_id(&body, "option_suffix");
 
         if symbol.is_empty() {
@@ -198,9 +198,10 @@ impl AkShareClient {
         exchange: &str,
         symbol: &str,
     ) -> Result<Vec<CffexOptionSpotRow>> {
-        let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/OptionService.getOptionData";
+        let url =
+            "https://stock.finance.sina.com.cn/futures/api/openapi.php/OptionService.getOptionData";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("type", "futures"),
                 ("product", product),
@@ -219,8 +220,8 @@ impl AkShareClient {
         let json_end = body.rfind('}').map(|i| i + 1).unwrap_or(body.len());
         let json_str = &body[json_start..json_end];
 
-        let data: SinaOptionDataResponse =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("sina cffex spot json: {e}")))?;
+        let data: SinaOptionDataResponse = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("sina cffex spot json: {e}")))?;
 
         let result = data
             .result
@@ -239,27 +240,72 @@ impl AkShareClient {
             let call_row = up.get(i);
             let put_row = down.get(i);
 
-            let call_bid_qty = call_row.and_then(|r| r.first()).map(json_to_f64).unwrap_or(0.0);
-            let call_bid_price = call_row.and_then(|r| r.get(1)).map(json_to_f64).unwrap_or(0.0);
-            let call_latest_price = call_row.and_then(|r| r.get(2)).map(json_to_f64).unwrap_or(0.0);
-            let call_ask_price = call_row.and_then(|r| r.get(3)).map(json_to_f64).unwrap_or(0.0);
-            let call_ask_qty = call_row.and_then(|r| r.get(4)).map(json_to_f64).unwrap_or(0.0);
-            let call_open_interest = call_row.and_then(|r| r.get(5)).map(json_to_f64).unwrap_or(0.0);
-            let call_change = call_row.and_then(|r| r.get(6)).map(json_to_f64).unwrap_or(0.0);
-            let strike_price = call_row.and_then(|r| r.get(7)).map(json_to_f64).unwrap_or(0.0);
+            let call_bid_qty = call_row
+                .and_then(|r| r.first())
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let call_bid_price = call_row
+                .and_then(|r| r.get(1))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let call_latest_price = call_row
+                .and_then(|r| r.get(2))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let call_ask_price = call_row
+                .and_then(|r| r.get(3))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let call_ask_qty = call_row
+                .and_then(|r| r.get(4))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let call_open_interest = call_row
+                .and_then(|r| r.get(5))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let call_change = call_row
+                .and_then(|r| r.get(6))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let strike_price = call_row
+                .and_then(|r| r.get(7))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
             let call_id = call_row
                 .and_then(|r| r.get(8))
                 .and_then(|v| v.as_str())
                 .unwrap_or("")
                 .to_string();
 
-            let put_bid_qty = put_row.and_then(|r| r.first()).map(json_to_f64).unwrap_or(0.0);
-            let put_bid_price = put_row.and_then(|r| r.get(1)).map(json_to_f64).unwrap_or(0.0);
-            let put_latest_price = put_row.and_then(|r| r.get(2)).map(json_to_f64).unwrap_or(0.0);
-            let put_ask_price = put_row.and_then(|r| r.get(3)).map(json_to_f64).unwrap_or(0.0);
-            let put_ask_qty = put_row.and_then(|r| r.get(4)).map(json_to_f64).unwrap_or(0.0);
-            let put_open_interest = put_row.and_then(|r| r.get(5)).map(json_to_f64).unwrap_or(0.0);
-            let put_change = put_row.and_then(|r| r.get(6)).map(json_to_f64).unwrap_or(0.0);
+            let put_bid_qty = put_row
+                .and_then(|r| r.first())
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let put_bid_price = put_row
+                .and_then(|r| r.get(1))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let put_latest_price = put_row
+                .and_then(|r| r.get(2))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let put_ask_price = put_row
+                .and_then(|r| r.get(3))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let put_ask_qty = put_row
+                .and_then(|r| r.get(4))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let put_open_interest = put_row
+                .and_then(|r| r.get(5))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
+            let put_change = put_row
+                .and_then(|r| r.get(6))
+                .map(json_to_f64)
+                .unwrap_or(0.0);
             let put_id = put_row
                 .and_then(|r| r.get(7))
                 .and_then(|v| v.as_str())
@@ -288,18 +334,13 @@ impl AkShareClient {
         }
 
         if rows.is_empty() {
-            return Err(Error::not_found(format!(
-                "no cffex spot data for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no cffex spot data for {symbol}")));
         }
 
         Ok(rows)
     }
 
-    async fn fetch_cffex_daily_sina(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CffexOptionDailyRow>> {
+    async fn fetch_cffex_daily_sina(&self, symbol: &str) -> Result<Vec<CffexOptionDailyRow>> {
         let now = chrono::Utc::now();
         let url = format!(
             "https://stock.finance.sina.com.cn/futures/api/jsonp.php/var%20_{symbol}{}_{}_{}/FutureOptionAllService.getOptionDayline",
@@ -309,7 +350,7 @@ impl AkShareClient {
         );
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .query(&[("symbol", symbol)])
             .send()
             .await
@@ -327,8 +368,8 @@ impl AkShareClient {
         let json_str = &body[arr_start..arr_end];
 
         // Data format: [[open, high, low, close, volume, date], ...]
-        let raw: Vec<Vec<serde_json::Value>> =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("sina cffex daily json: {e}")))?;
+        let raw: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("sina cffex daily json: {e}")))?;
 
         let mut rows = Vec::with_capacity(raw.len());
         for item in &raw {
@@ -341,10 +382,7 @@ impl AkShareClient {
                 low: json_to_f64(&item[2]),
                 close: json_to_f64(&item[3]),
                 volume: json_to_f64(&item[4]),
-                date: item[5]
-                    .as_str()
-                    .unwrap_or("")
-                    .to_string(),
+                date: item[5].as_str().unwrap_or("").to_string(),
             });
         }
 

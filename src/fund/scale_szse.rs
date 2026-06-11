@@ -15,6 +15,8 @@ impl AkShareClient {
         _symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
         // SZSE returns xlsx content; cannot parse in pure Rust.
-        Err(Error::decode("SZSE fund scale daily data requires xlsx parsing"))
+        Err(Error::decode(
+            "SZSE fund scale daily data requires xlsx parsing",
+        ))
     }
 }

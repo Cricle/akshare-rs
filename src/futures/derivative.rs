@@ -17,12 +17,9 @@ impl AkShareClient {
     pub async fn futures_contract_info_cffex(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..6];
         let day = &date[6..];
-        let url = format!(
-            "http://www.cffex.com.cn/sj/jycs/{}/{}/index.xml",
-            year, day
-        );
+        let url = format!("http://www.cffex.com.cn/sj/jycs/{}/{}/index.xml", year, day);
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -38,9 +35,18 @@ impl AkShareClient {
             let mut r = Row::new();
             // Extract each XML tag
             for tag in &[
-                "TRADING_DAY", "PRODUCT_ID", "INSTRUMENT_ID", "INSTRUMENT_MONTH",
-                "BASIS_PRICE", "OPEN_DATE", "END_TRADING_DAY", "UPPER_VALUE",
-                "LOWER_VALUE", "UPPERLIMITPRICE", "LOWERLIMITPRICE", "LONG_LIMIT",
+                "TRADING_DAY",
+                "PRODUCT_ID",
+                "INSTRUMENT_ID",
+                "INSTRUMENT_MONTH",
+                "BASIS_PRICE",
+                "OPEN_DATE",
+                "END_TRADING_DAY",
+                "UPPER_VALUE",
+                "LOWER_VALUE",
+                "UPPERLIMITPRICE",
+                "LOWERLIMITPRICE",
+                "LONG_LIMIT",
             ] {
                 let open_tag = format!("<{}>", tag);
                 let close_tag = format!("</{}>", tag);
@@ -83,7 +89,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Host", "www.czce.com.cn")
             .send()
@@ -100,14 +106,46 @@ impl AkShareClient {
             let mut r = Row::new();
             // Extract each XML tag
             for tag in &[
-                "Name", "CtrCd", "PrdCd", "PrdTp", "ExchCd", "SegTp", "TrdHrs",
-                "TrdCtyCd", "TrdCcyCd", "ClrngCcyCd", "ExpiryTime", "SettleTp",
-                "Duration", "TckSz", "TckVal", "CtrSz", "MsrmntUnt", "MaxOrdSz",
-                "MnthPosLmt", "MinBlckTrdSz", "CesrEaaFl", "FlexElgblFl", "ListCy",
-                "DlvryNtcDt", "FrstTrdDt", "LstTrdDt", "DlvrySettleDt", "MnthCd",
-                "YrCd", "LstDlvryDt", "LstDlvryDtBoard", "DlvryMnth", "Margin",
-                "PxLim", "FeeCcy", "TrdFee", "FeeCollectionType", "DlvryFee",
-                "IntraDayTrdFee", "TradingLimit",
+                "Name",
+                "CtrCd",
+                "PrdCd",
+                "PrdTp",
+                "ExchCd",
+                "SegTp",
+                "TrdHrs",
+                "TrdCtyCd",
+                "TrdCcyCd",
+                "ClrngCcyCd",
+                "ExpiryTime",
+                "SettleTp",
+                "Duration",
+                "TckSz",
+                "TckVal",
+                "CtrSz",
+                "MsrmntUnt",
+                "MaxOrdSz",
+                "MnthPosLmt",
+                "MinBlckTrdSz",
+                "CesrEaaFl",
+                "FlexElgblFl",
+                "ListCy",
+                "DlvryNtcDt",
+                "FrstTrdDt",
+                "LstTrdDt",
+                "DlvrySettleDt",
+                "MnthCd",
+                "YrCd",
+                "LstDlvryDt",
+                "LstDlvryDtBoard",
+                "DlvryMnth",
+                "Margin",
+                "PxLim",
+                "FeeCcy",
+                "TrdFee",
+                "FeeCollectionType",
+                "DlvryFee",
+                "IntraDayTrdFee",
+                "TradingLimit",
             ] {
                 let open_tag = format!("<{}>", tag);
                 let close_tag = format!("</{}>", tag);
@@ -135,27 +173,56 @@ impl AkShareClient {
             "varietyId": "all",
         });
 
-        let body = self
-                        .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.post(url).json(&payload).send().await?.text().await?;
 
         let data: serde_json::Value = serde_json::from_str(&body)?;
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for mut row in rows {
             let mut r = Row::new();
-            r.insert("variety".into(), row["variety"].clone());
-            r.insert("contract_id".into(), row["contractId"].clone());
-            r.insert("unit".into(), row["unit"].clone());
-            r.insert("tick".into(), row["tick"].clone());
-            r.insert("start_trade_date".into(), row["startTradeDate"].clone());
-            r.insert("end_trade_date".into(), row["endTradeDate"].clone());
-            r.insert("end_delivery_date".into(), row["endDeliveryDate"].clone());
+            r.insert(
+                "variety".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("variety"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "contract_id".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("contractId"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "unit".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("unit"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "tick".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("tick"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "start_trade_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("startTradeDate"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "end_trade_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("endTradeDate"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "end_delivery_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("endDeliveryDate"))
+                    .unwrap_or_default(),
+            );
             items.push(r);
         }
         Ok(items)
@@ -165,7 +232,7 @@ impl AkShareClient {
     pub async fn futures_contract_info_gfex(&self) -> Result<Vec<Row>> {
         let url = "http://www.gfex.com.cn/u/interfacesWebTtQueryContractInfo/loadList";
         let body = self
-                        .post(url)
+            .post(url)
             .query(&[("variety", ""), ("trade_type", "0")])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -177,15 +244,50 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for mut row in rows {
             let mut r = Row::new();
-            r.insert("variety".into(), row["variety"].clone());
-            r.insert("contract_id".into(), row["contractId"].clone());
-            r.insert("unit".into(), row["unit"].clone());
-            r.insert("tick".into(), row["tick"].clone());
-            r.insert("start_trade_date".into(), row["startTradeDate"].clone());
-            r.insert("end_trade_date".into(), row["endTradeDate"].clone());
-            r.insert("end_delivery_date".into(), row["endDeliveryDate0"].clone());
+            r.insert(
+                "variety".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("variety"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "contract_id".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("contractId"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "unit".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("unit"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "tick".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("tick"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "start_trade_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("startTradeDate"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "end_trade_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("endTradeDate"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "end_delivery_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("endDeliveryDate0"))
+                    .unwrap_or_default(),
+            );
             items.push(r);
         }
         Ok(items)
@@ -198,7 +300,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .query(&[("rnd", "0.8312696798757147")])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -213,15 +315,50 @@ impl AkShareClient {
             .unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for mut row in rows {
             let mut r = Row::new();
-            r.insert("instrument_id".into(), row["INSTRUMENTID"].clone());
-            r.insert("open_date".into(), row["OPENDATE"].clone());
-            r.insert("expire_date".into(), row["EXPIREDATE"].clone());
-            r.insert("start_delivery_date".into(), row["STARTDELIVDATE"].clone());
-            r.insert("end_delivery_date".into(), row["ENDDELIVDATE"].clone());
-            r.insert("basis_price".into(), row["BASISPRICE"].clone());
-            r.insert("trading_day".into(), row["TRADINGDAY"].clone());
+            r.insert(
+                "instrument_id".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("INSTRUMENTID"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "open_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("OPENDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "expire_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("EXPIREDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "start_delivery_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("STARTDELIVDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "end_delivery_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("ENDDELIVDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "basis_price".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("BASISPRICE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "trading_day".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("TRADINGDAY"))
+                    .unwrap_or_default(),
+            );
             items.push(r);
         }
         Ok(items)
@@ -234,7 +371,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -248,15 +385,50 @@ impl AkShareClient {
             .unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for mut row in rows {
             let mut r = Row::new();
-            r.insert("instrument_id".into(), row["INSTRUMENTID"].clone());
-            r.insert("open_date".into(), row["OPENDATE"].clone());
-            r.insert("expire_date".into(), row["EXPIREDATE"].clone());
-            r.insert("start_delivery_date".into(), row["STARTDELIVDATE"].clone());
-            r.insert("end_delivery_date".into(), row["ENDDELIVDATE"].clone());
-            r.insert("basis_price".into(), row["BASISPRICE"].clone());
-            r.insert("trading_day".into(), row["TRADINGDAY"].clone());
+            r.insert(
+                "instrument_id".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("INSTRUMENTID"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "open_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("OPENDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "expire_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("EXPIREDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "start_delivery_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("STARTDELIVDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "end_delivery_date".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("ENDDELIVDATE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "basis_price".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("BASISPRICE"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "trading_day".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("TRADINGDAY"))
+                    .unwrap_or_default(),
+            );
             if let Some(update_date) = data.get("update_date") {
                 r.insert("update_date".into(), update_date.clone());
             }
@@ -287,7 +459,7 @@ impl AkShareClient {
 
         let url = "https://xt.yangzhu.vip/data/getzhujiahitsdata";
         let body = self
-                        .post(url)
+            .post(url)
             .query(&[("ptype", ptype), ("areano", "-1"), ("datetype", "0")])
             .send()
             .await?
@@ -298,7 +470,7 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for row in rows {
             let Some(arr) = row.as_array() else {
                 continue;
             };
@@ -331,7 +503,7 @@ impl AkShareClient {
         };
 
         let body = self
-                        .post(url)
+            .post(url)
             .query(&[("ptype", ptype), ("areano", "-1")])
             .send()
             .await?
@@ -342,7 +514,7 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for row in rows {
             let Some(arr) = row.as_array() else {
                 continue;
             };
@@ -391,7 +563,7 @@ impl AkShareClient {
 
         let url = "https://xt.yangzhu.vip/data/getmapdata";
         let body = self
-                        .post(url)
+            .post(url)
             .query(&[("ptype", ptype), ("areano", "-1")])
             .send()
             .await?
@@ -402,7 +574,7 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &rows {
+        for row in rows {
             let Some(arr) = row.as_array() else {
                 continue;
             };
@@ -497,7 +669,7 @@ impl AkShareClient {
 
             let url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQFuturesData";
             let body = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("page", "1"),
                     ("sort", "position"),
@@ -537,7 +709,7 @@ impl AkShareClient {
     async fn zh_subscribe_exchange_symbol(&self, exchange: &str) -> Result<Vec<Row>> {
         let url = "https://vip.stock.finance.sina.com.cn/quotes_service/view/js/qihuohangqing.js";
         let body = self
-                        .get(url)
+            .get(url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")
             .send()
             .await?
@@ -546,27 +718,28 @@ impl AkShareClient {
 
         let json_str = body
             .find('{')
-            .and_then(|start| body[start..].find('}').map(|end| &body[start..start + end + 1]))
+            .and_then(|start| {
+                body[start..]
+                    .find('}')
+                    .map(|end| &body[start..start + end + 1])
+            })
             .ok_or_else(|| Error::decode("sina exchange symbols: invalid JS response"))?;
 
         let data: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|_| Error::decode("sina exchange symbols: JSON parse error"))?;
 
-        let arr = data[exchange]
-            .as_array()
-            .cloned()
-            .unwrap_or_default();
+        let arr = data[exchange].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for i in 1..arr.len() {
-            let entry = &arr[i];
+        for entry in arr.iter().skip(1) {
             if let Some(arr_entry) = entry.as_array()
-                && arr_entry.len() >= 2 {
-                    let mut r = Row::new();
-                    r.insert("symbol".into(), arr_entry[0].clone());
-                    r.insert("mark".into(), arr_entry[1].clone());
-                    items.push(r);
-                }
+                && arr_entry.len() >= 2
+            {
+                let mut r = Row::new();
+                r.insert("symbol".into(), arr_entry[0].clone());
+                r.insert("mark".into(), arr_entry[1].clone());
+                items.push(r);
+            }
         }
         Ok(items)
     }
@@ -581,18 +754,13 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<Row>> {
         let date = "20210817";
-        let date_formatted = format!(
-            "{}_{}_{}",
-            &date[..4],
-            &date[4..6],
-            &date[6..8]
-        );
+        let date_formatted = format!("{}_{}_{}", &date[..4], &date[4..6], &date[6..8]);
         let url = format!(
             "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_{}{}=/InnerFuturesNewService.getDailyKLine?symbol={}&_={}",
             symbol, date_formatted, symbol, date_formatted
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://finance.sina.com.cn")
             .send()
             .await?
@@ -601,7 +769,11 @@ impl AkShareClient {
 
         let json_str = body
             .find("[[")
-            .and_then(|start| body[start..].rfind("]]").map(|end| &body[start..start + end + 2]))
+            .and_then(|start| {
+                body[start..]
+                    .rfind("]]")
+                    .map(|end| &body[start..start + end + 2])
+            })
             .ok_or_else(|| Error::decode("sina main derivative: invalid JSONP response"))?;
 
         let rows: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str)
@@ -609,20 +781,21 @@ impl AkShareClient {
 
         let start_dt = chrono::NaiveDate::parse_from_str(start_date, "%Y%m%d")
             .unwrap_or(chrono::NaiveDate::MIN);
-        let end_dt = chrono::NaiveDate::parse_from_str(end_date, "%Y%m%d")
-            .unwrap_or(chrono::NaiveDate::MAX);
+        let end_dt =
+            chrono::NaiveDate::parse_from_str(end_date, "%Y%m%d").unwrap_or(chrono::NaiveDate::MAX);
 
         let mut items = Vec::new();
-        for row in &rows {
+        for row in rows {
             if row.len() < 8 {
                 continue;
             }
             let date_str = row[0].as_str().unwrap_or("");
             let dt = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d");
             if let Ok(dt) = dt
-                && (dt < start_dt || dt > end_dt) {
-                    continue;
-                }
+                && (dt < start_dt || dt > end_dt)
+            {
+                continue;
+            }
             let mut r = Row::new();
             r.insert("date".into(), row[0].clone());
             r.insert("open".into(), row[1].clone());
@@ -646,7 +819,10 @@ impl AkShareClient {
         r.insert("symbol".into(), serde_json::json!(symbol));
         r.insert("indicator".into(), serde_json::json!(indicator));
         r.insert("source".into(), serde_json::json!("100ppi.com"));
-        r.insert("note".into(), serde_json::json!("requires HTML scraping from 100ppi.com"));
+        r.insert(
+            "note".into(),
+            serde_json::json!("requires HTML scraping from 100ppi.com"),
+        );
         items.push(r);
         Ok(items)
     }

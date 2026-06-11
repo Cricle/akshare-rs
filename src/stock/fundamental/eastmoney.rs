@@ -36,6 +36,7 @@ struct SingleEnvelope {
 // Generic helpers
 // ---------------------------------------------------------------------------
 
+#[allow(clippy::too_many_arguments)]
 /// Fetch a single page from the Eastmoney web datacenter API.
 async fn fetch_datacenter_page(
     http: &reqwest::Client,
@@ -123,6 +124,7 @@ async fn fetch_datacenter_all(
     Ok(all)
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Fetch a single page from the Eastmoney securities API (used for HK/US financials).
 async fn fetch_securities_page(
     http: &reqwest::Client,
@@ -322,12 +324,20 @@ impl AkShareClient {
             "资产负债表" => "RPT_HKF10_FN_BALANCE_PC",
             "利润表" => "RPT_HKF10_FN_INCOME_PC",
             "现金流量表" => "RPT_HKF10_FN_CASHFLOW_PC",
-            _ => return Err(Error::invalid_input(format!("unsupported symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported symbol: {symbol}"
+                )));
+            }
         };
 
         let cols = match symbol {
-            "资产负债表" => "SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,ORG_CODE,REPORT_DATE,DATE_TYPE_CODE,FISCAL_YEAR,STD_ITEM_CODE,STD_ITEM_NAME,AMOUNT,STD_REPORT_DATE",
-            _ => "SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,ORG_CODE,REPORT_DATE,DATE_TYPE_CODE,FISCAL_YEAR,START_DATE,STD_ITEM_CODE,STD_ITEM_NAME,AMOUNT",
+            "资产负债表" => {
+                "SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,ORG_CODE,REPORT_DATE,DATE_TYPE_CODE,FISCAL_YEAR,STD_ITEM_CODE,STD_ITEM_NAME,AMOUNT,STD_REPORT_DATE"
+            }
+            _ => {
+                "SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,ORG_CODE,REPORT_DATE,DATE_TYPE_CODE,FISCAL_YEAR,START_DATE,STD_ITEM_CODE,STD_ITEM_NAME,AMOUNT"
+            }
         };
 
         let filter = format!(r#"(SECUCODE="{stock}.HK")(REPORT_DATE in ({years_joined}))"#);
@@ -434,7 +444,11 @@ impl AkShareClient {
             "资产负债表" => "RPT_USF10_FN_BALANCE",
             "综合损益表" => "RPT_USF10_FN_INCOME",
             "现金流量表" => "RPT_USSK_FN_CASHFLOW",
-            _ => return Err(Error::invalid_input(format!("unsupported symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported symbol: {symbol}"
+                )));
+            }
         };
 
         let reports = fetch_securities_page(
@@ -449,7 +463,11 @@ impl AkShareClient {
         // Extract unique REPORT values
         let report_set: std::collections::HashSet<String> = reports
             .iter()
-            .filter_map(|r| r.get("REPORT").and_then(|v| v.as_str()).map(|s| s.to_string()))
+            .filter_map(|r| {
+                r.get("REPORT")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string())
+            })
             .collect();
 
         // Filter by indicator type
@@ -471,7 +489,7 @@ impl AkShareClient {
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported indicator: {indicator}"
-                )))
+                )));
             }
         };
 
@@ -539,11 +557,13 @@ impl AkShareClient {
             "单季报" => {
                 format!(r#"(SECUCODE="{secucode}")(DATE_TYPE_CODE in ("003","006","007","008"))"#)
             }
-            "累计季报" => format!(r#"(SECUCODE="{secucode}")(DATE_TYPE_CODE in ("002","004"))"#),
+            "累计季报" => {
+                format!(r#"(SECUCODE="{secucode}")(DATE_TYPE_CODE in ("002","004"))"#)
+            }
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported indicator: {indicator}"
-                )))
+                )));
             }
         };
 
@@ -552,7 +572,10 @@ impl AkShareClient {
             report_name,
             columns,
             &filter,
-            1, 0, "REPORT_DATE", "-1",
+            1,
+            0,
+            "REPORT_DATE",
+            "-1",
         )
         .await?;
 
@@ -592,7 +615,11 @@ impl AkShareClient {
             "北交所" => r#"(PREDICT_LISTING_MARKET="北交所")"#,
             "沪主板" => r#"(PREDICT_LISTING_MARKET="沪主板")"#,
             "深主板" => r#"(PREDICT_LISTING_MARKET="深主板")"#,
-            _ => return Err(Error::invalid_input(format!("unsupported market: {market}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported market: {market}"
+                )));
+            }
         };
 
         let data = fetch_datacenter_all(
@@ -666,7 +693,7 @@ impl AkShareClient {
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported market: {market}"
-                )))
+                )));
             }
         };
 
@@ -676,16 +703,10 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let ed = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
-        let filter = format!(
-            r#"(INDEX_CODE="{index_code}")(FREE_DATE>='{sd}')(FREE_DATE<='{ed}')"#
-        );
+        let filter =
+            format!(r#"(INDEX_CODE="{index_code}")(FREE_DATE>='{sd}')(FREE_DATE<='{ed}')"#);
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_LIFTDAY_STA",
@@ -723,12 +744,7 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let ed = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
         let filter = format!(r#"(FREE_DATE>='{sd}')(FREE_DATE<='{ed}')"#);
         let data = fetch_datacenter_all(
@@ -821,9 +837,7 @@ impl AkShareClient {
     // -----------------------------------------------------------------------
 
     /// Eastmoney IPO declaration (first-time filing) information.
-    pub async fn stock_ipo_declare_em(
-        &self,
-    ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo_declare_em(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_IPO_DECORGNEWEST",
@@ -848,9 +862,7 @@ impl AkShareClient {
     }
 
     /// Eastmoney IPO review (listing committee) information.
-    pub async fn stock_ipo_review_em(
-        &self,
-    ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo_review_em(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_IPO_REVIEW",
@@ -875,9 +887,7 @@ impl AkShareClient {
     }
 
     /// Eastmoney IPO tutor (coaching/filing) information.
-    pub async fn stock_ipo_tutor_em(
-        &self,
-    ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo_tutor_em(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_IPO_TUTRECORD",
@@ -986,7 +996,7 @@ impl AkShareClient {
         symbol: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let resp = self
-                        .get("https://emweb.securities.eastmoney.com/PC_HSF10/BusinessAnalysis/PageAjax")
+            .get("https://emweb.securities.eastmoney.com/PC_HSF10/BusinessAnalysis/PageAjax")
             .query(&[("code", symbol)])
             .send()
             .await?
@@ -1066,10 +1076,7 @@ impl AkShareClient {
         .into_iter()
         .collect();
 
-        let f_node = report_map
-            .get(report_type)
-            .copied()
-            .unwrap_or("0");
+        let f_node = report_map.get(report_type).copied().unwrap_or("0");
 
         let mut all_items = Vec::new();
         let mut page = 1u64;
@@ -1105,7 +1112,7 @@ impl AkShareClient {
             }
 
             let resp = self
-                                .get("https://np-anotice-stock.eastmoney.com/api/security/ann")
+                .get("https://np-anotice-stock.eastmoney.com/api/security/ann")
                 .query(&params)
                 .send()
                 .await?
@@ -1149,9 +1156,11 @@ impl AkShareClient {
                         String::new()
                     };
 
-                    let mut row: HashMap<String, serde_json::Value> =
-                        map.into_iter().collect();
-                    row.insert("stock_code".to_string(), serde_json::Value::String(stock_code));
+                    let mut row: HashMap<String, serde_json::Value> = map.into_iter().collect();
+                    row.insert(
+                        "stock_code".to_string(),
+                        serde_json::Value::String(stock_code),
+                    );
                     row.insert(
                         "column_name".to_string(),
                         serde_json::Value::String(column_name),

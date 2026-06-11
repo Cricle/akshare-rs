@@ -12,11 +12,19 @@ impl AkShareClient {
         let response = self
             .get("https://fund.eastmoney.com/Data/funddataIndex_Interface.aspx")
             .query(&[
-                ("dt", "9"), ("page", "1"), ("rank", "FSRQ"), ("sort", "desc"),
-                ("gs", ""), ("ftype", ""), ("year", year),
+                ("dt", "9"),
+                ("page", "1"),
+                ("rank", "FSRQ"),
+                ("sort", "desc"),
+                ("gs", ""),
+                ("ftype", ""),
+                ("year", year),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         // Parse JS response: [[...],[...]]
@@ -32,7 +40,9 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for (i, row) in data.iter().enumerate() {
-            if row.len() < 6 { continue; }
+            if row.len() < 6 {
+                continue;
+            }
             result.push(FundSplitItem {
                 rank: (i + 1) as i32,
                 fund_code: row[0].as_str().unwrap_or("").to_string(),

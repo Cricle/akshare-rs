@@ -105,24 +105,24 @@ async fn test_option_premium_analysis_em() {
     let server = MockServer::start().await;
     // The clist API returns diff as arrays of values
     let row = vec![
-        serde_json::json!(null), // 0
-        serde_json::json!(null), // 1
-        serde_json::json!(0.05), // 2: latest_price
-        serde_json::json!(1.5),  // 3: change_pct
-        serde_json::json!(null), // 4
-        serde_json::json!(null), // 5
-        serde_json::json!(null), // 6
-        serde_json::json!(2.5),  // 7: exercise_price
-        serde_json::json!(5.0),  // 8: premium_rate
-        serde_json::json!("2024-01-24"), // 9: expiry_date
-        serde_json::json!(null), // 10
-        serde_json::json!(null), // 11
-        serde_json::json!("10005765"), // 12: option_code
-        serde_json::json!("50ETF"),    // 13: underlying_name
+        serde_json::json!(null),             // 0
+        serde_json::json!(null),             // 1
+        serde_json::json!(0.05),             // 2: latest_price
+        serde_json::json!(1.5),              // 3: change_pct
+        serde_json::json!(null),             // 4
+        serde_json::json!(null),             // 5
+        serde_json::json!(null),             // 6
+        serde_json::json!(2.5),              // 7: exercise_price
+        serde_json::json!(5.0),              // 8: premium_rate
+        serde_json::json!("2024-01-24"),     // 9: expiry_date
+        serde_json::json!(null),             // 10
+        serde_json::json!(null),             // 11
+        serde_json::json!("10005765"),       // 12: option_code
+        serde_json::json!("50ETF"),          // 13: underlying_name
         serde_json::json!("50ETF购1月2500"), // 14: option_name
-        serde_json::json!(2.50), // 15: underlying_price
-        serde_json::json!(0.5),  // 16: underlying_change_pct
-        serde_json::json!(2.55), // 17: breakeven_price
+        serde_json::json!(2.50),             // 15: underlying_price
+        serde_json::json!(0.5),              // 16: underlying_change_pct
+        serde_json::json!(2.55),             // 17: breakeven_price
     ];
     let body = serde_json::json!({
         "rc": 0,
@@ -144,25 +144,25 @@ async fn test_option_premium_analysis_em() {
 async fn test_option_value_analysis_em() {
     let server = MockServer::start().await;
     let row = vec![
-        serde_json::json!(null), // 0
-        serde_json::json!(null), // 1
-        serde_json::json!(0.05), // 2: latest_price
-        serde_json::json!(null), // 3
-        serde_json::json!(null), // 4
-        serde_json::json!(null), // 5
-        serde_json::json!(null), // 6
-        serde_json::json!(0.25), // 7: implied_volatility
-        serde_json::json!(0.02), // 8: time_value
-        serde_json::json!(0.03), // 9: intrinsic_value
-        serde_json::json!(0.048), // 10: theoretical_price
-        serde_json::json!("2024-01-24"), // 11: expiry_date
-        serde_json::json!("10005765"),   // 12: option_code
-        serde_json::json!("50ETF"),      // 13: underlying_name
+        serde_json::json!(null),             // 0
+        serde_json::json!(null),             // 1
+        serde_json::json!(0.05),             // 2: latest_price
+        serde_json::json!(null),             // 3
+        serde_json::json!(null),             // 4
+        serde_json::json!(null),             // 5
+        serde_json::json!(null),             // 6
+        serde_json::json!(0.25),             // 7: implied_volatility
+        serde_json::json!(0.02),             // 8: time_value
+        serde_json::json!(0.03),             // 9: intrinsic_value
+        serde_json::json!(0.048),            // 10: theoretical_price
+        serde_json::json!("2024-01-24"),     // 11: expiry_date
+        serde_json::json!("10005765"),       // 12: option_code
+        serde_json::json!("50ETF"),          // 13: underlying_name
         serde_json::json!("50ETF购1月2500"), // 14: option_name
-        serde_json::json!(null), // 15
-        serde_json::json!(2.50), // 16: underlying_price
-        serde_json::json!(null), // 17
-        serde_json::json!(0.20), // 18: underlying_volatility
+        serde_json::json!(null),             // 15
+        serde_json::json!(2.50),             // 16: underlying_price
+        serde_json::json!(null),             // 17
+        serde_json::json!(0.20),             // 18: underlying_volatility
     ];
     let body = serde_json::json!({
         "rc": 0,
@@ -181,22 +181,22 @@ async fn test_option_value_analysis_em() {
 async fn test_option_risk_analysis_em() {
     let server = MockServer::start().await;
     let row = vec![
-        serde_json::json!(null), // 0
-        serde_json::json!(null), // 1
-        serde_json::json!(0.05), // 2: latest_price
-        serde_json::json!(1.5),  // 3: change_pct
-        serde_json::json!(null), // 4
-        serde_json::json!(null), // 5
-        serde_json::json!(null), // 6
-        serde_json::json!(null), // 7
+        serde_json::json!(null),         // 0
+        serde_json::json!(null),         // 1
+        serde_json::json!(0.05),         // 2: latest_price
+        serde_json::json!(1.5),          // 3: change_pct
+        serde_json::json!(null),         // 4
+        serde_json::json!(null),         // 5
+        serde_json::json!(null),         // 6
+        serde_json::json!(null),         // 7
         serde_json::json!("2024-01-24"), // 8: expiry_date
-        serde_json::json!(20.0), // 9: leverage_ratio
-        serde_json::json!(15.0), // 10: effective_leverage
-        serde_json::json!(0.5),  // 11: delta
-        serde_json::json!(0.01), // 12: gamma
-        serde_json::json!(0.02), // 13: vega
-        serde_json::json!(0.001), // 14: rho
-        serde_json::json!(-0.01), // 15: theta
+        serde_json::json!(20.0),         // 9: leverage_ratio
+        serde_json::json!(15.0),         // 10: effective_leverage
+        serde_json::json!(0.5),          // 11: delta
+        serde_json::json!(0.01),         // 12: gamma
+        serde_json::json!(0.02),         // 13: vega
+        serde_json::json!(0.001),        // 14: rho
+        serde_json::json!(-0.01),        // 15: theta
     ];
     let body = serde_json::json!({
         "rc": 0,
@@ -247,7 +247,9 @@ async fn test_option_sse_expire_day_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_expire_day_sina("202401", "50ETF", "SSE").await;
+    let result = client
+        .option_sse_expire_day_sina("202401", "50ETF", "SSE")
+        .await;
     assert!(result.is_ok());
     let (date, days) = result.unwrap();
     assert_eq!(date, "2024-01-24");
@@ -260,7 +262,9 @@ async fn test_option_sse_codes_sina() {
     let body = "var hq_str_OP_UP_51005003=\"CON_OP_10003720,CON_OP_10003721\"";
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_codes_sina("看涨期权", "202401", "510050").await;
+    let result = client
+        .option_sse_codes_sina("看涨期权", "202401", "510050")
+        .await;
     assert!(result.is_ok());
     let codes = result.unwrap();
     assert_eq!(codes.len(), 2);
@@ -288,7 +292,9 @@ async fn test_option_sse_underlying_spot_price_sina() {
     let body = format!("var hq_str_sh510050=\"{}\"", values.join(","));
     mock_any_get_text(&server, ".*", &body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_underlying_spot_price_sina("sh510050").await;
+    let result = client
+        .option_sse_underlying_spot_price_sina("sh510050")
+        .await;
     assert!(result.is_ok());
     let pairs = result.unwrap();
     assert_eq!(pairs.len(), 33);
@@ -710,7 +716,9 @@ async fn test_option_commodity_contract_table_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_commodity_contract_table_sina("豆粕期权", "m2405").await;
+    let result = client
+        .option_commodity_contract_table_sina("豆粕期权", "m2405")
+        .await;
     let _ = result; // Sina commodity format may differ from mock
 }
 
@@ -878,7 +886,9 @@ async fn test_option_finance_board_sse() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_finance_board("华夏上证50ETF期权", "2401").await;
+    let result = client
+        .option_finance_board("华夏上证50ETF期权", "2401")
+        .await;
     let _ = result; // SSE board format may differ from mock
 }
 
@@ -905,7 +915,9 @@ async fn test_option_finance_sse_underlying() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_finance_sse_underlying("华夏上证50ETF期权").await;
+    let result = client
+        .option_finance_sse_underlying("华夏上证50ETF期权")
+        .await;
     let _ = result; // SSE underlying format may differ from mock
 }
 
@@ -929,7 +941,34 @@ async fn test_option_lhb_em() {
     let mut data = Vec::new();
     for _ in 0..28 {
         data.push(serde_json::json!([
-            "期权交易", "2024-01-02", "510050", "50ETF", null, "某券商", 1, 1000.0, 500.0, 200.0, 100.0, 50.0, 300.0, 150.0, 100.0, 50.0, 25.0, 800.0, 400.0, 200.0, 100.0, 50.0, 25.0, 12.5, 600.0, 300.0, 150.0, 75.0
+            "期权交易",
+            "2024-01-02",
+            "510050",
+            "50ETF",
+            null,
+            "某券商",
+            1,
+            1000.0,
+            500.0,
+            200.0,
+            100.0,
+            50.0,
+            300.0,
+            150.0,
+            100.0,
+            50.0,
+            25.0,
+            800.0,
+            400.0,
+            200.0,
+            100.0,
+            50.0,
+            25.0,
+            12.5,
+            600.0,
+            300.0,
+            150.0,
+            75.0
         ]));
     }
     let body = serde_json::json!({
@@ -937,11 +976,9 @@ async fn test_option_lhb_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_lhb_em(
-        "510050",
-        "期权交易情况-认沽交易量",
-        "20240102",
-    ).await;
+    let result = client
+        .option_lhb_em("510050", "期权交易情况-认沽交易量", "20240102")
+        .await;
     let _ = result; // LHB EM array format may differ from mock
 }
 
@@ -961,7 +998,7 @@ async fn test_option_margin_symbol() {
     let result = client.option_margin_symbol().await;
     assert!(result.is_ok());
     let symbols = result.unwrap();
-    assert!(symbols.len() >= 1);
+    assert!(!symbols.is_empty());
 }
 
 #[tokio::test]
@@ -1038,7 +1075,7 @@ async fn test_option_comm_symbol() {
     let result = client.option_comm_symbol().await;
     assert!(result.is_ok());
     let symbols = result.unwrap();
-    assert!(symbols.len() >= 1);
+    assert!(!symbols.is_empty());
 }
 
 #[tokio::test]
@@ -1200,7 +1237,9 @@ async fn test_option_commodity_contract_table_sina_invalid() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
-    let result = client.option_commodity_contract_table_sina("invalid_symbol", "xxx").await;
+    let result = client
+        .option_commodity_contract_table_sina("invalid_symbol", "xxx")
+        .await;
     assert!(result.is_err());
 }
 
@@ -1229,6 +1268,8 @@ async fn test_option_lhb_em_invalid_indicator() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_lhb_em("510050", "invalid_indicator", "20240102").await;
+    let result = client
+        .option_lhb_em("510050", "invalid_indicator", "20240102")
+        .await;
     assert!(result.is_err());
 }

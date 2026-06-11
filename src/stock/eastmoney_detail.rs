@@ -219,7 +219,7 @@ impl AkShareClient {
     pub async fn stock_bid_ask_em(&self, symbol: &str) -> Result<BidAskData> {
         let secid = crate::market::eastmoney_secid(symbol)?;
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/stock/get")
+            .get("https://push2.eastmoney.com/api/qt/stock/get")
             .query(&[
                 ("fltt", "2"),
                 ("invt", "2"),
@@ -245,7 +245,11 @@ impl AkShareClient {
 
         Ok(BidAskData {
             symbol: symbol.to_string(),
-            name: data.get("f58").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+            name: data
+                .get("f58")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string(),
             latest: data.get("f43").and_then(|v| v.as_f64()),
             avg_price: data.get("f71").and_then(|v| v.as_f64()),
             change_pct: data.get("f170").and_then(|v| v.as_f64()),
@@ -291,7 +295,7 @@ impl AkShareClient {
     pub async fn stock_intraday_em(&self, symbol: &str) -> Result<Vec<IntradayTick>> {
         let secid = crate::market::eastmoney_secid(symbol)?;
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/stock/details/sse")
+            .get("https://push2.eastmoney.com/api/qt/stock/details/sse")
             .query(&[
                 ("fields1", "f1,f2,f3,f4"),
                 ("fields2", "f51,f52,f53,f54,f55"),
@@ -321,7 +325,11 @@ impl AkShareClient {
                 continue;
             }
             if let Ok(val) = serde_json::from_str::<serde_json::Value>(json_str) {
-                if let Some(details) = val.get("data").and_then(|d| d.get("details")).and_then(|d| d.as_array()) {
+                if let Some(details) = val
+                    .get("data")
+                    .and_then(|d| d.get("details"))
+                    .and_then(|d| d.as_array())
+                {
                     for detail in details {
                         if let Some(s) = detail.as_str() {
                             let parts: Vec<&str> = s.split(',').collect();
@@ -353,14 +361,11 @@ impl AkShareClient {
     pub async fn stock_individual_info_em(&self, symbol: &str) -> Result<Vec<StockInfoItem>> {
         let secid = crate::market::eastmoney_secid(symbol)?;
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/stock/get")
+            .get("https://push2.eastmoney.com/api/qt/stock/get")
             .query(&[
                 ("fltt", "2"),
                 ("invt", "2"),
-                (
-                    "fields",
-                    "f57,f58,f84,f85,f127,f116,f117,f189,f43",
-                ),
+                ("fields", "f57,f58,f84,f85,f127,f116,f117,f189,f43"),
                 ("secid", secid.as_str()),
             ])
             .send()
@@ -386,12 +391,13 @@ impl AkShareClient {
         let mut items = Vec::new();
         for (key, label) in &code_name_map {
             if let Some(val) = payload.get(key)
-                && !val.is_null() {
-                    items.push(StockInfoItem {
-                        item: label.to_string(),
-                        value: val.clone(),
-                    });
-                }
+                && !val.is_null()
+            {
+                items.push(StockInfoItem {
+                    item: label.to_string(),
+                    value: val.clone(),
+                });
+            }
         }
 
         Ok(items)
@@ -412,10 +418,7 @@ impl AkShareClient {
     /// Get HK company profile from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_company_profile_em(symbol)`
-    pub async fn stock_hk_company_profile_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HkCompanyProfile>> {
+    pub async fn stock_hk_company_profile_em(&self, symbol: &str) -> Result<Vec<HkCompanyProfile>> {
         let filter = format!("(SECUCODE=\"{symbol}.HK\")");
         self.fetch_hk_profile("RPT_HKF10_INFO_COMPANYINFO", &filter)
             .await
@@ -428,7 +431,7 @@ impl AkShareClient {
         T: for<'de> Deserialize<'de>,
     {
         let response = self
-                        .get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
+            .get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
             .query(&[
                 ("reportName", report_name),
                 ("columns", "ALL"),
@@ -447,11 +450,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: DatacenterProfileEnvelope<T> =
-            response.json().await.map_err(Error::from)?;
-        Ok(payload
-            .result
-            .and_then(|r| r.data)
-            .unwrap_or_default())
+        let payload: DatacenterProfileEnvelope<T> = response.json().await.map_err(Error::from)?;
+        Ok(payload.result.and_then(|r| r.data).unwrap_or_default())
     }
 }

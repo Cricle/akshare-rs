@@ -4,8 +4,8 @@
 use serde::Deserialize;
 
 use crate::client::AkShareClient;
-use crate::types::FundSnapshot;
 use crate::error::{Error, Result};
+use crate::types::FundSnapshot;
 
 /// Wire type for fund search data (var r = [...] pattern).
 #[derive(Debug, Deserialize)]
@@ -101,15 +101,26 @@ impl AkShareClient {
         limit: usize,
     ) -> Result<Vec<FundSnapshot>> {
         let symbol_map: &[(&str, &str)] = &[
-            ("全部", ""), ("沪深指数", "053"), ("行业主题", "054"),
-            ("大盘指数", "01"), ("中盘指数", "02"), ("小盘指数", "03"),
+            ("全部", ""),
+            ("沪深指数", "053"),
+            ("行业主题", "054"),
+            ("大盘指数", "01"),
+            ("中盘指数", "02"),
+            ("小盘指数", "03"),
         ];
-        let indicator_map: &[(&str, &str)] = &[
-            ("全部", ""), ("被动指数型", "051"), ("增强指数型", "052"),
-        ];
+        let indicator_map: &[(&str, &str)] =
+            &[("全部", ""), ("被动指数型", "051"), ("增强指数型", "052")];
 
-        let s_code = symbol_map.iter().find(|(n, _)| *n == symbol).map(|(_, c)| *c).unwrap_or("");
-        let i_code = indicator_map.iter().find(|(n, _)| *n == indicator).map(|(_, c)| *c).unwrap_or("");
+        let s_code = symbol_map
+            .iter()
+            .find(|(n, _)| *n == symbol)
+            .map(|(_, c)| *c)
+            .unwrap_or("");
+        let i_code = indicator_map
+            .iter()
+            .find(|(n, _)| *n == indicator)
+            .map(|(_, c)| *c)
+            .unwrap_or("");
 
         let pn = limit.max(1).to_string();
         let resp = self
@@ -160,7 +171,9 @@ impl AkShareClient {
             .take(limit)
             .filter_map(|item| {
                 let arr = item.as_array()?;
-                if arr.len() < 5 { return None; }
+                if arr.len() < 5 {
+                    return None;
+                }
                 Some(FundSnapshot {
                     symbol: arr[0].as_str().unwrap_or("").to_string(),
                     name: arr[1].as_str().unwrap_or("").to_string(),

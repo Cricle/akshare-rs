@@ -110,7 +110,7 @@ impl AkShareClient {
 
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_IMP_INTRESTRATEN"),
                 ("columns", "REPORT_DATE,REPORT_PERIOD,IR_RATE,CHANGE_RATE"),
@@ -139,10 +139,7 @@ impl AkShareClient {
             if date.is_empty() {
                 continue;
             }
-            let rate = v
-                .get("IR_RATE")
-                .and_then(|x| x.as_f64())
-                .unwrap_or(0.0);
+            let rate = v.get("IR_RATE").and_then(|x| x.as_f64()).unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value: rate,

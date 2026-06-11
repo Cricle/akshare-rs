@@ -73,7 +73,7 @@ impl AkShareClient {
         let per_code = resolve_code(PERIOD_MAP, period)?;
 
         let resp: serde_json::Value = self
-                        .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQueryResult")
+            .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQueryResult")
             .query(&[
                 ("indexid", "8a8b2ca0332abed20134ea76d8885831"),
                 ("qxlxt", per_code.as_str()),
@@ -126,7 +126,7 @@ impl AkShareClient {
         let ind_code = resolve_code(INDICATOR_MAP, indicator)?;
 
         let resp: serde_json::Value = self
-                        .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQueryResult")
+            .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQueryResult")
             .query(&[
                 ("indexid", index_id),
                 ("qxlxt", "00"),
@@ -156,7 +156,7 @@ impl AkShareClient {
         let per_code = resolve_code(PERIOD_MAP, period)?;
 
         let resp: serde_json::Value = self
-                        .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQuery")
+            .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQuery")
             .query(&[
                 ("indexid", "8a8b2ca0332abed20134ea76d8885831"),
                 ("qxlxt", per_code.as_str()),
@@ -181,7 +181,7 @@ impl AkShareClient {
     pub async fn bond_available_index_cbond(&self) -> Result<Vec<Row>> {
         let url = "https://yield.chinabond.com.cn/cbweb-mn/indices/queryAllIndices";
         let resp: serde_json::Value = self
-                        .post(url)
+            .post(url)
             .query(&[("locale", "zh_CN")])
             .send()
             .await?
@@ -228,7 +228,7 @@ impl AkShareClient {
         let per_code = resolve_code(PERIOD_MAP, period)?;
 
         let resp: serde_json::Value = self
-                        .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQuery")
+            .post("https://yield.chinabond.com.cn/cbweb-mn/indices/singleIndexQuery")
             .query(&[
                 ("indexid", "2c90818811afed8d0111c0c672b31578"),
                 ("qxlxt", per_code.as_str()),

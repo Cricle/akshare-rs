@@ -13,20 +13,24 @@ impl AkShareClient {
     ///
     /// Fetches all international futures contracts (COMEX, NYMEX, LME, etc.)
     pub async fn futures_global_spot_em(&self) -> Result<Vec<Row>> {
-        let url = "https://futsseapi.eastmoney.com/list/COMEX,NYMEX,COBOT,SGX,NYBOT,LME,MDEX,TOCOM,IPE";
+        let url =
+            "https://futsseapi.eastmoney.com/list/COMEX,NYMEX,COBOT,SGX,NYBOT,LME,MDEX,TOCOM,IPE";
         let mut all_items = Vec::new();
         let mut page = 0;
 
         loop {
             let body = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("orderBy", "dm"),
                     ("sort", "desc"),
                     ("pageSize", "20"),
                     ("pageIndex", &page.to_string()),
                     ("token", "58b2fa8f54638b60b87d69b31969089c"),
-                    ("field", "dm,sc,name,p,zsjd,zde,zdf,f152,o,h,l,zjsj,vol,wp,np,ccl"),
+                    (
+                        "field",
+                        "dm,sc,name,p,zsjd,zde,zdf,f152,o,h,l,zjsj,vol,wp,np,ccl",
+                    ),
                     ("blockName", "callback"),
                 ])
                 .send()
@@ -71,20 +75,29 @@ impl AkShareClient {
     /// `symbol`: Eastmoney symbol code, e.g., "HG00Y", "CL00Y"
     pub async fn futures_global_hist_em(&self, symbol: &str) -> Result<Vec<GlobalFuturesKline>> {
         // Determine market code from symbol prefix
-        let base: String = symbol.chars().take_while(|c| c.is_ascii_alphabetic()).collect();
+        let base: String = symbol
+            .chars()
+            .take_while(|c| c.is_ascii_alphabetic())
+            .collect();
         let market_code = match base.as_str() {
             "HG" | "GC" | "SI" | "QI" | "QO" | "MGC" | "LTH" => 101,
             "CL" | "NG" | "RB" | "HO" | "PA" | "PL" | "QM" => 102,
-            "ZW" | "ZM" | "ZS" | "ZC" | "XC" | "XK" | "XW" | "YM" | "TY" | "US" | "ES"
-            | "NQ" => 103,
+            "ZW" | "ZM" | "ZS" | "ZC" | "XC" | "XK" | "XW" | "YM" | "TY" | "US" | "ES" | "NQ" => {
+                103
+            }
             "SB" | "CT" | "SF" => 108,
-            _ => return Err(Error::invalid_input(format!("unknown symbol prefix: {}", base))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unknown symbol prefix: {}",
+                    base
+                )));
+            }
         };
 
         let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
         let secid = format!("{}.{}", market_code, symbol);
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("secid", secid.as_str()),
                 ("klt", "101"),
@@ -93,7 +106,10 @@ impl AkShareClient {
                 ("end", "20500000"),
                 ("iscca", "1"),
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+                ),
                 ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
                 ("forcect", "1"),
             ])

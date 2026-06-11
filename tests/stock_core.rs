@@ -277,7 +277,8 @@ fn sample_tx_kline_body() -> serde_json::Value {
 
 /// Tencent tick data response (for stock_zh_a_tick_tx_js).
 fn sample_tx_tick_body() -> String {
-    r#"v_sz000001=["1|09:30:00|10.50|0.15|10000|1050000|B","1|09:31:00|10.51|0.16|8000|840080|S"];"#.to_string()
+    r#"v_sz000001=["1|09:30:00|10.50|0.15|10000|1050000|B","1|09:31:00|10.51|0.16|8000|840080|S"];"#
+        .to_string()
 }
 
 /// Sina intraday tick list response.
@@ -1020,7 +1021,9 @@ async fn test_a_share_trade_calendar_sse() {
     let server = MockServer::start().await;
     mock_any_post(&server, ".*", sample_trade_calendar_body()).await;
     let client = mock_client(&server);
-    let _ = client.a_share_trade_calendar("SSE", "20240101", "20240131").await;
+    let _ = client
+        .a_share_trade_calendar("SSE", "20240101", "20240131")
+        .await;
 }
 
 #[tokio::test]
@@ -1028,7 +1031,9 @@ async fn test_a_share_trade_calendar_szse() {
     let server = MockServer::start().await;
     mock_any_post(&server, ".*", sample_trade_calendar_body()).await;
     let client = mock_client(&server);
-    let _ = client.a_share_trade_calendar("SZSE", "20240101", "20240131").await;
+    let _ = client
+        .a_share_trade_calendar("SZSE", "20240101", "20240131")
+        .await;
 }
 
 // =========================================================================
@@ -1122,7 +1127,9 @@ async fn test_stock_zh_a_daily_qfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_daily("600000", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_a_daily("600000", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1130,7 +1137,9 @@ async fn test_stock_zh_a_daily_hfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_daily("600000", "20240101", "20241231", "hfq").await;
+    let _ = client
+        .stock_zh_a_daily("600000", "20240101", "20241231", "hfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1138,7 +1147,9 @@ async fn test_stock_zh_a_daily_raw() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_daily("600000", "20240101", "20241231", "").await;
+    let _ = client
+        .stock_zh_a_daily("600000", "20240101", "20241231", "")
+        .await;
 }
 
 #[tokio::test]
@@ -1146,7 +1157,9 @@ async fn test_stock_zh_a_daily_sz() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_daily("sz000001", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_a_daily("sz000001", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1219,7 +1232,9 @@ async fn test_stock_zh_a_cdr_daily() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_cdr_daily("688001", "20240101", "20241231").await;
+    let _ = client
+        .stock_zh_a_cdr_daily("688001", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -1227,7 +1242,9 @@ async fn test_stock_zh_a_hist_pre_min_em() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_trends2_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_hist_pre_min_em("600000", "09:00", "09:30").await;
+    let _ = client
+        .stock_zh_a_hist_pre_min_em("600000", "09:00", "09:30")
+        .await;
 }
 
 #[tokio::test]
@@ -1235,7 +1252,9 @@ async fn test_stock_zh_a_hist_tx_raw() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_a_hist_body("sz000001")).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "").await;
+    let _ = client
+        .stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "")
+        .await;
 }
 
 #[tokio::test]
@@ -1243,7 +1262,9 @@ async fn test_stock_zh_a_hist_tx_qfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_a_hist_body("sz000001")).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1251,7 +1272,9 @@ async fn test_stock_zh_a_hist_tx_hfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_a_hist_body("sz000001")).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "hfq").await;
+    let _ = client
+        .stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "hfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1259,7 +1282,9 @@ async fn test_stock_zh_a_hist_tx_sh() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_a_hist_body("sh600000")).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_hist_tx("sh600000", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_a_hist_tx("sh600000", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1296,7 +1321,9 @@ async fn test_stock_zh_b_daily_qfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_b_daily("sh900901", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_b_daily("sh900901", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1304,7 +1331,9 @@ async fn test_stock_zh_b_daily_hfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_b_daily("sh900901", "20240101", "20241231", "hfq").await;
+    let _ = client
+        .stock_zh_b_daily("sh900901", "20240101", "20241231", "hfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1312,7 +1341,9 @@ async fn test_stock_zh_b_daily_raw() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_b_daily("sh900901", "20240101", "20241231", "").await;
+    let _ = client
+        .stock_zh_b_daily("sh900901", "20240101", "20241231", "")
+        .await;
 }
 
 #[tokio::test]
@@ -1320,7 +1351,9 @@ async fn test_stock_zh_b_daily_short_code() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_b_daily("900901", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_b_daily("900901", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1396,7 +1429,9 @@ async fn test_stock_zh_ah_daily_qfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tencent_kline_body("02318")).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_ah_daily("02318", "2024", "2024", "qfq").await;
+    let _ = client
+        .stock_zh_ah_daily("02318", "2024", "2024", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1404,7 +1439,9 @@ async fn test_stock_zh_ah_daily_hfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tencent_kline_body("02318")).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_ah_daily("02318", "2024", "2024", "hfq").await;
+    let _ = client
+        .stock_zh_ah_daily("02318", "2024", "2024", "hfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1440,7 +1477,9 @@ async fn test_stock_zh_index_daily_em_sh() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_index_daily_em("000001", "20240101", "20241231").await;
+    let _ = client
+        .stock_zh_index_daily_em("000001", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -1448,7 +1487,9 @@ async fn test_stock_zh_index_daily_em_sz() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_index_daily_em("399001", "20240101", "20241231").await;
+    let _ = client
+        .stock_zh_index_daily_em("399001", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -1456,7 +1497,9 @@ async fn test_stock_zh_index_daily_tx() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_index_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_index_daily_tx("sh000001", "20240101", "20241231").await;
+    let _ = client
+        .stock_zh_index_daily_tx("sh000001", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -1464,7 +1507,9 @@ async fn test_stock_zh_index_daily_tx_no_prefix() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_index_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_index_daily_tx("000001", "20240101", "20241231").await;
+    let _ = client
+        .stock_zh_index_daily_tx("000001", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -1510,7 +1555,9 @@ async fn test_stock_zh_kcb_daily_qfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_kcb_daily("688399", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_kcb_daily("688399", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1518,7 +1565,9 @@ async fn test_stock_zh_kcb_daily_hfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_kcb_daily("688399", "20240101", "20241231", "hfq").await;
+    let _ = client
+        .stock_zh_kcb_daily("688399", "20240101", "20241231", "hfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1526,7 +1575,9 @@ async fn test_stock_zh_kcb_daily_raw() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_kcb_daily("688399", "20240101", "20241231", "").await;
+    let _ = client
+        .stock_zh_kcb_daily("688399", "20240101", "20241231", "")
+        .await;
 }
 
 #[tokio::test]
@@ -1534,7 +1585,9 @@ async fn test_stock_zh_kcb_daily_with_prefix() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_kcb_daily("sh688399", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_kcb_daily("sh688399", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1581,7 +1634,9 @@ async fn test_stock_intraday_sina_limit_100() {
     mock_any_get_text(&server, ".*", SINA_COUNT_TEXT).await;
     mock_any_get(&server, ".*", sample_sina_tick_list()).await;
     let client = mock_client(&server);
-    let _ = client.stock_intraday_sina("sz000001", "20240321", 100).await;
+    let _ = client
+        .stock_intraday_sina("sz000001", "20240321", 100)
+        .await;
 }
 
 #[tokio::test]
@@ -1647,7 +1702,9 @@ async fn test_stock_hk_daily_qfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_daily("00593", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_hk_daily("00593", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1655,7 +1712,9 @@ async fn test_stock_hk_daily_hfq() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_daily("00593", "20240101", "20241231", "hfq").await;
+    let _ = client
+        .stock_hk_daily("00593", "20240101", "20241231", "hfq")
+        .await;
 }
 
 #[tokio::test]
@@ -1663,7 +1722,9 @@ async fn test_stock_hk_daily_raw() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_daily("00593", "20240101", "20241231", "").await;
+    let _ = client
+        .stock_hk_daily("00593", "20240101", "20241231", "")
+        .await;
 }
 
 #[tokio::test]
@@ -1759,7 +1820,13 @@ async fn test_stock_hk_valuation_baidu() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_valuation_baidu("00593", "\u{5e02}\u{76c8}\u{7387}(TTM)", "\u{8fd1}\u{4e00}\u{5e74}").await;
+    let _ = client
+        .stock_hk_valuation_baidu(
+            "00593",
+            "\u{5e02}\u{76c8}\u{7387}(TTM)",
+            "\u{8fd1}\u{4e00}\u{5e74}",
+        )
+        .await;
 }
 
 #[tokio::test]
@@ -1767,7 +1834,13 @@ async fn test_stock_hk_valuation_baidu_mv() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_valuation_baidu("00593", "\u{603b}\u{5e02}\u{503c}", "\u{8fd1}\u{4e09}\u{5e74}").await;
+    let _ = client
+        .stock_hk_valuation_baidu(
+            "00593",
+            "\u{603b}\u{5e02}\u{503c}",
+            "\u{8fd1}\u{4e09}\u{5e74}",
+        )
+        .await;
 }
 
 #[tokio::test]
@@ -1837,7 +1910,9 @@ async fn test_stock_us_daily_with_prefix() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_daily("105.AAPL", "20240101", "20241231").await;
+    let _ = client
+        .stock_us_daily("105.AAPL", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -1861,7 +1936,9 @@ async fn test_stock_us_famous_spot_em_tech() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_us_famous_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_famous_spot_em("\u{79d1}\u{6280}\u{7c7b}").await;
+    let _ = client
+        .stock_us_famous_spot_em("\u{79d1}\u{6280}\u{7c7b}")
+        .await;
 }
 
 #[tokio::test]
@@ -1869,7 +1946,9 @@ async fn test_stock_us_famous_spot_em_finance() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_us_famous_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_famous_spot_em("\u{91d1}\u{878d}\u{7c7b}").await;
+    let _ = client
+        .stock_us_famous_spot_em("\u{91d1}\u{878d}\u{7c7b}")
+        .await;
 }
 
 #[tokio::test]
@@ -1877,7 +1956,9 @@ async fn test_stock_us_famous_spot_em_pharma() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_us_famous_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_famous_spot_em("\u{533b}\u{836f}\u{98df}\u{54c1}\u{7c7b}").await;
+    let _ = client
+        .stock_us_famous_spot_em("\u{533b}\u{836f}\u{98df}\u{54c1}\u{7c7b}")
+        .await;
 }
 
 #[tokio::test]
@@ -1885,7 +1966,9 @@ async fn test_stock_us_famous_spot_em_media() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_us_famous_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_famous_spot_em("\u{5a92}\u{4f53}\u{7c7b}").await;
+    let _ = client
+        .stock_us_famous_spot_em("\u{5a92}\u{4f53}\u{7c7b}")
+        .await;
 }
 
 #[tokio::test]
@@ -1893,7 +1976,9 @@ async fn test_stock_us_famous_spot_em_auto() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_us_famous_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_famous_spot_em("\u{6c7d}\u{8f66}\u{80fd}\u{6e90}\u{7c7b}").await;
+    let _ = client
+        .stock_us_famous_spot_em("\u{6c7d}\u{8f66}\u{80fd}\u{6e90}\u{7c7b}")
+        .await;
 }
 
 #[tokio::test]
@@ -1901,7 +1986,9 @@ async fn test_stock_us_famous_spot_em_retail() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_us_famous_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_famous_spot_em("\u{5236}\u{9020}\u{96f6}\u{552e}\u{7c7b}").await;
+    let _ = client
+        .stock_us_famous_spot_em("\u{5236}\u{9020}\u{96f6}\u{552e}\u{7c7b}")
+        .await;
 }
 
 #[tokio::test]
@@ -1917,7 +2004,13 @@ async fn test_stock_us_valuation_baidu_mv() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_valuation_baidu("NVDA", "\u{603b}\u{5e02}\u{503c}", "\u{8fd1}\u{4e00}\u{5e74}").await;
+    let _ = client
+        .stock_us_valuation_baidu(
+            "NVDA",
+            "\u{603b}\u{5e02}\u{503c}",
+            "\u{8fd1}\u{4e00}\u{5e74}",
+        )
+        .await;
 }
 
 #[tokio::test]
@@ -1925,7 +2018,13 @@ async fn test_stock_us_valuation_baidu_pe() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_valuation_baidu("AAPL", "\u{5e02}\u{76c8}\u{7387}(TTM)", "\u{8fd1}\u{4e09}\u{5e74}").await;
+    let _ = client
+        .stock_us_valuation_baidu(
+            "AAPL",
+            "\u{5e02}\u{76c8}\u{7387}(TTM)",
+            "\u{8fd1}\u{4e09}\u{5e74}",
+        )
+        .await;
 }
 
 #[tokio::test]
@@ -1933,7 +2032,9 @@ async fn test_stock_us_valuation_baidu_pb() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_valuation_baidu("MSFT", "\u{5e02}\u{51c0}\u{7387}", "\u{5168}\u{90e8}").await;
+    let _ = client
+        .stock_us_valuation_baidu("MSFT", "\u{5e02}\u{51c0}\u{7387}", "\u{5168}\u{90e8}")
+        .await;
 }
 
 // =========================================================================
@@ -1977,7 +2078,13 @@ async fn test_stock_zh_valuation_baidu_mv() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_valuation_baidu("002044", "\u{603b}\u{5e02}\u{503c}", "\u{8fd1}\u{4e00}\u{5e74}").await;
+    let _ = client
+        .stock_zh_valuation_baidu(
+            "002044",
+            "\u{603b}\u{5e02}\u{503c}",
+            "\u{8fd1}\u{4e00}\u{5e74}",
+        )
+        .await;
 }
 
 #[tokio::test]
@@ -1985,7 +2092,13 @@ async fn test_stock_zh_valuation_baidu_pe() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_valuation_baidu("002044", "\u{5e02}\u{76c8}\u{7387}(TTM)", "\u{8fd1}\u{4e09}\u{5e74}").await;
+    let _ = client
+        .stock_zh_valuation_baidu(
+            "002044",
+            "\u{5e02}\u{76c8}\u{7387}(TTM)",
+            "\u{8fd1}\u{4e09}\u{5e74}",
+        )
+        .await;
 }
 
 #[tokio::test]
@@ -1993,7 +2106,13 @@ async fn test_stock_zh_valuation_baidu_pb() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_valuation_baidu("000001", "\u{5e02}\u{51c0}\u{7387}", "\u{8fd1}\u{4e94}\u{5e74}").await;
+    let _ = client
+        .stock_zh_valuation_baidu(
+            "000001",
+            "\u{5e02}\u{51c0}\u{7387}",
+            "\u{8fd1}\u{4e94}\u{5e74}",
+        )
+        .await;
 }
 
 #[tokio::test]
@@ -2001,7 +2120,9 @@ async fn test_stock_zh_valuation_baidu_pcf() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_valuation_baidu("600000", "\u{5e02}\u{73b0}\u{7387}", "\u{5168}\u{90e8}").await;
+    let _ = client
+        .stock_zh_valuation_baidu("600000", "\u{5e02}\u{73b0}\u{7387}", "\u{5168}\u{90e8}")
+        .await;
 }
 
 #[tokio::test]
@@ -2009,7 +2130,9 @@ async fn test_stock_zh_vote_baidu_stock() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_vote_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_vote_baidu("000001", "\u{80a1}\u{7968}").await;
+    let _ = client
+        .stock_zh_vote_baidu("000001", "\u{80a1}\u{7968}")
+        .await;
 }
 
 #[tokio::test]
@@ -2017,7 +2140,9 @@ async fn test_stock_zh_vote_baidu_index() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_vote_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_vote_baidu("000001", "\u{6307}\u{6570}").await;
+    let _ = client
+        .stock_zh_vote_baidu("000001", "\u{6307}\u{6570}")
+        .await;
 }
 
 // =========================================================================
@@ -2267,7 +2392,9 @@ async fn test_stock_zh_a_daily_short_date_range() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_daily("600000", "20240102", "20240103", "qfq").await;
+    let _ = client
+        .stock_zh_a_daily("600000", "20240102", "20240103", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -2283,7 +2410,9 @@ async fn test_stock_zh_a_hist_pre_min_em_sz() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_trends2_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_hist_pre_min_em("000001", "09:15", "09:25").await;
+    let _ = client
+        .stock_zh_a_hist_pre_min_em("000001", "09:15", "09:25")
+        .await;
 }
 
 #[tokio::test]
@@ -2291,7 +2420,9 @@ async fn test_stock_zh_a_cdr_daily_sz() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_a_cdr_daily("000001", "20240601", "20240630").await;
+    let _ = client
+        .stock_zh_a_cdr_daily("000001", "20240601", "20240630")
+        .await;
 }
 
 // --- zh_b.rs additional variants ---
@@ -2301,7 +2432,9 @@ async fn test_stock_zh_b_daily_200xxx() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_b_daily("200001", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_b_daily("200001", "20240101", "20241231", "qfq")
+        .await;
 }
 
 // --- zh_ah.rs additional variants ---
@@ -2311,7 +2444,9 @@ async fn test_stock_zh_ah_daily_02318() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tencent_kline_body("02318")).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_ah_daily("02318", "2023", "2024", "qfq").await;
+    let _ = client
+        .stock_zh_ah_daily("02318", "2023", "2024", "qfq")
+        .await;
 }
 
 // --- zh_index.rs additional variants ---
@@ -2321,7 +2456,9 @@ async fn test_stock_zh_index_daily_em_399006() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_index_daily_em("399006", "20240101", "20241231").await;
+    let _ = client
+        .stock_zh_index_daily_em("399006", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -2329,7 +2466,9 @@ async fn test_stock_zh_index_daily_tx_sz() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_index_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_index_daily_tx("sz399001", "20240101", "20241231").await;
+    let _ = client
+        .stock_zh_index_daily_tx("sz399001", "20240101", "20241231")
+        .await;
 }
 
 #[tokio::test]
@@ -2347,7 +2486,9 @@ async fn test_stock_zh_kcb_daily_688001() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_kcb_daily("688001", "20240101", "20241231", "qfq").await;
+    let _ = client
+        .stock_zh_kcb_daily("688001", "20240101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -2366,7 +2507,9 @@ async fn test_stock_intraday_sina_limit_120() {
     mock_any_get_text(&server, ".*", SINA_COUNT_TEXT).await;
     mock_any_get(&server, ".*", sample_sina_tick_list()).await;
     let client = mock_client(&server);
-    let _ = client.stock_intraday_sina("sz000001", "20240321", 120).await;
+    let _ = client
+        .stock_intraday_sina("sz000001", "20240321", 120)
+        .await;
 }
 
 // --- hk_extra.rs additional variants ---
@@ -2376,7 +2519,9 @@ async fn test_stock_hk_daily_long_range() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_daily("00593", "20200101", "20241231", "qfq").await;
+    let _ = client
+        .stock_hk_daily("00593", "20200101", "20241231", "qfq")
+        .await;
 }
 
 #[tokio::test]
@@ -2424,7 +2569,9 @@ async fn test_stock_hk_valuation_baidu_pb() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_valuation_baidu("00593", "\u{5e02}\u{51c0}\u{7387}", "\u{5168}\u{90e8}").await;
+    let _ = client
+        .stock_hk_valuation_baidu("00593", "\u{5e02}\u{51c0}\u{7387}", "\u{5168}\u{90e8}")
+        .await;
 }
 
 #[tokio::test]
@@ -2474,7 +2621,13 @@ async fn test_stock_us_valuation_baidu_pcf() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_us_valuation_baidu("GOOG", "\u{5e02}\u{73b0}\u{7387}", "\u{8fd1}\u{4e94}\u{5e74}").await;
+    let _ = client
+        .stock_us_valuation_baidu(
+            "GOOG",
+            "\u{5e02}\u{73b0}\u{7387}",
+            "\u{8fd1}\u{4e94}\u{5e74}",
+        )
+        .await;
 }
 
 // --- zh_comparison.rs additional variants ---
@@ -2500,7 +2653,9 @@ async fn test_stock_zh_valuation_baidu_all() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_valuation_baidu("600000", "\u{603b}\u{5e02}\u{503c}", "\u{5168}\u{90e8}").await;
+    let _ = client
+        .stock_zh_valuation_baidu("600000", "\u{603b}\u{5e02}\u{503c}", "\u{5168}\u{90e8}")
+        .await;
 }
 
 // --- additional feature/spot_em.rs variants ---
@@ -2538,7 +2693,9 @@ async fn test_stock_hk_daily_invalid_adjust() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_hk_daily("00593", "20240101", "20241231", "invalid").await;
+    let result = client
+        .stock_hk_daily("00593", "20240101", "20241231", "invalid")
+        .await;
     assert!(result.is_err());
 }
 
@@ -2547,7 +2704,9 @@ async fn test_stock_zh_a_daily_invalid_adjust() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_a_daily("600000", "20240101", "20241231", "bad").await;
+    let result = client
+        .stock_zh_a_daily("600000", "20240101", "20241231", "bad")
+        .await;
     assert!(result.is_err());
 }
 
@@ -2556,7 +2715,9 @@ async fn test_stock_zh_b_daily_invalid_adjust() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_b_daily("sh900901", "20240101", "20241231", "bad").await;
+    let result = client
+        .stock_zh_b_daily("sh900901", "20240101", "20241231", "bad")
+        .await;
     assert!(result.is_err());
 }
 
@@ -2565,7 +2726,9 @@ async fn test_stock_zh_kcb_daily_invalid_adjust() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_kcb_daily("688399", "20240101", "20241231", "bad").await;
+    let result = client
+        .stock_zh_kcb_daily("688399", "20240101", "20241231", "bad")
+        .await;
     assert!(result.is_err());
 }
 
@@ -2574,7 +2737,9 @@ async fn test_stock_zh_a_hist_tx_invalid_adjust() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_tx_a_hist_body("sz000001")).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "bad").await;
+    let result = client
+        .stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "bad")
+        .await;
     assert!(result.is_err());
 }
 

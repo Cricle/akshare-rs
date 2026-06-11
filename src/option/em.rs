@@ -53,7 +53,7 @@ impl AkShareClient {
         let filter = format!("(UNDERLYING_SECURITY_CODE=\"{trimmed}\")");
 
         let response = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
                 ("reportName", "RPT_OPTION_CURRENTDAY"),
                 ("columns", "ALL"),
@@ -170,7 +170,7 @@ impl AkShareClient {
         let lmt = limit.max(5).to_string();
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
@@ -333,7 +333,7 @@ impl AkShareClient {
         let url = "https://futsseapi.eastmoney.com/list/option/221";
 
         let resp: FutsseapiEnvelope = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("orderBy", "zdf"),
                 ("sort", "desc"),
@@ -380,10 +380,7 @@ impl AkShareClient {
     /// Option minute (intraday trend) data from Eastmoney.
     ///
     /// `symbol` is the option code, e.g. "MO2404-P-4450".
-    pub async fn option_minute_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<OptionMinuteRow>> {
+    pub async fn option_minute_em(&self, symbol: &str) -> Result<Vec<OptionMinuteRow>> {
         // First, look up the market id from the current options list
         let current = self.fetch_em_option_clist_current().await?;
         let option = current
@@ -395,10 +392,13 @@ impl AkShareClient {
         let url = "https://push2.eastmoney.com/api/qt/stock/trends2/get";
 
         let resp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("secid", secid.as_str()),
-                ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f17"),
+                (
+                    "fields1",
+                    "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f17",
+                ),
                 ("fields2", "f51,f53,f54,f55,f56,f57,f58"),
                 ("iscr", "0"),
                 ("iscca", "0"),
@@ -447,9 +447,7 @@ impl AkShareClient {
         }
 
         if rows.is_empty() {
-            return Err(Error::not_found(format!(
-                "no minute data for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no minute data for {symbol}")));
         }
 
         Ok(rows)
@@ -510,7 +508,11 @@ impl AkShareClient {
                         .max()
                         .unwrap_or(0);
                     (0..=max_key)
-                        .map(|i| obj.get(&i.to_string()).cloned().unwrap_or(serde_json::Value::Null))
+                        .map(|i| {
+                            obj.get(&i.to_string())
+                                .cloned()
+                                .unwrap_or(serde_json::Value::Null)
+                        })
                         .collect::<Vec<_>>()
                 } else {
                     continue;

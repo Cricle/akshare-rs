@@ -183,10 +183,7 @@ impl AkShareClient {
     /// Note: This endpoint may require a valid `xq_a_token` cookie.
     /// The client does not automatically provide one — you may need to
     /// set cookies manually via a custom reqwest client.
-    pub async fn stock_individual_spot_xq(
-        &self,
-        symbol: &str,
-    ) -> Result<XqStockSpot> {
+    pub async fn stock_individual_spot_xq(&self, symbol: &str) -> Result<XqStockSpot> {
         let url = format!(
             "https://stock.xueqiu.com/v5/stock/quote.json?symbol={}&extend=detail",
             symbol
@@ -291,10 +288,13 @@ impl AkShareClient {
     ) -> Result<Vec<(String, String)>> {
         let url = format!("https://stock.xueqiu.com/v5/stock/f10/{market}/company.json");
         let response = self
-                        .get(&url)
+            .get(&url)
             .query(&[("symbol", symbol)])
             .header("Cookie", format!("xq_a_token={token};"))
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .header(
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            )
             .send()
             .await?
             .error_for_status()?;

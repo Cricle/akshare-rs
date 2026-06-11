@@ -53,7 +53,9 @@ async fn test_fund_etf_fund_info_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_etf_fund_info_em("511280", "20240101", "20240131").await;
+    let result = client
+        .fund_etf_fund_info_em("511280", "20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -65,7 +67,9 @@ async fn test_fund_etf_hist_em() {
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_etf_hist_em("159707", "daily", "20240101", "20240131", "qfq").await;
+    let result = client
+        .fund_etf_hist_em("159707", "daily", "20240101", "20240131", "qfq")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -78,7 +82,13 @@ async fn test_fund_etf_hist_min_em_5min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_etf_hist_min_em("159707", "5", "2024-01-02 09:30:00", "2024-01-02 15:00:00", "qfq")
+        .fund_etf_hist_min_em(
+            "159707",
+            "5",
+            "2024-01-02 09:30:00",
+            "2024-01-02 15:00:00",
+            "qfq",
+        )
         .await;
     assert!(result.is_ok());
 }
@@ -99,7 +109,13 @@ async fn test_fund_etf_hist_min_em_1min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_etf_hist_min_em("159707", "1", "2024-01-02 09:30:00", "2024-01-02 15:00:00", "qfq")
+        .fund_etf_hist_min_em(
+            "159707",
+            "1",
+            "2024-01-02 09:30:00",
+            "2024-01-02 15:00:00",
+            "qfq",
+        )
         .await;
     assert!(result.is_ok());
 }
@@ -175,7 +191,9 @@ async fn test_fund_lof_hist_em() {
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_lof_hist_em("160105", "daily", "20240101", "20240131", "qfq").await;
+    let result = client
+        .fund_lof_hist_em("160105", "daily", "20240101", "20240131", "qfq")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -188,7 +206,13 @@ async fn test_fund_lof_hist_min_em_5min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_lof_hist_min_em("160105", "5", "2024-01-02 09:30:00", "2024-01-02 15:00:00", "")
+        .fund_lof_hist_min_em(
+            "160105",
+            "5",
+            "2024-01-02 09:30:00",
+            "2024-01-02 15:00:00",
+            "",
+        )
         .await;
     assert!(result.is_ok());
 }
@@ -208,7 +232,13 @@ async fn test_fund_lof_hist_min_em_1min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_lof_hist_min_em("160105", "1", "2024-01-02 09:30:00", "2024-01-02 15:00:00", "")
+        .fund_lof_hist_min_em(
+            "160105",
+            "1",
+            "2024-01-02 09:30:00",
+            "2024-01-02 15:00:00",
+            "",
+        )
         .await;
     assert!(result.is_ok());
 }
@@ -266,7 +296,9 @@ async fn test_fund_open_fund_info_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_open_fund_info_em("710001", "", "", "单位净值走势").await;
+    let result = client
+        .fund_open_fund_info_em("710001", "", "", "单位净值走势")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -319,21 +351,21 @@ async fn test_fund_money_rank_em() {
     //   [13]=annualized_14d, [14]=annualized_28d, [15]=month_1, [16]=month_3,
     //   [17]=month_6, [18]=ytd, [19]=since_found
     let mut row: Vec<serde_json::Value> = (0..20).map(|i| serde_json::json!("0")).collect();
-    row[0] = serde_json::json!("5.00");   // year_1
-    row[1] = serde_json::json!("8.00");   // year_2
-    row[2] = serde_json::json!("12.00");  // year_3
-    row[3] = serde_json::json!("20.00");  // year_5
+    row[0] = serde_json::json!("5.00"); // year_1
+    row[1] = serde_json::json!("8.00"); // year_2
+    row[2] = serde_json::json!("12.00"); // year_3
+    row[3] = serde_json::json!("20.00"); // year_5
     row[7] = serde_json::json!("000009"); // fund_code
     row[8] = serde_json::json!("华夏货币"); // fund_name
     row[9] = serde_json::json!("2024-01-02"); // date
-    row[10] = serde_json::json!("0.50");  // yield_per_10k
-    row[11] = serde_json::json!("1.80");  // annualized_7d
-    row[13] = serde_json::json!("1.90");  // annualized_14d
-    row[14] = serde_json::json!("2.00");  // annualized_28d
-    row[15] = serde_json::json!("0.15");  // month_1
-    row[16] = serde_json::json!("0.45");  // month_3
-    row[17] = serde_json::json!("0.90");  // month_6
-    row[18] = serde_json::json!("3.50");  // ytd
+    row[10] = serde_json::json!("0.50"); // yield_per_10k
+    row[11] = serde_json::json!("1.80"); // annualized_7d
+    row[13] = serde_json::json!("1.90"); // annualized_14d
+    row[14] = serde_json::json!("2.00"); // annualized_28d
+    row[15] = serde_json::json!("0.15"); // month_1
+    row[16] = serde_json::json!("0.45"); // month_3
+    row[17] = serde_json::json!("0.90"); // month_6
+    row[18] = serde_json::json!("3.50"); // ytd
     row[19] = serde_json::json!("15.00"); // since_found
     let body = serde_json::json!({
         "Data": [row]
@@ -512,11 +544,29 @@ async fn test_fund_exchange_rank_em() {
     //   [7]=week_1, [8]=month_1, [9]=month_3, [10]=month_6, [11]=year_1,
     //   [12]=year_2, [13]=year_3, [14]=ytd, [15]=since_found, [16]=found_date, [22]=fund_type
     let fields = vec![
-        "000001", "华夏成长", "type1", "type2", "2024-01-02",
-        "1.0000", "2.0000", "0.10", "0.50", "1.20",
-        "2.50", "5.00", "8.00", "12.00", "3.50",
-        "15.00", "2020-01-01", "sub1", "sub2", "sub3",
-        "sub4", "sub5", "股票型",
+        "000001",
+        "华夏成长",
+        "type1",
+        "type2",
+        "2024-01-02",
+        "1.0000",
+        "2.0000",
+        "0.10",
+        "0.50",
+        "1.20",
+        "2.50",
+        "5.00",
+        "8.00",
+        "12.00",
+        "3.50",
+        "15.00",
+        "2020-01-01",
+        "sub1",
+        "sub2",
+        "sub3",
+        "sub4",
+        "sub5",
+        "股票型",
     ];
     let row = fields.join(",");
     let text_body = format!("var rankHandler={{\"datas\":[\"{}\"]}}", row);
@@ -611,22 +661,22 @@ async fn test_fund_hk_rank_em() {
     // [13]=month_3, [14]=month_6, [15]=year_1, [16]=year_2, [17]=year_3,
     // [18]=ytd, [19]=since_found/currency
     let mut row: Vec<serde_json::Value> = (0..20).map(|i| serde_json::json!("0")).collect();
-    row[2] = serde_json::json!("HK001");    // hk_fund_code
-    row[3] = serde_json::json!("968001");   // fund_code
-    row[5] = serde_json::json!("华夏精选");  // fund_name
-    row[6] = serde_json::json!("1");        // can_buy
+    row[2] = serde_json::json!("HK001"); // hk_fund_code
+    row[3] = serde_json::json!("968001"); // fund_code
+    row[5] = serde_json::json!("华夏精选"); // fund_name
+    row[6] = serde_json::json!("1"); // can_buy
     row[7] = serde_json::json!("2024-01-02"); // date
-    row[8] = serde_json::json!("1.5000");   // nav
-    row[9] = serde_json::json!("0.50");     // change_pct
-    row[11] = serde_json::json!("0.10");    // week_1
-    row[12] = serde_json::json!("0.50");    // month_1
-    row[13] = serde_json::json!("1.20");    // month_3
-    row[14] = serde_json::json!("2.50");    // month_6
-    row[15] = serde_json::json!("5.00");    // year_1
-    row[16] = serde_json::json!("8.00");    // year_2
-    row[17] = serde_json::json!("12.00");   // year_3
-    row[18] = serde_json::json!("3.50");    // ytd
-    row[19] = serde_json::json!("HKD");     // since_found / currency
+    row[8] = serde_json::json!("1.5000"); // nav
+    row[9] = serde_json::json!("0.50"); // change_pct
+    row[11] = serde_json::json!("0.10"); // week_1
+    row[12] = serde_json::json!("0.50"); // month_1
+    row[13] = serde_json::json!("1.20"); // month_3
+    row[14] = serde_json::json!("2.50"); // month_6
+    row[15] = serde_json::json!("5.00"); // year_1
+    row[16] = serde_json::json!("8.00"); // year_2
+    row[17] = serde_json::json!("12.00"); // year_3
+    row[18] = serde_json::json!("3.50"); // ytd
+    row[19] = serde_json::json!("HKD"); // since_found / currency
     let body = serde_json::json!({
         "Data": [row]
     });
@@ -768,7 +818,9 @@ async fn test_fund_individual_detail_hold_xq() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_individual_detail_hold_xq("000001", "20240101").await;
+    let result = client
+        .fund_individual_detail_hold_xq("000001", "20240101")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -983,7 +1035,9 @@ async fn test_fund_report_industry_allocation_cninfo() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     // Always returns Err (JS authentication required)
-    let result = client.fund_report_industry_allocation_cninfo("2024-01-01").await;
+    let result = client
+        .fund_report_industry_allocation_cninfo("2024-01-01")
+        .await;
     assert!(result.is_err());
 }
 
@@ -1005,7 +1059,8 @@ async fn test_fund_scale_change_em() {
     let server = MockServer::start().await;
     // Returns text: {data:[["2024-01-02","100","5000.00","3000.00","8000.00","120000.00","more"]]}
     // Fields: [0]=report_date, [1]=fund_count, [2]=subscribe, [3]=redeem, [4]=end_shares, [5]=end_net_assets
-    let text_body = r#"{"data":[["2024-01-02","100","5000.00","3000.00","8000.00","120000.00","extra"]]}"#;
+    let text_body =
+        r#"{"data":[["2024-01-02","100","5000.00","3000.00","8000.00","120000.00","extra"]]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
     let result = client.fund_scale_change_em().await;
@@ -1017,7 +1072,9 @@ async fn test_fund_scale_daily_szse() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     // Always returns Err (xlsx parsing not supported)
-    let result = client.fund_scale_daily_szse("20240101", "20240131", "ETF").await;
+    let result = client
+        .fund_scale_daily_szse("20240101", "20240131", "ETF")
+        .await;
     assert!(result.is_err());
 }
 
@@ -1044,12 +1101,12 @@ async fn test_fund_value_estimation_em() {
     // [0]=fund_code, [19]=deviation, [20]=estimated_value, [21]=estimated_change_pct,
     // [22]=published_change_pct, [24]=published_nav, [26]=fund_name
     let mut row: Vec<serde_json::Value> = (0..28).map(|_| serde_json::json!("0")).collect();
-    row[0] = serde_json::json!("000001");   // fund_code
-    row[19] = serde_json::json!("0.05");    // deviation
-    row[20] = serde_json::json!("1.5000");  // estimated_value
-    row[21] = serde_json::json!("0.50");    // estimated_change_pct
-    row[22] = serde_json::json!("0.30");    // published_change_pct
-    row[24] = serde_json::json!("1.4900");  // published_nav
+    row[0] = serde_json::json!("000001"); // fund_code
+    row[19] = serde_json::json!("0.05"); // deviation
+    row[20] = serde_json::json!("1.5000"); // estimated_value
+    row[21] = serde_json::json!("0.50"); // estimated_change_pct
+    row[22] = serde_json::json!("0.30"); // published_change_pct
+    row[24] = serde_json::json!("1.4900"); // published_nav
     row[26] = serde_json::json!("华夏成长"); // fund_name
     let body = serde_json::json!({
         "Data": {
@@ -1196,10 +1253,13 @@ async fn test_fund_name_em() {
 #[tokio::test]
 async fn test_fund_info_index_em() {
     let server = MockServer::start().await;
-    let text_body = r#"jQuery({"datas":[["510300","华泰柏瑞沪深300ETF","etf","3.5000","4.0000"]]})"#;
+    let text_body =
+        r#"jQuery({"datas":[["510300","华泰柏瑞沪深300ETF","etf","3.5000","4.0000"]]})"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_info_index_em("沪深指数", "被动指数型", 10).await;
+    let result = client
+        .fund_info_index_em("沪深指数", "被动指数型", 10)
+        .await;
     assert!(result.is_ok());
 }
 
@@ -1310,7 +1370,12 @@ async fn test_fund_position_est_lg() {
 #[tokio::test]
 async fn test_fund_aum_em() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><table><tr><td>row1</td></tr></table></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><table><tr><td>row1</td></tr></table></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.fund_aum_em().await;
     assert!(result.is_ok());
@@ -1354,7 +1419,8 @@ async fn test_fund_xueqiu_achievement() {
 #[tokio::test]
 async fn test_fund_etf_category_sina() {
     let server = MockServer::start().await;
-    let body = r#"IO.XSRV2.CallbackList['da_yPT46_Ll7K6WD']([["510050","华夏上证50ETF",3.00,100,1.50]])"#;
+    let body =
+        r#"IO.XSRV2.CallbackList['da_yPT46_Ll7K6WD']([["510050","华夏上证50ETF",3.00,100,1.50]])"#;
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.fund_etf_category_sina("ETF基金").await;

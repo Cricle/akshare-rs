@@ -19,7 +19,7 @@ impl AkShareClient {
         }
 
         let response = self
-                        .get("https://www.msweet.com.cn/eportal/ui")
+            .get("https://www.msweet.com.cn/eportal/ui")
             .query(&[
                 ("struts.portlet.action", "/portlet/price!getSTZSJson.action"),
                 ("moduleId", "cb752447cfe24b44b18c7a7e9abab048"),
@@ -37,9 +37,18 @@ impl AkShareClient {
         let mut points = Vec::new();
         for (i, date) in categories.iter().enumerate() {
             let row = data.get(i);
-            let composite = row.and_then(|r| r.first()).and_then(|v| v.as_f64()).unwrap_or(0.0);
-            let raw = row.and_then(|r| r.get(1)).and_then(|v| v.as_f64()).unwrap_or(0.0);
-            let spot = row.and_then(|r| r.get(2)).and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let composite = row
+                .and_then(|r| r.first())
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
+            let raw = row
+                .and_then(|r| r.get(1))
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
+            let spot = row
+                .and_then(|r| r.get(2))
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
             points.push(SugarMsweetPoint {
                 date: date.clone(),
                 composite_price: composite,
@@ -63,7 +72,7 @@ impl AkShareClient {
         }
 
         let response = self
-                        .get("https://www.msweet.com.cn/datacenterapply/datacenter/json/JinKongTang.json")
+            .get("https://www.msweet.com.cn/datacenterapply/datacenter/json/JinKongTang.json")
             .send()
             .await
             .map_err(Error::from)?
@@ -79,7 +88,9 @@ impl AkShareClient {
             let row = data.get(i);
             let date = date_raw.replace('/', "-");
             let get = |idx: usize| -> f64 {
-                row.and_then(|r| r.get(idx)).and_then(|v| v.as_f64()).unwrap_or(0.0)
+                row.and_then(|r| r.get(idx))
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(0.0)
             };
             points.push(SugarInnerQuotePoint {
                 date,
@@ -115,7 +126,7 @@ impl AkShareClient {
         }
 
         let response = self
-                        .get("https://www.msweet.com.cn/datacenterapply/datacenter/json/Jkpewlr.json")
+            .get("https://www.msweet.com.cn/datacenterapply/datacenter/json/Jkpewlr.json")
             .send()
             .await
             .map_err(Error::from)?
@@ -131,7 +142,9 @@ impl AkShareClient {
             let row = data.get(i);
             let date = date_raw.replace('/', "-");
             let get = |idx: usize| -> f64 {
-                row.and_then(|r| r.get(idx)).and_then(|v| v.as_f64()).unwrap_or(0.0)
+                row.and_then(|r| r.get(idx))
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(0.0)
             };
             points.push(SugarOuterQuotePoint {
                 date,

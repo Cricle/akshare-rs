@@ -155,11 +155,15 @@ impl AkShareClient {
             "day" => "DAY",
             "week" => "WEEK",
             "month" => "MONTH",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
 
         let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_publish/trend/")
+            .get("https://www.swsresearch.com/institute-sw/api/index_publish/trend/")
             .query(&[("swindexcode", symbol), ("period", period_upper)])
             .send()
             .await
@@ -191,10 +195,7 @@ impl AkShareClient {
     }
 
     /// 申万宏源研究 — 指数分时数据.
-    pub async fn index_min_sw(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<SwMinPoint>> {
+    pub async fn index_min_sw(&self, symbol: &str) -> Result<Vec<SwMinPoint>> {
         #[derive(Deserialize)]
         struct MinEnvelope {
             data: Option<Vec<MinItem>>,
@@ -214,7 +215,7 @@ impl AkShareClient {
         }
 
         let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_publish/details/timelines/")
+            .get("https://www.swsresearch.com/institute-sw/api/index_publish/details/timelines/")
             .query(&[("swindexcode", symbol)])
             .send()
             .await
@@ -243,10 +244,7 @@ impl AkShareClient {
     }
 
     /// 申万宏源研究 — 指数成分股.
-    pub async fn index_component_sw(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<SwResearchComponent>> {
+    pub async fn index_component_sw(&self, symbol: &str) -> Result<Vec<SwResearchComponent>> {
         let response = self
                         .get("https://www.swsresearch.com/institute-sw/api/index_publish/details/component_stocks/")
             .query(&[("swindexcode", symbol), ("page", "1"), ("page_size", "10000")])
@@ -257,10 +255,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: SwComponentEnvelope = response.json().await.map_err(Error::from)?;
-        let items = payload
-            .data
-            .and_then(|d| d.results)
-            .unwrap_or_default();
+        let items = payload.data.and_then(|d| d.results).unwrap_or_default();
 
         let components: Vec<SwResearchComponent> = items
             .into_iter()
@@ -281,16 +276,13 @@ impl AkShareClient {
     /// 申万宏源研究 — 指数系列实时行情.
     ///
     /// `symbol` is one of: "市场表征", "一级行业", "二级行业", "风格指数".
-    pub async fn index_realtime_sw(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<SwResearchRealtime>> {
+    pub async fn index_realtime_sw(&self, symbol: &str) -> Result<Vec<SwResearchRealtime>> {
         if symbol == "大类风格指数" || symbol == "金创指数" {
             return self.index_realtime_sw_page_list(symbol).await;
         }
 
         let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_publish/current/")
+            .get("https://www.swsresearch.com/institute-sw/api/index_publish/current/")
             .query(&[("page", "1"), ("page_size", "200"), ("indextype", symbol)])
             .send()
             .await
@@ -299,10 +291,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: SwCurrentEnvelope = response.json().await.map_err(Error::from)?;
-        let results = payload
-            .data
-            .and_then(|d| d.results)
-            .unwrap_or_default();
+        let results = payload.data.and_then(|d| d.results).unwrap_or_default();
 
         let items: Vec<SwResearchRealtime> = results
             .into_iter()
@@ -359,14 +348,11 @@ impl AkShareClient {
     }
 
     /// 申万宏源研究 — 周/月报表日期序列.
-    pub async fn index_analysis_week_month_sw(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<String>> {
+    pub async fn index_analysis_week_month_sw(&self, symbol: &str) -> Result<Vec<String>> {
         let period = symbol.to_uppercase();
 
         let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_analysis/week_month_datetime/")
+            .get("https://www.swsresearch.com/institute-sw/api/index_analysis/week_month_datetime/")
             .query(&[("type", period.as_str())])
             .send()
             .await
@@ -453,12 +439,9 @@ impl AkShareClient {
     }
 
     // Private: page list for 大类风格/金创
-    async fn index_realtime_sw_page_list(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<SwResearchRealtime>> {
+    async fn index_realtime_sw_page_list(&self, symbol: &str) -> Result<Vec<SwResearchRealtime>> {
         let response = self
-                        .post("https://www.swsresearch.com/insWechatSw/dflgOrJcIndex/pageList")
+            .post("https://www.swsresearch.com/insWechatSw/dflgOrJcIndex/pageList")
             .json(&serde_json::json!({
                 "pageNo": 1,
                 "pageSize": 50,
@@ -474,10 +457,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: SwPageListEnvelope = response.json().await.map_err(Error::from)?;
-        let items = payload
-            .data
-            .and_then(|d| d.list)
-            .unwrap_or_default();
+        let items = payload.data.and_then(|d| d.list).unwrap_or_default();
 
         let result: Vec<SwResearchRealtime> = items
             .into_iter()
@@ -515,15 +495,9 @@ pub struct SwMinPoint {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async fn fetch_sw_analysis(
-    _client: &AkShareClient,
-    body: &str,
-) -> Result<Vec<SwAnalysisPoint>> {
+async fn fetch_sw_analysis(_client: &AkShareClient, body: &str) -> Result<Vec<SwAnalysisPoint>> {
     let payload: SwAnalysisEnvelope = serde_json::from_str(body)?;
-    let items = payload
-        .data
-        .and_then(|d| d.results)
-        .unwrap_or_default();
+    let items = payload.data.and_then(|d| d.results).unwrap_or_default();
 
     let points: Vec<SwAnalysisPoint> = items
         .into_iter()

@@ -27,12 +27,8 @@ impl AkShareClient {
         );
 
         let body = self
-                        .get(&url)
-            .query(&[
-                ("symbol", symbol),
-                ("_", &today),
-                ("source", "web"),
-            ])
+            .get(&url)
+            .query(&[("symbol", symbol), ("_", &today), ("source", "web")])
             .send()
             .await?
             .text()
@@ -40,15 +36,20 @@ impl AkShareClient {
 
         // Extract JSON array from JSONP
         let start = body.find('[').ok_or_else(|| {
-            Error::decode(format!("foreign futures JSONP: no array start for {}", symbol))
+            Error::decode(format!(
+                "foreign futures JSONP: no array start for {}",
+                symbol
+            ))
         })?;
         let end = body.rfind(']').ok_or_else(|| {
-            Error::decode(format!("foreign futures JSONP: no array end for {}", symbol))
+            Error::decode(format!(
+                "foreign futures JSONP: no array end for {}",
+                symbol
+            ))
         })?;
         let json_str = &body[start..=end];
 
-        let rows: Vec<Vec<serde_json::Value>> =
-            serde_json::from_str(json_str).unwrap_or_default();
+        let rows: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str).unwrap_or_default();
 
         let mut items = Vec::new();
         for row in &rows {
@@ -74,7 +75,7 @@ impl AkShareClient {
     pub async fn get_qhkc_fund_bs(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/fund/bs";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("date", date)])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -82,7 +83,8 @@ impl AkShareClient {
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -110,7 +112,7 @@ impl AkShareClient {
     pub async fn get_qhkc_fund_money_change(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/fund/moneyChange";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("date", date)])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -118,7 +120,8 @@ impl AkShareClient {
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -146,7 +149,7 @@ impl AkShareClient {
     pub async fn get_qhkc_fund_position(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/fund/position";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("date", date)])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -154,7 +157,8 @@ impl AkShareClient {
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -182,7 +186,7 @@ impl AkShareClient {
     pub async fn get_qhkc_index(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/index";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("date", date)])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -190,7 +194,8 @@ impl AkShareClient {
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -218,7 +223,7 @@ impl AkShareClient {
     pub async fn get_qhkc_index_profit_loss(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/index/profitLoss";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("date", date)])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -226,7 +231,8 @@ impl AkShareClient {
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -254,7 +260,7 @@ impl AkShareClient {
     pub async fn get_qhkc_index_trend(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/index/trend";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("date", date)])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -262,7 +268,8 @@ impl AkShareClient {
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -288,14 +295,15 @@ impl AkShareClient {
     pub async fn qhkc_tool_foreign(&self) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/tool/foreign";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -320,14 +328,15 @@ impl AkShareClient {
     pub async fn qhkc_tool_gdp(&self) -> Result<Vec<Row>> {
         let url = "https://www.qhkc.com/api/tool/gdp";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
             .text()
             .await?;
 
-        let data: serde_json::Value = serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value =
+            serde_json::from_str(&body).unwrap_or(serde_json::Value::Null);
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
@@ -350,9 +359,12 @@ impl AkShareClient {
 
     /// Foreign futures contract detail from Sina.
     pub async fn futures_foreign_detail(&self, symbol: &str) -> Result<Vec<Row>> {
-        let url = format!("https://finance.sina.com.cn/futures/quotes/{}.shtml", symbol);
+        let url = format!(
+            "https://finance.sina.com.cn/futures/quotes/{}.shtml",
+            symbol
+        );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?

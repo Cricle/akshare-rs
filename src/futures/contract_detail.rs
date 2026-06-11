@@ -16,9 +16,12 @@ impl AkShareClient {
     ///
     /// Fetches contract specifications from the Sina futures page.
     pub async fn futures_contract_detail_sina(&self, symbol: &str) -> Result<Vec<Row>> {
-        let url = format!("https://finance.sina.com.cn/futures/quotes/{}.shtml", symbol);
+        let url = format!(
+            "https://finance.sina.com.cn/futures/quotes/{}.shtml",
+            symbol
+        );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -50,7 +53,7 @@ impl AkShareClient {
         let url = "https://push2.eastmoney.com/api/qt/clist/get";
         let filter = "m:113,m:114,m:115,m:8,m:142,m:225".to_string();
         let resp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("pn", "1"),
                 ("pz", "500"),
@@ -74,7 +77,10 @@ impl AkShareClient {
         let mut items = Vec::new();
         for row in &diff {
             let code = row["f12"].as_str().unwrap_or("").to_uppercase();
-            let var = RE_ALPHA.find(&code).map(|m| m.as_str().to_uppercase()).unwrap_or_default();
+            let var = RE_ALPHA
+                .find(&code)
+                .map(|m| m.as_str().to_uppercase())
+                .unwrap_or_default();
             if var == variety_upper {
                 let mut r = Row::new();
                 r.insert("symbol".into(), serde_json::json!(code));
@@ -96,7 +102,7 @@ impl AkShareClient {
         // Step 1: Get the inner symbol from the Eastmoney page
         let url = format!("https://quote.eastmoney.com/qihuo/{}.html", symbol);
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -119,12 +125,7 @@ impl AkShareClient {
             "https://futsse-static.eastmoney.com/redis?msgid={}_info",
             inner_id
         );
-        let info_body = self
-                        .get(&info_url)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let info_body = self.get(&info_url).send().await?.text().await?;
 
         let data: serde_json::Value = serde_json::from_str(&info_body)?;
 

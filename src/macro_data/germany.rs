@@ -83,5 +83,4 @@ impl AkShareClient {
     pub async fn macro_germany_zew(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_zew().await
     }
-
 }

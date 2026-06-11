@@ -108,12 +108,9 @@ impl AkShareClient {
     ///
     /// Available indices: medrv, rk_twoscale, bv, rv10, rv5, rk_th2, rv10_ss,
     /// rsv, rv5_ss, bv_ss, rk_parzen, rsv_ss.
-    pub async fn article_oman_rv(
-        &self,
-        symbol: &str,
-        index: &str,
-    ) -> Result<Vec<MacroDataPoint>> {
-        let url = "https://realized.oxford-man.ox.ac.uk/theme/js/visualization-data.js?20191111113154";
+    pub async fn article_oman_rv(&self, symbol: &str, index: &str) -> Result<Vec<MacroDataPoint>> {
+        let url =
+            "https://realized.oxford-man.ox.ac.uk/theme/js/visualization-data.js?20191111113154";
         let body = self.get(url).send().await?.text().await?;
 
         // Extract JSON from the JS file content
@@ -125,8 +122,8 @@ impl AkShareClient {
             .ok_or_else(|| Error::decode("oman rv: JSON end not found"))?;
         let json_str = &body[json_start..=json_end];
 
-        let data: serde_json::Value =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("oman rv JSON: {e}")))?;
+        let data: serde_json::Value = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("oman rv JSON: {e}")))?;
 
         let key = format!(".{}", symbol);
         let dates = data
@@ -162,7 +159,7 @@ impl AkShareClient {
     pub async fn article_oman_rv_short(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://realized.oxford-man.ox.ac.uk/theme/js/front-page-chart.js";
         let body = self
-                        .get(url)
+            .get(url)
             .header("Referer", "https://realized.oxford-man.ox.ac.uk/")
             .send()
             .await?
@@ -185,23 +182,26 @@ impl AkShareClient {
             .get(&key)
             .and_then(|v| v.get("data"))
             .and_then(|v| v.as_array())
-            .ok_or_else(|| Error::not_found(format!("oman rv short: symbol {} not found", symbol)))?;
+            .ok_or_else(|| {
+                Error::not_found(format!("oman rv short: symbol {} not found", symbol))
+            })?;
 
         let mut items = Vec::new();
         for entry in data_arr {
             if let Some(arr) = entry.as_array()
-                && arr.len() >= 2 {
-                    let ts_ms = arr[0].as_i64().unwrap_or(0);
-                    let date = chrono::DateTime::from_timestamp_millis(ts_ms)
-                        .map(|dt| dt.format("%Y-%m-%d").to_string())
-                        .unwrap_or_default();
-                    let value = arr[1].as_f64().unwrap_or(0.0);
-                    items.push(MacroDataPoint {
-                        date,
-                        value,
-                        name: symbol.to_string(),
-                    });
-                }
+                && arr.len() >= 2
+            {
+                let ts_ms = arr[0].as_i64().unwrap_or(0);
+                let date = chrono::DateTime::from_timestamp_millis(ts_ms)
+                    .map(|dt| dt.format("%Y-%m-%d").to_string())
+                    .unwrap_or_default();
+                let value = arr[1].as_f64().unwrap_or(0.0);
+                items.push(MacroDataPoint {
+                    date,
+                    value,
+                    name: symbol.to_string(),
+                });
+            }
         }
         Ok(items)
     }
@@ -212,12 +212,7 @@ impl AkShareClient {
     /// Chicago Booth Risk Research Laboratory.
     pub async fn article_ff_crr(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://dachxiu.chicagobooth.edu/FF/F-F_Research_Data_Factors_CSV.zip";
-        let body = self
-                        .get(url)
-            .send()
-            .await?
-            .bytes()
-            .await?;
+        let body = self.get(url).send().await?.bytes().await?;
 
         // Attempt to read as text (the zip may fail, so try CSV directly)
         let text = String::from_utf8_lossy(&body);
@@ -266,7 +261,7 @@ impl AkShareClient {
     pub async fn article_rlab_rv(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://dachxiu.chicagobooth.edu/data.php";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("ticker", symbol)])
             .send()
             .await?
@@ -288,20 +283,17 @@ impl AkShareClient {
             if parts.len() >= 2
                 && let (Ok(date_val), Ok(rv_val)) =
                     (parts[0].parse::<i64>(), parts[1].parse::<f64>())
-                    && date_val > 19000000 {
-                        in_data = true;
-                        let date_str = format!(
-                            "{}-{}-{}",
-                            &parts[0][..4],
-                            &parts[0][4..6],
-                            &parts[0][6..8]
-                        );
-                        items.push(MacroDataPoint {
-                            date: date_str,
-                            value: rv_val,
-                            name: format!("RLab RV - {}", symbol),
-                        });
-                    }
+                && date_val > 19000000
+            {
+                in_data = true;
+                let date_str =
+                    format!("{}-{}-{}", &parts[0][..4], &parts[0][4..6], &parts[0][6..8]);
+                items.push(MacroDataPoint {
+                    date: date_str,
+                    value: rv_val,
+                    name: format!("RLab RV - {}", symbol),
+                });
+            }
         }
 
         if items.is_empty() && !in_data {

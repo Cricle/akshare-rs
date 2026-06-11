@@ -28,14 +28,15 @@ impl AkShareClient {
     /// 浙江省排污权交易指数.
     ///
     /// `symbol` is "月度" or "季度".
-    pub async fn index_eri(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<EriIndexPoint>> {
+    pub async fn index_eri(&self, symbol: &str) -> Result<Vec<EriIndexPoint>> {
         let cycle = match symbol {
             "月度" => "MONTH",
             "季度" => "QUARTER",
-            _ => return Err(Error::invalid_input(format!("unsupported ERI symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported ERI symbol: {symbol}"
+                )));
+            }
         };
 
         let params = [
@@ -49,7 +50,7 @@ impl AkShareClient {
 
         // Fetch index data
         let resp1 = self
-                        .get("https://zs.zjpwq.net/pwq-index-webapi/indexData")
+            .get("https://zs.zjpwq.net/pwq-index-webapi/indexData")
             .query(&params)
             .send()
             .await
@@ -67,7 +68,10 @@ impl AkShareClient {
                 Some(o) => o,
                 None => continue,
             };
-            let val = obj.get("indexValue").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let val = obj
+                .get("indexValue")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
             let ts = obj
                 .get("stage")
                 .and_then(|s| s.get("publishTime"))
@@ -82,7 +86,7 @@ impl AkShareClient {
 
         // Fetch statistics data
         let resp2 = self
-                        .get("https://zs.zjpwq.net/pwq-index-webapi/dataStatistics")
+            .get("https://zs.zjpwq.net/pwq-index-webapi/dataStatistics")
             .query(&params)
             .send()
             .await
@@ -100,7 +104,11 @@ impl AkShareClient {
                 Some(o) => o,
                 None => continue,
             };
-            volumes.push(obj.get("totalQuantity").and_then(|v| v.as_f64()).unwrap_or(0.0));
+            volumes.push(
+                obj.get("totalQuantity")
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(0.0),
+            );
             amounts.push(obj.get("totalCost").and_then(|v| v.as_f64()).unwrap_or(0.0));
         }
 

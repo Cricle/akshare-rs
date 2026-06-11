@@ -1,6 +1,5 @@
 //! Convertible bond info from Sina Finance.
 
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
@@ -12,7 +11,7 @@ impl AkShareClient {
     pub async fn bond_cb_profile_sina(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://money.finance.sina.com.cn/bond/info/{symbol}.html");
         let resp = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await
             .map_err(Error::from)?
@@ -33,7 +32,7 @@ impl AkShareClient {
     pub async fn bond_cb_summary_sina(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://money.finance.sina.com.cn/bond/quotes/{symbol}.html");
         let resp = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await
             .map_err(Error::from)?

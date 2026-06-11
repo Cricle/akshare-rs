@@ -1,8 +1,8 @@
 //! Economy-related alternative data: AMAC fund, air quality, auto sales,
 //! box office, NLP sentiment, articles, events, fortune, other.
 
-pub mod amac;
 pub mod air;
+pub mod amac;
 pub mod article;
 pub mod car;
 pub mod event;

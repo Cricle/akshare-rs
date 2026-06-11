@@ -91,7 +91,7 @@ impl AkShareClient {
     pub async fn stock_zh_kcb_spot(&self) -> Result<Vec<KcbSpotQuote>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
         let count_resp = self
-                        .get(count_url)
+            .get(count_url)
             .query(&[("node", "kcb")])
             .send()
             .await
@@ -114,7 +114,7 @@ impl AkShareClient {
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
             let response = self
-                                .get(list_url)
+                .get(list_url)
                 .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
@@ -133,8 +133,16 @@ impl AkShareClient {
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
 
             for item in &data {
-                let symbol = item.get("symbol").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                let name = item.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                let symbol = item
+                    .get("symbol")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let name = item
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
 
                 all_quotes.push(KcbSpotQuote {
                     symbol,
@@ -189,7 +197,7 @@ impl AkShareClient {
         };
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -251,14 +259,18 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_kcb_report_em(from_page, to_page)`
     ///
     /// Returns KCB announcement reports.
-    pub async fn stock_zh_kcb_report_em(&self, from_page: i32, to_page: i32) -> Result<Vec<KcbReport>> {
+    pub async fn stock_zh_kcb_report_em(
+        &self,
+        from_page: i32,
+        to_page: i32,
+    ) -> Result<Vec<KcbReport>> {
         let url = "https://np-anotice-stock.eastmoney.com/api/security/ann";
         let mut all_reports = Vec::new();
 
         for page in from_page..=to_page.min(from_page + 10) {
             let page_str = page.to_string();
             let response = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("sr", "-1"),
                     ("page_size", "100"),
@@ -301,10 +313,7 @@ impl AkShareClient {
             }
 
             let payload: Env = response.json().await.map_err(Error::from)?;
-            let list = payload
-                .data
-                .and_then(|d| d.list)
-                .unwrap_or_default();
+            let list = payload.data.and_then(|d| d.list).unwrap_or_default();
 
             for item in &list {
                 let code = item

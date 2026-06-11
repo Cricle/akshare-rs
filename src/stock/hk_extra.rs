@@ -238,7 +238,7 @@ impl AkShareClient {
         for page in 1..100 {
             let page_str = page.to_string();
             let response = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("page", page_str.as_str()),
                     ("num", "60"),
@@ -259,9 +259,20 @@ impl AkShareClient {
             }
 
             for item in &data {
-                let code = item.get("symbol").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                let cname = item.get("cname").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                let ename = item.get("name").and_then(|v| v.as_str()).map(|s| s.to_string());
+                let code = item
+                    .get("symbol")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let cname = item
+                    .get("cname")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let ename = item
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string());
 
                 all_quotes.push(HkSpotQuote {
                     code,
@@ -312,7 +323,7 @@ impl AkShareClient {
         };
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -373,7 +384,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_hk_famous_spot_em()`
     pub async fn stock_hk_famous_spot_em(&self) -> Result<Vec<HkFamousStock>> {
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -451,16 +462,13 @@ impl AkShareClient {
     /// Python equivalent: `stock_hk_index_daily_em(symbol)`
     ///
     /// - `symbol`: HK index code like "HSTECH"
-    pub async fn stock_hk_index_daily_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HkIndexDailyCandle>> {
+    pub async fn stock_hk_index_daily_em(&self, symbol: &str) -> Result<Vec<HkIndexDailyCandle>> {
         // Use secid format: internal_id.symbol
         // Default internal_id mapping for common indices
         let secid = format!("100.{}", symbol);
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("klt", "101"),
@@ -469,7 +477,10 @@ impl AkShareClient {
                 ("end", "20500000"),
                 ("iscca", "1"),
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+                ),
                 ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
                 ("forcect", "1"),
             ])
@@ -522,17 +533,14 @@ impl AkShareClient {
     /// Python equivalent: `stock_hk_index_daily_sina(symbol)`
     ///
     /// - `symbol`: HK index code like "CES100"
-    pub async fn stock_hk_index_daily_sina(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HkIndexDailyCandle>> {
+    pub async fn stock_hk_index_daily_sina(&self, symbol: &str) -> Result<Vec<HkIndexDailyCandle>> {
         let url = format!(
             "https://finance.sina.com.cn/stock/hkstock/{}/klc2_kl.js",
             symbol
         );
 
         let response = self
-                        .get(&url)
+            .get(&url)
             .query(&[("d", "2023_5_01")])
             .send()
             .await
@@ -543,12 +551,17 @@ impl AkShareClient {
         let text = response.text().await.map_err(Error::from)?;
 
         // Parse JS response - extract JSON
-        let json_start = text.find("=(").ok_or_else(|| Error::decode("invalid JS response"))? + 2;
-        let json_end = text.find(");").ok_or_else(|| Error::decode("invalid JS response"))?;
+        let json_start = text
+            .find("=(")
+            .ok_or_else(|| Error::decode("invalid JS response"))?
+            + 2;
+        let json_end = text
+            .find(");")
+            .ok_or_else(|| Error::decode("invalid JS response"))?;
         let json_text = &text[json_start..json_end];
 
-        let data: Vec<serde_json::Value> =
-            serde_json::from_str(json_text).map_err(|e| Error::decode(format!("JSON parse error: {e}")))?;
+        let data: Vec<serde_json::Value> = serde_json::from_str(json_text)
+            .map_err(|e| Error::decode(format!("JSON parse error: {e}")))?;
 
         let items: Vec<HkIndexDailyCandle> = data
             .iter()
@@ -558,7 +571,13 @@ impl AkShareClient {
                 let close = item.get("close")?.as_f64()?;
                 let high = item.get("high")?.as_f64()?;
                 let low = item.get("low")?.as_f64()?;
-                Some(HkIndexDailyCandle { date, open, high, low, close })
+                Some(HkIndexDailyCandle {
+                    date,
+                    open,
+                    high,
+                    low,
+                    close,
+                })
             })
             .collect();
 
@@ -573,7 +592,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_hk_index_spot_em()`
     pub async fn stock_hk_index_spot_em(&self) -> Result<Vec<HkIndexSpotEm>> {
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -611,7 +630,11 @@ impl AkShareClient {
             .iter()
             .filter_map(|item| {
                 let code = item.get("f12")?.as_str()?.to_string();
-                let internal_id = item.get("f13").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                let internal_id = item
+                    .get("f13")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
                 let name = item.get("f14")?.as_str()?.to_string();
                 Some(HkIndexSpotEm {
                     code,
@@ -643,7 +666,7 @@ impl AkShareClient {
         let url = "https://hq.sinajs.cn/rn=mtf2t&list=hkCES100,hkCES120,hkCES280,hkCES300,hkCESA80,hkCESG10,hkCESHKM,hkCSCMC,hkCSHK100,hkCSHKDIV,hkCSHKLC,hkCSHKLRE,hkCSHKMCS,hkCSHKME,hkCSHKPE,hkCSHKSE,hkCSI300,hkCSRHK50,hkGEM,hkHKL,hkHSCCI,hkHSCEI,hkHSI,hkHSMBI,hkHSMOGI,hkHSMPI,hkHSTECH,hkSSE180,hkSSE180GV,hkSSE380,hkSSE50,hkSSECEQT,hkSSECOMP,hkSSEDIV,hkSSEITOP,hkSSEMCAP,hkSSEMEGA,hkVHSI";
 
         let response = self
-                        .get(url)
+            .get(url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")
             .send()
             .await
@@ -701,7 +724,7 @@ impl AkShareClient {
         });
 
         let response = self
-                        .post(url)
+            .post(url)
             .json(&payload)
             .send()
             .await
@@ -720,7 +743,9 @@ impl AkShareClient {
         }
 
         let env: Env = response.json().await.map_err(Error::from)?;
-        let rank_data = env.data.ok_or_else(|| Error::upstream("HK hot rank missing data"))?;
+        let rank_data = env
+            .data
+            .ok_or_else(|| Error::upstream("HK hot rank missing data"))?;
 
         let mut items = Vec::new();
         for item in &rank_data {
@@ -747,10 +772,7 @@ impl AkShareClient {
     /// Get HK latest hot rank from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_hot_rank_latest_em(symbol)`
-    pub async fn stock_hk_hot_rank_latest_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HkHotRankDetail>> {
+    pub async fn stock_hk_hot_rank_latest_em(&self, symbol: &str) -> Result<Vec<HkHotRankDetail>> {
         let url = "https://emappdata.eastmoney.com/stockrank/getCurrentHkUsLatest";
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -760,7 +782,7 @@ impl AkShareClient {
         });
 
         let response = self
-                        .post(url)
+            .post(url)
             .json(&payload)
             .send()
             .await
@@ -793,10 +815,7 @@ impl AkShareClient {
     /// Get HK hot rank detail from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_hot_rank_detail_em(symbol)`
-    pub async fn stock_hk_hot_rank_detail_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HkHotRankDetail>> {
+    pub async fn stock_hk_hot_rank_detail_em(&self, symbol: &str) -> Result<Vec<HkHotRankDetail>> {
         let url = "https://emappdata.eastmoney.com/stockrank/getHisHkUsList";
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -806,7 +825,7 @@ impl AkShareClient {
         });
 
         let response = self
-                        .post(url)
+            .post(url)
             .json(&payload)
             .send()
             .await
@@ -825,7 +844,9 @@ impl AkShareClient {
         }
 
         let env: Env = response.json().await.map_err(Error::from)?;
-        let data = env.data.ok_or_else(|| Error::upstream("HK hot rank detail missing data"))?;
+        let data = env
+            .data
+            .ok_or_else(|| Error::upstream("HK hot rank detail missing data"))?;
 
         let items: Vec<HkHotRankDetail> = data
             .iter()
@@ -858,7 +879,7 @@ impl AkShareClient {
         });
 
         let response = self
-                        .post(url)
+            .post(url)
             .json(&payload)
             .send()
             .await
@@ -877,7 +898,9 @@ impl AkShareClient {
         }
 
         let env: Env = response.json().await.map_err(Error::from)?;
-        let data = env.data.ok_or_else(|| Error::upstream("HK realtime hot rank missing data"))?;
+        let data = env
+            .data
+            .ok_or_else(|| Error::upstream("HK realtime hot rank missing data"))?;
 
         let items: Vec<HkHotRankDetail> = data
             .iter()
@@ -905,7 +928,7 @@ impl AkShareClient {
     ) -> Result<Vec<HkValuationBaidu>> {
         let url = "https://finance.baidu.com/opendata";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("openapi", "1"),
                 ("dspName", "iphone"),
@@ -974,7 +997,7 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_PCF10_INDUSTRY_HKSCALE"),
                 ("columns", "ALL"),
@@ -1025,7 +1048,7 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_HKF10_FN_DIVIDEND"),
                 ("columns", "ALL"),
@@ -1068,10 +1091,7 @@ impl AkShareClient {
     /// Get HK fhpx detail from THS.
     ///
     /// Python equivalent: `stock_hk_fhpx_detail_ths(symbol)`
-    pub async fn stock_hk_fhpx_detail_ths(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HkFhpxDetailThs>> {
+    pub async fn stock_hk_fhpx_detail_ths(&self, symbol: &str) -> Result<Vec<HkFhpxDetailThs>> {
         let url = format!("https://basic.10jqka.com.cn/176/HK{}/bonus.html", symbol);
 
         let response = self
@@ -1131,7 +1151,7 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_HKF10_FN_MAINFINADATA"),
                 ("columns", "ALL"),
@@ -1179,7 +1199,7 @@ impl AkShareClient {
     pub async fn stock_hk_gxl_lg(&self) -> Result<Vec<HkGxlLg>> {
         let url = "https://legulegu.com/api/stockdata/hs";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[("indexCode", "HSI")])
             .send()
             .await
@@ -1205,7 +1225,9 @@ impl AkShareClient {
             .collect();
 
         if items.is_empty() {
-            return Err(Error::not_found("legulegu HK dividend yield returned no data"));
+            return Err(Error::not_found(
+                "legulegu HK dividend yield returned no data",
+            ));
         }
         Ok(items)
     }
@@ -1213,10 +1235,7 @@ impl AkShareClient {
     /// Get Eniu HK indicators (stub - requires authentication).
     ///
     /// Python equivalent: `stock_hk_indicator_eniu(symbol)`
-    pub async fn stock_hk_indicator_eniu(
-        &self,
-        _symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn stock_hk_indicator_eniu(&self, _symbol: &str) -> Result<Vec<serde_json::Value>> {
         Err(Error::unsupported_market(
             "stock_hk_indicator_eniu requires Eniu API authentication, not yet implemented",
         ))

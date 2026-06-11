@@ -23,7 +23,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -31,7 +31,10 @@ impl AkShareClient {
             .await?;
 
         let data: serde_json::Value = serde_json::from_str(&body)?;
-        let rows = data["ExchangeDelivery"].as_array().cloned().unwrap_or_default();
+        let rows = data["ExchangeDelivery"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
 
         let mut items = Vec::new();
         for row in &rows {
@@ -44,8 +47,14 @@ impl AkShareClient {
             let mut r = Row::new();
             r.insert("date".into(), arr.get(1).cloned().unwrap_or_default());
             r.insert("contract".into(), arr.get(5).cloned().unwrap_or_default());
-            r.insert("delivery_volume".into(), arr.get(2).cloned().unwrap_or_default());
-            r.insert("to_spot_volume".into(), arr.get(4).cloned().unwrap_or_default());
+            r.insert(
+                "delivery_volume".into(),
+                arr.get(2).cloned().unwrap_or_default(),
+            );
+            r.insert(
+                "to_spot_volume".into(),
+                arr.get(4).cloned().unwrap_or_default(),
+            );
             items.push(r);
         }
         Ok(items)
@@ -58,7 +67,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -66,7 +75,10 @@ impl AkShareClient {
             .await?;
 
         let data: serde_json::Value = serde_json::from_str(&body)?;
-        let rows = data["o_curdelivery"].as_array().cloned().unwrap_or_default();
+        let rows = data["o_curdelivery"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
 
         let mut items = Vec::new();
         for row in &rows {
@@ -90,13 +102,16 @@ impl AkShareClient {
     pub async fn futures_delivery_dce(&self, date: &str) -> Result<Vec<Row>> {
         let url = "http://www.dce.com.cn/publicweb/quotesdata/delivery.html";
         let _body = self
-                        .post(url)
+            .post(url)
             .query(&[
                 ("deliveryQuotes.variety", "all"),
                 ("year", ""),
                 ("month", ""),
                 ("deliveryQuotes.begin_month", date),
-                ("deliveryQuotes.end_month", &format!("{}", date.parse::<i64>().unwrap_or(0) + 1)),
+                (
+                    "deliveryQuotes.end_month",
+                    &format!("{}", date.parse::<i64>().unwrap_or(0) + 1),
+                ),
             ])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -109,7 +124,10 @@ impl AkShareClient {
         let mut row = Row::new();
         row.insert("source".into(), serde_json::json!("dce"));
         row.insert("date".into(), serde_json::json!(date));
-        row.insert("note".into(), serde_json::json!("HTML table data - use raw endpoint"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("HTML table data - use raw endpoint"),
+        );
         items.push(row);
         Ok(items)
     }
@@ -118,7 +136,7 @@ impl AkShareClient {
     pub async fn futures_to_spot_dce(&self, date: &str) -> Result<Vec<Row>> {
         let url = "http://www.dce.com.cn/publicweb/quotesdata/ftsDeal.html";
         let _body = self
-                        .post(url)
+            .post(url)
             .query(&[
                 ("ftsDealQuotes.variety", "all"),
                 ("year", ""),
@@ -136,7 +154,10 @@ impl AkShareClient {
         let mut row = Row::new();
         row.insert("source".into(), serde_json::json!("dce"));
         row.insert("date".into(), serde_json::json!(date));
-        row.insert("note".into(), serde_json::json!("HTML table data - use raw endpoint"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("HTML table data - use raw endpoint"),
+        );
         items.push(row);
         Ok(items)
     }
@@ -149,7 +170,7 @@ impl AkShareClient {
             year, date
         );
         let _body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -161,7 +182,10 @@ impl AkShareClient {
         let mut row = Row::new();
         row.insert("source".into(), serde_json::json!("czce"));
         row.insert("date".into(), serde_json::json!(date));
-        row.insert("note".into(), serde_json::json!("XLS binary data - requires xls parser"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("XLS binary data - requires xls parser"),
+        );
         items.push(row);
         Ok(items)
     }
@@ -174,7 +198,7 @@ impl AkShareClient {
             year, date
         );
         let _body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -185,7 +209,10 @@ impl AkShareClient {
         let mut row = Row::new();
         row.insert("source".into(), serde_json::json!("czce"));
         row.insert("date".into(), serde_json::json!(date));
-        row.insert("note".into(), serde_json::json!("XLS binary data - requires xls parser"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("XLS binary data - requires xls parser"),
+        );
         items.push(row);
         Ok(items)
     }
@@ -196,13 +223,16 @@ impl AkShareClient {
     pub async fn futures_delivery_match_dce(&self, date: &str) -> Result<Vec<Row>> {
         let url = "http://www.dce.com.cn/publicweb/quotesdata/deliveryMatch.html";
         let body = self
-                        .post(url)
+            .post(url)
             .query(&[
                 ("deliveryMatchQuotes.variety", "all"),
                 ("year", ""),
                 ("month", ""),
                 ("deliveryMatchQuotes.begin_month", date),
-                ("deliveryMatchQuotes.end_month", &format!("{}", date.parse::<i64>().unwrap_or(0) + 1)),
+                (
+                    "deliveryMatchQuotes.end_month",
+                    &format!("{}", date.parse::<i64>().unwrap_or(0) + 1),
+                ),
             ])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -227,7 +257,7 @@ impl AkShareClient {
             year, date
         );
         let _body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -238,7 +268,10 @@ impl AkShareClient {
         let mut row = Row::new();
         row.insert("source".into(), serde_json::json!("czce"));
         row.insert("date".into(), serde_json::json!(date));
-        row.insert("note".into(), serde_json::json!("XLS binary data - requires xls parser"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("XLS binary data - requires xls parser"),
+        );
         items.push(row);
         Ok(items)
     }

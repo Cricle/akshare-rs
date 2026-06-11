@@ -94,10 +94,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_board_concept_info_ths(symbol)`
     ///
     /// `symbol` is the board name, e.g. "阿里巴巴概念".
-    pub async fn stock_board_concept_info_ths(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<ThsBoardInfo>> {
+    pub async fn stock_board_concept_info_ths(&self, symbol: &str) -> Result<Vec<ThsBoardInfo>> {
         let boards = self.stock_board_concept_name_ths().await?;
         let code = boards
             .iter()
@@ -165,10 +162,7 @@ impl AkShareClient {
     /// Get industry board info from THS.
     ///
     /// Python equivalent: `stock_board_industry_info_ths(symbol)`
-    pub async fn stock_board_industry_info_ths(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<ThsBoardInfo>> {
+    pub async fn stock_board_industry_info_ths(&self, symbol: &str) -> Result<Vec<ThsBoardInfo>> {
         let boards = self.stock_board_industry_name_ths().await?;
         let code = boards
             .iter()
@@ -176,8 +170,10 @@ impl AkShareClient {
             .map(|b| b.code.as_str())
             .ok_or_else(|| Error::not_found(format!("THS industry board not found: {symbol}")))?;
 
-        self.fetch_ths_board_info(&format!("https://q.10jqka.com.cn/thshy/detail/code/{code}/"))
-            .await
+        self.fetch_ths_board_info(&format!(
+            "https://q.10jqka.com.cn/thshy/detail/code/{code}/"
+        ))
+        .await
     }
 
     /// Get industry board index data from THS.
@@ -213,8 +209,10 @@ impl AkShareClient {
             .map(|b| b.code.as_str())
             .ok_or_else(|| Error::not_found(format!("THS industry board not found: {symbol}")))?;
 
-        self.fetch_ths_board_summary(&format!("https://q.10jqka.com.cn/thshy/detail/code/{code}/"))
-            .await
+        self.fetch_ths_board_summary(&format!(
+            "https://q.10jqka.com.cn/thshy/detail/code/{code}/"
+        ))
+        .await
     }
 
     // -- Private helpers -----------------------------------------------------

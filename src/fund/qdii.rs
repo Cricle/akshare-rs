@@ -48,22 +48,12 @@ impl AkShareClient {
     }
 
     // Internal helper
-    async fn fetch_qdii_jsl(
-        &self,
-        market: &str,
-        cookie: &str,
-    ) -> Result<Vec<MacroDataPoint>> {
-        let url = format!(
-            "https://www.jisilu.cn/data/qdii/qdii_list/{}",
-            market
-        );
+    async fn fetch_qdii_jsl(&self, market: &str, cookie: &str) -> Result<Vec<MacroDataPoint>> {
+        let url = format!("https://www.jisilu.cn/data/qdii/qdii_list/{}", market);
 
         let mut req = self
             .get(&url)
-            .query(&[
-                ("___jsl", "LST___t=1728207798534"),
-                ("rp", "22"),
-            ]);
+            .query(&[("___jsl", "LST___t=1728207798534"), ("rp", "22")]);
 
         if !cookie.is_empty() {
             req = req.header("Cookie", cookie);
@@ -86,14 +76,8 @@ impl AkShareClient {
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string();
-                let price = cell
-                    .get("price")
-                    .and_then(|v| v.as_f64())
-                    .unwrap_or(0.0);
-                let nav = cell
-                    .get("fund_nav")
-                    .and_then(|v| v.as_f64())
-                    .unwrap_or(0.0);
+                let price = cell.get("price").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let nav = cell.get("fund_nav").and_then(|v| v.as_f64()).unwrap_or(0.0);
                 let discount_rt = cell
                     .get("discount_rt")
                     .and_then(|v| v.as_str())
@@ -114,10 +98,7 @@ impl AkShareClient {
                     });
                     // Add discount rate
                     items.push(MacroDataPoint {
-                        date: format!(
-                            "{}_discount",
-                            items[items.len() - 2].date
-                        ),
+                        date: format!("{}_discount", items[items.len() - 2].date),
                         value: discount_rt,
                         name: format!("{} Discount%", items[items.len() - 2].name),
                     });

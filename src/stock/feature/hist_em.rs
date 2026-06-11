@@ -1,9 +1,9 @@
 //! Historical data from Eastmoney (stock_zh_a_hist, stock_hk_hist, stock_us_hist, etc.)
 
+use super::types::HistData;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::market::*;
-use super::types::HistData;
 use crate::util::parse_csv_line;
 use crate::util::parse_f64_safe;
 
@@ -21,24 +21,46 @@ impl AkShareClient {
             "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let fqt = match adjust {
             "qfq" => "1",
             "hfq" => "2",
             "" => "0",
-            _ => return Err(Error::invalid_input(format!("unsupported adjust: {adjust}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported adjust: {adjust}"
+                )));
+            }
         };
         let secid = eastmoney_secid(symbol)?;
         let resp = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
                 ("klt", klt),
                 ("fqt", fqt),
-                ("beg", if start_date.is_empty() { "0" } else { start_date }),
-                ("end", if end_date.is_empty() { "20500000" } else { end_date }),
+                (
+                    "beg",
+                    if start_date.is_empty() {
+                        "0"
+                    } else {
+                        start_date
+                    },
+                ),
+                (
+                    "end",
+                    if end_date.is_empty() {
+                        "20500000"
+                    } else {
+                        end_date
+                    },
+                ),
                 ("lmt", "1000000"),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
@@ -96,7 +118,11 @@ impl AkShareClient {
             "15" => "15",
             "30" => "30",
             "60" => "60",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let fqt = match adjust {
             "qfq" => "1",
@@ -106,14 +132,28 @@ impl AkShareClient {
         };
         let secid = eastmoney_secid(symbol)?;
         let resp = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
                 ("klt", klt),
                 ("fqt", fqt),
-                ("beg", if start_date.is_empty() { "0" } else { start_date }),
-                ("end", if end_date.is_empty() { "20500000" } else { end_date }),
+                (
+                    "beg",
+                    if start_date.is_empty() {
+                        "0"
+                    } else {
+                        start_date
+                    },
+                ),
+                (
+                    "end",
+                    if end_date.is_empty() {
+                        "20500000"
+                    } else {
+                        end_date
+                    },
+                ),
                 ("lmt", "1000000"),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
@@ -169,7 +209,11 @@ impl AkShareClient {
             "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let fqt = match adjust {
             "qfq" => "1",
@@ -179,14 +223,28 @@ impl AkShareClient {
         };
         let secid = format!("116.{}", symbol.trim());
         let resp = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
                 ("klt", klt),
                 ("fqt", fqt),
-                ("beg", if start_date.is_empty() { "0" } else { start_date }),
-                ("end", if end_date.is_empty() { "20500000" } else { end_date }),
+                (
+                    "beg",
+                    if start_date.is_empty() {
+                        "0"
+                    } else {
+                        start_date
+                    },
+                ),
+                (
+                    "end",
+                    if end_date.is_empty() {
+                        "20500000"
+                    } else {
+                        end_date
+                    },
+                ),
                 ("lmt", "1000000"),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
@@ -244,7 +302,11 @@ impl AkShareClient {
             "15" => "15",
             "30" => "30",
             "60" => "60",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let fqt = match adjust {
             "qfq" => "1",
@@ -254,14 +316,28 @@ impl AkShareClient {
         };
         let secid = format!("116.{}", symbol.trim());
         let resp = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
                 ("klt", klt),
                 ("fqt", fqt),
-                ("beg", if start_date.is_empty() { "0" } else { start_date }),
-                ("end", if end_date.is_empty() { "20500000" } else { end_date }),
+                (
+                    "beg",
+                    if start_date.is_empty() {
+                        "0"
+                    } else {
+                        start_date
+                    },
+                ),
+                (
+                    "end",
+                    if end_date.is_empty() {
+                        "20500000"
+                    } else {
+                        end_date
+                    },
+                ),
                 ("lmt", "1000000"),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
@@ -317,7 +393,11 @@ impl AkShareClient {
             "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let fqt = match adjust {
             "qfq" => "1",
@@ -345,14 +425,28 @@ impl AkShareClient {
         };
 
         let resp = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
                 ("klt", klt),
                 ("fqt", fqt),
-                ("beg", if start_date.is_empty() { "0" } else { start_date }),
-                ("end", if end_date.is_empty() { "20500000" } else { end_date }),
+                (
+                    "beg",
+                    if start_date.is_empty() {
+                        "0"
+                    } else {
+                        start_date
+                    },
+                ),
+                (
+                    "end",
+                    if end_date.is_empty() {
+                        "20500000"
+                    } else {
+                        end_date
+                    },
+                ),
                 ("lmt", "1000000"),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
@@ -410,7 +504,11 @@ impl AkShareClient {
             "15" => "15",
             "30" => "30",
             "60" => "60",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let fqt = match adjust {
             "qfq" => "1",
@@ -420,14 +518,28 @@ impl AkShareClient {
         };
         let secid = format!("105.{}", symbol);
         let resp = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
                 ("klt", klt),
                 ("fqt", fqt),
-                ("beg", if start_date.is_empty() { "0" } else { start_date }),
-                ("end", if end_date.is_empty() { "20500000" } else { end_date }),
+                (
+                    "beg",
+                    if start_date.is_empty() {
+                        "0"
+                    } else {
+                        start_date
+                    },
+                ),
+                (
+                    "end",
+                    if end_date.is_empty() {
+                        "20500000"
+                    } else {
+                        end_date
+                    },
+                ),
                 ("lmt", "1000000"),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),

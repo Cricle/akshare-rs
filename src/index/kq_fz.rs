@@ -13,20 +13,21 @@ impl AkShareClient {
     /// 中国柯桥纺织指数.
     ///
     /// `symbol` is one of: "价格指数", "景气指数", "外贸指数".
-    pub async fn index_kq_fz(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn index_kq_fz(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let index_type = match symbol {
             "价格指数" => "1_1",
             "景气指数" => "1_2",
             "外贸指数" => "2",
-            _ => return Err(Error::invalid_input(format!("unsupported KQ FZ symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported KQ FZ symbol: {symbol}"
+                )));
+            }
         };
 
         // First request to get page count
         let resp = self
-                        .get("http://www.kqindex.cn/flzs/table_data")
+            .get("http://www.kqindex.cn/flzs/table_data")
             .query(&[
                 ("category", "0"),
                 ("start", ""),
@@ -53,7 +54,7 @@ impl AkShareClient {
         // Fetch remaining pages
         for page in 2..=page_count {
             let resp = self
-                                .get("http://www.kqindex.cn/flzs/table_data")
+                .get("http://www.kqindex.cn/flzs/table_data")
                 .query(&[
                     ("category", "0"),
                     ("start", ""),

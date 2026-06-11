@@ -79,7 +79,7 @@ impl AkShareClient {
     pub async fn stock_zh_b_spot(&self) -> Result<Vec<ZhBSpotQuote>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
         let count_resp = self
-                        .get(count_url)
+            .get(count_url)
             .query(&[("node", "hs_b")])
             .send()
             .await
@@ -102,7 +102,7 @@ impl AkShareClient {
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
             let response = self
-                                .get(list_url)
+                .get(list_url)
                 .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
@@ -180,7 +180,7 @@ impl AkShareClient {
         };
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
@@ -263,7 +263,7 @@ impl AkShareClient {
 
         let url = "https://quotes.sina.cn/cn/api/jsonp_v2.php/=/CN_MarketDataService.getKLineData";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("symbol", sina_symbol.as_str()),
                 ("scale", period),
@@ -277,12 +277,17 @@ impl AkShareClient {
 
         let text = response.text().await.map_err(Error::from)?;
 
-        let json_start = text.find("=(").ok_or_else(|| Error::decode("invalid JSONP response"))? + 2;
-        let json_end = text.rfind(");").ok_or_else(|| Error::decode("invalid JSONP response"))?;
+        let json_start = text
+            .find("=(")
+            .ok_or_else(|| Error::decode("invalid JSONP response"))?
+            + 2;
+        let json_end = text
+            .rfind(");")
+            .ok_or_else(|| Error::decode("invalid JSONP response"))?;
         let json_text = &text[json_start..json_end];
 
-        let data: Vec<serde_json::Value> =
-            serde_json::from_str(json_text).map_err(|e| Error::decode(format!("JSON parse error: {e}")))?;
+        let data: Vec<serde_json::Value> = serde_json::from_str(json_text)
+            .map_err(|e| Error::decode(format!("JSON parse error: {e}")))?;
 
         let items: Vec<ZhBMinuteCandle> = data
             .iter()

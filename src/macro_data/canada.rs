@@ -101,5 +101,4 @@ impl AkShareClient {
     pub async fn macro_canada_unemployment_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_unemployment_rate().await
     }
-
 }

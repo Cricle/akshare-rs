@@ -27,7 +27,7 @@ impl AkShareClient {
     pub async fn car_market_country_cpca(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "http://data.cpcadata.com/api/chartlist";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("charttype", "4")])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -55,7 +55,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "http://data.cpcadata.com/api/chartlist";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("charttype", "5")])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -79,7 +79,7 @@ impl AkShareClient {
     pub async fn economy_auto_sales(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_ECONOMY_AUTO_SALES"),
                 ("columns", "ALL"),

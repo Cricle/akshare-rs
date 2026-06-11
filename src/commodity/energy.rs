@@ -22,7 +22,7 @@ impl AkShareClient {
     pub async fn energy_oil_hist(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_ECONOMY_OIL_PRICE"),
                 ("columns", "ALL"),
@@ -69,7 +69,7 @@ impl AkShareClient {
     pub async fn energy_carbon_domestic(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_CARBON_TRADING"),
                 ("columns", "ALL"),

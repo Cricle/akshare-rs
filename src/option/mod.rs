@@ -8,18 +8,18 @@
 //! - **Commodity exchanges** — DCE, CZCE, SHFE, GFEX daily option data
 //! - **Other** — Commission info (9qihuo), margin data (iweiai), CTP contract info (openctp)
 
-pub mod em;
+pub mod analysis_em;
 pub mod cffex_sina;
-pub mod sse_sina;
+pub mod comm_qihuo;
 pub mod commodity;
 pub mod commodity_sina;
+pub mod contract_info_ctp;
 pub mod current_sse;
+pub mod czce;
 pub mod daily_stats;
+pub mod em;
 pub mod finance;
 pub mod lhb_em;
 pub mod margin;
 pub mod risk_indicator;
-pub mod analysis_em;
-pub mod comm_qihuo;
-pub mod contract_info_ctp;
-pub mod czce;
+pub mod sse_sina;

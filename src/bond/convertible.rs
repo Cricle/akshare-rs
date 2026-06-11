@@ -70,7 +70,7 @@ impl AkShareClient {
     pub async fn bond_convertible_list(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
         let pz = limit.clamp(1, 5000).to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),
@@ -89,10 +89,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
-        let values = payload
-            .data
-            .and_then(|d| d.diff)
-            .unwrap_or_default();
+        let values = payload.data.and_then(|d| d.diff).unwrap_or_default();
 
         if values.is_empty() {
             return Err(Error::not_found(
@@ -141,7 +138,7 @@ impl AkShareClient {
         let lmt = limit.max(5).to_string();
 
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("secid", secid.as_str()),
                 ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),

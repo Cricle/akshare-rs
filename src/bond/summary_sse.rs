@@ -1,6 +1,5 @@
 //! Bond summary data from SSE (上登债券信息网).
 
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
@@ -13,7 +12,7 @@ impl AkShareClient {
         let formatted = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "http://query.sse.com.cn/commonExcelDd.do";
         let resp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQXQSCGL_CX_L"),
                 ("TRADE_DATE", formatted.as_str()),
@@ -40,7 +39,7 @@ impl AkShareClient {
         let formatted = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "http://query.sse.com.cn/commonExcelDd.do";
         let resp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQCJGL_CX_L"),
                 ("TRADE_DATE", formatted.as_str()),

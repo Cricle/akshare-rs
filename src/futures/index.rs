@@ -22,7 +22,7 @@ impl AkShareClient {
 
         let url = "http://www.ccidx.com/CCI-ZZZS/index/getDateLine";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("indexId", index_id)])
             .send()
             .await?
@@ -43,7 +43,10 @@ impl AkShareClient {
             row.insert("close_price".into(), entry["closingPrice"].clone());
             row.insert("settle_price".into(), entry["settlePrice"].clone());
             row.insert("change".into(), entry["dailyIncreaseAndDecrease"].clone());
-            row.insert("change_pct".into(), entry["dailyIncreaseAndDecreasePercentage"].clone());
+            row.insert(
+                "change_pct".into(),
+                entry["dailyIncreaseAndDecreasePercentage"].clone(),
+            );
             items.push(row);
         }
         Ok(items)

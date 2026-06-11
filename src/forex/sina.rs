@@ -7,14 +7,22 @@ use crate::util::parse_f64_safe;
 
 /// Sina forex symbols for major currency pairs against CNY.
 const SINA_FOREX_SYMBOLS: &[&str] = &[
-    "fx_susdcny", "fx_seurcny", "fx_sgbpcny", "fx_sjpycny", "fx_shkdcny",
-    "fx_saudcny", "fx_scadcny", "fx_schfcny", "fx_nzdcny", "fx_ssgdcny",
+    "fx_susdcny",
+    "fx_seurcny",
+    "fx_sgbpcny",
+    "fx_sjpycny",
+    "fx_shkdcny",
+    "fx_saudcny",
+    "fx_scadcny",
+    "fx_schfcny",
+    "fx_nzdcny",
+    "fx_ssgdcny",
 ];
 
 /// Human-readable currency pair labels matching `SINA_FOREX_SYMBOLS`.
 const FOREX_PAIR_LABELS: &[&str] = &[
-    "USD/CNY", "EUR/CNY", "GBP/CNY", "JPY/CNY", "HKD/CNY",
-    "AUD/CNY", "CAD/CNY", "CHF/CNY", "NZD/CNY", "SGD/CNY",
+    "USD/CNY", "EUR/CNY", "GBP/CNY", "JPY/CNY", "HKD/CNY", "AUD/CNY", "CAD/CNY", "CHF/CNY",
+    "NZD/CNY", "SGD/CNY",
 ];
 
 impl AkShareClient {
@@ -29,7 +37,7 @@ impl AkShareClient {
         let url = format!("https://hq.sinajs.cn/list={symbols_csv}");
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://finance.sina.com.cn")
             .send()
             .await?

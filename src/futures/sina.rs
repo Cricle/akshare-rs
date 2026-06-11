@@ -14,17 +14,13 @@ impl AkShareClient {
     /// - `"nf_SC0"` — Crude oil (Shanghai INE)
     /// - `"nf_RB0"` — Rebar
     /// - `"nf_IF0"` — CSI 300 index futures
-    pub async fn futures_main_sina(
-        &self,
-        symbol: &str,
-        limit: usize,
-    ) -> Result<Vec<CandlePoint>> {
+    pub async fn futures_main_sina(&self, symbol: &str, limit: usize) -> Result<Vec<CandlePoint>> {
         let url = format!(
-            "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_=/InnerFuturesNewService.getDailyKLine?symbol={symbol}&_={}"
-            , chrono::Utc::now().timestamp_millis()
+            "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_=/InnerFuturesNewService.getDailyKLine?symbol={symbol}&_={}",
+            chrono::Utc::now().timestamp_millis()
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://finance.sina.com.cn")
             .send()
             .await?
@@ -34,12 +30,15 @@ impl AkShareClient {
         // Extract JSON array from JSONP callback: var _=([[...]])
         let json_str = body
             .find("[[")
-            .and_then(|start| body[start..].rfind("]]").map(|end| &body[start..start + end + 2]))
+            .and_then(|start| {
+                body[start..]
+                    .rfind("]]")
+                    .map(|end| &body[start..start + end + 2])
+            })
             .ok_or_else(|| Error::decode("sina futures: invalid JSONP response"))?;
 
         // Parse as Vec<Vec<...>> where each inner is [date, open, high, low, close, volume, ...]
-        let rows: Vec<Vec<serde_json::Value>> =
-            serde_json::from_str(json_str).unwrap_or_default();
+        let rows: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str).unwrap_or_default();
 
         let mut items = Vec::with_capacity(rows.len());
         for row in &rows {
@@ -85,7 +84,7 @@ impl AkShareClient {
     pub async fn futures_symbol_mark(&self) -> Result<Vec<Row>> {
         let url = "https://vip.stock.finance.sina.com.cn/quotes_service/view/js/qihuohangqing.js";
         let body = self
-                        .get(url)
+            .get(url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")
             .send()
             .await?
@@ -96,7 +95,11 @@ impl AkShareClient {
         // Extract the JSON object from the JS variable assignment
         let json_str = body
             .find('{')
-            .and_then(|start| body[start..].find('}').map(|end| &body[start..start + end + 1]))
+            .and_then(|start| {
+                body[start..]
+                    .find('}')
+                    .map(|end| &body[start..start + end + 1])
+            })
             .ok_or_else(|| Error::decode("sina symbol mark: invalid JS response"))?;
 
         let data: serde_json::Value = serde_json::from_str(json_str)
@@ -111,8 +114,7 @@ impl AkShareClient {
                 continue;
             }
             // First element is the exchange name, rest are [symbol, mark] pairs
-            for i in 1..arr.len() {
-                let entry = &arr[i];
+            for entry in arr.iter().skip(1) {
                 let Some(arr_entry) = entry.as_array() else {
                     continue;
                 };
@@ -139,12 +141,15 @@ impl AkShareClient {
         let mark = marks
             .iter()
             .find(|r| r.get("symbol").and_then(|v| v.as_str()) == Some(symbol))
-            .and_then(|r| r.get("mark").and_then(|v| v.as_str().map(|s| s.to_string())))
+            .and_then(|r| {
+                r.get("mark")
+                    .and_then(|v| v.as_str().map(|s| s.to_string()))
+            })
             .ok_or_else(|| Error::not_found(format!("sina: unknown futures symbol: {}", symbol)))?;
 
         let url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQFuturesData";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("page", "1"),
                 ("sort", "position"),
@@ -176,11 +181,7 @@ impl AkShareClient {
     ///
     /// `symbols` is a comma-separated list of contract codes like "V2309,V2401".
     /// `market` is "CF" for commodity futures, "FF" for financial futures.
-    pub async fn futures_zh_spot(
-        &self,
-        symbols: &str,
-        market: &str,
-    ) -> Result<Vec<Row>> {
+    pub async fn futures_zh_spot(&self, symbols: &str, market: &str) -> Result<Vec<Row>> {
         let subscribe_list: Vec<String> = symbols
             .split(',')
             .map(|s| format!("nf_{}", s.trim()))
@@ -190,7 +191,7 @@ impl AkShareClient {
 
         let url = format!("https://hq.sinajs.cn/rn={}&list={}", rn, list_str);
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -211,10 +212,7 @@ impl AkShareClient {
 
             // Extract the comma-separated values between quotes
             let value_part = line.split('=').nth(1).unwrap_or("");
-            let values: Vec<&str> = value_part
-                .trim_matches('"')
-                .split(',')
-                .collect();
+            let values: Vec<&str> = value_part.trim_matches('"').split(',').collect();
 
             if values.len() < 15 {
                 continue;
@@ -262,14 +260,10 @@ impl AkShareClient {
     ///
     /// `symbol`: contract code like "IF2008", "RB0"
     /// `period`: "1", "5", "15", "30", "60" for 1/5/15/30/60 minute bars
-    pub async fn futures_zh_minute_sina(
-        &self,
-        symbol: &str,
-        period: &str,
-    ) -> Result<Vec<Row>> {
+    pub async fn futures_zh_minute_sina(&self, symbol: &str, period: &str) -> Result<Vec<Row>> {
         let url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/=/InnerFuturesNewService.getFewMinLine";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("symbol", symbol), ("type", period)])
             .header("Referer", "https://finance.sina.com.cn")
             .send()
@@ -280,7 +274,11 @@ impl AkShareClient {
         // Extract JSON from JSONP callback: =([...]);
         let json_str = body
             .find("=(")
-            .and_then(|start| body[start..].rfind(");").map(|end| &body[start + 2..start + end]))
+            .and_then(|start| {
+                body[start..]
+                    .rfind(");")
+                    .map(|end| &body[start + 2..start + end])
+            })
             .ok_or_else(|| Error::decode("sina minute kline: invalid JSONP response"))?;
 
         let data: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str)
@@ -309,15 +307,10 @@ impl AkShareClient {
     /// `symbol`: contract code like "RB0", "V2105"
     pub async fn futures_zh_daily_sina(&self, symbol: &str) -> Result<Vec<Row>> {
         let date = chrono::Utc::now().format("%Y%m%d").to_string();
-        let date_formatted = format!(
-            "{}_{}_{}",
-            &date[..4],
-            &date[4..6],
-            &date[6..8]
-        );
+        let date_formatted = format!("{}_{}_{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_dummy=/InnerFuturesNewService.getDailyKLine";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("symbol", symbol), ("type", &date_formatted)])
             .header("Referer", "https://finance.sina.com.cn")
             .send()
@@ -328,7 +321,11 @@ impl AkShareClient {
         // Extract JSON from JSONP callback
         let json_str = body
             .find("=(")
-            .and_then(|start| body[start..].rfind(");").map(|end| &body[start + 2..start + end]))
+            .and_then(|start| {
+                body[start..]
+                    .rfind(");")
+                    .map(|end| &body[start + 2..start + end])
+            })
             .ok_or_else(|| Error::decode("sina daily kline: invalid JSONP response"))?;
 
         let data: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str)

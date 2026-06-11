@@ -89,7 +89,7 @@ impl AkShareClient {
     async fn fetch_sina_bond(&self, code: &str, label: &str) -> Result<Vec<MacroDataPoint>> {
         let url = format!("https://bond.finance.sina.com.cn/hq/gb/daily?symbol={code}");
         let resp: SinaGbEnvelope = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await
             .map_err(Error::from)?
@@ -97,13 +97,12 @@ impl AkShareClient {
             .await
             .map_err(Error::from)?;
 
-        let rows = resp
-            .result
-            .and_then(|r| r.data)
-            .unwrap_or_default();
+        let rows = resp.result.and_then(|r| r.data).unwrap_or_default();
 
         if rows.is_empty() {
-            return Err(Error::not_found(format!("sina returned no bond data for {label}")));
+            return Err(Error::not_found(format!(
+                "sina returned no bond data for {label}"
+            )));
         }
 
         let items: Vec<MacroDataPoint> = rows
@@ -137,13 +136,19 @@ mod tests {
     #[test]
     fn test_zh_gb_map() {
         assert_eq!(ZH_GB_MAP.len(), 9);
-        assert_eq!(resolve_sina_code(ZH_GB_MAP, "中国10年期国债").unwrap(), "CN10YT");
+        assert_eq!(
+            resolve_sina_code(ZH_GB_MAP, "中国10年期国债").unwrap(),
+            "CN10YT"
+        );
     }
 
     #[test]
     fn test_us_gb_map() {
         assert_eq!(US_GB_MAP.len(), 13);
-        assert_eq!(resolve_sina_code(US_GB_MAP, "美国10年期国债").unwrap(), "US10YT");
+        assert_eq!(
+            resolve_sina_code(US_GB_MAP, "美国10年期国债").unwrap(),
+            "US10YT"
+        );
     }
 
     #[test]

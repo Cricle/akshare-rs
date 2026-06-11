@@ -20,7 +20,7 @@ impl AkShareClient {
         );
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .send()
             .await?
             .error_for_status()?
@@ -46,7 +46,10 @@ impl AkShareClient {
         }
 
         if items.is_empty() {
-            return Err(Error::not_found(format!("hf sp500: no data for year {}", year)));
+            return Err(Error::not_found(format!(
+                "hf sp500: no data for year {}",
+                year
+            )));
         }
         Ok(items)
     }

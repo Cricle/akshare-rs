@@ -15,12 +15,7 @@ impl AkShareClient {
     /// Returns a list of trading dates.
     pub async fn tool_trade_date_hist_sina(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://finance.sina.com.cn/realstock/company/klc_td_sh.txt";
-        let body = self
-                        .get(url)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.get(url).send().await?.text().await?;
 
         // The response format is: var klc_td_sh="date1,date2,...";
         let dates_str = body

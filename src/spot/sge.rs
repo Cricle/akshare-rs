@@ -9,9 +9,9 @@ use crate::types::MacroDataPoint;
 
 /// Available SGE symbol list.
 const SGE_SYMBOLS: &[&str] = &[
-    "Au99.99", "Au99.95", "Au100g", "Pt99.95", "Ag(T+D)", "Au(T+D)",
-    "mAu(T+D)", "Au(T+N1)", "Au(T+N2)", "Ag99.99", "iAu99.99", "Au99.5",
-    "iAu100g", "iAu99.5", "PGC30g", "NYAuTN06", "NYAuTN12",
+    "Au99.99", "Au99.95", "Au100g", "Pt99.95", "Ag(T+D)", "Au(T+D)", "mAu(T+D)", "Au(T+N1)",
+    "Au(T+N2)", "Ag99.99", "iAu99.99", "Au99.5", "iAu100g", "iAu99.5", "PGC30g", "NYAuTN06",
+    "NYAuTN12",
 ];
 
 #[derive(Debug, Deserialize)]
@@ -44,7 +44,7 @@ impl AkShareClient {
     /// Returns intraday price series with timestamps.
     pub async fn spot_quotations_sge(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let resp: SgeQuotationResp = self
-                        .get("https://www.sge.com.cn/graph/quotations")
+            .get("https://www.sge.com.cn/graph/quotations")
             .query(&[("instid", symbol)])
             .send()
             .await?
@@ -55,7 +55,9 @@ impl AkShareClient {
         let data = resp.data.unwrap_or_default();
 
         if times.is_empty() || data.is_empty() {
-            return Err(Error::not_found(format!("sge returned no data for {symbol}")));
+            return Err(Error::not_found(format!(
+                "sge returned no data for {symbol}"
+            )));
         }
 
         let items: Vec<MacroDataPoint> = times
@@ -82,7 +84,7 @@ impl AkShareClient {
     /// Returns daily open/close/high/low data.
     pub async fn spot_hist_sge(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let resp: SgeHistResp = self
-                        .post("https://www.sge.com.cn/graph/Dailyhq")
+            .post("https://www.sge.com.cn/graph/Dailyhq")
             .form(&[("instid", symbol)])
             .send()
             .await?
@@ -91,7 +93,9 @@ impl AkShareClient {
 
         let rows = resp.time.unwrap_or_default();
         if rows.is_empty() {
-            return Err(Error::not_found(format!("sge returned no hist data for {symbol}")));
+            return Err(Error::not_found(format!(
+                "sge returned no hist data for {symbol}"
+            )));
         }
 
         let items: Vec<MacroDataPoint> = rows
@@ -121,7 +125,9 @@ impl AkShareClient {
             .collect();
 
         if items.is_empty() {
-            return Err(Error::not_found(format!("no valid sge hist data for {symbol}")));
+            return Err(Error::not_found(format!(
+                "no valid sge hist data for {symbol}"
+            )));
         }
         Ok(items)
     }
@@ -131,7 +137,7 @@ impl AkShareClient {
     /// Returns early and late session benchmark prices.
     pub async fn spot_golden_benchmark_sge(&self) -> Result<Vec<MacroDataPoint>> {
         let resp: SgeBenchmarkResp = self
-                        .post("https://www.sge.com.cn/graph/DayilyJzj")
+            .post("https://www.sge.com.cn/graph/DayilyJzj")
             .send()
             .await?
             .json()
@@ -145,7 +151,7 @@ impl AkShareClient {
     /// Returns early and late session benchmark prices.
     pub async fn spot_silver_benchmark_sge(&self) -> Result<Vec<MacroDataPoint>> {
         let resp: SgeBenchmarkResp = self
-                        .post("https://www.sge.com.cn/graph/DayilyShsilverJzj")
+            .post("https://www.sge.com.cn/graph/DayilyShsilverJzj")
             .send()
             .await?
             .json()
@@ -163,28 +169,32 @@ fn parse_benchmark(resp: SgeBenchmarkResp, label: &str) -> Result<Vec<MacroDataP
     for row in &wp {
         if row.len() >= 2
             && let (Some(ts), Some(val)) = (row[0].as_f64(), row[1].as_f64())
-                && let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64) {
-                    items.push(MacroDataPoint {
-                        date: dt.format("%Y-%m-%d").to_string(),
-                        value: val,
-                        name: format!("{label} late"),
-                    });
-                }
+            && let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64)
+        {
+            items.push(MacroDataPoint {
+                date: dt.format("%Y-%m-%d").to_string(),
+                value: val,
+                name: format!("{label} late"),
+            });
+        }
     }
     for row in &zp {
         if row.len() >= 2
             && let (Some(ts), Some(val)) = (row[0].as_f64(), row[1].as_f64())
-                && let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64) {
-                    items.push(MacroDataPoint {
-                        date: dt.format("%Y-%m-%d").to_string(),
-                        value: val,
-                        name: format!("{label} early"),
-                    });
-                }
+            && let Some(dt) = chrono::DateTime::from_timestamp_millis(ts as i64)
+        {
+            items.push(MacroDataPoint {
+                date: dt.format("%Y-%m-%d").to_string(),
+                value: val,
+                name: format!("{label} early"),
+            });
+        }
     }
 
     if items.is_empty() {
-        return Err(Error::not_found(format!("sge returned no benchmark data for {label}")));
+        return Err(Error::not_found(format!(
+            "sge returned no benchmark data for {label}"
+        )));
     }
     Ok(items)
 }

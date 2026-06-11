@@ -23,7 +23,7 @@ impl AkShareClient {
         // Step 1: Get product code mapping
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_FUTU_POSITIONCODE"),
                 ("columns", "TRADE_MARKET_CODE,TRADE_CODE,TRADE_TYPE"),
@@ -54,9 +54,9 @@ impl AkShareClient {
             }
         }
 
-        let product_id = code_map.get(symbol).ok_or_else(|| {
-            Error::invalid_input(format!("unknown inventory symbol: {}", symbol))
-        })?;
+        let product_id = code_map
+            .get(symbol)
+            .ok_or_else(|| Error::invalid_input(format!("unknown inventory symbol: {}", symbol)))?;
 
         // Step 2: Fetch inventory data
         let filter = format!(
@@ -64,10 +64,13 @@ impl AkShareClient {
             product_id
         );
         let body2 = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_FUTU_STOCKDATA"),
-                ("columns", "SECURITY_CODE,TRADE_DATE,ON_WARRANT_NUM,ADDCHANGE"),
+                (
+                    "columns",
+                    "SECURITY_CODE,TRADE_DATE,ON_WARRANT_NUM,ADDCHANGE",
+                ),
                 ("filter", filter.as_str()),
                 ("pageNumber", "1"),
                 ("pageSize", "500"),
@@ -110,7 +113,7 @@ impl AkShareClient {
     pub async fn futures_inventory_99(&self, _symbol: &str) -> Result<Vec<Row>> {
         let url = "https://www.99qh.com/data/stockIn";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?

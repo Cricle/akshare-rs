@@ -83,25 +83,17 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let formatted_end = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let formatted_end = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
         let url = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-currency/FrrHis";
         let resp: FrrResponse = self
-                        .post(url)
+            .post(url)
             .query(&[
                 ("lang", "CN"),
                 ("startDate", &formatted_start),
                 ("endDate", &formatted_end),
             ])
-            .header(
-                "User-Agent",
-                "Mozilla/5.0 (compatible; akshare-rust/0.1)",
-            )
+            .header("User-Agent", "Mozilla/5.0 (compatible; akshare-rust/0.1)")
             .send()
             .await?
             .json()

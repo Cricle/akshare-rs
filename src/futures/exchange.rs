@@ -106,10 +106,22 @@ impl AkShareClient {
                 row.insert("variety".into(), serde_json::json!(r.variety));
                 row.insert("vol_party_name".into(), serde_json::json!(r.vol_party_name));
                 row.insert("vol".into(), serde_json::json!(r.vol));
-                row.insert("long_party_name".into(), serde_json::json!(r.long_party_name));
-                row.insert("long_open_interest".into(), serde_json::json!(r.long_open_interest));
-                row.insert("short_party_name".into(), serde_json::json!(r.short_party_name));
-                row.insert("short_open_interest".into(), serde_json::json!(r.short_open_interest));
+                row.insert(
+                    "long_party_name".into(),
+                    serde_json::json!(r.long_party_name),
+                );
+                row.insert(
+                    "long_open_interest".into(),
+                    serde_json::json!(r.long_open_interest),
+                );
+                row.insert(
+                    "short_party_name".into(),
+                    serde_json::json!(r.short_party_name),
+                );
+                row.insert(
+                    "short_open_interest".into(),
+                    serde_json::json!(r.short_open_interest),
+                );
                 all_ranks.push(row);
             }
         }
@@ -124,10 +136,22 @@ impl AkShareClient {
                 row.insert("variety".into(), serde_json::json!(r.variety));
                 row.insert("vol_party_name".into(), serde_json::json!(r.vol_party_name));
                 row.insert("vol".into(), serde_json::json!(r.vol));
-                row.insert("long_party_name".into(), serde_json::json!(r.long_party_name));
-                row.insert("long_open_interest".into(), serde_json::json!(r.long_open_interest));
-                row.insert("short_party_name".into(), serde_json::json!(r.short_party_name));
-                row.insert("short_open_interest".into(), serde_json::json!(r.short_open_interest));
+                row.insert(
+                    "long_party_name".into(),
+                    serde_json::json!(r.long_party_name),
+                );
+                row.insert(
+                    "long_open_interest".into(),
+                    serde_json::json!(r.long_open_interest),
+                );
+                row.insert(
+                    "short_party_name".into(),
+                    serde_json::json!(r.short_party_name),
+                );
+                row.insert(
+                    "short_open_interest".into(),
+                    serde_json::json!(r.short_open_interest),
+                );
                 all_ranks.push(row);
             }
         }
@@ -142,10 +166,22 @@ impl AkShareClient {
                 row.insert("variety".into(), serde_json::json!(r.variety));
                 row.insert("vol_party_name".into(), serde_json::json!(r.vol_party_name));
                 row.insert("vol".into(), serde_json::json!(r.vol));
-                row.insert("long_party_name".into(), serde_json::json!(r.long_party_name));
-                row.insert("long_open_interest".into(), serde_json::json!(r.long_open_interest));
-                row.insert("short_party_name".into(), serde_json::json!(r.short_party_name));
-                row.insert("short_open_interest".into(), serde_json::json!(r.short_open_interest));
+                row.insert(
+                    "long_party_name".into(),
+                    serde_json::json!(r.long_party_name),
+                );
+                row.insert(
+                    "long_open_interest".into(),
+                    serde_json::json!(r.long_open_interest),
+                );
+                row.insert(
+                    "short_party_name".into(),
+                    serde_json::json!(r.short_party_name),
+                );
+                row.insert(
+                    "short_open_interest".into(),
+                    serde_json::json!(r.short_open_interest),
+                );
                 all_ranks.push(row);
             }
         }
@@ -161,11 +197,7 @@ impl AkShareClient {
     /// Get receipt (warehouse receipt) data for a given date and variety list.
     ///
     /// Tries DCE and SHFE receipt data and merges the results.
-    pub async fn get_receipt(
-        &self,
-        date: &str,
-        _var_list: Option<&str>,
-    ) -> Result<Vec<Row>> {
+    pub async fn get_receipt(&self, date: &str, _var_list: Option<&str>) -> Result<Vec<Row>> {
         let mut items = Vec::new();
 
         if let Ok(dce) = self.get_dce_receipt(date).await {

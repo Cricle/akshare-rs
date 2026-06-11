@@ -34,7 +34,7 @@ impl AkShareClient {
     pub async fn economy_air_quality(&self, city: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_ENVIRONMENT_AIR"),
                 ("columns", "ALL"),
@@ -92,16 +92,17 @@ impl AkShareClient {
         for line in body.lines() {
             let trimmed = line.trim();
             if trimmed.contains("<AQI>")
-                && let (Some(start), Some(end)) = (trimmed.find("<AQI>"), trimmed.find("</AQI>")) {
-                    let aqi_str = &trimmed[start + 5..end];
-                    if let Ok(aqi) = aqi_str.parse::<f64>() {
-                        items.push(MacroDataPoint {
-                            date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
-                            value: aqi,
-                            name: "Hebei AQI".to_string(),
-                        });
-                    }
+                && let (Some(start), Some(end)) = (trimmed.find("<AQI>"), trimmed.find("</AQI>"))
+            {
+                let aqi_str = &trimmed[start + 5..end];
+                if let Ok(aqi) = aqi_str.parse::<f64>() {
+                    items.push(MacroDataPoint {
+                        date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
+                        value: aqi,
+                        name: "Hebei AQI".to_string(),
+                    });
                 }
+            }
         }
         Ok(items)
     }
@@ -113,7 +114,7 @@ impl AkShareClient {
     pub async fn air_city_table(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_ENVIRONMENT_AIR"),
                 ("columns", "ALL"),
@@ -133,9 +134,11 @@ impl AkShareClient {
         let mut cities: Vec<String> = Vec::new();
         for v in &data {
             if let Some(city) = v.get("CITY").and_then(|x| x.as_str())
-                && !city.is_empty() && !cities.contains(&city.to_string()) {
-                    cities.push(city.to_string());
-                }
+                && !city.is_empty()
+                && !cities.contains(&city.to_string())
+            {
+                cities.push(city.to_string());
+            }
         }
 
         let items: Vec<MacroDataPoint> = cities
@@ -171,7 +174,7 @@ impl AkShareClient {
     pub async fn air_quality_rank(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_ENVIRONMENT_AIR"),
                 ("columns", "ALL"),
@@ -195,10 +198,7 @@ impl AkShareClient {
                 .and_then(|x| x.as_str())
                 .unwrap_or("")
                 .to_string();
-            let aqi = v
-                .get("AQI")
-                .and_then(|x| x.as_f64())
-                .unwrap_or(0.0);
+            let aqi = v.get("AQI").and_then(|x| x.as_f64()).unwrap_or(0.0);
             if !city.is_empty() {
                 items.push(MacroDataPoint {
                     date: (i + 1).to_string(),
@@ -228,11 +228,7 @@ impl AkShareClient {
     /// Returns sunrise/sunset times from timeanddate.com.
     /// `date` is in "YYYYMMDD" format.
     /// `city` is the English city name (e.g., "beijing", "shanghai").
-    pub async fn sunrise_daily(
-        &self,
-        date: &str,
-        city: &str,
-    ) -> Result<Vec<MacroDataPoint>> {
+    pub async fn sunrise_daily(&self, date: &str, city: &str) -> Result<Vec<MacroDataPoint>> {
         let year = &date[..4];
         let month = &date[4..6];
         let url = format!(
@@ -240,12 +236,7 @@ impl AkShareClient {
             city, month, year
         );
 
-        let body = self
-                        .get(&url)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.get(&url).send().await?.text().await?;
 
         let mut items = Vec::new();
         // Parse HTML table for sunrise/sunset data
@@ -275,11 +266,7 @@ impl AkShareClient {
     ///
     /// Returns daily sunrise/sunset times for the entire month
     /// containing the given date.
-    pub async fn sunrise_monthly(
-        &self,
-        date: &str,
-        city: &str,
-    ) -> Result<Vec<MacroDataPoint>> {
+    pub async fn sunrise_monthly(&self, date: &str, city: &str) -> Result<Vec<MacroDataPoint>> {
         // Same implementation as sunrise_daily but returns all days
         self.sunrise_daily(date, city).await
     }

@@ -10,16 +10,20 @@ impl AkShareClient {
         let response = self
             .get("https://fund.eastmoney.com/data/FundNewIssue.aspx")
             .query(&[
-                ("t", "xcln"), ("sort", "jzrgq,desc"), ("y", ""),
-                ("page", "1,50000"), ("isbuy", "1"),
+                ("t", "xcln"),
+                ("sort", "jzrgq,desc"),
+                ("y", ""),
+                ("page", "1,50000"),
+                ("isbuy", "1"),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
-        let json_str = text
-            .strip_prefix("var newfunddata=")
-            .unwrap_or(&text);
+        let json_str = text.strip_prefix("var newfunddata=").unwrap_or(&text);
         let json_start = json_str.find('{').unwrap_or(0);
         let json_end = json_str.rfind('}').map(|i| i + 1).unwrap_or(json_str.len());
         let json_body = &json_str[json_start..json_end];
@@ -27,14 +31,18 @@ impl AkShareClient {
         let root: serde_json::Value = serde_json::from_str(json_body)
             .map_err(|e| Error::decode(format!("new fund JSON parse: {e}")))?;
 
-        let datas = root.get("datas").and_then(|d| d.as_array())
+        let datas = root
+            .get("datas")
+            .and_then(|d| d.as_array())
             .ok_or_else(|| Error::not_found("no new fund data"))?;
 
         let mut result = Vec::new();
         for item in datas {
             let row = item.as_str().unwrap_or("");
             let fields: Vec<&str> = row.split(',').map(str::trim).collect();
-            if fields.len() < 10 { continue; }
+            if fields.len() < 10 {
+                continue;
+            }
             result.push(serde_json::json!({
                 "fund_code": fields[0],
                 "fund_name": fields[1],
@@ -58,14 +66,19 @@ impl AkShareClient {
     pub async fn fund_new_found_ths(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let response = self
             .get("https://fund.10jqka.com.cn/datacenter/xfjj/")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         // Extract jsonData from the HTML page
-        let start_idx = text.find("jsonData=")
+        let start_idx = text
+            .find("jsonData=")
             .ok_or_else(|| Error::decode("THS page missing jsonData"))?;
-        let start_bracket = text[start_idx..].find('{')
+        let start_bracket = text[start_idx..]
+            .find('{')
             .ok_or_else(|| Error::decode("THS page missing JSON start"))?;
         let abs_start = start_idx + start_bracket;
 
@@ -73,8 +86,9 @@ impl AkShareClient {
         let mut count = 0i32;
         let mut end_idx = abs_start;
         for (i, ch) in text[abs_start..].char_indices() {
-            if ch == '{' { count += 1; }
-            else if ch == '}' {
+            if ch == '{' {
+                count += 1;
+            } else if ch == '}' {
                 count -= 1;
                 if count == 0 {
                     end_idx = abs_start + i + 1;

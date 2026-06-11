@@ -15,7 +15,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = format!("https://www.100ppi.com/sf/day-{}.html", date_fmt);
         let _body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Accept", "text/html")
             .send()
@@ -28,7 +28,10 @@ impl AkShareClient {
         let mut row = Row::new();
         row.insert("source".into(), serde_json::json!("100ppi"));
         row.insert("date".into(), serde_json::json!(date));
-        row.insert("note".into(), serde_json::json!("HTML table data - use web scraping"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("HTML table data - use web scraping"),
+        );
         items.push(row);
         Ok(items)
     }
@@ -47,7 +50,10 @@ impl AkShareClient {
         row.insert("source".into(), serde_json::json!("100ppi"));
         row.insert("start_date".into(), serde_json::json!(start_date));
         row.insert("end_date".into(), serde_json::json!(end_date));
-        row.insert("note".into(), serde_json::json!("Call futures_spot_price per day"));
+        row.insert(
+            "note".into(),
+            serde_json::json!("Call futures_spot_price per day"),
+        );
         items.push(row);
         Ok(items)
     }
@@ -57,7 +63,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = format!("https://www.100ppi.com/sf2/day-{}.html", date_fmt);
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Accept", "text/html")
             .send()

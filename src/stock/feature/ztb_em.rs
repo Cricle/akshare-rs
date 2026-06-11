@@ -1,9 +1,9 @@
 //! Limit-up/down pools (涨停/跌停股池) from Eastmoney.
 
-use crate::client::AkShareClient;
-use crate::error::Result;
 use super::helpers::*;
 use super::types::*;
+use crate::client::AkShareClient;
+use crate::error::Result;
 
 impl AkShareClient {
     /// 涨停股池
@@ -19,24 +19,32 @@ impl AkShareClient {
             ("pz", "5000"),
         ]).await?;
 
-        let diff = data.get("data").and_then(|d| d.get("diff")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(diff.iter().map(|v| ZtPool {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            change_pct: json_f64(v, "f3"),
-            latest_price: json_f64(v, "f2"),
-            amount: json_f64(v, "f6"),
-            circulating_market_cap: json_f64(v, "f20"),
-            total_market_cap: json_f64(v, "f21"),
-            turnover_rate: json_f64(v, "f8"),
-            seal_amount: json_f64(v, "f222"),
-            first_seal_time: json_str(v, "f223"),
-            last_seal_time: json_str(v, "f224"),
-            break_count: json_i64(v, "f225"),
-            zt_statistics: json_str(v, "f233"),
-            consecutive_count: json_i64(v, "f226"),
-            industry: json_str(v, "f104"),
-        }).collect())
+        let diff = data
+            .get("data")
+            .and_then(|d| d.get("diff"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(diff
+            .iter()
+            .map(|v| ZtPool {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                change_pct: json_f64(v, "f3"),
+                latest_price: json_f64(v, "f2"),
+                amount: json_f64(v, "f6"),
+                circulating_market_cap: json_f64(v, "f20"),
+                total_market_cap: json_f64(v, "f21"),
+                turnover_rate: json_f64(v, "f8"),
+                seal_amount: json_f64(v, "f222"),
+                first_seal_time: json_str(v, "f223"),
+                last_seal_time: json_str(v, "f224"),
+                break_count: json_i64(v, "f225"),
+                zt_statistics: json_str(v, "f233"),
+                consecutive_count: json_i64(v, "f226"),
+                industry: json_str(v, "f104"),
+            })
+            .collect())
     }
 
     /// 跌停股池
@@ -52,22 +60,30 @@ impl AkShareClient {
             ("pz", "5000"),
         ]).await?;
 
-        let diff = data.get("data").and_then(|d| d.get("diff")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(diff.iter().map(|v| ZtPoolDtgc {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            change_pct: json_f64(v, "f3"),
-            latest_price: json_f64(v, "f2"),
-            amount: json_f64(v, "f6"),
-            circulating_market_cap: json_f64(v, "f20"),
-            total_market_cap: json_f64(v, "f21"),
-            turnover_rate: json_f64(v, "f8"),
-            seal_amount: json_f64(v, "f222"),
-            first_seal_time: json_str(v, "f223"),
-            last_seal_time: json_str(v, "f224"),
-            open_count: json_i64(v, "f225"),
-            industry: json_str(v, "f104"),
-        }).collect())
+        let diff = data
+            .get("data")
+            .and_then(|d| d.get("diff"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(diff
+            .iter()
+            .map(|v| ZtPoolDtgc {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                change_pct: json_f64(v, "f3"),
+                latest_price: json_f64(v, "f2"),
+                amount: json_f64(v, "f6"),
+                circulating_market_cap: json_f64(v, "f20"),
+                total_market_cap: json_f64(v, "f21"),
+                turnover_rate: json_f64(v, "f8"),
+                seal_amount: json_f64(v, "f222"),
+                first_seal_time: json_str(v, "f223"),
+                last_seal_time: json_str(v, "f224"),
+                open_count: json_i64(v, "f225"),
+                industry: json_str(v, "f104"),
+            })
+            .collect())
     }
 
     /// 昨日涨停股池
@@ -84,24 +100,32 @@ impl AkShareClient {
             ("tp", "1"),
         ]).await?;
 
-        let diff = data.get("data").and_then(|d| d.get("diff")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(diff.iter().map(|v| ZtPoolPrevious {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            change_pct: json_f64(v, "f3"),
-            latest_price: json_f64(v, "f2"),
-            limit_price: json_f64(v, "f221"),
-            amount: json_f64(v, "f6"),
-            circulating_market_cap: json_f64(v, "f20"),
-            total_market_cap: json_f64(v, "f21"),
-            turnover_rate: json_f64(v, "f8"),
-            speed: json_f64(v, "f227"),
-            amplitude: json_f64(v, "f228"),
-            prev_seal_time: json_str(v, "f223"),
-            prev_consecutive_count: json_i64(v, "f226"),
-            zt_statistics: json_str(v, "f233"),
-            industry: json_str(v, "f104"),
-        }).collect())
+        let diff = data
+            .get("data")
+            .and_then(|d| d.get("diff"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(diff
+            .iter()
+            .map(|v| ZtPoolPrevious {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                change_pct: json_f64(v, "f3"),
+                latest_price: json_f64(v, "f2"),
+                limit_price: json_f64(v, "f221"),
+                amount: json_f64(v, "f6"),
+                circulating_market_cap: json_f64(v, "f20"),
+                total_market_cap: json_f64(v, "f21"),
+                turnover_rate: json_f64(v, "f8"),
+                speed: json_f64(v, "f227"),
+                amplitude: json_f64(v, "f228"),
+                prev_seal_time: json_str(v, "f223"),
+                prev_consecutive_count: json_i64(v, "f226"),
+                zt_statistics: json_str(v, "f233"),
+                industry: json_str(v, "f104"),
+            })
+            .collect())
     }
 
     /// 强势股池
@@ -117,24 +141,32 @@ impl AkShareClient {
             ("pz", "5000"),
         ]).await?;
 
-        let diff = data.get("data").and_then(|d| d.get("diff")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(diff.iter().map(|v| ZtPoolStrong {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            change_pct: json_f64(v, "f3"),
-            latest_price: json_f64(v, "f2"),
-            amount: json_f64(v, "f6"),
-            circulating_market_cap: json_f64(v, "f20"),
-            total_market_cap: json_f64(v, "f21"),
-            turnover_rate: json_f64(v, "f8"),
-            seal_amount: json_f64(v, "f222"),
-            first_seal_time: json_str(v, "f223"),
-            last_seal_time: json_str(v, "f224"),
-            break_count: json_i64(v, "f225"),
-            zt_statistics: json_str(v, "f233"),
-            consecutive_count: json_i64(v, "f226"),
-            industry: json_str(v, "f104"),
-        }).collect())
+        let diff = data
+            .get("data")
+            .and_then(|d| d.get("diff"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(diff
+            .iter()
+            .map(|v| ZtPoolStrong {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                change_pct: json_f64(v, "f3"),
+                latest_price: json_f64(v, "f2"),
+                amount: json_f64(v, "f6"),
+                circulating_market_cap: json_f64(v, "f20"),
+                total_market_cap: json_f64(v, "f21"),
+                turnover_rate: json_f64(v, "f8"),
+                seal_amount: json_f64(v, "f222"),
+                first_seal_time: json_str(v, "f223"),
+                last_seal_time: json_str(v, "f224"),
+                break_count: json_i64(v, "f225"),
+                zt_statistics: json_str(v, "f233"),
+                consecutive_count: json_i64(v, "f226"),
+                industry: json_str(v, "f104"),
+            })
+            .collect())
     }
 
     /// 次新股池
@@ -150,19 +182,27 @@ impl AkShareClient {
             ("pz", "5000"),
         ]).await?;
 
-        let diff = data.get("data").and_then(|d| d.get("diff")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(diff.iter().map(|v| ZtPoolSubNew {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            change_pct: json_f64(v, "f3"),
-            latest_price: json_f64(v, "f2"),
-            amount: json_f64(v, "f6"),
-            circulating_market_cap: json_f64(v, "f20"),
-            total_market_cap: json_f64(v, "f21"),
-            turnover_rate: json_f64(v, "f8"),
-            ipo_date: json_str(v, "f229"),
-            industry: json_str(v, "f104"),
-        }).collect())
+        let diff = data
+            .get("data")
+            .and_then(|d| d.get("diff"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(diff
+            .iter()
+            .map(|v| ZtPoolSubNew {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                change_pct: json_f64(v, "f3"),
+                latest_price: json_f64(v, "f2"),
+                amount: json_f64(v, "f6"),
+                circulating_market_cap: json_f64(v, "f20"),
+                total_market_cap: json_f64(v, "f21"),
+                turnover_rate: json_f64(v, "f8"),
+                ipo_date: json_str(v, "f229"),
+                industry: json_str(v, "f104"),
+            })
+            .collect())
     }
 
     /// 炸板股池
@@ -178,22 +218,30 @@ impl AkShareClient {
             ("pz", "5000"),
         ]).await?;
 
-        let diff = data.get("data").and_then(|d| d.get("diff")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(diff.iter().map(|v| ZtPoolZbgc {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            change_pct: json_f64(v, "f3"),
-            latest_price: json_f64(v, "f2"),
-            amount: json_f64(v, "f6"),
-            circulating_market_cap: json_f64(v, "f20"),
-            total_market_cap: json_f64(v, "f21"),
-            turnover_rate: json_f64(v, "f8"),
-            seal_amount: json_f64(v, "f222"),
-            first_seal_time: json_str(v, "f223"),
-            last_seal_time: json_str(v, "f224"),
-            break_count: json_i64(v, "f225"),
-            zt_statistics: json_str(v, "f233"),
-            industry: json_str(v, "f104"),
-        }).collect())
+        let diff = data
+            .get("data")
+            .and_then(|d| d.get("diff"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(diff
+            .iter()
+            .map(|v| ZtPoolZbgc {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                change_pct: json_f64(v, "f3"),
+                latest_price: json_f64(v, "f2"),
+                amount: json_f64(v, "f6"),
+                circulating_market_cap: json_f64(v, "f20"),
+                total_market_cap: json_f64(v, "f21"),
+                turnover_rate: json_f64(v, "f8"),
+                seal_amount: json_f64(v, "f222"),
+                first_seal_time: json_str(v, "f223"),
+                last_seal_time: json_str(v, "f224"),
+                break_count: json_i64(v, "f225"),
+                zt_statistics: json_str(v, "f233"),
+                industry: json_str(v, "f104"),
+            })
+            .collect())
     }
 }

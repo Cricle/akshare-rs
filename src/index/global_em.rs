@@ -40,7 +40,7 @@ impl AkShareClient {
             i:100.AS51,i:100.AORD,i:100.NZ50,i:100.UDI,i:100.BDI,i:100.CRB";
 
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("np", "2"),
                 ("fltt", "1"),
@@ -64,10 +64,9 @@ impl AkShareClient {
 
         // diff may be an object (keyed by index) or an array
         let entries: Vec<(String, serde_json::Value)> = match &diff {
-            serde_json::Value::Object(map) => map
-                .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect(),
+            serde_json::Value::Object(map) => {
+                map.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+            }
             serde_json::Value::Array(arr) => arr
                 .iter()
                 .enumerate()

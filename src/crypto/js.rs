@@ -53,7 +53,7 @@ impl AkShareClient {
     pub async fn crypto_spot(&self) -> Result<Vec<CryptoSpot>> {
         let url = "https://cdn.jin10.com/data_center/reports/exchange_rate.json";
         let resp = self
-                        .get(url)
+            .get(url)
             .header("Referer", "https://www.jin10.com")
             .send()
             .await?;
@@ -71,11 +71,7 @@ impl AkShareClient {
         let items_raw = body
             .as_array()
             .cloned()
-            .or_else(|| {
-                body.get("data")
-                    .and_then(|d| d.as_array())
-                    .cloned()
-            })
+            .or_else(|| body.get("data").and_then(|d| d.as_array()).cloned())
             .unwrap_or_default();
 
         let mut items = Vec::with_capacity(items_raw.len());
@@ -116,10 +112,7 @@ impl AkShareClient {
                 .or_else(|| v.get("volume_24h"))
                 .and_then(|x| x.as_f64())
                 .unwrap_or(0.0);
-            let market_cap = v
-                .get("market_cap")
-                .and_then(|x| x.as_f64())
-                .unwrap_or(0.0);
+            let market_cap = v.get("market_cap").and_then(|x| x.as_f64()).unwrap_or(0.0);
 
             items.push(CryptoSpot {
                 symbol,

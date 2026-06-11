@@ -46,7 +46,7 @@ pub(crate) async fn fetch_em_report(
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
     let resp: EmDatacenterResp = client
-                .get(url)
+        .get(url)
         .query(&[
             ("reportName", report_name),
             ("columns", "ALL"),
@@ -108,7 +108,7 @@ pub(crate) async fn fetch_em_indicator(
     let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
     let filter = format!(r#"(INDICATOR_ID="{}")"#, indicator_id);
     let resp: EmDatacenterResp = client
-                .get(url)
+        .get(url)
         .query(&[
             ("reportName", report_name),
             ("columns", "ALL"),
@@ -176,12 +176,8 @@ pub(crate) async fn fetch_jin10_report(
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://datacenter-api.jin10.com/reports/list_v2";
     let resp: Jin10Resp = client
-                .get(url)
-        .query(&[
-            ("max_date", ""),
-            ("category", "ec"),
-            ("attr_id", attr_id),
-        ])
+        .get(url)
+        .query(&[("max_date", ""), ("category", "ec"), ("attr_id", attr_id)])
         .header("x-app-id", "rU6QIu7JHe2gOUeR")
         .header("x-csrf-token", "x-csrf-token")
         .header("x-version", "1.0.0")

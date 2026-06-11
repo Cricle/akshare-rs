@@ -97,7 +97,7 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_PCF10_INDUSTRY_DUPONT"),
                 ("columns", "ALL"),
@@ -124,10 +124,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_scale_comparison_em(symbol)`
     ///
     /// - `symbol`: stock code like "SZ000895"
-    pub async fn stock_zh_scale_comparison_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<ScaleComparison>> {
+    pub async fn stock_zh_scale_comparison_em(&self, symbol: &str) -> Result<Vec<ScaleComparison>> {
         let filter = if symbol.len() >= 2 {
             let (prefix, code) = symbol.split_at(2);
             format!("(SECUCODE=\"{}.{}\")", code, prefix)
@@ -137,7 +134,7 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_PCF10_INDUSTRY_SCALE"),
                 ("columns", "ALL"),
@@ -174,7 +171,7 @@ impl AkShareClient {
     ) -> Result<Vec<BaiduValuation>> {
         let url = "https://gushitong.baidu.com/opendata";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("openapi", "1"),
                 ("dspName", "iphone"),
@@ -214,7 +211,11 @@ impl AkShareClient {
         let finance_type = match indicator {
             "股票" => "stock",
             "指数" => "index",
-            _ => return Err(Error::invalid_input(format!("invalid indicator: {indicator}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "invalid indicator: {indicator}"
+                )));
+            }
         };
 
         let url = "https://finance.pae.baidu.com/vapi/v1/stockvoterecords";
@@ -222,7 +223,7 @@ impl AkShareClient {
 
         for period in &["day", "week", "month", "year"] {
             let response = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("code", symbol),
                     ("market", "ab"),

@@ -12,8 +12,8 @@
 mod common;
 use common::*;
 
-use wiremock::{MockServer, Mock, ResponseTemplate};
 use wiremock::matchers::{method, path_regex};
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 // =========================================================================
 // Helper response payloads
@@ -115,18 +115,49 @@ fn ths_summary_html() -> String {
 fn bid_ask_body() -> serde_json::Value {
     let mut data = serde_json::Map::new();
     for (k, v) in [
-        ("f43", 1050.0), ("f44", 1080.0), ("f45", 1020.0), ("f46", 1030.0),
-        ("f47", 100000.0), ("f48", 10500000.0),
-        ("f50", 1.1), ("f51", 1155.0), ("f52", 935.0),
-        ("f60", 1035.0), ("f71", 1040.0), ("f116", 100000000.0), ("f117", 50000000.0),
-        ("f120", 100000000.0), ("f121", 50000000.0),
-        ("f161", 50000.0), ("f162", 15.0), ("f163", 1.0), ("f164", 100.0),
-        ("f168", 120.0), ("f169", 15.0), ("f170", 150.0), ("f171", 200.0),
-        ("f11", 1049.0), ("f12", 100.0), ("f13", 1048.0), ("f14", 200.0),
-        ("f15", 1047.0), ("f16", 300.0), ("f17", 1046.0), ("f18", 400.0),
-        ("f19", 1051.0), ("f20", 100.0), ("f31", 1052.0), ("f32", 200.0),
-        ("f33", 1053.0), ("f34", 300.0), ("f35", 1054.0), ("f36", 400.0),
-        ("f37", 1055.0), ("f38", 500.0), ("f39", 1056.0), ("f40", 600.0),
+        ("f43", 1050.0),
+        ("f44", 1080.0),
+        ("f45", 1020.0),
+        ("f46", 1030.0),
+        ("f47", 100000.0),
+        ("f48", 10500000.0),
+        ("f50", 1.1),
+        ("f51", 1155.0),
+        ("f52", 935.0),
+        ("f60", 1035.0),
+        ("f71", 1040.0),
+        ("f116", 100000000.0),
+        ("f117", 50000000.0),
+        ("f120", 100000000.0),
+        ("f121", 50000000.0),
+        ("f161", 50000.0),
+        ("f162", 15.0),
+        ("f163", 1.0),
+        ("f164", 100.0),
+        ("f168", 120.0),
+        ("f169", 15.0),
+        ("f170", 150.0),
+        ("f171", 200.0),
+        ("f11", 1049.0),
+        ("f12", 100.0),
+        ("f13", 1048.0),
+        ("f14", 200.0),
+        ("f15", 1047.0),
+        ("f16", 300.0),
+        ("f17", 1046.0),
+        ("f18", 400.0),
+        ("f19", 1051.0),
+        ("f20", 100.0),
+        ("f31", 1052.0),
+        ("f32", 200.0),
+        ("f33", 1053.0),
+        ("f34", 300.0),
+        ("f35", 1054.0),
+        ("f36", 400.0),
+        ("f37", 1055.0),
+        ("f38", 500.0),
+        ("f39", 1056.0),
+        ("f40", 600.0),
         ("f49", 55000.0),
     ] {
         data.insert(k.to_string(), serde_json::json!(v));
@@ -138,7 +169,8 @@ fn bid_ask_body() -> serde_json::Value {
 
 /// Eastmoney intraday SSE response.
 fn intraday_sse_body() -> String {
-    r#"data:{"data":{"details":["09:30:00,10.50,1000,10500000,2","09:31:00,10.51,500,5255000,1"]}}"#.to_string()
+    r#"data:{"data":{"details":["09:30:00,10.50,1000,10500000,2","09:31:00,10.51,500,5255000,1"]}}"#
+        .to_string()
 }
 
 /// Eastmoney stock/get for individual info.
@@ -326,72 +358,64 @@ fn hsgt_flow_body() -> serde_json::Value {
 
 /// Eastmoney datacenter datacenter response for misc methods.
 fn misc_datacenter_body() -> serde_json::Value {
-    em_datacenter_response(vec![
-        serde_json::json!({
-            "TRADE_DATE": "2024-01-02",
-            "SZ_INDEX": 3200.0,
-            "SZ_CHANGE_RATE": 1.5,
-            "BLOCKTRADE_DEAL_AMT": 1000000.0,
-            "PREMIUM_DEAL_AMT": 500000.0,
-            "PREMIUM_RATIO": 2.0,
-            "DISCOUNT_DEAL_AMT": 300000.0,
-            "DISCOUNT_RATIO": 1.0
-        }),
-    ])
+    em_datacenter_response(vec![serde_json::json!({
+        "TRADE_DATE": "2024-01-02",
+        "SZ_INDEX": 3200.0,
+        "SZ_CHANGE_RATE": 1.5,
+        "BLOCKTRADE_DEAL_AMT": 1000000.0,
+        "PREMIUM_DEAL_AMT": 500000.0,
+        "PREMIUM_RATIO": 2.0,
+        "DISCOUNT_DEAL_AMT": 300000.0,
+        "DISCOUNT_RATIO": 1.0
+    })])
 }
 
 /// Block trade detail datacenter response.
 fn block_trade_detail_body() -> serde_json::Value {
-    em_datacenter_response(vec![
-        serde_json::json!({
-            "TRADE_DATE": "2024-01-02",
-            "SECURITY_CODE": "000001",
-            "SECURITY_NAME_ABBR": "平安银行",
-            "CHANGE_RATE": 1.5,
-            "CLOSE_PRICE": 10.50,
-            "DEAL_PRICE": 10.60,
-            "DEAL_VOLUME": 100000.0,
-            "DEAL_AMT": 1060000.0,
-            "PREMIUM_RATIO": 0.95,
-            "BUYER_NAME": "Test Broker Buy",
-            "SELLER_NAME": "Test Broker Sell"
-        }),
-    ])
+    em_datacenter_response(vec![serde_json::json!({
+        "TRADE_DATE": "2024-01-02",
+        "SECURITY_CODE": "000001",
+        "SECURITY_NAME_ABBR": "平安银行",
+        "CHANGE_RATE": 1.5,
+        "CLOSE_PRICE": 10.50,
+        "DEAL_PRICE": 10.60,
+        "DEAL_VOLUME": 100000.0,
+        "DEAL_AMT": 1060000.0,
+        "PREMIUM_RATIO": 0.95,
+        "BUYER_NAME": "Test Broker Buy",
+        "SELLER_NAME": "Test Broker Sell"
+    })])
 }
 
 /// Repurchase datacenter response.
 fn repurchase_body() -> serde_json::Value {
-    em_datacenter_response(vec![
-        serde_json::json!({
-            "DIM_SCODE": "000001",
-            "SECURITYSHORTNAME": "平安银行",
-            "NEWPRICE": 10.50,
-            "REPURPRICECAP": 12.00,
-            "REPURNUMLOWER": 1000000.0,
-            "REPURNUMCAP": 5000000.0,
-            "JEXX": 10500000.0,
-            "JESX": 52500000.0,
-            "DIM_TRADEDATE": "2024-01-02",
-            "REPURPROGRESS": "进行中",
-            "REPURNUM": 2000000.0,
-            "REPURAMOUNT": 21000000.0,
-            "UPDATEDATE": "2024-01-15"
-        }),
-    ])
+    em_datacenter_response(vec![serde_json::json!({
+        "DIM_SCODE": "000001",
+        "SECURITYSHORTNAME": "平安银行",
+        "NEWPRICE": 10.50,
+        "REPURPRICECAP": 12.00,
+        "REPURNUMLOWER": 1000000.0,
+        "REPURNUMCAP": 5000000.0,
+        "JEXX": 10500000.0,
+        "JESX": 52500000.0,
+        "DIM_TRADEDATE": "2024-01-02",
+        "REPURPROGRESS": "进行中",
+        "REPURNUM": 2000000.0,
+        "REPURAMOUNT": 21000000.0,
+        "UPDATEDATE": "2024-01-15"
+    })])
 }
 
 /// Company events datacenter response.
 fn company_events_body() -> serde_json::Value {
-    em_datacenter_response(vec![
-        serde_json::json!({
-            "SECURITY_CODE": "000001",
-            "SECUCODE": "000001.SZ",
-            "SECURITY_NAME_ABBR": "平安银行",
-            "EVENT_TYPE": "业绩预告",
-            "EVENT_CONTENT": "预计2023年净利润增长",
-            "TRADE_DATE": "2024-01-15"
-        }),
-    ])
+    em_datacenter_response(vec![serde_json::json!({
+        "SECURITY_CODE": "000001",
+        "SECUCODE": "000001.SZ",
+        "SECURITY_NAME_ABBR": "平安银行",
+        "EVENT_TYPE": "业绩预告",
+        "EVENT_CONTENT": "预计2023年净利润增长",
+        "TRADE_DATE": "2024-01-15"
+    })])
 }
 
 /// Fund holdings response (data.eastmoney.com/dataapi/zlsj/list format).
@@ -740,7 +764,11 @@ fn em_notice_body() -> serde_json::Value {
 }
 
 /// Register GET + POST catch-all mocks on the server.
-async fn mount_catch_all(server: &MockServer, get_body: serde_json::Value, post_body: serde_json::Value) {
+async fn mount_catch_all(
+    server: &MockServer,
+    get_body: serde_json::Value,
+    post_body: serde_json::Value,
+) {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(get_body))
@@ -791,7 +819,9 @@ async fn test_stock_board_concept_hist_em() {
     // BK code skips resolve; only kline GET is needed
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_concept_hist_em("BK0715", "daily", "20240101", "20240103", "").await;
+    let result = client
+        .stock_board_concept_hist_em("BK0715", "daily", "20240101", "20240103", "")
+        .await;
     let _ = result;
 }
 
@@ -806,7 +836,9 @@ async fn test_stock_board_concept_hist_em_name() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let result = client.stock_board_concept_hist_em("绿色电力", "weekly", "20240101", "20240103", "qfq").await;
+    let result = client
+        .stock_board_concept_hist_em("绿色电力", "weekly", "20240101", "20240103", "qfq")
+        .await;
     let _ = result;
 }
 
@@ -846,7 +878,9 @@ async fn test_stock_board_industry_hist_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_industry_hist_em("BK1027", "daily", "20240101", "20240103", "").await;
+    let result = client
+        .stock_board_industry_hist_em("BK1027", "daily", "20240101", "20240103", "")
+        .await;
     let _ = result;
 }
 
@@ -855,7 +889,9 @@ async fn test_stock_board_industry_hist_min_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_industry_hist_min_em("BK1027", "15").await;
+    let result = client
+        .stock_board_industry_hist_min_em("BK1027", "15")
+        .await;
     let _ = result;
 }
 
@@ -875,7 +911,11 @@ async fn test_stock_board_industry_spot_em() {
 #[tokio::test]
 async fn test_stock_board_change_em_industry() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_em_stock_row("BK0001", "银行")])).await;
+    mount_catch_all_json(
+        &server,
+        em_push2_response(vec![sample_em_stock_row("BK0001", "银行")]),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.stock_board_change_em("行业板块").await;
     let _ = result;
@@ -884,7 +924,11 @@ async fn test_stock_board_change_em_industry() {
 #[tokio::test]
 async fn test_stock_board_change_em_concept() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_em_stock_row("BK0002", "人工智能")])).await;
+    mount_catch_all_json(
+        &server,
+        em_push2_response(vec![sample_em_stock_row("BK0002", "人工智能")]),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.stock_board_change_em("概念板块").await;
     let _ = result;
@@ -920,7 +964,9 @@ async fn test_stock_board_concept_index_ths() {
     // name_ths + kline fetch. Use name HTML which has a link match.
     mount_catch_all_text(&server, &ths_concept_names_html()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_concept_index_ths("阿里巴巴概念", "20240101", "20240103").await;
+    let result = client
+        .stock_board_concept_index_ths("阿里巴巴概念", "20240101", "20240103")
+        .await;
     let _ = result;
 }
 
@@ -960,7 +1006,9 @@ async fn test_stock_board_industry_index_ths() {
     let server = MockServer::start().await;
     mount_catch_all_text(&server, &ths_industry_names_html()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_industry_index_ths("小金属", "20240101", "20240103").await;
+    let result = client
+        .stock_board_industry_index_ths("小金属", "20240101", "20240103")
+        .await;
     let _ = result;
 }
 
@@ -1219,7 +1267,9 @@ async fn test_stock_dzjy_mrmx() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, block_trade_detail_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_dzjy_mrmx("astock", "20240101", "20240102", 10).await;
+    let result = client
+        .stock_dzjy_mrmx("astock", "20240101", "20240102", 10)
+        .await;
     let _ = result;
 }
 
@@ -1276,7 +1326,9 @@ async fn test_stock_report_fund_hold_social() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, fund_hold_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_report_fund_hold("social", "20210331", 10).await;
+    let result = client
+        .stock_report_fund_hold("social", "20210331", 10)
+        .await;
     let _ = result;
 }
 
@@ -1285,7 +1337,9 @@ async fn test_stock_report_fund_hold_broker() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, fund_hold_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_report_fund_hold("broker", "20210331", 10).await;
+    let result = client
+        .stock_report_fund_hold("broker", "20210331", 10)
+        .await;
     let _ = result;
 }
 
@@ -1294,7 +1348,9 @@ async fn test_stock_report_fund_hold_insurance() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, fund_hold_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_report_fund_hold("insurance", "20210331", 10).await;
+    let result = client
+        .stock_report_fund_hold("insurance", "20210331", 10)
+        .await;
     let _ = result;
 }
 
@@ -1485,13 +1541,17 @@ async fn test_stock_board_industry_cons_em() {
 #[tokio::test]
 async fn test_stock_zh_ah_spot_em() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, serde_json::json!({
-        "rc": 0,
-        "data": {
-            "total": 1,
-            "diff": [sample_ah_row_em()]
-        }
-    })).await;
+    mount_catch_all_json(
+        &server,
+        serde_json::json!({
+            "rc": 0,
+            "data": {
+                "total": 1,
+                "diff": [sample_ah_row_em()]
+            }
+        }),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.stock_zh_ah_spot_em(10).await;
     let _ = result;
@@ -1510,13 +1570,17 @@ async fn test_stock_hsgt_sh_hk_spot_em() {
         "f3": 150, "f152": 1, "f17": 10300, "f18": 10350,
         "f15": 10800, "f16": 10200, "f5": 100000, "f6": 1050000000
     });
-    mount_catch_all_json(&server, serde_json::json!({
-        "rc": 0,
-        "data": {
-            "total": 1,
-            "diff": [row]
-        }
-    })).await;
+    mount_catch_all_json(
+        &server,
+        serde_json::json!({
+            "rc": 0,
+            "data": {
+                "total": 1,
+                "diff": [row]
+            }
+        }),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.stock_hsgt_sh_hk_spot_em(10).await;
     let _ = result;
@@ -1531,13 +1595,17 @@ async fn test_stock_hsgt_sz_hk_spot_em() {
         "f3": 150, "f152": 1, "f17": 10300, "f18": 10350,
         "f15": 10800, "f16": 10200, "f5": 100000, "f6": 1050000000
     });
-    mount_catch_all_json(&server, serde_json::json!({
-        "rc": 0,
-        "data": {
-            "total": 1,
-            "diff": [row]
-        }
-    })).await;
+    mount_catch_all_json(
+        &server,
+        serde_json::json!({
+            "rc": 0,
+            "data": {
+                "total": 1,
+                "diff": [row]
+            }
+        }),
+    )
+    .await;
     let client = mock_client(&server);
     let result = client.stock_hsgt_sz_hk_spot_em(10).await;
     let _ = result;
@@ -1561,7 +1629,9 @@ async fn test_stock_individual_basic_info_xq() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, xueqiu_basic_info_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_individual_basic_info_xq("SH600000", "test_token").await;
+    let result = client
+        .stock_individual_basic_info_xq("SH600000", "test_token")
+        .await;
     let _ = result;
 }
 
@@ -1570,7 +1640,9 @@ async fn test_stock_individual_basic_info_us_xq() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, xueqiu_basic_info_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_individual_basic_info_us_xq("NVDA", "test_token").await;
+    let result = client
+        .stock_individual_basic_info_us_xq("NVDA", "test_token")
+        .await;
     let _ = result;
 }
 
@@ -1579,7 +1651,9 @@ async fn test_stock_individual_basic_info_hk_xq() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, xueqiu_basic_info_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_individual_basic_info_hk_xq("02097", "test_token").await;
+    let result = client
+        .stock_individual_basic_info_hk_xq("02097", "test_token")
+        .await;
     let _ = result;
 }
 
@@ -1623,7 +1697,9 @@ async fn test_stock_financial_report_sina_balance() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, sina_finance_report_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_report_sina("sh600600", "资产负债表").await;
+    let result = client
+        .stock_financial_report_sina("sh600600", "资产负债表")
+        .await;
     let _ = result;
 }
 
@@ -1632,7 +1708,9 @@ async fn test_stock_financial_report_sina_income() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, sina_finance_report_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_report_sina("sh600600", "利润表").await;
+    let result = client
+        .stock_financial_report_sina("sh600600", "利润表")
+        .await;
     let _ = result;
 }
 
@@ -1641,7 +1719,9 @@ async fn test_stock_financial_report_sina_cashflow() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, sina_finance_report_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_report_sina("sh600600", "现金流量表").await;
+    let result = client
+        .stock_financial_report_sina("sh600600", "现金流量表")
+        .await;
     let _ = result;
 }
 
@@ -1676,7 +1756,9 @@ async fn test_stock_history_dividend_detail_dividend() {
     let server = MockServer::start().await;
     mount_catch_all_text(&server, &sina_table_html()).await;
     let client = mock_client(&server);
-    let result = client.stock_history_dividend_detail("000002", "分红", None).await;
+    let result = client
+        .stock_history_dividend_detail("000002", "分红", None)
+        .await;
     let _ = result;
 }
 
@@ -1685,7 +1767,9 @@ async fn test_stock_history_dividend_detail_rights() {
     let server = MockServer::start().await;
     mount_catch_all_text(&server, &sina_table_html()).await;
     let client = mock_client(&server);
-    let result = client.stock_history_dividend_detail("000002", "配股", None).await;
+    let result = client
+        .stock_history_dividend_detail("000002", "配股", None)
+        .await;
     let _ = result;
 }
 
@@ -1768,7 +1852,9 @@ async fn test_stock_financial_analysis_indicator() {
     let server = MockServer::start().await;
     mount_catch_all_text(&server, &sina_financial_analysis_html()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_analysis_indicator("600519", "2020").await;
+    let result = client
+        .stock_financial_analysis_indicator("600519", "2020")
+        .await;
     let _ = result;
 }
 
@@ -1825,7 +1911,9 @@ async fn test_stock_financial_analysis_indicator_em_report() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_securities_financial_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_analysis_indicator_em("301389.SZ", "按报告期").await;
+    let result = client
+        .stock_financial_analysis_indicator_em("301389.SZ", "按报告期")
+        .await;
     let _ = result;
 }
 
@@ -1834,7 +1922,9 @@ async fn test_stock_financial_analysis_indicator_em_quarterly() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_securities_financial_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_analysis_indicator_em("301389.SZ", "按单季度").await;
+    let result = client
+        .stock_financial_analysis_indicator_em("301389.SZ", "按单季度")
+        .await;
     let _ = result;
 }
 
@@ -1849,7 +1939,9 @@ async fn test_stock_financial_hk_report_em_balance() {
     // Both go to securities API; catch-all returns summary-compatible response.
     mount_catch_all_json(&server, em_hk_summary_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_hk_report_em("00700", "资产负债表", "年度").await;
+    let result = client
+        .stock_financial_hk_report_em("00700", "资产负债表", "年度")
+        .await;
     let _ = result;
 }
 
@@ -1858,7 +1950,9 @@ async fn test_stock_financial_hk_report_em_income() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_hk_summary_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_hk_report_em("00700", "利润表", "报告期").await;
+    let result = client
+        .stock_financial_hk_report_em("00700", "利润表", "报告期")
+        .await;
     let _ = result;
 }
 
@@ -1867,7 +1961,9 @@ async fn test_stock_financial_hk_report_em_cashflow() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_hk_summary_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_hk_report_em("00700", "现金流量表", "年度").await;
+    let result = client
+        .stock_financial_hk_report_em("00700", "现金流量表", "年度")
+        .await;
     let _ = result;
 }
 
@@ -1876,7 +1972,9 @@ async fn test_stock_financial_hk_analysis_indicator_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_securities_financial_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_hk_analysis_indicator_em("00700", "年度").await;
+    let result = client
+        .stock_financial_hk_analysis_indicator_em("00700", "年度")
+        .await;
     let _ = result;
 }
 
@@ -1890,7 +1988,9 @@ async fn test_stock_financial_us_report_em_balance() {
     // First call resolves SECUCODE, then gets report data.
     mount_catch_all_json(&server, em_us_org_profile_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_us_report_em("TSLA", "资产负债表", "年报").await;
+    let result = client
+        .stock_financial_us_report_em("TSLA", "资产负债表", "年报")
+        .await;
     let _ = result;
 }
 
@@ -1899,7 +1999,9 @@ async fn test_stock_financial_us_report_em_income() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_us_org_profile_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_us_report_em("TSLA", "综合损益表", "单季报").await;
+    let result = client
+        .stock_financial_us_report_em("TSLA", "综合损益表", "单季报")
+        .await;
     let _ = result;
 }
 
@@ -1908,7 +2010,9 @@ async fn test_stock_financial_us_analysis_indicator_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_us_org_profile_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_us_analysis_indicator_em("TSLA", "年报").await;
+    let result = client
+        .stock_financial_us_analysis_indicator_em("TSLA", "年报")
+        .await;
     let _ = result;
 }
 
@@ -1961,7 +2065,9 @@ async fn test_stock_restricted_release_summary_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_summary_em("全部股票", "20240101", "20240131").await;
+    let result = client
+        .stock_restricted_release_summary_em("全部股票", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -1970,7 +2076,9 @@ async fn test_stock_restricted_release_detail_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_detail_em("20240101", "20240131").await;
+    let result = client
+        .stock_restricted_release_detail_em("20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -1988,7 +2096,9 @@ async fn test_stock_restricted_release_stockholder_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_stockholder_em("600000", "20240115").await;
+    let result = client
+        .stock_restricted_release_stockholder_em("600000", "20240115")
+        .await;
     let _ = result;
 }
 
@@ -2098,7 +2208,9 @@ async fn test_stock_individual_notice_report() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_notice_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_individual_notice_report("300237", "全部", Some("20240101"), Some("20240102")).await;
+    let result = client
+        .stock_individual_notice_report("300237", "全部", Some("20240101"), Some("20240102"))
+        .await;
     let _ = result;
 }
 
@@ -2107,7 +2219,9 @@ async fn test_stock_individual_notice_report_no_dates() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_notice_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_individual_notice_report("300237", "全部", None, None).await;
+    let result = client
+        .stock_individual_notice_report("300237", "全部", None, None)
+        .await;
     let _ = result;
 }
 
@@ -2120,7 +2234,9 @@ async fn test_stock_board_concept_hist_em_weekly() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_concept_hist_em("BK0715", "weekly", "20240101", "20240103", "qfq").await;
+    let result = client
+        .stock_board_concept_hist_em("BK0715", "weekly", "20240101", "20240103", "qfq")
+        .await;
     let _ = result;
 }
 
@@ -2129,7 +2245,9 @@ async fn test_stock_board_concept_hist_em_monthly() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_concept_hist_em("BK0715", "monthly", "20240101", "20240103", "hfq").await;
+    let result = client
+        .stock_board_concept_hist_em("BK0715", "monthly", "20240101", "20240103", "hfq")
+        .await;
     let _ = result;
 }
 
@@ -2138,7 +2256,9 @@ async fn test_stock_board_industry_hist_em_weekly() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_industry_hist_em("BK1027", "weekly", "20240101", "20240103", "qfq").await;
+    let result = client
+        .stock_board_industry_hist_em("BK1027", "weekly", "20240101", "20240103", "qfq")
+        .await;
     let _ = result;
 }
 
@@ -2156,7 +2276,9 @@ async fn test_stock_board_industry_hist_min_em_60min() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_industry_hist_min_em("BK1027", "60").await;
+    let result = client
+        .stock_board_industry_hist_min_em("BK1027", "60")
+        .await;
     let _ = result;
 }
 
@@ -2174,7 +2296,9 @@ async fn test_stock_dzjy_mrmx_bstock() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, block_trade_detail_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_dzjy_mrmx("bstock", "20240101", "20240102", 10).await;
+    let result = client
+        .stock_dzjy_mrmx("bstock", "20240101", "20240102", 10)
+        .await;
     let _ = result;
 }
 
@@ -2183,7 +2307,9 @@ async fn test_stock_dzjy_mrmx_fund() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, block_trade_detail_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_dzjy_mrmx("fund", "20240101", "20240102", 10).await;
+    let result = client
+        .stock_dzjy_mrmx("fund", "20240101", "20240102", 10)
+        .await;
     let _ = result;
 }
 
@@ -2192,7 +2318,9 @@ async fn test_stock_dzjy_mrmx_bond() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, block_trade_detail_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_dzjy_mrmx("bond", "20240101", "20240102", 10).await;
+    let result = client
+        .stock_dzjy_mrmx("bond", "20240101", "20240102", 10)
+        .await;
     let _ = result;
 }
 
@@ -2219,7 +2347,9 @@ async fn test_stock_restricted_release_summary_em_sh_a() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_summary_em("沪市A股", "20240101", "20240131").await;
+    let result = client
+        .stock_restricted_release_summary_em("沪市A股", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -2228,7 +2358,9 @@ async fn test_stock_restricted_release_summary_em_kcb() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_summary_em("科创板", "20240101", "20240131").await;
+    let result = client
+        .stock_restricted_release_summary_em("科创板", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -2237,7 +2369,9 @@ async fn test_stock_restricted_release_summary_em_cyb() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_summary_em("创业板", "20240101", "20240131").await;
+    let result = client
+        .stock_restricted_release_summary_em("创业板", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -2246,7 +2380,9 @@ async fn test_stock_restricted_release_summary_em_bse() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_summary_em("京市A股", "20240101", "20240131").await;
+    let result = client
+        .stock_restricted_release_summary_em("京市A股", "20240101", "20240131")
+        .await;
     let _ = result;
 }
 
@@ -2255,7 +2391,9 @@ async fn test_stock_financial_us_analysis_indicator_em_quarterly() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_us_org_profile_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_us_analysis_indicator_em("TSLA", "单季报").await;
+    let result = client
+        .stock_financial_us_analysis_indicator_em("TSLA", "单季报")
+        .await;
     let _ = result;
 }
 
@@ -2264,7 +2402,9 @@ async fn test_stock_financial_us_analysis_indicator_em_cumulative() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_us_org_profile_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_us_analysis_indicator_em("TSLA", "累计季报").await;
+    let result = client
+        .stock_financial_us_analysis_indicator_em("TSLA", "累计季报")
+        .await;
     let _ = result;
 }
 
@@ -2273,14 +2413,20 @@ async fn test_stock_financial_hk_analysis_indicator_em_period() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, em_securities_financial_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_hk_analysis_indicator_em("00700", "报告期").await;
+    let result = client
+        .stock_financial_hk_analysis_indicator_em("00700", "报告期")
+        .await;
     let _ = result;
 }
 
 #[tokio::test]
 async fn test_stock_board_change_em_custom_fs() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_em_stock_row("BK0001", "Test")])).await;
+    mount_catch_all_json(
+        &server,
+        em_push2_response(vec![sample_em_stock_row("BK0001", "Test")]),
+    )
+    .await;
     let client = mock_client(&server);
     // Custom fs string (not "行业板块" or "概念板块")
     let result = client.stock_board_change_em("m:90 t:3 f:!50").await;
@@ -2292,7 +2438,9 @@ async fn test_stock_report_fund_hold_invalid_type() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, fund_hold_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_report_fund_hold("invalid_type", "20210331", 10).await;
+    let result = client
+        .stock_report_fund_hold("invalid_type", "20210331", 10)
+        .await;
     // This should return an error due to unsupported holder type
     assert!(result.is_err());
 }
@@ -2302,7 +2450,9 @@ async fn test_stock_dzjy_mrmx_invalid_asset() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, block_trade_detail_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_dzjy_mrmx("invalid", "20240101", "20240102", 10).await;
+    let result = client
+        .stock_dzjy_mrmx("invalid", "20240101", "20240102", 10)
+        .await;
     assert!(result.is_err());
 }
 
@@ -2311,7 +2461,9 @@ async fn test_stock_board_concept_hist_em_invalid_period() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_concept_hist_em("BK0715", "invalid", "20240101", "20240103", "").await;
+    let result = client
+        .stock_board_concept_hist_em("BK0715", "invalid", "20240101", "20240103", "")
+        .await;
     assert!(result.is_err());
 }
 
@@ -2320,7 +2472,9 @@ async fn test_stock_board_concept_hist_em_invalid_adjust() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_board_concept_hist_em("BK0715", "daily", "20240101", "20240103", "invalid").await;
+    let result = client
+        .stock_board_concept_hist_em("BK0715", "daily", "20240101", "20240103", "invalid")
+        .await;
     assert!(result.is_err());
 }
 
@@ -2329,7 +2483,9 @@ async fn test_stock_individual_fund_flow_invalid_market() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, fund_flow_kline_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_individual_fund_flow("000001", "invalid", 30).await;
+    let result = client
+        .stock_individual_fund_flow("000001", "invalid", 30)
+        .await;
     assert!(result.is_err());
 }
 
@@ -2347,7 +2503,9 @@ async fn test_stock_financial_report_sina_invalid_symbol() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, sina_finance_report_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_financial_report_sina("sh600600", "无效报表").await;
+    let result = client
+        .stock_financial_report_sina("sh600600", "无效报表")
+        .await;
     assert!(result.is_err());
 }
 
@@ -2375,7 +2533,9 @@ async fn test_stock_restricted_release_summary_em_invalid_market() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, misc_datacenter_body()).await;
     let client = mock_client(&server);
-    let result = client.stock_restricted_release_summary_em("invalid", "20240101", "20240131").await;
+    let result = client
+        .stock_restricted_release_summary_em("invalid", "20240101", "20240131")
+        .await;
     assert!(result.is_err());
 }
 

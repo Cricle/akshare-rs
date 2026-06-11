@@ -76,7 +76,7 @@ impl AkShareClient {
         let url = "http://dict.openctp.cn/instruments?types=option";
 
         let resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .send()
             .await
             .map_err(Error::from)?

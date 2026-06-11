@@ -73,10 +73,20 @@ fn ths_headers() -> reqwest::header::HeaderMap {
 
 fn ths_market_code(stock_code: &str) -> i32 {
     let code = stock_code.trim();
-    if code.starts_with("000") || code.starts_with("001") || code.starts_with("002") || code.starts_with("003") || code.starts_with("300") {
+    if code.starts_with("000")
+        || code.starts_with("001")
+        || code.starts_with("002")
+        || code.starts_with("003")
+        || code.starts_with("300")
+    {
         return 33; // Shenzhen
     }
-    if code.starts_with("600") || code.starts_with("601") || code.starts_with("603") || code.starts_with("605") || code.starts_with("688") {
+    if code.starts_with("600")
+        || code.starts_with("601")
+        || code.starts_with("603")
+        || code.starts_with("605")
+        || code.starts_with("688")
+    {
         return 17; // Shanghai
     }
     if code.starts_with("920") {
@@ -144,7 +154,10 @@ fn parse_html_tables(html: &str) -> Vec<(Vec<String>, Vec<Vec<String>>)> {
     tables
 }
 
-fn table_to_records(headers: &[String], rows: &[Vec<String>]) -> Vec<HashMap<String, serde_json::Value>> {
+fn table_to_records(
+    headers: &[String],
+    rows: &[Vec<String>],
+) -> Vec<HashMap<String, serde_json::Value>> {
     rows.iter()
         .filter(|row| !row.is_empty())
         .map(|row| {
@@ -178,7 +191,7 @@ impl AkShareClient {
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = format!("https://basic.10jqka.com.cn/new/{symbol}/finance.html");
         let html = self
-                        .get(&url)
+            .get(&url)
             .headers(ths_headers())
             .send()
             .await?
@@ -234,7 +247,7 @@ impl AkShareClient {
         has_simple: bool,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let resp = self
-                        .get(url)
+            .get(url)
             .headers(ths_headers())
             .send()
             .await?
@@ -351,10 +364,7 @@ impl AkShareClient {
                     serde_json::Value::String(row_label.clone()),
                 );
                 if let Some(val) = cells.get(col_idx) {
-                    record.insert(
-                        "值".to_string(),
-                        serde_json::Value::String(val.clone()),
-                    );
+                    record.insert("值".to_string(), serde_json::Value::String(val.clone()));
                 }
                 all_records.push(record);
             }
@@ -391,7 +401,8 @@ impl AkShareClient {
         } else {
             "按年度"
         };
-        self.fetch_ths_new_api(symbol, "client_stock_debt", ind).await
+        self.fetch_ths_new_api(symbol, "client_stock_debt", ind)
+            .await
     }
 
     /// THS new income statement (利润表).
@@ -425,7 +436,7 @@ impl AkShareClient {
         let period = ths_period_code(indicator);
 
         let resp = self
-                        .get(url)
+            .get(url)
             .headers(ths_headers())
             .query(&[
                 ("code", symbol),
@@ -449,18 +460,12 @@ impl AkShareClient {
 
         let mut all_records = Vec::new();
         for report in &financial_data {
-            let report_date = report
-                .get("date")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let report_date = report.get("date").and_then(|v| v.as_str()).unwrap_or("");
             let report_name = report
                 .get("report_name")
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
-            let report_period = report
-                .get("report")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let report_period = report.get("report").and_then(|v| v.as_str()).unwrap_or("");
             let quarter_name = report
                 .get("quarter_name")
                 .and_then(|v| v.as_str())
@@ -520,7 +525,7 @@ impl AkShareClient {
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = format!("https://basic.10jqka.com.cn/new/{symbol}/event.html");
         let html = self
-                        .get(&url)
+            .get(&url)
             .headers(ths_headers())
             .send()
             .await?
@@ -550,7 +555,7 @@ impl AkShareClient {
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = format!("https://basic.10jqka.com.cn/new/{symbol}/event.html");
         let html = self
-                        .get(&url)
+            .get(&url)
             .headers(ths_headers())
             .send()
             .await?
@@ -601,7 +606,7 @@ impl AkShareClient {
 
         let url = format!("https://data.10jqka.com.cn/ipo/xgsgyzq/{path}/");
         let html = self
-                        .get(&url)
+            .get(&url)
             .headers(ths_headers())
             .send()
             .await?
@@ -633,7 +638,7 @@ impl AkShareClient {
     pub async fn stock_ipo_hk_ths(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = "https://data.10jqka.com.cn/ipo/xgsgyzq/hkstock/";
         let html = self
-                        .get(url)
+            .get(url)
             .headers(ths_headers())
             .send()
             .await?
@@ -675,11 +680,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = format!("https://basic.10jqka.com.cn/new/{symbol}/worth.html");
-        let resp = self
-                        .get(&url)
-            .headers(ths_headers())
-            .send()
-            .await?;
+        let resp = self.get(&url).headers(ths_headers()).send().await?;
 
         let bytes = resp.bytes().await?;
         let html = String::from_utf8_lossy(&bytes).to_string();
@@ -713,7 +714,11 @@ impl AkShareClient {
             "预测年报净利润" => 1,
             "业绩预测详表-机构" => 2,
             "业绩预测详表-详细指标预测" => 3,
-            _ => return Err(Error::invalid_input(format!("unsupported indicator: {indicator}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported indicator: {indicator}"
+                )));
+            }
         };
 
         if table_idx >= tables.len() {
@@ -731,16 +736,9 @@ impl AkShareClient {
     /// THS main business introduction (主营介绍).
     ///
     /// `symbol` is the stock code, e.g. "000066".
-    pub async fn stock_zyjs_ths(
-        &self,
-        symbol: &str,
-    ) -> Result<HashMap<String, serde_json::Value>> {
+    pub async fn stock_zyjs_ths(&self, symbol: &str) -> Result<HashMap<String, serde_json::Value>> {
         let url = format!("https://basic.10jqka.com.cn/new/{symbol}/operate.html");
-        let resp = self
-                        .get(&url)
-            .headers(ths_headers())
-            .send()
-            .await?;
+        let resp = self.get(&url).headers(ths_headers()).send().await?;
 
         let bytes = resp.bytes().await?;
         let html = String::from_utf8_lossy(&bytes).to_string();
@@ -796,7 +794,7 @@ impl AkShareClient {
 
         let url = "https://www.etnet.com.hk/www/sc/stocks/realtime/quote_profit.php";
         let html = self
-                        .get(url)
+            .get(url)
             .query(&[("code", code)])
             .send()
             .await?

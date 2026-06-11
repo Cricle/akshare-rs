@@ -42,7 +42,7 @@ impl AkShareClient {
         });
 
         let resp: TushareResponse = self
-                        .post("https://api.tushare.pro")
+            .post("https://api.tushare.pro")
             .json(&body)
             .send()
             .await?
@@ -50,7 +50,9 @@ impl AkShareClient {
             .await?;
 
         if resp.code != Some(0) {
-            let msg = resp.msg.unwrap_or_else(|| "unknown tushare error".to_string());
+            let msg = resp
+                .msg
+                .unwrap_or_else(|| "unknown tushare error".to_string());
             return Err(Error::upstream(format!("tushare: {msg}")));
         }
 
@@ -71,7 +73,11 @@ impl AkShareClient {
             "end_date": end,
         });
         let data = self
-            .tushare_call("daily", params, "trade_date,open,high,low,close,vol,amount,pct_chg,change,turnover_rate")
+            .tushare_call(
+                "daily",
+                params,
+                "trade_date,open,high,low,close,vol,amount,pct_chg,change,turnover_rate",
+            )
             .await?;
 
         let fields = &data.fields;
@@ -114,7 +120,11 @@ impl AkShareClient {
             "end_date": end,
         });
         let data = self
-            .tushare_call("trade_cal", params, "exchange,cal_date,is_open,pretrade_date")
+            .tushare_call(
+                "trade_cal",
+                params,
+                "exchange,cal_date,is_open,pretrade_date",
+            )
             .await?;
 
         let fields = &data.fields;
@@ -131,9 +141,7 @@ impl AkShareClient {
                 exchange: get("exchange").as_str().unwrap_or("").to_string(),
                 calendar_date: get("cal_date").as_str().unwrap_or("").to_string(),
                 is_open: get("is_open").as_i64().unwrap_or(0) == 1,
-                previous_trade_date: get("pretrade_date")
-                    .as_str()
-                    .map(|s| s.to_string()),
+                previous_trade_date: get("pretrade_date").as_str().map(|s| s.to_string()),
             });
         }
         Ok(items)

@@ -54,10 +54,7 @@ impl AkShareClient {
     /// 新浪财经 — 环球市场历史行情.
     ///
     /// `name` is the Chinese name from `index_global_name_table()`.
-    pub async fn index_global_hist_sina(
-        &self,
-        name: &str,
-    ) -> Result<Vec<GlobalSinaHistPoint>> {
+    pub async fn index_global_hist_sina(&self, name: &str) -> Result<Vec<GlobalSinaHistPoint>> {
         let code = GLOBAL_SINA_SYMBOL_MAP
             .iter()
             .find(|(n, _)| *n == name)
@@ -65,7 +62,7 @@ impl AkShareClient {
             .ok_or_else(|| Error::invalid_input(format!("unknown global index name: {name}")))?;
 
         let response = self
-                        .get("https://gi.finance.sina.com.cn/hq/daily")
+            .get("https://gi.finance.sina.com.cn/hq/daily")
             .query(&[("symbol", code), ("num", "10000")])
             .send()
             .await

@@ -47,7 +47,7 @@ impl AkShareClient {
         }
 
         let mut returns_oi: Vec<f64> = Vec::new(); // overnight returns (open_i / close_{i-1})
-         // close-to-open returns (close_i / open_i)
+        // close-to-open returns (close_i / open_i)
         let mut rs_values: Vec<f64> = Vec::new(); // Rogers-Satchell values
 
         // Calculate returns
@@ -127,7 +127,10 @@ impl AkShareClient {
     ///
     /// `symbol`: futures contract code (e.g., "AU2406")
     /// Fetches minute kline data and computes Yang-Zhang realized volatility.
-    pub async fn rv_from_futures_zh_minute_sina(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
+    pub async fn rv_from_futures_zh_minute_sina(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<MacroDataPoint>> {
         let klines = self.futures_zh_minute_sina(symbol, "1").await?;
         if klines.is_empty() {
             return Err(Error::not_found(format!("no minute data for {}", symbol)));
@@ -140,7 +143,11 @@ impl AkShareClient {
         let bars: Vec<OhlcBar> = klines
             .iter()
             .map(|k| OhlcBar {
-                date: k.get("datetime").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                date: k
+                    .get("datetime")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
                 open: row_f64(k, "open"),
                 high: row_f64(k, "high"),
                 low: row_f64(k, "low"),
@@ -155,8 +162,13 @@ impl AkShareClient {
     ///
     /// `symbol`: stock code (e.g., "600000")
     /// Fetches minute kline data and computes Yang-Zhang realized volatility.
-    pub async fn rv_from_stock_zh_a_hist_min_em(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
-        let klines = self.stock_zh_a_hist_min_em(symbol, "5", "qfq", "", "").await?;
+    pub async fn rv_from_stock_zh_a_hist_min_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<MacroDataPoint>> {
+        let klines = self
+            .stock_zh_a_hist_min_em(symbol, "5", "qfq", "", "")
+            .await?;
         if klines.is_empty() {
             return Err(Error::not_found(format!("no minute data for {}", symbol)));
         }
@@ -194,9 +206,10 @@ impl AkShareClient {
         for window_start in 0..=(data.len() - window_size - 1) {
             let window = &data[window_start..window_start + window_size + 1];
             if let Ok(mut result) = self.volatility_yz_rv(window)
-                && let Some(point) = result.pop() {
-                    items.push(point);
-                }
+                && let Some(point) = result.pop()
+            {
+                items.push(point);
+            }
         }
         Ok(items)
     }
@@ -214,7 +227,12 @@ pub fn yang_zhang_rv(
     lows: &[f64],
     closes: &[f64],
 ) -> Result<f64> {
-    let n = dates.len().min(opens.len()).min(highs.len()).min(lows.len()).min(closes.len());
+    let n = dates
+        .len()
+        .min(opens.len())
+        .min(highs.len())
+        .min(lows.len())
+        .min(closes.len());
     if n < 2 {
         return Err(Error::invalid_input("need at least 2 data points"));
     }

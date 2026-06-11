@@ -86,14 +86,11 @@ impl AkShareClient {
     /// SSE option daily statistics.
     ///
     /// `date` is "YYYYMMDD".
-    pub async fn option_daily_stats_sse(
-        &self,
-        date: &str,
-    ) -> Result<Vec<OptionDailyStatsSse>> {
+    pub async fn option_daily_stats_sse(&self, date: &str) -> Result<Vec<OptionDailyStatsSse>> {
         let url = "http://query.sse.com.cn/commonQuery.do";
 
         let resp: SseQueryEnvelope = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("isPagination", "false"),
                 ("sqlId", "COMMON_SSE_ZQPZ_YSP_QQ_SJTJ_MRTJ_CX"),
@@ -133,10 +130,7 @@ impl AkShareClient {
     /// SZSE option daily statistics.
     ///
     /// `date` is "YYYYMMDD".
-    pub async fn option_daily_stats_szse(
-        &self,
-        date: &str,
-    ) -> Result<Vec<OptionDailyStatsSzse>> {
+    pub async fn option_daily_stats_szse(&self, date: &str) -> Result<Vec<OptionDailyStatsSzse>> {
         let date_formatted = if date.len() >= 8 {
             format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8])
         } else {
@@ -146,7 +140,7 @@ impl AkShareClient {
         let url = "https://investor.szse.cn/api/report/ShowReport/data";
 
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("SHOWTYPE", "JSON"),
                 ("CATALOGID", "ysprdzb"),
@@ -161,8 +155,8 @@ impl AkShareClient {
             .await
             .map_err(Error::from)?;
 
-        let json_val: serde_json::Value =
-            serde_json::from_str(&body).map_err(|e| Error::decode(format!("szse daily stats json: {e}")))?;
+        let json_val: serde_json::Value = serde_json::from_str(&body)
+            .map_err(|e| Error::decode(format!("szse daily stats json: {e}")))?;
 
         let data = json_val
             .as_array()

@@ -69,13 +69,10 @@ impl AkShareClient {
     ///
     /// Returns up to `limit` futures contracts with latest price, change,
     /// volume and open interest across all major Chinese futures exchanges.
-    pub async fn futures_spot_prices(
-        &self,
-        limit: usize,
-    ) -> Result<Vec<FuturesSnapshot>> {
+    pub async fn futures_spot_prices(&self, limit: usize) -> Result<Vec<FuturesSnapshot>> {
         let pz = limit.clamp(1, 500).to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),

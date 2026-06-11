@@ -21,7 +21,9 @@ fn lof_secid(symbol: &str) -> Result<String> {
         };
         return Ok(format!("{prefix}.{s}"));
     }
-    Err(Error::invalid_input(format!("invalid LOF symbol: {symbol}")))
+    Err(Error::invalid_input(format!(
+        "invalid LOF symbol: {symbol}"
+    )))
 }
 
 impl AkShareClient {
@@ -61,7 +63,11 @@ impl AkShareClient {
             .filter_map(|v| {
                 Some(FundSnapshot {
                     symbol: v.get("f12")?.as_str()?.to_string(),
-                    name: v.get("f14").and_then(|x| x.as_str()).unwrap_or("").to_string(),
+                    name: v
+                        .get("f14")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                     date: date.clone(),
                     nav: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
                     acc_nav: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
@@ -101,13 +107,21 @@ impl AkShareClient {
             "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
-            _ => return Err(Error::invalid_input(format!("unsupported period: {period}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported period: {period}"
+                )));
+            }
         };
         let adjust_map = match adjust {
             "qfq" => "1",
             "hfq" => "2",
             "" | "none" => "0",
-            _ => return Err(Error::invalid_input(format!("unsupported adjust: {adjust}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported adjust: {adjust}"
+                )));
+            }
         };
         let secid = lof_secid(symbol)?;
 
@@ -115,7 +129,10 @@ impl AkShareClient {
             .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
                 ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f116"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f116",
+                ),
                 ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
                 ("klt", period_map),
                 ("fqt", adjust_map),
@@ -178,7 +195,11 @@ impl AkShareClient {
             "qfq" => "1",
             "hfq" => "2",
             "" | "none" => "0",
-            _ => return Err(Error::invalid_input(format!("unsupported adjust: {adjust}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported adjust: {adjust}"
+                )));
+            }
         };
         let secid = lof_secid(symbol)?;
 
@@ -256,7 +277,9 @@ impl AkShareClient {
                 .get("data")
                 .and_then(|d| d.get("klines"))
                 .and_then(|k| k.as_array())
-                .ok_or_else(|| Error::not_found(format!("no minute kline data for LOF {symbol}")))?;
+                .ok_or_else(|| {
+                    Error::not_found(format!("no minute kline data for LOF {symbol}"))
+                })?;
 
             let mut candles = Vec::new();
             for kline in klines {
@@ -301,7 +324,10 @@ impl AkShareClient {
                 ("invt", "2"),
                 ("fid", "f3"),
                 ("fs", "b:MK0404,b:MK0405,b:MK0406,b:MK0407"),
-                ("fields", "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21"),
+                (
+                    "fields",
+                    "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21",
+                ),
             ])
             .send()
             .await
@@ -322,7 +348,11 @@ impl AkShareClient {
             .filter_map(|v| {
                 Some(EtfSpotItem {
                     code: v.get("f12")?.as_str()?.to_string(),
-                    name: v.get("f14").and_then(|x| x.as_str()).unwrap_or("").to_string(),
+                    name: v
+                        .get("f14")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                     latest_price: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
                     change_pct: v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0),
                     change_amount: v.get("f4").and_then(|x| x.as_f64()).unwrap_or(0.0),

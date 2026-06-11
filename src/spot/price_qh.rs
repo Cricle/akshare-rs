@@ -42,7 +42,7 @@ impl AkShareClient {
         let token = self.fetch_qh_token().await?;
 
         let resp: QhTrendResp = self
-                        .get("https://centerapi.fx168api.com/app/qh/api/spot/trend")
+            .get("https://centerapi.fx168api.com/app/qh/api/spot/trend")
             .query(&[
                 ("productId", product_id.as_str()),
                 ("pageNo", "1"),
@@ -78,7 +78,9 @@ impl AkShareClient {
             .collect();
 
         if items.is_empty() {
-            return Err(Error::not_found(format!("no valid spot price data for {symbol}")));
+            return Err(Error::not_found(format!(
+                "no valid spot price data for {symbol}"
+            )));
         }
         Ok(items)
     }
@@ -88,12 +90,16 @@ impl AkShareClient {
     /// Returns a list of (exchange_name, commodity_name) pairs.
     pub async fn spot_price_table_qh(&self) -> Result<Vec<(String, String)>> {
         let products = self.fetch_qh_products().await?;
-        Ok(products.into_iter().map(|(name, _id)| name).map(|n| (String::new(), n)).collect())
+        Ok(products
+            .into_iter()
+            .map(|(name, _id)| name)
+            .map(|n| (String::new(), n))
+            .collect())
     }
 
     async fn fetch_qh_products(&self) -> Result<Vec<(String, String)>> {
         let resp = self
-                        .get("https://www.99qh.com/data/spotTrend")
+            .get("https://www.99qh.com/data/spotTrend")
             .send()
             .await
             .map_err(Error::from)?
@@ -103,16 +109,17 @@ impl AkShareClient {
 
         // Extract __NEXT_DATA__ JSON from the page
         let marker = r#"id="__NEXT_DATA__"#;
-        let script_start = resp.find(marker).ok_or_else(|| {
-            Error::decode("99qh page missing __NEXT_DATA__ script")
-        })?;
+        let script_start = resp
+            .find(marker)
+            .ok_or_else(|| Error::decode("99qh page missing __NEXT_DATA__ script"))?;
         let after_script = &resp[script_start..];
-        let json_start = after_script.find('>').ok_or_else(|| {
-            Error::decode("99qh __NEXT_DATA__ script malformed")
-        })? + 1;
-        let json_end = after_script.find("</script>").ok_or_else(|| {
-            Error::decode("99qh __NEXT_DATA__ script not closed")
-        })?;
+        let json_start = after_script
+            .find('>')
+            .ok_or_else(|| Error::decode("99qh __NEXT_DATA__ script malformed"))?
+            + 1;
+        let json_end = after_script
+            .find("</script>")
+            .ok_or_else(|| Error::decode("99qh __NEXT_DATA__ script not closed"))?;
         let json_str = &after_script[json_start..json_end];
 
         let data: serde_json::Value = serde_json::from_str(json_str)
@@ -154,7 +161,7 @@ impl AkShareClient {
 
     async fn fetch_qh_token(&self) -> Result<String> {
         let resp = self
-                        .get("https://centerapi.fx168api.com/app/common/v.js")
+            .get("https://centerapi.fx168api.com/app/common/v.js")
             .header("Origin", "https://www.99qh.com")
             .header("Referer", "https://www.99qh.com")
             .send()

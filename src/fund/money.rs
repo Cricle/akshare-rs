@@ -22,32 +22,67 @@ impl AkShareClient {
         let response = self
             .get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
             .query(&[
-                ("FundType", "0"), ("SortColumn", "SYL_7"), ("Sort", "desc"),
-                ("pageIndex", "1"), ("pageSize", pn.as_str()), ("IsSale", "1"),
+                ("FundType", "0"),
+                ("SortColumn", "SYL_7"),
+                ("Sort", "desc"),
+                ("pageIndex", "1"),
+                ("pageSize", pn.as_str()),
+                ("IsSale", "1"),
             ])
             .header("Referer", "https://fund.eastmoney.com/")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let payload: HbRankEnvelope = response.json().await.map_err(Error::from)?;
         if let Some(code) = payload.err_code
-            && code != 0 {
-                let msg = payload.err_msg.unwrap_or_else(|| "unknown".to_string());
-                return Err(Error::upstream(format!("money fund API error {code}: {msg}")));
-            }
+            && code != 0
+        {
+            let msg = payload.err_msg.unwrap_or_else(|| "unknown".to_string());
+            return Err(Error::upstream(format!(
+                "money fund API error {code}: {msg}"
+            )));
+        }
 
         let items = payload.datas.unwrap_or_default();
         let snapshots: Vec<FundSnapshot> = items
             .into_iter()
             .filter_map(|v| {
                 let symbol = v.get("FCODE")?.as_str()?.to_string();
-                let name = v.get("SHORTNAME").and_then(|x| x.as_str()).unwrap_or("").to_string();
-                let date = v.get("PDATE").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                let name = v
+                    .get("SHORTNAME")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let date = v
+                    .get("PDATE")
+                    .and_then(|x| x.as_str())
+                    .unwrap_or("")
+                    .to_string();
                 Some(FundSnapshot {
-                    symbol, name, date,
-                    nav: v.get("DWJZ").and_then(|x| x.as_str()).unwrap_or("0").parse().unwrap_or(0.0),
-                    acc_nav: v.get("LJJZ").and_then(|x| x.as_str()).unwrap_or("0").parse().unwrap_or(0.0),
-                    change_pct: v.get("RZDF").and_then(|x| x.as_str()).unwrap_or("0").parse().unwrap_or(0.0),
+                    symbol,
+                    name,
+                    date,
+                    nav: v
+                        .get("DWJZ")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("0")
+                        .parse()
+                        .unwrap_or(0.0),
+                    acc_nav: v
+                        .get("LJJZ")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("0")
+                        .parse()
+                        .unwrap_or(0.0),
+                    change_pct: v
+                        .get("RZDF")
+                        .and_then(|x| x.as_str())
+                        .unwrap_or("0")
+                        .parse()
+                        .unwrap_or(0.0),
                     fund_type: Some("money_market".to_string()),
                 })
             })
@@ -63,8 +98,11 @@ impl AkShareClient {
     pub async fn fund_money_fund_daily_em(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .get("https://fund.eastmoney.com/HBJJ_pjsyl.html")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         // This endpoint returns HTML; we need to parse the table.
@@ -75,7 +113,9 @@ impl AkShareClient {
         // Extract data from HTML table using simple parsing
         // The HTML contains a table with fund data; we return a placeholder error
         // since full HTML parsing requires a dedicated library.
-        Err(Error::decode("money fund daily data requires HTML table parsing"))
+        Err(Error::decode(
+            "money fund daily data requires HTML table parsing",
+        ))
     }
 
     /// Fetch money fund info (historical NAV) from Eastmoney.
@@ -84,7 +124,10 @@ impl AkShareClient {
     pub async fn fund_money_fund_info_em(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
         let response = self
             .get("https://api.fund.eastmoney.com/f10/lsjz")
-            .header("Referer", format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"))
+            .header(
+                "Referer",
+                format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
+            )
             .query(&[
                 ("fundCode", symbol),
                 ("pageIndex", "1"),
@@ -92,8 +135,11 @@ impl AkShareClient {
                 ("startDate", ""),
                 ("endDate", ""),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = payload
@@ -104,8 +150,13 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for item in list {
-            let arr = match item.as_array() { Some(a) => a, None => continue };
-            if arr.len() < 10 { continue; }
+            let arr = match item.as_array() {
+                Some(a) => a,
+                None => continue,
+            };
+            if arr.len() < 10 {
+                continue;
+            }
             result.push(FundNavHistory {
                 date: arr[0].as_str().unwrap_or("").to_string(),
                 nav: arr[1].as_str().unwrap_or("0").parse().unwrap_or(0.0),
@@ -127,13 +178,20 @@ impl AkShareClient {
         let response = self
             .get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
             .query(&[
-                ("intCompany", "0"), ("MinsgType", ""), ("IsSale", "1"),
-                ("strSortCol", "SYL_1N"), ("orderType", "desc"),
-                ("pageIndex", "1"), ("pageSize", "10000"),
+                ("intCompany", "0"),
+                ("MinsgType", ""),
+                ("IsSale", "1"),
+                ("strSortCol", "SYL_1N"),
+                ("orderType", "desc"),
+                ("pageIndex", "1"),
+                ("pageSize", "10000"),
             ])
             .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -143,8 +201,13 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for (i, item) in data.iter().enumerate() {
-            let arr = match item.as_array() { Some(a) => a, None => continue };
-            if arr.len() < 20 { continue; }
+            let arr = match item.as_array() {
+                Some(a) => a,
+                None => continue,
+            };
+            if arr.len() < 20 {
+                continue;
+            }
             result.push(FundMoneyRankItem {
                 rank: (i + 1) as i32,
                 fund_code: arr[7].as_str().unwrap_or("").to_string(),

@@ -77,10 +77,7 @@ impl AkShareClient {
     ///
     /// `series` is one of: "沪深重要指数", "上证系列指数", "深证系列指数",
     /// "指数成份", "中证系列指数".
-    pub async fn index_stock_zh_spot_em(
-        &self,
-        series: &str,
-    ) -> Result<Vec<IndexSpotItem>> {
+    pub async fn index_stock_zh_spot_em(&self, series: &str) -> Result<Vec<IndexSpotItem>> {
         let fs = EM_SERIES
             .iter()
             .find(|(name, _)| *name == series)
@@ -88,7 +85,7 @@ impl AkShareClient {
             .ok_or_else(|| Error::invalid_input(format!("unknown series: {series}")))?;
 
         let response = self
-                        .get("https://48.push2.eastmoney.com/api/qt/clist/get")
+            .get("https://48.push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "200"),
@@ -131,7 +128,9 @@ impl AkShareClient {
             .collect();
 
         if items.is_empty() {
-            return Err(Error::not_found("eastmoney returned no A-share index spot data"));
+            return Err(Error::not_found(
+                "eastmoney returned no A-share index spot data",
+            ));
         }
         Ok(items)
     }
@@ -189,16 +188,12 @@ impl AkShareClient {
     /// 新浪财经 — A股指数历史行情 (日线).
     ///
     /// `symbol` uses Sina format, e.g. "sh000300", "sz399006".
-    pub async fn stock_zh_index_daily(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CandlePoint>> {
+    pub async fn stock_zh_index_daily(&self, symbol: &str) -> Result<Vec<CandlePoint>> {
         // Sina uses JS-encoded data; try to parse the response directly
-        let url = format!(
-            "https://finance.sina.com.cn/realstock/company/{symbol}/hisdata/klc_kl.js"
-        );
+        let url =
+            format!("https://finance.sina.com.cn/realstock/company/{symbol}/hisdata/klc_kl.js");
         let response = self
-                        .get(&url)
+            .get(&url)
             .query(&[("d", "2020_2_4")])
             .send()
             .await

@@ -26,7 +26,7 @@ impl AkShareClient {
     pub async fn index_csindex_all(&self) -> Result<Vec<crate::types::Row>> {
         let url = "https://www.csindex.com.cn/csindex-home/index/list";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("page", "1"), ("pageSize", "5000")])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -58,7 +58,7 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<CsindexHistPoint>> {
         let response = self
-                        .get("https://www.csindex.com.cn/csindex-home/perf/index-perf")
+            .get("https://www.csindex.com.cn/csindex-home/perf/index-perf")
             .query(&[
                 ("indexCode", symbol),
                 ("startDate", start_date),

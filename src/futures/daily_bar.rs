@@ -39,7 +39,10 @@ struct GfexResponse {
 // ---------------------------------------------------------------------------
 
 fn extract_variety(symbol: &str) -> String {
-    RE_ALPHA.find(symbol).map(|m| m.as_str().to_uppercase()).unwrap_or_default()
+    RE_ALPHA
+        .find(symbol)
+        .map(|m| m.as_str().to_uppercase())
+        .unwrap_or_default()
 }
 
 fn parse_f64_val(v: &serde_json::Value) -> f64 {
@@ -78,7 +81,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -134,7 +137,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -150,7 +153,10 @@ impl AkShareClient {
         let mut items = Vec::new();
         for row in &instruments {
             let delivery_month = row["DELIVERYMONTH"].as_str().unwrap_or("").to_string();
-            if delivery_month.contains("小计") || delivery_month.contains("合计") || delivery_month.is_empty() {
+            if delivery_month.contains("小计")
+                || delivery_month.contains("合计")
+                || delivery_month.is_empty()
+            {
                 continue;
             }
             let product_name = row["PRODUCTNAME"].as_str().unwrap_or("");
@@ -196,7 +202,7 @@ impl AkShareClient {
             date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -264,13 +270,7 @@ impl AkShareClient {
             "varietyId": "all",
         });
 
-        let body = self
-                        .post(url)
-            .json(&payload)
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = self.post(url).json(&payload).send().await?.text().await?;
 
         let data: serde_json::Value = serde_json::from_str(&body)?;
         let rows = data["data"].as_array().cloned().unwrap_or_default();
@@ -315,7 +315,7 @@ impl AkShareClient {
             year, date
         );
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -372,7 +372,7 @@ impl AkShareClient {
     pub async fn futures_daily_gfex(&self, date: &str) -> Result<Vec<FuturesDailyBar>> {
         let url = "http://www.gfex.com.cn/u/interfacesWebTiDayQuotes/loadList";
         let body = self
-                        .post(url)
+            .post(url)
             .form(&[("trade_date", date), ("trade_type", "0")])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -389,10 +389,7 @@ impl AkShareClient {
             if variety_str.contains("小计") || variety_str.contains("总计") {
                 continue;
             }
-            let variety_order = row["varietyOrder"]
-                .as_str()
-                .unwrap_or("")
-                .to_uppercase();
+            let variety_order = row["varietyOrder"].as_str().unwrap_or("").to_uppercase();
             let deliv_month = row["delivMonth"].as_str().unwrap_or("");
             let sym = format!("{}{}", variety_order, deliv_month);
             items.push(FuturesDailyBar {

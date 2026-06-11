@@ -63,7 +63,7 @@ impl AkShareClient {
         let referer = format!("https://so.eastmoney.com/news/s?keyword={query}");
 
         let raw_text = self
-                        .get("https://search-api-web.eastmoney.com/search/jsonp")
+            .get("https://search-api-web.eastmoney.com/search/jsonp")
             .query(&[
                 ("cb", "jQuery_callback"),
                 ("param", &inner_param.to_string()),
@@ -75,8 +75,8 @@ impl AkShareClient {
             .await?;
 
         let json_str = strip_jsonp(&raw_text)?;
-        let root: serde_json::Value =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("JSON parse: {e}")))?;
+        let root: serde_json::Value = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("JSON parse: {e}")))?;
 
         let list = root
             .pointer("/result/cmsArticleWebOld")
@@ -89,14 +89,8 @@ impl AkShareClient {
             if items.len() >= limit {
                 break;
             }
-            let title_raw = entry
-                .get("title")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
-            let content_raw = entry
-                .get("content")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let title_raw = entry.get("title").and_then(|v| v.as_str()).unwrap_or("");
+            let content_raw = entry.get("content").and_then(|v| v.as_str()).unwrap_or("");
             let date = entry
                 .get("date")
                 .and_then(|v| v.as_str())

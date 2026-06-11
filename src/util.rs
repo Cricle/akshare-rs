@@ -45,3 +45,39 @@ pub fn amplitude_pct(high: f64, low: f64) -> f64 {
         0.0
     }
 }
+
+/// Extract fields from a JSON object into a Row by removing (not cloning) values.
+/// The source Value must be an object; non-object values produce an empty Row.
+#[allow(dead_code)]
+pub fn json_obj_to_row(mut v: serde_json::Value, fields: &[&str]) -> crate::types::Row {
+    let mut r = crate::types::Row::new();
+    if let Some(obj) = v.as_object_mut() {
+        for &field in fields {
+            if let Some(val) = obj.remove(field) {
+                r.insert(field.to_string(), val);
+            }
+        }
+    }
+    r
+}
+
+/// Extract a string from a JSON value without cloning (returns owned String).
+#[allow(dead_code)]
+pub fn json_take_str(v: &serde_json::Value, key: &str) -> String {
+    v.get(key)
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string()
+}
+
+/// Extract an f64 from a JSON value.
+#[allow(dead_code)]
+pub fn json_take_f64(v: &serde_json::Value, key: &str) -> f64 {
+    v.get(key).and_then(|v| v.as_f64()).unwrap_or(0.0)
+}
+
+/// Extract an i64 from a JSON value.
+#[allow(dead_code)]
+pub fn json_take_i64(v: &serde_json::Value, key: &str) -> i64 {
+    v.get(key).and_then(|v| v.as_i64()).unwrap_or(0)
+}

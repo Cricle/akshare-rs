@@ -84,8 +84,9 @@ impl From<reqwest::Error> for Error {
     fn from(err: reqwest::Error) -> Self {
         let kind = if err.is_status() {
             match err.status() {
-                Some(s) if s == reqwest::StatusCode::FORBIDDEN
-                    || s == reqwest::StatusCode::UNAUTHORIZED =>
+                Some(s)
+                    if s == reqwest::StatusCode::FORBIDDEN
+                        || s == reqwest::StatusCode::UNAUTHORIZED =>
                 {
                     ErrorKind::Restricted
                 }

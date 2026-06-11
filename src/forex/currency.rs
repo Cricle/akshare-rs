@@ -24,12 +24,8 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "https://api.currencyscoop.com/v1/latest";
         let resp: serde_json::Value = self
-                        .get(url)
-            .query(&[
-                ("base", base),
-                ("symbols", symbols),
-                ("api_key", api_key),
-            ])
+            .get(url)
+            .query(&[("base", base), ("symbols", symbols), ("api_key", api_key)])
             .send()
             .await?
             .json()
@@ -73,7 +69,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "https://api.currencyscoop.com/v1/historical";
         let resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("base", base),
                 ("date", date),
@@ -118,7 +114,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "https://api.currencyscoop.com/v1/timeseries";
         let resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("base", base),
                 ("start_date", start_date),
@@ -163,7 +159,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "https://api.currencyscoop.com/v1/currencies";
         let resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[("type", c_type), ("api_key", api_key)])
             .send()
             .await?
@@ -204,7 +200,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "https://api.currencyscoop.com/v1/convert";
         let resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("from", from),
                 ("to", to),
@@ -270,7 +266,12 @@ impl AkShareClient {
             "泰国铢" => "THB",
             "菲律宾比索" => "PHP",
             "韩国元" => "KRW",
-            _ => return Err(Error::invalid_input(format!("unknown currency: {}", symbol))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unknown currency: {}",
+                    symbol
+                )));
+            }
         };
 
         let url = "http://biz.finance.sina.com.cn/forex/forex.php";
@@ -280,15 +281,10 @@ impl AkShareClient {
             &start_date[4..6],
             &start_date[6..8]
         );
-        let formatted_end = format!(
-            "{}-{}-{}",
-            &end_date[..4],
-            &end_date[4..6],
-            &end_date[6..8]
-        );
+        let formatted_end = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("money_code", money_code),
                 ("type", "0"),
@@ -328,10 +324,13 @@ impl AkShareClient {
     pub async fn currency_boc_safe(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.safe.gov.cn/AppStructured/hlw/RMBQuery.do";
         let body = self
-                        .post(url)
+            .post(url)
             .form(&[
                 ("startDate", "2020-01-01"),
-                ("endDate", &chrono::Utc::now().format("%Y-%m-%d").to_string()),
+                (
+                    "endDate",
+                    &chrono::Utc::now().format("%Y-%m-%d").to_string(),
+                ),
                 ("queryYN", "true"),
             ])
             .send()

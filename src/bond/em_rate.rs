@@ -32,7 +32,7 @@ impl AkShareClient {
 
         for page in 1..=10 {
             let resp: EmRateResp = self
-                                .get("https://datacenter.eastmoney.com/api/data/get")
+                .get("https://datacenter.eastmoney.com/api/data/get")
                 .query(&[
                     ("type", "RPTA_WEB_TREASURYYIELD"),
                     ("sty", "ALL"),
@@ -55,10 +55,7 @@ impl AkShareClient {
             }
 
             for v in &data {
-                let date = v
-                    .get("SOLAR_DATE")
-                    .and_then(|x| x.as_str())
-                    .unwrap_or("");
+                let date = v.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
                 if date.is_empty() {
                     continue;
                 }

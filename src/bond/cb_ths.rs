@@ -17,7 +17,7 @@ impl AkShareClient {
     /// conversion prices, etc.
     pub async fn bond_zh_cov_info_ths(&self) -> Result<Vec<serde_json::Value>> {
         let resp: ThsBondResp = self
-                        .get("https://data.10jqka.com.cn/ipo/kzz/")
+            .get("https://data.10jqka.com.cn/ipo/kzz/")
             .send()
             .await
             .map_err(Error::from)?

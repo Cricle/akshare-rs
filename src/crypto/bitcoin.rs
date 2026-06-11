@@ -50,7 +50,7 @@ impl AkShareClient {
 
         let url = "https://datacenter-api.jin10.com/reports/list";
         let resp: Jin10ReportResponse = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("category", "cme"),
                 ("date", &formatted_date),
@@ -99,7 +99,7 @@ impl AkShareClient {
     pub async fn crypto_bitcoin_hold_report(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-api.jin10.com/bitcoin_treasuries/list";
         let resp: Jin10HoldResponse = self
-                        .get(url)
+            .get(url)
             .header("X-App-Id", "lnFP5lxse24wPgtY")
             .header("X-Version", "1.0.0")
             .send()
@@ -107,10 +107,7 @@ impl AkShareClient {
             .json()
             .await?;
 
-        let values = resp
-            .data
-            .and_then(|d| d.values)
-            .unwrap_or_default();
+        let values = resp.data.and_then(|d| d.values).unwrap_or_default();
 
         let mut items = Vec::new();
         for row in &values {
@@ -122,15 +119,9 @@ impl AkShareClient {
             // [4] btc_ratio, [5] cost, [6] holding_ratio, [7] holding_amount,
             // [8] holding_value, [9] query_date, [10] announcement_link,
             // [11] _, [12] category, [13] multiplier, [14] _, [15] company_cn
-            let company = row[1]
-                .as_str()
-                .unwrap_or("")
-                .to_string();
+            let company = row[1].as_str().unwrap_or("").to_string();
             let holding_amount = row[7].as_f64().unwrap_or(0.0);
-            let query_date = row[9]
-                .as_str()
-                .unwrap_or("")
-                .to_string();
+            let query_date = row[9].as_str().unwrap_or("").to_string();
 
             if !company.is_empty() {
                 items.push(MacroDataPoint {

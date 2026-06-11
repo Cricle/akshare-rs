@@ -62,7 +62,7 @@ impl AkShareClient {
     /// - "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{6cbd}\u{6301}\u{4ed3}\u{91cf}"
     /// - "\u{9009}\u{6743}\u{4ea4}\u{6613}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{4ea4}\u{6613}\u{91cf}"
     /// - "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{6301}\u{4ed3}\u{91cf}"
-    /// `trade_date` is "YYYYMMDD".
+    ///   `trade_date` is "YYYYMMDD".
     pub async fn option_lhb_em(
         &self,
         symbol: &str,
@@ -83,7 +83,7 @@ impl AkShareClient {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")(TRADE_DATE='{date_formatted}')");
 
         let resp: DatacenterEnvelope = self
-                        .get("https://datacenter-web.eastmoney.com/api/data/get")
+            .get("https://datacenter-web.eastmoney.com/api/data/get")
             .query(&[
                 ("type", "RPT_IF_BILLBOARD_TD"),
                 ("sty", "ALL"),
@@ -106,22 +106,29 @@ impl AkShareClient {
         // Each request returns 4 groups of 7 rows:
         // [0..7]: put volume, [7..14]: put position, [14..21]: call volume, [21..]: call position
         let (start, end, value_key, net_key) = match indicator {
-            "\u{9009}\u{6743}\u{4ea4}\u{6613}\u{60c5}\u{51b5}-\u{8ba4}\u{6cbd}\u{4ea4}\u{6613}\u{91cf}" => (0, 7, 8, 10),
-            "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{6cbd}\u{6301}\u{4ed3}\u{91cf}" => (7, 14, 13, 15),
-            "\u{9009}\u{6743}\u{4ea4}\u{6613}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{4ea4}\u{6613}\u{91cf}" => (14, 21, 17, 19),
-            "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{6301}\u{4ed3}\u{91cf}" => (21, usize::MAX, 12, 14),
+            "\u{9009}\u{6743}\u{4ea4}\u{6613}\u{60c5}\u{51b5}-\u{8ba4}\u{6cbd}\u{4ea4}\u{6613}\u{91cf}" => {
+                (0, 7, 8, 10)
+            }
+            "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{6cbd}\u{6301}\u{4ed3}\u{91cf}" => {
+                (7, 14, 13, 15)
+            }
+            "\u{9009}\u{6743}\u{4ea4}\u{6613}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{4ea4}\u{6613}\u{91cf}" => {
+                (14, 21, 17, 19)
+            }
+            "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{6301}\u{4ed3}\u{91cf}" => {
+                (21, usize::MAX, 12, 14)
+            }
             other => {
                 return Err(Error::invalid_input(format!(
                     "unsupported LHB indicator: {other}"
-                )))
+                )));
             }
         };
 
         let end = end.min(data.len());
         let mut rows = Vec::new();
 
-        for i in start..end {
-            let item = &data[i];
+        for item in data.iter().take(end).skip(start) {
             let arr = item.as_array();
             let get_str = |idx: usize| -> String {
                 arr.and_then(|a| a.get(idx))
@@ -136,7 +143,9 @@ impl AkShareClient {
             };
 
             // For the last group (call position), use named fields
-            if indicator == "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{6301}\u{4ed3}\u{91cf}" {
+            if indicator
+                == "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{6301}\u{4ed3}\u{91cf}"
+            {
                 rows.push(OptionLhbEntry {
                     trade_type: get_str(0),
                     trade_date: get_str(1),

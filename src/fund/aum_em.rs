@@ -10,8 +10,11 @@ impl AkShareClient {
         let response = self
             .get("https://fund.eastmoney.com/Company/home/gspmlist")
             .query(&[("fundType", "0")])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         // This returns HTML; we parse the table data.
@@ -44,13 +47,20 @@ impl AkShareClient {
     pub async fn fund_aum_trend_em(&self) -> Result<Vec<FundAumTrendPoint>> {
         let response = self
             .get("https://fund.eastmoney.com/Company/home/GetFundTotalScaleForChart")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
-        let x = payload.get("x").and_then(|v| v.as_array())
+        let x = payload
+            .get("x")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::not_found("no AUM trend data"))?;
-        let y = payload.get("y").and_then(|v| v.as_array())
+        let y = payload
+            .get("y")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::not_found("no AUM trend values"))?;
 
         let mut result = Vec::new();
@@ -71,14 +81,19 @@ impl AkShareClient {
         let response = self
             .get("https://fund.eastmoney.com/Company/home/HistoryScaleTable")
             .query(&[("year", year)])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         // Returns HTML table; we attempt basic extraction.
         if text.is_empty() {
             return Err(Error::not_found(format!("no AUM hist data for {year}")));
         }
-        Err(Error::decode("fund AUM hist data requires HTML table parsing"))
+        Err(Error::decode(
+            "fund AUM hist data requires HTML table parsing",
+        ))
     }
 }

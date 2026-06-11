@@ -51,7 +51,7 @@ impl AkShareClient {
     pub async fn option_margin_symbol(&self) -> Result<Vec<OptionMarginSymbol>> {
         let url = "https://www.iweiai.com/qiquan/yuanyou";
         let body = self
-                        .get(url)
+            .get(url)
             .send()
             .await
             .map_err(Error::from)?
@@ -110,7 +110,7 @@ impl AkShareClient {
 
         let url = &entry.url;
         let body = self
-                        .get(url)
+            .get(url)
             .send()
             .await
             .map_err(Error::from)?
@@ -125,9 +125,7 @@ impl AkShareClient {
         let rows = parse_html_table(&body, &update_time);
 
         if rows.is_empty() {
-            return Err(Error::not_found(format!(
-                "no margin data for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no margin data for {symbol}")));
         }
 
         Ok(rows)
@@ -153,7 +151,10 @@ fn extract_small_text(html: &str) -> Option<String> {
     let text_end = after.find("</small>")?;
     let text = &after[text_start..text_end];
     // Strip prefix
-    Some(text.trim_start_matches("\u{6700}\u{8fd1}\u{66f4}\u{65b0}\u{effd}").to_string())
+    Some(
+        text.trim_start_matches("\u{6700}\u{8fd1}\u{66f4}\u{65b0}\u{effd}")
+            .to_string(),
+    )
 }
 
 fn parse_html_table(html: &str, update_time: &str) -> Vec<OptionMarginRow> {
@@ -177,7 +178,9 @@ fn parse_html_table(html: &str, update_time: &str) -> Vec<OptionMarginRow> {
 
             // Skip header row
             if !header_found {
-                if cells.iter().any(|c| c.contains("\u{7ed3}\u{7b97}\u{4ef7}") || c.contains("\u{5408}\u{7ea6}")) {
+                if cells.iter().any(|c| {
+                    c.contains("\u{7ed3}\u{7b97}\u{4ef7}") || c.contains("\u{5408}\u{7ea6}")
+                }) {
                     header_found = true;
                 }
                 search = &after_tr[tr_end + 5..];

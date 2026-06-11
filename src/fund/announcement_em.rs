@@ -26,8 +26,11 @@ impl AkShareClient {
                 ("type", ann_type),
                 ("_", ts.as_str()),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -37,8 +40,13 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for item in data {
-            let arr = match item.as_array() { Some(a) => a, None => continue };
-            if arr.len() < 8 { continue; }
+            let arr = match item.as_array() {
+                Some(a) => a,
+                None => continue,
+            };
+            if arr.len() < 8 {
+                continue;
+            }
             result.push(FundAnnouncementItem {
                 fund_code: arr[0].as_str().unwrap_or("").to_string(),
                 title: arr[1].as_str().unwrap_or("").to_string(),
@@ -52,17 +60,26 @@ impl AkShareClient {
     }
 
     /// Fetch fund dividend announcements (Python: fund_announcement_dividend_em).
-    pub async fn fund_announcement_dividend_em(&self, symbol: &str) -> Result<Vec<FundAnnouncementItem>> {
+    pub async fn fund_announcement_dividend_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<FundAnnouncementItem>> {
         self.fund_announcement_em_inner(symbol, "2").await
     }
 
     /// Fetch fund report announcements (Python: fund_announcement_report_em).
-    pub async fn fund_announcement_report_em(&self, symbol: &str) -> Result<Vec<FundAnnouncementItem>> {
+    pub async fn fund_announcement_report_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<FundAnnouncementItem>> {
         self.fund_announcement_em_inner(symbol, "3").await
     }
 
     /// Fetch fund personnel announcements (Python: fund_announcement_personnel_em).
-    pub async fn fund_announcement_personnel_em(&self, symbol: &str) -> Result<Vec<FundAnnouncementItem>> {
+    pub async fn fund_announcement_personnel_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<FundAnnouncementItem>> {
         self.fund_announcement_em_inner(symbol, "4").await
     }
 }

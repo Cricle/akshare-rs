@@ -31,7 +31,7 @@ impl AkShareClient {
 
         loop {
             let body = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("sortColumns", "REPORT_DATE"),
                     ("sortTypes", "-1"),
@@ -59,10 +59,7 @@ impl AkShareClient {
             for row in &rows {
                 let mut r = Row::new();
                 r.insert("date".into(), row["REPORT_DATE"].clone());
-                r.insert(
-                    format!("comex_{}_ton", symbol),
-                    row["STORAGE_TON"].clone(),
-                );
+                r.insert(format!("comex_{}_ton", symbol), row["STORAGE_TON"].clone());
                 r.insert(
                     format!("comex_{}_ounce", symbol),
                     row["STORAGE_OUNCE"].clone(),

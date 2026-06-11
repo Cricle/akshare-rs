@@ -43,7 +43,7 @@ impl AkShareClient {
     /// 行情宝 — 生猪市场价格指数.
     pub async fn index_hog_spot_price(&self) -> Result<Vec<HogIndexPoint>> {
         let response = self
-                        .get("https://hqb.nxin.com/pigindex/getPigIndexChart.shtml")
+            .get("https://hqb.nxin.com/pigindex/getPigIndexChart.shtml")
             .query(&[("regionId", "0")])
             .send()
             .await

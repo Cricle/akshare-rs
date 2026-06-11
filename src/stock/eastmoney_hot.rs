@@ -173,7 +173,7 @@ impl AkShareClient {
         });
 
         let rank_response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getAllCurrentList")
+            .post("https://emappdata.eastmoney.com/stockrank/getAllCurrentList")
             .json(&payload)
             .send()
             .await
@@ -206,7 +206,7 @@ impl AkShareClient {
 
         // Step 3: Get quotes
         let ulist_response = self
-                        .get("https://push2.eastmoney.com/api/qt/ulist.np/get")
+            .get("https://push2.eastmoney.com/api/qt/ulist.np/get")
             .query(&[
                 ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
                 ("fltt", "2"),
@@ -221,10 +221,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let ulist_data: UlistEnvelope = ulist_response.json().await.map_err(Error::from)?;
-        let quotes = ulist_data
-            .data
-            .and_then(|d| d.diff)
-            .unwrap_or_default();
+        let quotes = ulist_data.data.and_then(|d| d.diff).unwrap_or_default();
 
         // Step 4: Merge rank + quotes
         let mut entries = Vec::new();
@@ -257,10 +254,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_hot_rank_detail_em(symbol)`
     ///
     /// `symbol` uses the Eastmoney format like "SZ000665".
-    pub async fn stock_hot_rank_detail_em(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HotRankTrendEntry>> {
+    pub async fn stock_hot_rank_detail_em(&self, symbol: &str) -> Result<Vec<HotRankTrendEntry>> {
         // Step 1: Get rank history
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -271,7 +265,7 @@ impl AkShareClient {
         });
 
         let rank_response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getHisList")
+            .post("https://emappdata.eastmoney.com/stockrank/getHisList")
             .json(&payload)
             .send()
             .await
@@ -283,7 +277,7 @@ impl AkShareClient {
 
         // Step 2: Get fan profile
         let profile_response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getHisProfileList")
+            .post("https://emappdata.eastmoney.com/stockrank/getHisProfileList")
             .json(&payload)
             .send()
             .await
@@ -340,7 +334,7 @@ impl AkShareClient {
         });
 
         let response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getCurrentList")
+            .post("https://emappdata.eastmoney.com/stockrank/getCurrentList")
             .json(&payload)
             .send()
             .await
@@ -374,7 +368,7 @@ impl AkShareClient {
         });
 
         let response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getHotStockRankList")
+            .post("https://emappdata.eastmoney.com/stockrank/getHotStockRankList")
             .json(&payload)
             .send()
             .await
@@ -412,7 +406,7 @@ impl AkShareClient {
         });
 
         let rank_response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getAllHisRcList")
+            .post("https://emappdata.eastmoney.com/stockrank/getAllHisRcList")
             .json(&payload)
             .send()
             .await
@@ -445,7 +439,7 @@ impl AkShareClient {
 
         // Step 3: Get quotes
         let ulist_response = self
-                        .get("https://push2.eastmoney.com/api/qt/ulist.np/get")
+            .get("https://push2.eastmoney.com/api/qt/ulist.np/get")
             .query(&[
                 ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
                 ("fltt", "2"),
@@ -460,10 +454,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let ulist_data: UlistEnvelope = ulist_response.json().await.map_err(Error::from)?;
-        let quotes = ulist_data
-            .data
-            .and_then(|d| d.diff)
-            .unwrap_or_default();
+        let quotes = ulist_data.data.and_then(|d| d.diff).unwrap_or_default();
 
         // Step 4: Merge rank + quotes
         let mut entries = Vec::new();
@@ -500,7 +491,7 @@ impl AkShareClient {
             "srcSecurityCode": symbol,
         });
         let response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getCurrentLatest")
+            .post("https://emappdata.eastmoney.com/stockrank/getCurrentLatest")
             .json(&payload)
             .send()
             .await
@@ -508,12 +499,17 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
         let data: TrendEnvelope = response.json().await.map_err(Error::from)?;
-        Ok(data.data.unwrap_or_default().into_iter().map(|item| HotRankTrendEntry {
-            time: item.date_time.unwrap_or_default(),
-            rank: item.rank.unwrap_or(0),
-            new_fan_rate: item.new_fan_rate,
-            old_fan_rate: item.old_fan_rate,
-        }).collect())
+        Ok(data
+            .data
+            .unwrap_or_default()
+            .into_iter()
+            .map(|item| HotRankTrendEntry {
+                time: item.date_time.unwrap_or_default(),
+                rank: item.rank.unwrap_or(0),
+                new_fan_rate: item.new_fan_rate,
+                old_fan_rate: item.old_fan_rate,
+            })
+            .collect())
     }
 
     /// 相关热度排名 (Python: stock_hot_rank_relate_em)
@@ -526,7 +522,7 @@ impl AkShareClient {
             "pageSize": 10,
         });
         let response = self
-                        .post("https://emappdata.eastmoney.com/stockrank/getFollowStockRankList")
+            .post("https://emappdata.eastmoney.com/stockrank/getFollowStockRankList")
             .json(&payload)
             .send()
             .await
@@ -534,24 +530,44 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
         let data: RankListEnvelope = response.json().await.map_err(Error::from)?;
-        Ok(data.data.unwrap_or_default().into_iter().map(|item| HotRankEntry {
-            rank: item.rk,
-            symbol: item.sc.unwrap_or_default(),
-            name: String::new(),
-            latest_price: None,
-            change_amount: None,
-            change_pct: None,
-        }).collect())
+        Ok(data
+            .data
+            .unwrap_or_default()
+            .into_iter()
+            .map(|item| HotRankEntry {
+                rank: item.rk,
+                symbol: item.sc.unwrap_or_default(),
+                name: String::new(),
+                latest_price: None,
+                change_amount: None,
+                change_pct: None,
+            })
+            .collect())
     }
 
     /// 百度热搜股票 (Python: stock_hot_search_baidu)
-    pub async fn stock_hot_search_baidu(&self, symbol: &str, _date: &str) -> Result<Vec<serde_json::Value>> {
-        let url = format!("https://finance.pae.baidu.com/selfselect/listsugrecomm?srcid=5353&all=1&pointType=string&group=quotation_index&code={}&market_type=ab&newFormat=1&finClientType=pc", symbol);
-        let response = self.get(&url)
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+    pub async fn stock_hot_search_baidu(
+        &self,
+        symbol: &str,
+        _date: &str,
+    ) -> Result<Vec<serde_json::Value>> {
+        let url = format!(
+            "https://finance.pae.baidu.com/selfselect/listsugrecomm?srcid=5353&all=1&pointType=string&group=quotation_index&code={}&market_type=ab&newFormat=1&finClientType=pc",
+            symbol
+        );
+        let response = self
+            .get(&url)
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
-        let items = data.get("result").and_then(|r| r.as_array()).cloned().unwrap_or_default();
+        let items = data
+            .get("result")
+            .and_then(|r| r.as_array())
+            .cloned()
+            .unwrap_or_default();
         Ok(items)
     }
 }

@@ -14,7 +14,13 @@ use super::shared::{fetch_em_indicator, fetch_jin10_report};
 impl AkShareClient {
     /// US pending home sales monthly rate (未决房屋销售月率).
     pub async fn us_pending_home_sales(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_indicator(self, "RPT_ECONOMICVALUE_USA", "EMG00342249", "US Pending Home Sales").await
+        fetch_em_indicator(
+            self,
+            "RPT_ECONOMICVALUE_USA",
+            "EMG00342249",
+            "US Pending Home Sales",
+        )
+        .await
     }
 
     /// US CPI YoY (CPI年率).
@@ -244,26 +250,22 @@ impl AkShareClient {
     /// Baker Hughes US rig count (贝克休斯钻井报告).
     pub async fn us_rig_count(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/baker.json";
-        let resp: Jin10CdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
         if let Some(obj) = values.as_object() {
             for (date, row) in obj {
                 if let Some(arr) = row.as_array()
-                    && arr.len() >= 2 {
-                        let count = arr[0].as_f64().unwrap_or(0.0);
-                        items.push(MacroDataPoint {
-                            date: date.clone(),
-                            value: count,
-                            name: "US Rig Count".to_string(),
-                        });
-                    }
+                    && arr.len() >= 2
+                {
+                    let count = arr[0].as_f64().unwrap_or(0.0);
+                    items.push(MacroDataPoint {
+                        date: date.clone(),
+                        value: count,
+                        name: "US Rig Count".to_string(),
+                    });
+                }
             }
         }
         items.sort_by(|a, b| a.date.cmp(&b.date));
@@ -273,12 +275,7 @@ impl AkShareClient {
     /// US crude oil production (美国原油产量).
     pub async fn us_crude_production(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/usa_oil.json";
-        let resp: Jin10CdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -287,13 +284,14 @@ impl AkShareClient {
                 if let Some(arr) = row.as_array() {
                     // First key is total US crude production
                     if let Some(inner) = arr.first().and_then(|v| v.as_array())
-                        && let Some(val) = inner.first().and_then(|v| v.as_f64()) {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: "US Crude Production".to_string(),
-                            });
-                        }
+                        && let Some(val) = inner.first().and_then(|v| v.as_f64())
+                    {
+                        items.push(MacroDataPoint {
+                            date: date.clone(),
+                            value: val,
+                            name: "US Crude Production".to_string(),
+                        });
+                    }
                 }
             }
         }
@@ -503,12 +501,7 @@ impl AkShareClient {
     /// CME precious metals holding report (CME贵金属).
     pub async fn macro_usa_cme_merchant_goods_holding(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/cme_3.json";
-        let resp: Jin10CdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -553,12 +546,7 @@ async fn fetch_cftc_holding(
     url: &str,
     name_label: &str,
 ) -> Result<Vec<MacroDataPoint>> {
-    let resp: Jin10CftcResp = client
-                .get(url)
-        .send()
-        .await?
-        .json()
-        .await?;
+    let resp: Jin10CftcResp = client.get(url).send().await?.json().await?;
 
     let values = resp.values.unwrap_or_default();
     let mut items = Vec::new();
@@ -567,13 +555,14 @@ async fn fetch_cftc_holding(
             if let Some(cols) = row.as_object() {
                 for (col_name, col_data) in cols {
                     if let Some(arr) = col_data.as_array()
-                        && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("{} {}", name_label, col_name),
-                            });
-                        }
+                        && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                    {
+                        items.push(MacroDataPoint {
+                            date: date.clone(),
+                            value: val,
+                            name: format!("{} {}", name_label, col_name),
+                        });
+                    }
                 }
             }
         }

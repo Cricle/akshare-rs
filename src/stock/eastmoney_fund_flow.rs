@@ -90,12 +90,16 @@ impl AkShareClient {
         let market_code = match market {
             "sh" => "1",
             "sz" | "bj" => "0",
-            _ => return Err(Error::invalid_input(format!("unsupported market: {market}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported market: {market}"
+                )));
+            }
         };
         let secid = format!("{market_code}.{symbol}");
         let lmt = limit.to_string();
         let response = self
-                        .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
+            .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
             .query(&[
                 ("lmt", lmt.as_str()),
                 ("klt", "101"),
@@ -163,13 +167,13 @@ impl AkShareClient {
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported indicator: {indicator}"
-                )))
+                )));
             }
         };
 
         let pz = limit.to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),

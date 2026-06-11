@@ -86,10 +86,7 @@ impl AkShareClient {
     }
 
     /// Roll yield cross-section for all varieties on a given date.
-    pub async fn futures_roll_yield_bar(
-        &self,
-        date: &str,
-    ) -> Result<Vec<Row>> {
+    pub async fn futures_roll_yield_bar(&self, date: &str) -> Result<Vec<Row>> {
         let mut all_bars: Vec<FuturesDailyBar> = Vec::new();
         for market in &["CFFEX", "SHFE", "DCE", "CZCE", "GFEX", "INE"] {
             if let Ok(bars) = self.get_futures_daily(date, market).await {

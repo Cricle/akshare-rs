@@ -34,20 +34,12 @@ impl AkShareClient {
     /// Regulatory Administration (NFRA, formerly CBIRC).
     ///
     /// `item`: "机关" (headquarters), "本级" (directly under), "分局本级" (branch level)
-    pub async fn bank_fjcf_table_detail(
-        &self,
-        item: &str,
-    ) -> Result<Vec<MacroDataPoint>> {
+    pub async fn bank_fjcf_table_detail(&self, item: &str) -> Result<Vec<MacroDataPoint>> {
         let item_id = match item {
             "机关" => "4113",
             "本级" => "4114",
             "分局本级" => "4115",
-            _ => {
-                return Err(Error::invalid_input(format!(
-                    "unknown item type: {}",
-                    item
-                )))
-            }
+            _ => return Err(Error::invalid_input(format!("unknown item type: {}", item))),
         };
 
         let url = "https://www.nfra.gov.cn/cbircweb/DocInfo/SelectDocByItemIdAndChild";
@@ -57,16 +49,13 @@ impl AkShareClient {
 
         loop {
             let resp: CbircResponse = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("itemId", item_id),
                     ("pageSize", &page_size.to_string()),
                     ("pageIndex", &page.to_string()),
                 ])
-                .header(
-                    "User-Agent",
-                    "Mozilla/5.0 (compatible; akshare-rust/0.1)",
-                )
+                .header("User-Agent", "Mozilla/5.0 (compatible; akshare-rust/0.1)")
                 .send()
                 .await?
                 .json()

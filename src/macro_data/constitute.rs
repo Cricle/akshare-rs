@@ -18,12 +18,8 @@ async fn fetch_etf_holding(
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://datacenter-api.jin10.com/reports/list_v2";
     let resp: Jin10Resp = client
-                .get(url)
-        .query(&[
-            ("max_date", ""),
-            ("category", "etf"),
-            ("attr_id", attr_id),
-        ])
+        .get(url)
+        .query(&[("max_date", ""), ("category", "etf"), ("attr_id", attr_id)])
         .header("x-app-id", "rU6QIu7JHe2gOUeR")
         .header("x-csrf-token", "x-csrf-token")
         .header("x-version", "1.0.0")
@@ -77,7 +73,7 @@ impl AkShareClient {
     pub async fn macro_cons_opec_month(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-api.jin10.com/reports/dates";
         let dates_resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[("category", "opec")])
             .header("x-app-id", "rU6QIu7JHe2gOUeR")
             .header("x-csrf-token", "x-csrf-token")
@@ -108,7 +104,7 @@ impl AkShareClient {
             }
             let list_url = "https://datacenter-api.jin10.com/reports/list";
             let resp: serde_json::Value = self
-                                .get(list_url)
+                .get(list_url)
                 .query(&[("category", "opec"), ("date", date_str)])
                 .header("x-app-id", "rU6QIu7JHe2gOUeR")
                 .header("x-csrf-token", "x-csrf-token")
@@ -120,24 +116,25 @@ impl AkShareClient {
 
             if let Some(data) = resp.get("data")
                 && let Some(values) = data.get("values").and_then(|v| v.as_array())
-                    && let Some(keys) = data.get("keys").and_then(|k| k.as_array()) {
-                        let col_names: Vec<String> = keys
-                            .iter()
-                            .filter_map(|k| k.get("name").and_then(|n| n.as_str()).map(String::from))
-                            .collect();
-                        // Get last row (total OPEC production)
-                        if let Some(last_row) = values.last().and_then(|r| r.as_array()) {
-                            for (i, col_name) in col_names.iter().enumerate() {
-                                if let Some(val) = last_row.get(i).and_then(|v| v.as_f64()) {
-                                    items.push(MacroDataPoint {
-                                        date: date_str.to_string(),
-                                        value: val,
-                                        name: format!("OPEC {}", col_name),
-                                    });
-                                }
-                            }
+                && let Some(keys) = data.get("keys").and_then(|k| k.as_array())
+            {
+                let col_names: Vec<String> = keys
+                    .iter()
+                    .filter_map(|k| k.get("name").and_then(|n| n.as_str()).map(String::from))
+                    .collect();
+                // Get last row (total OPEC production)
+                if let Some(last_row) = values.last().and_then(|r| r.as_array()) {
+                    for (i, col_name) in col_names.iter().enumerate() {
+                        if let Some(val) = last_row.get(i).and_then(|v| v.as_f64()) {
+                            items.push(MacroDataPoint {
+                                date: date_str.to_string(),
+                                value: val,
+                                name: format!("OPEC {}", col_name),
+                            });
                         }
                     }
+                }
+            }
         }
         items.sort_by(|a, b| a.date.cmp(&b.date));
         Ok(items)

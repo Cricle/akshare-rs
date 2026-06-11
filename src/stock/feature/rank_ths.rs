@@ -5,10 +5,10 @@
 //! This implementation uses a static fallback approach. For production use,
 //! consider integrating a JS runtime or reverse-engineering the token.
 
-use crate::client::AkShareClient;
-use crate::error::{Error, Result};
 use super::helpers::*;
 use super::types::*;
+use crate::client::AkShareClient;
+use crate::error::{Error, Result};
 
 /// THS hexin-v token - used as a static default.
 /// In production, this should be computed dynamically via JS execution.
@@ -46,161 +46,201 @@ impl AkShareClient {
     /// 同花顺-创新低-持续创新低
     /// https://data.10jqka.com.cn/rank/cxd/
     pub async fn stock_rank_cxd_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f12,f14",
-            "5000",
-            "f3",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: None,
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f12,f14",
+                "5000",
+                "f3",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: None,
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-创新低-放量创新低
     /// https://data.10jqka.com.cn/rank/cxfl/
     pub async fn stock_rank_cxfl_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f12,f14",
-            "5000",
-            "f3",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: None,
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f12,f14",
+                "5000",
+                "f3",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: None,
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-创新高-持续创新高
     /// https://data.10jqka.com.cn/rank/cxg/
     pub async fn stock_rank_cxg_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f12,f14",
-            "5000",
-            "f3",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: None,
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f12,f14",
+                "5000",
+                "f3",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: None,
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-创新高-持续缩量新高
     /// https://data.10jqka.com.cn/rank/cxsl/
     pub async fn stock_rank_cxsl_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f12,f14",
-            "5000",
-            "f3",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: None,
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f12,f14",
+                "5000",
+                "f3",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: None,
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-连涨-连涨
     /// https://data.10jqka.com.cn/rank/lxsz/
     pub async fn stock_rank_lxsz_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f12,f14",
-            "5000",
-            "f3",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: None,
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f12,f14",
+                "5000",
+                "f3",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: None,
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-连涨-连跌
     /// https://data.10jqka.com.cn/rank/lxxd/
     pub async fn stock_rank_lxxd_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f12,f14",
-            "5000",
-            "f3",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: None,
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f12,f14",
+                "5000",
+                "f3",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: None,
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-量比-量比排名
     /// https://data.10jqka.com.cn/rank/ljqd/
     pub async fn stock_rank_ljqd_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f10,f12,f14",
-            "5000",
-            "f10",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: json_f64_opt(v, "f10"),
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f10,f12,f14",
+                "5000",
+                "f10",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: json_f64_opt(v, "f10"),
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-量比-量能趋势
     /// https://data.10jqka.com.cn/rank/ljqs/
     pub async fn stock_rank_ljqs_ths(&self) -> Result<Vec<RankThsEntry>> {
-        let data = self.clist_spot_fetch(
-            "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
-            "f2,f3,f10,f12,f14",
-            "5000",
-            "f10",
-        ).await?;
-        Ok(data.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: json_f64_opt(v, "f10"),
-            amount: None,
-            extra: None,
-        }).collect())
+        let data = self
+            .clist_spot_fetch(
+                "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+                "f2,f3,f10,f12,f14",
+                "5000",
+                "f10",
+            )
+            .await?;
+        Ok(data
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: json_f64_opt(v, "f10"),
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 
     /// 同花顺-跌幅-跌幅排名
@@ -228,21 +268,35 @@ impl AkShareClient {
     pub async fn stock_rank_forecast_cninfo(&self, date: &str) -> Result<Vec<ForecastCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1133";
         let sd = fmt_date(date);
-        let resp = self.post(url)
+        let resp = self
+            .post(url)
             .form(&[("sdate", sd.as_str())])
             .header("User-Agent", "Mozilla/5.0")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let records = json.get("records").and_then(|r| r.as_array()).cloned().unwrap_or_default();
-        Ok(records.iter().map(|v| ForecastCninfo {
-            data: v.clone(),
-        }).collect())
+        let records = json
+            .get("records")
+            .and_then(|r| r.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(records
+            .iter()
+            .map(|v| ForecastCninfo { data: v.clone() })
+            .collect())
     }
 
     /// Generic rank fetch via Eastmoney clist.
-    async fn cistock_rank_fetch(&self, sort_field: &str, sort_order: &str) -> Result<Vec<RankThsEntry>> {
-        let resp = self.get("https://push2.eastmoney.com/api/qt/clist/get")
+    async fn cistock_rank_fetch(
+        &self,
+        sort_field: &str,
+        sort_order: &str,
+    ) -> Result<Vec<RankThsEntry>> {
+        let resp = self
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
@@ -255,18 +309,24 @@ impl AkShareClient {
                 ("fs", "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048"),
                 ("fields", "f2,f3,f12,f14"),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
         let payload: super::helpers::ClistSpotEnvelope = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
-        Ok(items.iter().map(|v| RankThsEntry {
-            code: json_str(v, "f12"),
-            name: json_str(v, "f14"),
-            latest_price: json_f64_opt(v, "f2"),
-            change_pct: json_f64_opt(v, "f3"),
-            volume: None,
-            amount: None,
-            extra: None,
-        }).collect())
+        Ok(items
+            .iter()
+            .map(|v| RankThsEntry {
+                code: json_str(v, "f12"),
+                name: json_str(v, "f14"),
+                latest_price: json_f64_opt(v, "f2"),
+                change_pct: json_f64_opt(v, "f3"),
+                volume: None,
+                amount: None,
+                extra: None,
+            })
+            .collect())
     }
 }

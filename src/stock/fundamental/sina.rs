@@ -108,10 +108,11 @@ fn parse_html_tables(html: &str) -> Vec<(Vec<String>, Vec<Vec<String>>)> {
 
         // If no headers found in thead, try first row
         if headers.is_empty()
-            && let Some(first_row) = rows.first() {
-                headers = first_row.clone();
-                rows.remove(0);
-            }
+            && let Some(first_row) = rows.first()
+        {
+            headers = first_row.clone();
+            rows.remove(0);
+        }
 
         if !headers.is_empty() || !rows.is_empty() {
             tables.push((headers, rows));
@@ -127,17 +128,17 @@ fn strip_html_tags(s: &str) -> String {
 }
 
 /// Convert HTML table data to a vec of HashMaps.
-fn table_to_records(headers: &[String], rows: &[Vec<String>]) -> Vec<HashMap<String, serde_json::Value>> {
+fn table_to_records(
+    headers: &[String],
+    rows: &[Vec<String>],
+) -> Vec<HashMap<String, serde_json::Value>> {
     rows.iter()
         .filter(|row| row.len() >= headers.len())
         .map(|row| {
             let mut map = HashMap::new();
             for (i, header) in headers.iter().enumerate() {
                 if i < row.len() {
-                    map.insert(
-                        header.clone(),
-                        serde_json::Value::String(row[i].clone()),
-                    );
+                    map.insert(header.clone(), serde_json::Value::String(row[i].clone()));
                 }
             }
             map
@@ -189,7 +190,11 @@ impl AkShareClient {
             "资产负债表" => "fzb",
             "利润表" => "lrb",
             "现金流量表" => "llb",
-            _ => return Err(Error::invalid_input(format!("unsupported symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported symbol: {symbol}"
+                )));
+            }
         };
 
         let resp = self
@@ -212,10 +217,7 @@ impl AkShareClient {
             .ok_or_else(|| Error::upstream("sina financial report missing data"))?;
 
         let dates = data.report_date.unwrap_or_default();
-        let date_values: Vec<String> = dates
-            .iter()
-            .filter_map(|d| d.date_value.clone())
-            .collect();
+        let date_values: Vec<String> = dates.iter().filter_map(|d| d.date_value.clone()).collect();
 
         let report_list = data.report_list.unwrap_or_default();
         let mut all_rows = Vec::new();
@@ -223,25 +225,47 @@ impl AkShareClient {
         for date_str in &date_values {
             let report = report_list.get(date_str);
             if let Some(report) = report {
-                let items = report.get("data").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+                let items = report
+                    .get("data")
+                    .and_then(|v| v.as_array())
+                    .cloned()
+                    .unwrap_or_default();
                 let mut row = HashMap::new();
-                row.insert("报告日".to_string(), serde_json::Value::String(date_str.clone()));
+                row.insert(
+                    "报告日".to_string(),
+                    serde_json::Value::String(date_str.clone()),
+                );
 
                 // Add metadata
                 if let Some(ds) = report.get("data_source").and_then(|v| v.as_str()) {
-                    row.insert("数据源".to_string(), serde_json::Value::String(ds.to_string()));
+                    row.insert(
+                        "数据源".to_string(),
+                        serde_json::Value::String(ds.to_string()),
+                    );
                 }
                 if let Some(audit) = report.get("is_audit").and_then(|v| v.as_str()) {
-                    row.insert("是否审计".to_string(), serde_json::Value::String(audit.to_string()));
+                    row.insert(
+                        "是否审计".to_string(),
+                        serde_json::Value::String(audit.to_string()),
+                    );
                 }
                 if let Some(pd) = report.get("publish_date").and_then(|v| v.as_str()) {
-                    row.insert("公告日期".to_string(), serde_json::Value::String(pd.to_string()));
+                    row.insert(
+                        "公告日期".to_string(),
+                        serde_json::Value::String(pd.to_string()),
+                    );
                 }
                 if let Some(currency) = report.get("rCurrency").and_then(|v| v.as_str()) {
-                    row.insert("币种".to_string(), serde_json::Value::String(currency.to_string()));
+                    row.insert(
+                        "币种".to_string(),
+                        serde_json::Value::String(currency.to_string()),
+                    );
                 }
                 if let Some(rtype) = report.get("rType").and_then(|v| v.as_str()) {
-                    row.insert("类型".to_string(), serde_json::Value::String(rtype.to_string()));
+                    row.insert(
+                        "类型".to_string(),
+                        serde_json::Value::String(rtype.to_string()),
+                    );
                 }
 
                 for item in items {
@@ -324,10 +348,7 @@ impl AkShareClient {
         let mut all_rows = Vec::new();
         for (i, title) in titles.iter().enumerate() {
             let mut row = HashMap::new();
-            row.insert(
-                "指标".to_string(),
-                serde_json::Value::String(title.clone()),
-            );
+            row.insert("指标".to_string(), serde_json::Value::String(title.clone()));
             for key in &keys {
                 let items = report_list
                     .get(key)
@@ -336,9 +357,10 @@ impl AkShareClient {
                     .cloned()
                     .unwrap_or_default();
                 if let Some(item) = items.get(i)
-                    && let Some(val) = item.get("item_value") {
-                        row.insert(key.clone(), val.clone());
-                    }
+                    && let Some(val) = item.get("item_value")
+                {
+                    row.insert(key.clone(), val.clone());
+                }
             }
             all_rows.push(row);
         }
@@ -392,9 +414,10 @@ impl AkShareClient {
 
         // If date specified, fetch detail for that specific date
         if let Some(detail_date) = date {
-            let detail_url = "https://vip.stock.finance.sina.com.cn/corp/view/vISSUE_ShareBonusDetail.php";
+            let detail_url =
+                "https://vip.stock.finance.sina.com.cn/corp/view/vISSUE_ShareBonusDetail.php";
             let detail_html = self
-                                .get(detail_url)
+                .get(detail_url)
                 .query(&[
                     ("stockid", symbol),
                     ("type", "1"),
@@ -658,18 +681,12 @@ impl AkShareClient {
                 for (j, date) in report_dates.iter().enumerate() {
                     if j + 1 < row.len() {
                         let mut record = HashMap::new();
-                        record.insert(
-                            "日期".to_string(),
-                            serde_json::Value::String(date.clone()),
-                        );
+                        record.insert("日期".to_string(), serde_json::Value::String(date.clone()));
                         record.insert(
                             "类别".to_string(),
                             serde_json::Value::String(current_category.clone()),
                         );
-                        record.insert(
-                            "指标".to_string(),
-                            serde_json::Value::String(first.clone()),
-                        );
+                        record.insert("指标".to_string(), serde_json::Value::String(first.clone()));
                         record.insert(
                             "值".to_string(),
                             serde_json::Value::String(row[j + 1].clone()),
@@ -698,10 +715,16 @@ impl AkShareClient {
         let report_date = &symbol[..symbol.len() - 1];
         let quarter = &symbol[symbol.len() - 1..];
 
-        let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vComStockHold/kind/jgcg/index.phtml";
+        let url =
+            "https://vip.stock.finance.sina.com.cn/q/go.php/vComStockHold/kind/jgcg/index.phtml";
         let html = self
-                        .get(url)
-            .query(&[("p", "1"), ("num", "10000"), ("reportdate", report_date), ("quarter", quarter)])
+            .get(url)
+            .query(&[
+                ("p", "1"),
+                ("num", "10000"),
+                ("reportdate", report_date),
+                ("quarter", quarter),
+            ])
             .send()
             .await?
             .text()
@@ -727,7 +750,7 @@ impl AkShareClient {
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/api/jsonp.php/var%20details=/ComStockHoldService.getJGCGDetail";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("symbol", stock), ("quarter", quarter)])
             .send()
             .await?
@@ -801,7 +824,7 @@ impl AkShareClient {
 
         // First, get the page to find the correct URL for the requested symbol
         let index_html = self
-                        .get(base_url)
+            .get(base_url)
             .query(&[("num", "40"), ("p", "1")])
             .send()
             .await?
@@ -821,11 +844,15 @@ impl AkShareClient {
 
         let url = match target_url {
             Some(u) => u,
-            None => return Err(Error::not_found(format!("recommendation type not found: {symbol}"))),
+            None => {
+                return Err(Error::not_found(format!(
+                    "recommendation type not found: {symbol}"
+                )));
+            }
         };
 
         let html = self
-                        .get(&url)
+            .get(&url)
             .query(&[("num", "10000"), ("p", "1")])
             .send()
             .await?
@@ -853,7 +880,7 @@ impl AkShareClient {
             "http://stock.finance.sina.com.cn/stock/go.php/vIR_StockSearch/key/{symbol}.phtml"
         );
         let html = self
-                        .get(&url)
+            .get(&url)
             .query(&[("num", "5000"), ("p", "1")])
             .send()
             .await?
@@ -942,10 +969,7 @@ fn parse_shareholder_table(
 
         // Add all cell values with generic column names
         for (i, cell) in row.iter().enumerate() {
-            record.insert(
-                format!("col_{i}"),
-                serde_json::Value::String(cell.clone()),
-            );
+            record.insert(format!("col_{i}"), serde_json::Value::String(cell.clone()));
         }
 
         all_records.push(record);

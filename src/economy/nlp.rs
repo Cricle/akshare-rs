@@ -62,7 +62,7 @@ impl AkShareClient {
     pub async fn economy_sentiment_index(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_ECONOMY_SENTIMENT"),
                 ("columns", "ALL"),
@@ -112,14 +112,10 @@ impl AkShareClient {
     /// Queries the Ownthink knowledge graph for information about a word/entity.
     /// `word` is the query term (e.g., "人工智能").
     /// `indicator` determines the return type: "entity", "desc", "avp", or "tag".
-    pub async fn nlp_ownthink(
-        &self,
-        word: &str,
-        indicator: &str,
-    ) -> Result<Vec<MacroDataPoint>> {
+    pub async fn nlp_ownthink(&self, word: &str, indicator: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://api.ownthink.com/kg/knowledge";
         let resp: OwnthinkResponse = self
-                        .post(url)
+            .post(url)
             .form(&[("entity", word)])
             .send()
             .await?
@@ -188,7 +184,7 @@ impl AkShareClient {
     pub async fn nlp_answer(&self, question: &str) -> Result<String> {
         let url = "https://api.ownthink.com/bot";
         let resp: BotResponse = self
-                        .get(url)
+            .get(url)
             .query(&[("spoken", question)])
             .send()
             .await?

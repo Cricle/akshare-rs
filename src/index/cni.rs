@@ -38,12 +38,8 @@ impl AkShareClient {
     /// 国证指数 — 最近交易日的所有指数.
     pub async fn index_all_cni(&self) -> Result<Vec<CniIndexItem>> {
         let response = self
-                        .get("https://www.cnindex.com.cn/index/indexList")
-            .query(&[
-                ("channelCode", "-1"),
-                ("rows", "2000"),
-                ("pageNum", "1"),
-            ])
+            .get("https://www.cnindex.com.cn/index/indexList")
+            .query(&[("channelCode", "-1"), ("rows", "2000"), ("pageNum", "1")])
             .send()
             .await
             .map_err(Error::from)?
@@ -51,10 +47,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: CniListEnvelope = response.json().await.map_err(Error::from)?;
-        let rows = payload
-            .data
-            .and_then(|d| d.rows)
-            .unwrap_or_default();
+        let rows = payload.data.and_then(|d| d.rows).unwrap_or_default();
 
         let items: Vec<CniIndexItem> = rows
             .into_iter()
@@ -105,7 +98,7 @@ impl AkShareClient {
         let end = format_date_hyphen(end_date);
 
         let response = self
-                        .get("http://hq.cnindex.com.cn/market/market/getIndexDailyDataWithDataFormat")
+            .get("http://hq.cnindex.com.cn/market/market/getIndexDailyDataWithDataFormat")
             .query(&[
                 ("indexCode", symbol),
                 ("startDate", &start),
@@ -119,10 +112,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: CniHistEnvelope = response.json().await.map_err(Error::from)?;
-        let data = payload
-            .data
-            .and_then(|d| d.data)
-            .unwrap_or_default();
+        let data = payload.data.and_then(|d| d.data).unwrap_or_default();
 
         let mut points: Vec<CniHistPoint> = data
             .into_iter()
@@ -168,12 +158,9 @@ impl AkShareClient {
     /// Returns a JSON array of objects with fields: date, code, name, industry,
     /// total_mv, weight.  The upstream returns an XLS; this endpoint returns
     /// JSON when called with the right accept header.
-    pub async fn index_detail_cni(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn index_detail_cni(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let response = self
-                        .get("https://www.cnindex.com.cn/sample-detail/download-history")
+            .get("https://www.cnindex.com.cn/sample-detail/download-history")
             .query(&[("indexcode", symbol)])
             .send()
             .await
@@ -189,8 +176,7 @@ impl AkShareClient {
             .to_string();
 
         if content_type.contains("json") {
-            let data: Vec<serde_json::Value> =
-                response.json().await.map_err(Error::from)?;
+            let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
             Ok(data)
         } else {
             // The endpoint returns XLS; we cannot parse it in pure Rust without
@@ -222,7 +208,7 @@ impl AkShareClient {
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
         let response = self
-                        .get("http://www.cnindex.com.cn/sample-detail/download-adjustment")
+            .get("http://www.cnindex.com.cn/sample-detail/download-adjustment")
             .query(&[("indexcode", symbol)])
             .send()
             .await
@@ -238,8 +224,7 @@ impl AkShareClient {
             .to_string();
 
         if content_type.contains("json") {
-            let data: Vec<serde_json::Value> =
-                response.json().await.map_err(Error::from)?;
+            let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
             Ok(data)
         } else {
             Err(Error::upstream(

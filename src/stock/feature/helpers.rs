@@ -81,6 +81,7 @@ pub(crate) fn json_i64_opt(v: &serde_json::Value, key: &str) -> Option<i64> {
 impl AkShareClient {
     /// Generic Eastmoney datacenter fetch with pagination support.
     ///
+    #[allow(clippy::too_many_arguments)]
     /// Fetches all pages and returns combined raw JSON values.
     pub(crate) async fn dc_fetch_all(
         &self,
@@ -100,7 +101,7 @@ impl AkShareClient {
         loop {
             let pn = page.to_string();
             let mut builder = self
-                                .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
                 .query(&[
                     ("reportName", report_name),
                     ("columns", columns),
@@ -116,7 +117,12 @@ impl AkShareClient {
                 builder = builder.query(&[(k, v)]);
             }
 
-            let resp = builder.send().await.map_err(Error::from)?.error_for_status().map_err(Error::from)?;
+            let resp = builder
+                .send()
+                .await
+                .map_err(Error::from)?
+                .error_for_status()
+                .map_err(Error::from)?;
             let payload: DcEnvelope = resp.json().await.map_err(Error::from)?;
             let result = payload
                 .result
@@ -147,7 +153,7 @@ impl AkShareClient {
     ) -> Result<serde_json::Value> {
         let url = format!("https://push2ex.eastmoney.com/{path}");
         let resp = self
-                        .get(&url)
+            .get(&url)
             .query(params)
             .send()
             .await
@@ -167,7 +173,7 @@ impl AkShareClient {
         sort_field: &str,
     ) -> Result<Vec<serde_json::Value>> {
         let resp = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", page_size),
@@ -187,10 +193,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let payload: ClistSpotEnvelope = resp.json().await.map_err(Error::from)?;
-        let items = payload
-            .data
-            .and_then(|d| d.diff)
-            .unwrap_or_default();
+        let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
 
         if items.is_empty() {
             return Err(Error::not_found("eastmoney clist returned no data"));
@@ -209,7 +212,7 @@ impl AkShareClient {
         // First get company type
         let url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index";
         let resp = self
-                        .get(url)
+            .get(url)
             .query(&[("type", "web"), ("code", &code.to_lowercase())])
             .send()
             .await
@@ -244,7 +247,7 @@ impl AkShareClient {
         );
         let code_lower = code.to_lowercase();
         let resp = self
-                        .get(&date_url)
+            .get(&date_url)
             .query(&[
                 ("companyType", company_type.as_str()),
                 ("reportDateType", date_type),
@@ -271,7 +274,11 @@ impl AkShareClient {
         let mut all_data = Vec::new();
         let date_strs: Vec<String> = dates
             .iter()
-            .filter_map(|d| d.get("REPORT_DATE").and_then(|v| v.as_str()).map(|s| s.to_string()))
+            .filter_map(|d| {
+                d.get("REPORT_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string())
+            })
             .collect();
 
         for chunk in date_strs.chunks(5) {
@@ -281,7 +288,7 @@ impl AkShareClient {
                 report_type
             );
             let resp = self
-                                .get(&data_url)
+                .get(&data_url)
                 .query(&[
                     ("companyType", company_type.as_str()),
                     ("reportDateType", date_type),

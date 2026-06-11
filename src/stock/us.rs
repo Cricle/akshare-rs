@@ -37,4 +37,40 @@ impl AkShareClient {
         // Fallback to Stooq
         self.stooq_candles(symbol, limit).await
     }
+
+    /// 获取美国股票名称列表 (Python: get_us_stock_name)
+    ///
+    /// Fetches US stock names from Sina Finance.
+    /// Returns stock name, Chinese name, and symbol.
+    pub async fn get_us_stock_name(&self) -> Result<Vec<serde_json::Value>> {
+        let mut all_stocks = Vec::new();
+        for page in 1..=5 {
+            let url = format!(
+                "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/callback/US_CategoryService.getList?page={}&num=20&sort=&asc=0&market=&id=",
+                page
+            );
+            let resp = self
+                .get(&url)
+                .header("User-Agent", "Mozilla/5.0")
+                .send()
+                .await?
+                .text()
+                .await?;
+            // Parse JSONP response
+            if let Some(start) = resp.find("({") {
+                if let Some(end) = resp.rfind(");") {
+                    let json_str = &resp[start + 1..end + 1];
+                    if let Ok(data) = serde_json::from_str::<serde_json::Value>(json_str) {
+                        if let Some(arr) = data.get("data").and_then(|d| d.as_array()) {
+                            if arr.is_empty() {
+                                break;
+                            }
+                            all_stocks.extend(arr.clone());
+                        }
+                    }
+                }
+            }
+        }
+        Ok(all_stocks)
+    }
 }

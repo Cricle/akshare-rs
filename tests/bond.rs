@@ -275,7 +275,9 @@ async fn test_bond_china_close_return() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_china_close_return("国债", "1", "20240101", "20240131").await;
+    let result = client
+        .bond_china_close_return("国债", "1", "20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -329,7 +331,9 @@ async fn test_bond_corporate_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_corporate_issue_cninfo("20240101", "20240131").await;
+    let result = client
+        .bond_corporate_issue_cninfo("20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -343,7 +347,9 @@ async fn test_bond_local_government_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_local_government_issue_cninfo("20240101", "20240131").await;
+    let result = client
+        .bond_local_government_issue_cninfo("20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -643,7 +649,9 @@ async fn test_bond_treasure_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_treasure_issue_cninfo("20240101", "20240131").await;
+    let result = client
+        .bond_treasure_issue_cninfo("20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -657,7 +665,9 @@ async fn test_bond_local_gov_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_local_gov_issue_cninfo("20240101", "20240131").await;
+    let result = client
+        .bond_local_gov_issue_cninfo("20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 

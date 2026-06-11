@@ -58,7 +58,7 @@ impl AkShareClient {
         let url = "http://query.sse.com.cn/commonQuery.do";
 
         let resp: SseQueryEnvelope = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("isPagination", "false"),
                 ("trade_date", date),

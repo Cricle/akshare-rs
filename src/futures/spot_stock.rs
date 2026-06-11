@@ -12,7 +12,7 @@ impl AkShareClient {
     pub async fn futures_spot_stock(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://data.eastmoney.com/ifdata/xhgp.html";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -34,7 +34,7 @@ impl AkShareClient {
     pub async fn futures_spot_stock_em(&self, category: &str) -> Result<Vec<Row>> {
         let url = "https://data.eastmoney.com/ifdata/xhgp.html";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?

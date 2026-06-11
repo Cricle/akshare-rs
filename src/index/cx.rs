@@ -22,11 +22,11 @@ struct CxEnvelope {
 #[derive(Debug, Deserialize)]
 struct CxRow {
     #[serde(default)]
-    v: Option<f64>,       // value
+    v: Option<f64>, // value
     #[serde(default)]
-    s: Option<f64>,       // change
+    s: Option<f64>, // change
     #[serde(default)]
-    t: Option<i64>,       // timestamp ms
+    t: Option<i64>, // timestamp ms
     // Some endpoints use different field names
     #[serde(default)]
     value: Option<f64>,
@@ -49,7 +49,7 @@ async fn fetch_cx_index(
     params.extend(extra.iter().map(|(k, v)| (*k, *v)));
 
     let response = client
-                .get("https://yun.ccxe.com.cn/api/index/pro/cxIndexTrendInfo")
+        .get("https://yun.ccxe.com.cn/api/index/pro/cxIndexTrendInfo")
         .query(&params)
         .send()
         .await

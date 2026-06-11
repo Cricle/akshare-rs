@@ -20,9 +20,7 @@ fn hk_yahoo_symbol(symbol: &str) -> Result<String> {
     let digits: String = code.trim_start_matches('0').to_string();
     let digits_str = if digits.is_empty() { "0" } else { &digits };
     if digits_str.len() > 5 || !digits_str.chars().all(|c| c.is_ascii_digit()) {
-        return Err(Error::invalid_input(format!(
-            "invalid HK symbol: {symbol}"
-        )));
+        return Err(Error::invalid_input(format!("invalid HK symbol: {symbol}")));
     }
 
     Ok(format!("{:0>5}.HK", digits_str))
@@ -32,7 +30,9 @@ impl AkShareClient {
     /// Get HK stock quote with fallback: Tencent -> Yahoo candles
     pub async fn hk_quote(&self, symbol: &str) -> Result<QuoteSnapshot> {
         // Try Tencent first
-        if let Ok(quote) = self.tencent_hk_quote(symbol).await { return Ok(quote) }
+        if let Ok(quote) = self.tencent_hk_quote(symbol).await {
+            return Ok(quote);
+        }
 
         // Fallback: get from Yahoo candles
         let yahoo_symbol = hk_yahoo_symbol(symbol)?;

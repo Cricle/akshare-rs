@@ -68,42 +68,55 @@ pub fn normalize_hk_symbol(symbol: &str) -> Option<String> {
     }
     // Check for explicit .HK suffix
     if let Some((code, suffix)) = symbol.trim().split_once('.')
-        && suffix.eq_ignore_ascii_case("HK") {
-            let code_trimmed = code.trim_start_matches('0');
-            if !code_trimmed.is_empty()
-                && code_trimmed.len() <= 5
-                && code_trimmed.chars().all(|c| c.is_ascii_digit())
-            {
-                return Some(format!("{:0>5}", code_trimmed));
-            }
+        && suffix.eq_ignore_ascii_case("HK")
+    {
+        let code_trimmed = code.trim_start_matches('0');
+        if !code_trimmed.is_empty()
+            && code_trimmed.len() <= 5
+            && code_trimmed.chars().all(|c| c.is_ascii_digit())
+        {
+            return Some(format!("{:0>5}", code_trimmed));
         }
+    }
     None
 }
 
 /// Tencent market symbol format: sh600000, sz000001
 pub fn tencent_market_symbol(symbol: &str) -> crate::error::Result<String> {
-    let normalized = normalize_a_share_symbol(symbol)
-        .ok_or_else(|| crate::error::Error::invalid_input(format!("invalid A-share symbol: {symbol}")))?;
-    let (code, suffix) = normalized.split_once('.')
-        .ok_or_else(|| crate::error::Error::invalid_input(format!("invalid symbol format: {normalized}")))?;
+    let normalized = normalize_a_share_symbol(symbol).ok_or_else(|| {
+        crate::error::Error::invalid_input(format!("invalid A-share symbol: {symbol}"))
+    })?;
+    let (code, suffix) = normalized.split_once('.').ok_or_else(|| {
+        crate::error::Error::invalid_input(format!("invalid symbol format: {normalized}"))
+    })?;
     let prefix = match suffix {
         "SH" => "sh",
         "SZ" | "BJ" => "sz",
-        _ => return Err(crate::error::Error::invalid_input(format!("unsupported suffix: {suffix}"))),
+        _ => {
+            return Err(crate::error::Error::invalid_input(format!(
+                "unsupported suffix: {suffix}"
+            )));
+        }
     };
     Ok(format!("{prefix}{code}"))
 }
 
 /// Eastmoney secid format: 1.600000 (SH), 0.000001 (SZ)
 pub fn eastmoney_secid(symbol: &str) -> crate::error::Result<String> {
-    let normalized = normalize_a_share_symbol(symbol)
-        .ok_or_else(|| crate::error::Error::invalid_input(format!("invalid A-share symbol: {symbol}")))?;
-    let (code, suffix) = normalized.split_once('.')
-        .ok_or_else(|| crate::error::Error::invalid_input(format!("invalid symbol format: {normalized}")))?;
+    let normalized = normalize_a_share_symbol(symbol).ok_or_else(|| {
+        crate::error::Error::invalid_input(format!("invalid A-share symbol: {symbol}"))
+    })?;
+    let (code, suffix) = normalized.split_once('.').ok_or_else(|| {
+        crate::error::Error::invalid_input(format!("invalid symbol format: {normalized}"))
+    })?;
     let market = match suffix {
         "SH" => "1",
         "SZ" | "BJ" => "0",
-        _ => return Err(crate::error::Error::invalid_input(format!("unsupported suffix: {suffix}"))),
+        _ => {
+            return Err(crate::error::Error::invalid_input(format!(
+                "unsupported suffix: {suffix}"
+            )));
+        }
     };
     Ok(format!("{market}.{code}"))
 }
@@ -114,10 +127,22 @@ mod tests {
 
     #[test]
     fn test_normalize_a_share() {
-        assert_eq!(normalize_a_share_symbol("600000"), Some("600000.SH".to_string()));
-        assert_eq!(normalize_a_share_symbol("000001"), Some("000001.SZ".to_string()));
-        assert_eq!(normalize_a_share_symbol("600000.SH"), Some("600000.SH".to_string()));
-        assert_eq!(normalize_a_share_symbol("sh600000"), Some("600000.SH".to_string()));
+        assert_eq!(
+            normalize_a_share_symbol("600000"),
+            Some("600000.SH".to_string())
+        );
+        assert_eq!(
+            normalize_a_share_symbol("000001"),
+            Some("000001.SZ".to_string())
+        );
+        assert_eq!(
+            normalize_a_share_symbol("600000.SH"),
+            Some("600000.SH".to_string())
+        );
+        assert_eq!(
+            normalize_a_share_symbol("sh600000"),
+            Some("600000.SH".to_string())
+        );
         assert_eq!(normalize_a_share_symbol("AAPL"), None);
     }
 

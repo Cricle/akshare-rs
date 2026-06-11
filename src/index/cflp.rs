@@ -34,20 +34,21 @@ impl AkShareClient {
     /// 中国公路物流运价指数.
     ///
     /// `symbol` is one of: "周指数", "月指数", "季度指数", "年度指数".
-    pub async fn index_price_cflp(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CflpIndexPoint>> {
+    pub async fn index_price_cflp(&self, symbol: &str) -> Result<Vec<CflpIndexPoint>> {
         let exp_type = match symbol {
             "周指数" => "2",
             "月指数" => "3",
             "季度指数" => "4",
             "年度指数" => "5",
-            _ => return Err(Error::invalid_input(format!("unsupported CFLP symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported CFLP symbol: {symbol}"
+                )));
+            }
         };
 
         let response = self
-                        .post("http://index.0256.cn/expcenter_trend.action")
+            .post("http://index.0256.cn/expcenter_trend.action")
             .header("Origin", "http://index.0256.cn")
             .header("Referer", "http://index.0256.cn/expx.htm")
             .form(&[
@@ -72,19 +73,20 @@ impl AkShareClient {
     /// 中国公路物流运量指数.
     ///
     /// `symbol` is one of: "月指数", "季度指数", "年度指数".
-    pub async fn index_volume_cflp(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CflpIndexPoint>> {
+    pub async fn index_volume_cflp(&self, symbol: &str) -> Result<Vec<CflpIndexPoint>> {
         let exp_type = match symbol {
             "月指数" => "3",
             "季度指数" => "4",
             "年度指数" => "5",
-            _ => return Err(Error::invalid_input(format!("unsupported CFLP symbol: {symbol}"))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported CFLP symbol: {symbol}"
+                )));
+            }
         };
 
         let response = self
-                        .post("http://index.0256.cn/volume_query.action")
+            .post("http://index.0256.cn/volume_query.action")
             .header("Origin", "http://index.0256.cn")
             .header("Referer", "http://index.0256.cn/expx.htm")
             .form(&[
@@ -107,9 +109,7 @@ impl AkShareClient {
     }
 }
 
-async fn parse_cflp_response(
-    response: reqwest::Response,
-) -> Result<Vec<CflpIndexPoint>> {
+async fn parse_cflp_response(response: reqwest::Response) -> Result<Vec<CflpIndexPoint>> {
     let payload: CflpEnvelope = response.json().await.map_err(Error::from)?;
 
     let chart1 = payload

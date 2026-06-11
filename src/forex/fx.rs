@@ -29,7 +29,7 @@ impl AkShareClient {
         // Use Eastmoney datacenter for currency pair mapping
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_FE_QUOTATION_BOCCN"),
                 ("columns", "ALL"),
@@ -81,7 +81,7 @@ impl AkShareClient {
     pub async fn fx_c_swap_cm(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-ccs/CcsSwpBm";
         let body: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[("lang", "CN")])
             .send()
             .await?
@@ -128,7 +128,7 @@ impl AkShareClient {
     pub async fn fx_pair_quote(&self, pair: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-ccs/CcsMktQuotation";
         let body: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[("lang", "CN"), ("ccyPair", pair)])
             .send()
             .await?
@@ -167,7 +167,7 @@ impl AkShareClient {
     pub async fn fx_spot_quote(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-ccs/CcsSpotQuotation";
         let body: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[("lang", "CN")])
             .send()
             .await?
@@ -211,7 +211,7 @@ impl AkShareClient {
     pub async fn fx_swap_quote(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-ccs/CcsSwapQuotation";
         let body: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[("lang", "CN")])
             .send()
             .await?
@@ -255,7 +255,7 @@ impl AkShareClient {
     pub async fn fx_quote_baidu(&self, pair: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://finance.pae.baidu.com/api/getbondprice";
         let body: serde_json::Value = self
-                        .get(url)
+            .get(url)
             .query(&[("code", pair), ("pointType", "string")])
             .header("User-Agent", "Mozilla/5.0 (compatible; akshare-rust/0.1)")
             .send()
@@ -265,27 +265,28 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         if let Some(result) = body.get("Result").or_else(|| body.get("result"))
-            && let Some(arr) = result.as_array() {
-                for entry in arr {
-                    let name = entry
-                        .get("name")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string();
-                    let price = entry
-                        .get("price")
-                        .or_else(|| entry.get("currentPrice"))
-                        .and_then(|v| v.as_f64())
-                        .unwrap_or(0.0);
-                    if !name.is_empty() {
-                        items.push(MacroDataPoint {
-                            date: pair.to_string(),
-                            value: price,
-                            name,
-                        });
-                    }
+            && let Some(arr) = result.as_array()
+        {
+            for entry in arr {
+                let name = entry
+                    .get("name")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let price = entry
+                    .get("price")
+                    .or_else(|| entry.get("currentPrice"))
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or(0.0);
+                if !name.is_empty() {
+                    items.push(MacroDataPoint {
+                        date: pair.to_string(),
+                        value: price,
+                        name,
+                    });
                 }
             }
+        }
 
         if items.is_empty() {
             return Err(Error::not_found(format!("baidu fx: no data for {}", pair)));

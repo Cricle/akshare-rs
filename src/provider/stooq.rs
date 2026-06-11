@@ -16,7 +16,7 @@ impl AkShareClient {
         let url = format!("https://stooq.com/q/d/l/?s={stooq_sym}&i=d");
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .header(
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",

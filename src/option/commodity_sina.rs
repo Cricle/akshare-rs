@@ -102,7 +102,7 @@ impl AkShareClient {
         // Fetch the options page to get the list of commodities
         let base_url = "https://stock.finance.sina.com.cn/futures/view/optionsDP.php/pg_o/dce";
         let body = self
-                        .get(base_url)
+            .get(base_url)
             .send()
             .await
             .map_err(Error::from)?
@@ -118,7 +118,7 @@ impl AkShareClient {
         // Fetch the commodity page
         let full_url = format!("https://stock.finance.sina.com.cn{commodity_url}");
         let body2 = self
-                        .get(&full_url)
+            .get(&full_url)
             .send()
             .await
             .map_err(Error::from)?
@@ -139,9 +139,7 @@ impl AkShareClient {
             .collect();
 
         if entries.is_empty() {
-            return Err(Error::not_found(format!(
-                "no contracts found for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no contracts found for {symbol}")));
         }
 
         Ok(entries)
@@ -155,12 +153,14 @@ impl AkShareClient {
         symbol: &str,
         contract: &str,
     ) -> Result<Vec<CffexOptionSpotRow>> {
-        let (product, exchange) = commodity_product_exchange(symbol)
-            .ok_or_else(|| Error::invalid_input(format!("unsupported commodity symbol: {symbol}")))?;
+        let (product, exchange) = commodity_product_exchange(symbol).ok_or_else(|| {
+            Error::invalid_input(format!("unsupported commodity symbol: {symbol}"))
+        })?;
 
-        let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/OptionService.getOptionData";
+        let url =
+            "https://stock.finance.sina.com.cn/futures/api/openapi.php/OptionService.getOptionData";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("type", "futures"),
                 ("product", product),
@@ -178,8 +178,8 @@ impl AkShareClient {
         let json_end = body.rfind('}').map(|i| i + 1).unwrap_or(body.len());
         let json_str = &body[json_start..json_end];
 
-        let data: SinaOptionDataResponse =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("sina commodity table json: {e}")))?;
+        let data: SinaOptionDataResponse = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("sina commodity table json: {e}")))?;
 
         let result = data
             .result
@@ -198,23 +198,76 @@ impl AkShareClient {
             let put_row = down.get(i);
 
             rows.push(CffexOptionSpotRow {
-                call_bid_qty: call_row.and_then(|r| r.first()).map(json_to_f64).unwrap_or(0.0),
-                call_bid_price: call_row.and_then(|r| r.get(1)).map(json_to_f64).unwrap_or(0.0),
-                call_latest_price: call_row.and_then(|r| r.get(2)).map(json_to_f64).unwrap_or(0.0),
-                call_ask_price: call_row.and_then(|r| r.get(3)).map(json_to_f64).unwrap_or(0.0),
-                call_ask_qty: call_row.and_then(|r| r.get(4)).map(json_to_f64).unwrap_or(0.0),
-                call_open_interest: call_row.and_then(|r| r.get(5)).map(json_to_f64).unwrap_or(0.0),
-                call_change: call_row.and_then(|r| r.get(6)).map(json_to_f64).unwrap_or(0.0),
-                strike_price: call_row.and_then(|r| r.get(7)).map(json_to_f64).unwrap_or(0.0),
-                call_id: call_row.and_then(|r| r.get(8)).and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                put_bid_qty: put_row.and_then(|r| r.first()).map(json_to_f64).unwrap_or(0.0),
-                put_bid_price: put_row.and_then(|r| r.get(1)).map(json_to_f64).unwrap_or(0.0),
-                put_latest_price: put_row.and_then(|r| r.get(2)).map(json_to_f64).unwrap_or(0.0),
-                put_ask_price: put_row.and_then(|r| r.get(3)).map(json_to_f64).unwrap_or(0.0),
-                put_ask_qty: put_row.and_then(|r| r.get(4)).map(json_to_f64).unwrap_or(0.0),
-                put_open_interest: put_row.and_then(|r| r.get(5)).map(json_to_f64).unwrap_or(0.0),
-                put_change: put_row.and_then(|r| r.get(6)).map(json_to_f64).unwrap_or(0.0),
-                put_id: put_row.and_then(|r| r.get(7)).and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                call_bid_qty: call_row
+                    .and_then(|r| r.first())
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                call_bid_price: call_row
+                    .and_then(|r| r.get(1))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                call_latest_price: call_row
+                    .and_then(|r| r.get(2))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                call_ask_price: call_row
+                    .and_then(|r| r.get(3))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                call_ask_qty: call_row
+                    .and_then(|r| r.get(4))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                call_open_interest: call_row
+                    .and_then(|r| r.get(5))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                call_change: call_row
+                    .and_then(|r| r.get(6))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                strike_price: call_row
+                    .and_then(|r| r.get(7))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                call_id: call_row
+                    .and_then(|r| r.get(8))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
+                put_bid_qty: put_row
+                    .and_then(|r| r.first())
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                put_bid_price: put_row
+                    .and_then(|r| r.get(1))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                put_latest_price: put_row
+                    .and_then(|r| r.get(2))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                put_ask_price: put_row
+                    .and_then(|r| r.get(3))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                put_ask_qty: put_row
+                    .and_then(|r| r.get(4))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                put_open_interest: put_row
+                    .and_then(|r| r.get(5))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                put_change: put_row
+                    .and_then(|r| r.get(6))
+                    .map(json_to_f64)
+                    .unwrap_or(0.0),
+                put_id: put_row
+                    .and_then(|r| r.get(7))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
             });
         }
 
@@ -230,10 +283,7 @@ impl AkShareClient {
     /// Commodity option daily history from Sina.
     ///
     /// `symbol` is the contract code including call/put, e.g. "au2012C392".
-    pub async fn option_commodity_hist_sina(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CommodityHistRow>> {
+    pub async fn option_commodity_hist_sina(&self, symbol: &str) -> Result<Vec<CommodityHistRow>> {
         let now = chrono::Utc::now();
         let url = format!(
             "https://stock.finance.sina.com.cn/futures/api/jsonp.php/var%20_m{}C3000{}_{}_{}=/FutureOptionAllService.getOptionDayline",
@@ -244,7 +294,7 @@ impl AkShareClient {
         );
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .query(&[("symbol", symbol)])
             .send()
             .await
@@ -261,8 +311,8 @@ impl AkShareClient {
         }
         let json_str = &body[arr_start..arr_end];
 
-        let raw: Vec<Vec<serde_json::Value>> =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("sina commodity hist json: {e}")))?;
+        let raw: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("sina commodity hist json: {e}")))?;
 
         let rows: Vec<CommodityHistRow> = raw
             .iter()

@@ -49,7 +49,7 @@ impl AkShareClient {
     pub async fn option_comm_symbol(&self) -> Result<Vec<OptionCommSymbol>> {
         let url = "https://www.9qihuo.com/qiquanshouxufei";
         let body = self
-                        .get(url)
+            .get(url)
             .send()
             .await
             .map_err(Error::from)?
@@ -85,10 +85,7 @@ impl AkShareClient {
                         .unwrap_or("")
                         .to_string();
                     if !text.is_empty() {
-                        symbols.push(OptionCommSymbol {
-                            name: text,
-                            code,
-                        });
+                        symbols.push(OptionCommSymbol { name: text, code });
                     }
                 }
             }
@@ -114,7 +111,7 @@ impl AkShareClient {
 
         let url = "https://www.9qihuo.com/qiquanshouxufei";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("heyue", entry.code.as_str())])
             .send()
             .await
@@ -140,9 +137,7 @@ impl AkShareClient {
         }
 
         if result.is_empty() {
-            return Err(Error::not_found(format!(
-                "no commission data for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no commission data for {symbol}")));
         }
 
         Ok(result)
@@ -242,7 +237,11 @@ fn extract_update_times(html: &str) -> (String, String) {
             let comm_time = text
                 .split('\u{ff0c}')
                 .next()
-                .map(|s| s.trim_start_matches("\u{ff08}\u{624b}\u{7eed}\u{8d39}\u{66f4}\u{65b0}\u{65f6}\u{95f4}\u{effd}"))
+                .map(|s| {
+                    s.trim_start_matches(
+                        "\u{ff08}\u{624b}\u{7eed}\u{8d39}\u{66f4}\u{65b0}\u{65f6}\u{95f4}\u{effd}",
+                    )
+                })
                 .unwrap_or("")
                 .to_string();
             let price_time = text

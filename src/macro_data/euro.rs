@@ -99,12 +99,7 @@ impl AkShareClient {
     /// LME holdings report (伦敦金属交易所持仓报告).
     pub async fn euro_lme_holding(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/lme_position.json";
-        let resp: Jin10CdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -113,13 +108,14 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (col_name, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                                items.push(MacroDataPoint {
-                                    date: date.clone(),
-                                    value: val,
-                                    name: format!("LME Holding {}", col_name),
-                                });
-                            }
+                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                        {
+                            items.push(MacroDataPoint {
+                                date: date.clone(),
+                                value: val,
+                                name: format!("LME Holding {}", col_name),
+                            });
+                        }
                     }
                 }
             }
@@ -131,12 +127,7 @@ impl AkShareClient {
     /// LME stock report (伦敦金属交易所库存报告).
     pub async fn euro_lme_stock(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/lme_stock.json";
-        let resp: Jin10CdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -145,13 +136,14 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (col_name, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                                items.push(MacroDataPoint {
-                                    date: date.clone(),
-                                    value: val,
-                                    name: format!("LME Stock {}", col_name),
-                                });
-                            }
+                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                        {
+                            items.push(MacroDataPoint {
+                                date: date.clone(),
+                                value: val,
+                                name: format!("LME Stock {}", col_name),
+                            });
+                        }
                     }
                 }
             }

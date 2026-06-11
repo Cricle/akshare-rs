@@ -141,14 +141,10 @@ impl AkShareClient {
     /// SSE option expiry month list from Sina.
     ///
     /// `symbol` is "50ETF" or "300ETF".
-    pub async fn option_sse_list_sina(
-        &self,
-        symbol: &str,
-        exchange: &str,
-    ) -> Result<Vec<String>> {
+    pub async fn option_sse_list_sina(&self, symbol: &str, exchange: &str) -> Result<Vec<String>> {
         let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/StockOptionService.getStockName";
         let resp: SinaStockNameResponse = self
-                        .get(url)
+            .get(url)
             .query(&[("exchange", exchange), ("cate", symbol)])
             .send()
             .await
@@ -188,7 +184,7 @@ impl AkShareClient {
         };
 
         let resp: SinaRemainderResponse = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("exchange", exchange),
                 ("cate", symbol),
@@ -212,7 +208,7 @@ impl AkShareClient {
         if remaining < 0 {
             let xd_symbol = format!("XD{symbol}");
             let resp2: SinaRemainderResponse = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("exchange", exchange),
                     ("cate", xd_symbol.as_str()),
@@ -254,7 +250,7 @@ impl AkShareClient {
         let url = format!("https://hq.sinajs.cn/list={list_prefix}{underlying}{suffix}");
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", SINA_REFERER)
             .send()
             .await
@@ -281,10 +277,7 @@ impl AkShareClient {
                 Some(code.to_string())
             })
             .enumerate()
-            .map(|(i, code)| OptionSseCodeEntry {
-                index: i + 1,
-                code,
-            })
+            .map(|(i, code)| OptionSseCodeEntry { index: i + 1, code })
             .collect();
 
         if codes.is_empty() {
@@ -305,7 +298,7 @@ impl AkShareClient {
     ) -> Result<Vec<OptionFieldValuePair>> {
         let url = format!("https://hq.sinajs.cn/list=CON_OP_{symbol}");
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", SINA_REFERER)
             .send()
             .await
@@ -322,13 +315,49 @@ impl AkShareClient {
 
         let values: Vec<&str> = data.split(',').collect();
         let field_list = [
-            "买量", "买价", "最新价", "卖价", "卖量", "持仓量", "涨幅", "行权价",
-            "昨收价", "开盘价", "涨停价", "跌停价", "申卖价五", "申卖量五",
-            "申卖价四", "申卖量四", "申卖价三", "申卖量三", "申卖价二", "申卖量二",
-            "申卖价一", "申卖量一", "申买价一", "申买量一", "申买价二", "申买量二",
-            "申买价三", "申买量三", "申买价四", "申买量四", "申买价五", "申买量五",
-            "行情时间", "主力合约标识", "状态码", "标的证券类型", "标的股票",
-            "期权合约简称", "振幅", "最高价", "最低价", "成交量", "成交额",
+            "买量",
+            "买价",
+            "最新价",
+            "卖价",
+            "卖量",
+            "持仓量",
+            "涨幅",
+            "行权价",
+            "昨收价",
+            "开盘价",
+            "涨停价",
+            "跌停价",
+            "申卖价五",
+            "申卖量五",
+            "申卖价四",
+            "申卖量四",
+            "申卖价三",
+            "申卖量三",
+            "申卖价二",
+            "申卖量二",
+            "申卖价一",
+            "申卖量一",
+            "申买价一",
+            "申买量一",
+            "申买价二",
+            "申买量二",
+            "申买价三",
+            "申买量三",
+            "申买价四",
+            "申买量四",
+            "申买价五",
+            "申买量五",
+            "行情时间",
+            "主力合约标识",
+            "状态码",
+            "标的证券类型",
+            "标的股票",
+            "期权合约简称",
+            "振幅",
+            "最高价",
+            "最低价",
+            "成交量",
+            "成交额",
         ];
 
         let pairs: Vec<OptionFieldValuePair> = field_list
@@ -358,7 +387,7 @@ impl AkShareClient {
     ) -> Result<Vec<OptionFieldValuePair>> {
         let url = format!("https://hq.sinajs.cn/list={symbol}");
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")
             .send()
             .await
@@ -375,13 +404,39 @@ impl AkShareClient {
 
         let values: Vec<&str> = data.split(',').collect();
         let field_list = [
-            "证券简称", "今日开盘价", "昨日收盘价", "最近成交价", "最高成交价",
-            "最低成交价", "买入价", "卖出价", "成交数量", "成交金额",
-            "买数量一", "买价位一", "买数量二", "买价位二", "买数量三", "买价位三",
-            "买数量四", "买价位四", "买数量五", "买价位五",
-            "卖数量一", "卖价位一", "卖数量二", "卖价位二", "卖数量三", "卖价位三",
-            "卖数量四", "卖价位四", "卖数量五", "卖价位五",
-            "行情日期", "行情时间", "停牌状态",
+            "证券简称",
+            "今日开盘价",
+            "昨日收盘价",
+            "最近成交价",
+            "最高成交价",
+            "最低成交价",
+            "买入价",
+            "卖出价",
+            "成交数量",
+            "成交金额",
+            "买数量一",
+            "买价位一",
+            "买数量二",
+            "买价位二",
+            "买数量三",
+            "买价位三",
+            "买数量四",
+            "买价位四",
+            "买数量五",
+            "买价位五",
+            "卖数量一",
+            "卖价位一",
+            "卖数量二",
+            "卖价位二",
+            "卖数量三",
+            "卖价位三",
+            "卖数量四",
+            "卖价位四",
+            "卖数量五",
+            "卖价位五",
+            "行情日期",
+            "行情时间",
+            "停牌状态",
         ];
 
         let pairs: Vec<OptionFieldValuePair> = field_list
@@ -405,13 +460,10 @@ impl AkShareClient {
     /// SSE option greeks from Sina.
     ///
     /// Returns field-value pairs with Delta, Gamma, Theta, Vega, implied volatility, etc.
-    pub async fn option_sse_greeks_sina(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<OptionFieldValuePair>> {
+    pub async fn option_sse_greeks_sina(&self, symbol: &str) -> Result<Vec<OptionFieldValuePair>> {
         let url = format!("https://hq.sinajs.cn/list=CON_SO_{symbol}");
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")
             .send()
             .await
@@ -428,8 +480,19 @@ impl AkShareClient {
 
         let values: Vec<&str> = data.split(',').collect();
         let field_list = [
-            "期权合约简称", "成交量", "Delta", "Gamma", "Theta", "Vega",
-            "隐含波动率", "最高价", "最低价", "交易代码", "行权价", "最新价", "理论价值",
+            "期权合约简称",
+            "成交量",
+            "Delta",
+            "Gamma",
+            "Theta",
+            "Vega",
+            "隐含波动率",
+            "最高价",
+            "最低价",
+            "交易代码",
+            "行权价",
+            "最新价",
+            "理论价值",
         ];
 
         // Python code skips indices 1-3: [data_list[0]] + data_list[4:]
@@ -451,26 +514,24 @@ impl AkShareClient {
             .collect();
 
         if pairs.is_empty() {
-            return Err(Error::not_found(format!(
-                "no greeks data for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no greeks data for {symbol}")));
         }
 
         Ok(pairs)
     }
 
     /// SSE option minute data (current trading day) from Sina.
-    pub async fn option_sse_minute_sina(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<OptionSseMinuteRow>> {
+    pub async fn option_sse_minute_sina(&self, symbol: &str) -> Result<Vec<OptionSseMinuteRow>> {
         let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/StockOptionDaylineService.getOptionMinline";
         let con_symbol = format!("CON_OP_{symbol}");
 
         let resp: SinaMinuteResponse = self
-                        .get(url)
+            .get(url)
             .query(&[("symbol", con_symbol.as_str())])
-            .header("Referer", "https://stock.finance.sina.com.cn/option/quotes.html")
+            .header(
+                "Referer",
+                "https://stock.finance.sina.com.cn/option/quotes.html",
+            )
             .send()
             .await
             .map_err(Error::from)?
@@ -508,9 +569,7 @@ impl AkShareClient {
         }
 
         if rows.is_empty() {
-            return Err(Error::not_found(format!(
-                "no minute data for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no minute data for {symbol}")));
         }
 
         // Forward-fill dates
@@ -524,17 +583,17 @@ impl AkShareClient {
     }
 
     /// SSE option daily kline data from Sina.
-    pub async fn option_sse_daily_sina(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<OptionSseDailyRow>> {
+    pub async fn option_sse_daily_sina(&self, symbol: &str) -> Result<Vec<OptionSseDailyRow>> {
         let url = "https://stock.finance.sina.com.cn/futures/api/jsonp_v2.php//StockOptionDaylineService.getSymbolInfo";
         let con_symbol = format!("CON_OP_{symbol}");
 
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("symbol", con_symbol.as_str())])
-            .header("Referer", "https://stock.finance.sina.com.cn/option/quotes.html")
+            .header(
+                "Referer",
+                "https://stock.finance.sina.com.cn/option/quotes.html",
+            )
             .send()
             .await
             .map_err(Error::from)?
@@ -551,8 +610,8 @@ impl AkShareClient {
         let json_str = &body[json_start..json_end];
 
         // Format: [[date, open, high, low, close, volume], ...]
-        let raw: Vec<Vec<serde_json::Value>> =
-            serde_json::from_str(json_str).map_err(|e| Error::decode(format!("sina daily json: {e}")))?;
+        let raw: Vec<Vec<serde_json::Value>> = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("sina daily json: {e}")))?;
 
         let rows: Vec<OptionSseDailyRow> = raw
             .iter()
@@ -568,9 +627,7 @@ impl AkShareClient {
             .collect();
 
         if rows.is_empty() {
-            return Err(Error::not_found(format!(
-                "no daily data for {symbol}"
-            )));
+            return Err(Error::not_found(format!("no daily data for {symbol}")));
         }
 
         Ok(rows)
@@ -585,9 +642,12 @@ impl AkShareClient {
         let con_symbol = format!("CON_OP_{symbol}");
 
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("symbol", con_symbol.as_str())])
-            .header("Referer", "https://stock.finance.sina.com.cn/option/quotes.html")
+            .header(
+                "Referer",
+                "https://stock.finance.sina.com.cn/option/quotes.html",
+            )
             .send()
             .await
             .map_err(Error::from)?
@@ -595,8 +655,8 @@ impl AkShareClient {
             .await
             .map_err(Error::from)?;
 
-        let resp: serde_json::Value =
-            serde_json::from_str(&body).map_err(|e| Error::decode(format!("sina finance minute json: {e}")))?;
+        let resp: serde_json::Value = serde_json::from_str(&body)
+            .map_err(|e| Error::decode(format!("sina finance minute json: {e}")))?;
 
         let data = resp
             .get("result")

@@ -12,12 +12,22 @@ impl AkShareClient {
         let response = self
             .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
             .query(&[
-                ("t", "1"), ("lx", "1"), ("letter", ""), ("gsid", ""),
-                ("text", ""), ("sort", "zdf,desc"), ("page", page.as_str()),
-                ("dt", "1580914040623"), ("atfc", ""), ("onlySale", "0"),
+                ("t", "1"),
+                ("lx", "1"),
+                ("letter", ""),
+                ("gsid", ""),
+                ("text", ""),
+                ("sort", "zdf,desc"),
+                ("page", page.as_str()),
+                ("dt", "1580914040623"),
+                ("atfc", ""),
+                ("onlySale", "0"),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text
@@ -27,18 +37,31 @@ impl AkShareClient {
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("open-end fund JSON parse: {e}")))?;
 
-        let showday = root.get("showday").and_then(|v| v.as_array())
+        let showday = root
+            .get("showday")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("missing showday"))?;
-        let date = showday.first().and_then(|v| v.as_str()).unwrap_or("").to_string();
+        let date = showday
+            .first()
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
 
-        let datas = root.get("datas").and_then(|v| v.as_array())
+        let datas = root
+            .get("datas")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("missing datas"))?;
 
         let mut snapshots = Vec::new();
         for item in datas {
-            let row = match item.as_str() { Some(s) => s, None => continue };
+            let row = match item.as_str() {
+                Some(s) => s,
+                None => continue,
+            };
             let fields: Vec<&str> = row.split(',').map(str::trim).collect();
-            if fields.len() < 9 { continue; }
+            if fields.len() < 9 {
+                continue;
+            }
             snapshots.push(FundSnapshot {
                 symbol: fields[0].to_string(),
                 name: fields[1].to_string(),
@@ -61,32 +84,56 @@ impl AkShareClient {
         let response = self
             .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
             .query(&[
-                ("t", "1"), ("lx", "1"), ("letter", ""), ("gsid", ""),
-                ("text", symbol), ("sort", "zdf,desc"), ("page", page.as_str()),
-                ("dt", "1580914040623"), ("atfc", ""), ("onlySale", "0"),
+                ("t", "1"),
+                ("lx", "1"),
+                ("letter", ""),
+                ("gsid", ""),
+                ("text", symbol),
+                ("sort", "zdf,desc"),
+                ("page", page.as_str()),
+                ("dt", "1580914040623"),
+                ("atfc", ""),
+                ("onlySale", "0"),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
-        let json_str = text.strip_prefix("var db=")
+        let json_str = text
+            .strip_prefix("var db=")
             .ok_or_else(|| Error::decode("unexpected response"))?;
 
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("JSON parse: {e}")))?;
 
-        let showday = root.get("showday").and_then(|v| v.as_array())
+        let showday = root
+            .get("showday")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("missing showday"))?;
-        let date = showday.first().and_then(|v| v.as_str()).unwrap_or("").to_string();
+        let date = showday
+            .first()
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
 
-        let datas = root.get("datas").and_then(|v| v.as_array())
+        let datas = root
+            .get("datas")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("missing datas"))?;
 
         let mut snapshots = Vec::new();
         for item in datas {
-            let row = match item.as_str() { Some(s) => s, None => continue };
+            let row = match item.as_str() {
+                Some(s) => s,
+                None => continue,
+            };
             let fields: Vec<&str> = row.split(',').map(str::trim).collect();
-            if fields.len() < 9 { continue; }
+            if fields.len() < 9 {
+                continue;
+            }
             snapshots.push(FundSnapshot {
                 symbol: fields[0].to_string(),
                 name: fields[1].to_string(),
@@ -110,33 +157,53 @@ impl AkShareClient {
         let response = self
             .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
             .query(&[
-                ("t", "1"), ("lx", "1"), ("letter", ""), ("gsid", ""),
-                ("text", ""), ("sort", "zdf,desc"), ("page", "1,50000"),
-                ("dt", "1580914040623"), ("atfc", ""), ("onlySale", "0"),
+                ("t", "1"),
+                ("lx", "1"),
+                ("letter", ""),
+                ("gsid", ""),
+                ("text", ""),
+                ("sort", "zdf,desc"),
+                ("page", "1,50000"),
+                ("dt", "1580914040623"),
+                ("atfc", ""),
+                ("onlySale", "0"),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
-        let json_str = text.strip_prefix("var db=")
+        let json_str = text
+            .strip_prefix("var db=")
             .ok_or_else(|| Error::decode("unexpected response"))?;
 
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("JSON parse: {e}")))?;
 
-        let showday = root.get("showday").and_then(|v| v.as_array())
+        let showday = root
+            .get("showday")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("missing showday"))?;
         let day0 = showday.first().and_then(|v| v.as_str()).unwrap_or("");
         let day1 = showday.get(1).and_then(|v| v.as_str()).unwrap_or("");
 
-        let datas = root.get("datas").and_then(|v| v.as_array())
+        let datas = root
+            .get("datas")
+            .and_then(|v| v.as_array())
             .ok_or_else(|| Error::decode("missing datas"))?;
 
         let mut result = Vec::new();
         for (i, item) in datas.iter().enumerate() {
-            let row = match item.as_str() { Some(s) => s, None => continue };
+            let row = match item.as_str() {
+                Some(s) => s,
+                None => continue,
+            };
             let fields: Vec<&str> = row.split(',').map(str::trim).collect();
-            if fields.len() < 9 { continue; }
+            if fields.len() < 9 {
+                continue;
+            }
             result.push(serde_json::json!({
                 "rank": i + 1,
                 "fund_code": fields[0],
@@ -170,7 +237,10 @@ impl AkShareClient {
         // Use the lsjz API for NAV history
         let response = self
             .get("https://api.fund.eastmoney.com/f10/lsjz")
-            .header("Referer", format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"))
+            .header(
+                "Referer",
+                format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
+            )
             .query(&[
                 ("fundCode", symbol),
                 ("pageIndex", "1"),
@@ -178,8 +248,11 @@ impl AkShareClient {
                 ("startDate", ""),
                 ("endDate", ""),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = payload
@@ -190,8 +263,13 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for item in list {
-            let arr = match item.as_array() { Some(a) => a, None => continue };
-            if arr.len() < 10 { continue; }
+            let arr = match item.as_array() {
+                Some(a) => a,
+                None => continue,
+            };
+            if arr.len() < 10 {
+                continue;
+            }
             result.push(FundNavHistory {
                 date: arr[0].as_str().unwrap_or("").to_string(),
                 nav: arr[1].as_str().unwrap_or("0").parse().unwrap_or(0.0),
@@ -202,7 +280,9 @@ impl AkShareClient {
             });
         }
         if result.is_empty() {
-            return Err(Error::not_found(format!("no {indicator} data for {symbol}")));
+            return Err(Error::not_found(format!(
+                "no {indicator} data for {symbol}"
+            )));
         }
         result.sort_by(|a, b| a.date.cmp(&b.date));
         Ok(result)

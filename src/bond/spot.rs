@@ -14,7 +14,7 @@ impl AkShareClient {
     pub async fn bond_spot_deal(&self) -> Result<Vec<crate::types::Row>> {
         let url = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-currency/SptDl?lang=CN&pageNo=1&pageSize=200";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -43,7 +43,7 @@ impl AkShareClient {
     pub async fn bond_spot_quote(&self) -> Result<Vec<crate::types::Row>> {
         let url = "https://www.chinamoney.com.cn/ags/ms/cm-u-bk-currency/SptQut?lang=CN&pageNo=1&pageSize=200";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -78,7 +78,7 @@ impl AkShareClient {
         let page_size = limit.clamp(1, 500).to_string();
 
         let response = self
-                        .get("https://datacenter.eastmoney.com/api/data/get")
+            .get("https://datacenter.eastmoney.com/api/data/get")
             .query(&[
                 ("type", "RPTA_WEB_TREASURYYIELD"),
                 ("sty", "ALL"),
@@ -120,10 +120,7 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for v in &data {
-            let date = v
-                .get("SOLAR_DATE")
-                .and_then(|x| x.as_str())
-                .unwrap_or("");
+            let date = v.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
             if date.is_empty() {
                 continue;
             }
@@ -169,10 +166,7 @@ mod tests {
             "EMM00166469": 2.80
         });
 
-        let date = row
-            .get("SOLAR_DATE")
-            .and_then(|x| x.as_str())
-            .unwrap_or("");
+        let date = row.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
         assert_eq!(date.get(..10).unwrap_or(date), "2025-01-15");
 
         let tenors = [
@@ -195,10 +189,7 @@ mod tests {
             "SOLAR_DATE": "",
             "EMM00588704": 1.85
         });
-        let date = row
-            .get("SOLAR_DATE")
-            .and_then(|x| x.as_str())
-            .unwrap_or("");
+        let date = row.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
         assert!(date.is_empty());
     }
 }

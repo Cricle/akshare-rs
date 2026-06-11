@@ -11,7 +11,7 @@ impl AkShareClient {
     pub async fn futures_rule_gtja(&self, date: &str) -> Result<Vec<Row>> {
         let url = "https://www.gtjaqh.com/pc/calendar";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("date", date)])
             .header("User-Agent", "Mozilla/5.0")
             .send()
@@ -40,7 +40,7 @@ impl AkShareClient {
     pub async fn futures_rule_em(&self) -> Result<Vec<Row>> {
         let url = "https://eastmoneyfutures.com/api/ComManage/GetPZJYInfo";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?

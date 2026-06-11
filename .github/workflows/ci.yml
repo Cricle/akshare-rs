@@ -61,9 +61,23 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo check
 
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc --no-deps --document-private-items
+      - name: Verify docs folder exists
+        run: |
+          test -d docs
+          test -f docs/README.md
+
   publish-dry-run:
     name: Publish dry-run
     runs-on: ubuntu-latest
+    needs: [check, test, fmt, clippy, msrv, docs]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

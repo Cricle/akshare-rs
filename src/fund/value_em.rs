@@ -8,10 +8,19 @@ impl AkShareClient {
     /// Fetch fund value estimation (Python: fund_value_estimation_em).
     ///
     /// `symbol`: "全部", "股票型", "混合型", "债券型", "指数型", "QDII", "ETF联接", "LOF", "场内交易基金".
-    pub async fn fund_value_estimation_em(&self, symbol: &str) -> Result<Vec<FundValueEstimationItem>> {
+    pub async fn fund_value_estimation_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<FundValueEstimationItem>> {
         let symbol_map: &[(&str, &str)] = &[
-            ("全部", "1"), ("股票型", "2"), ("混合型", "3"), ("债券型", "4"),
-            ("指数型", "5"), ("QDII", "6"), ("ETF联接", "7"), ("LOF", "8"),
+            ("全部", "1"),
+            ("股票型", "2"),
+            ("混合型", "3"),
+            ("债券型", "4"),
+            ("指数型", "5"),
+            ("QDII", "6"),
+            ("ETF联接", "7"),
+            ("LOF", "8"),
             ("场内交易基金", "9"),
         ];
         let type_id = symbol_map
@@ -25,25 +34,42 @@ impl AkShareClient {
             .get("https://api.fund.eastmoney.com/FundGuZhi/GetFundGZList")
             .header("Referer", "https://fund.eastmoney.com/")
             .query(&[
-                ("type", type_id), ("sort", "3"), ("orderType", "desc"),
-                ("canbuy", "0"), ("pageIndex", "1"), ("pageSize", "20000"),
+                ("type", type_id),
+                ("sort", "3"),
+                ("orderType", "desc"),
+                ("canbuy", "0"),
+                ("pageIndex", "1"),
+                ("pageSize", "20000"),
                 ("_", ts.as_str()),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
-            .get("Data").and_then(|d| d.get("list")).and_then(|l| l.as_array())
+            .get("Data")
+            .and_then(|d| d.get("list"))
+            .and_then(|l| l.as_array())
             .ok_or_else(|| Error::not_found("no fund estimation data"))?;
 
-        let gzrq = payload.get("Data").and_then(|d| d.get("gzrq"))
-            .and_then(|v| v.as_str()).unwrap_or("");
+        let gzrq = payload
+            .get("Data")
+            .and_then(|d| d.get("gzrq"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
 
         let mut result = Vec::new();
         for (i, item) in data.iter().enumerate() {
-            let arr = match item.as_array() { Some(a) => a, None => continue };
-            if arr.len() < 28 { continue; }
+            let arr = match item.as_array() {
+                Some(a) => a,
+                None => continue,
+            };
+            if arr.len() < 28 {
+                continue;
+            }
             result.push(FundValueEstimationItem {
                 rank: (i + 1) as i32,
                 fund_code: arr[0].as_str().unwrap_or("").to_string(),

@@ -35,7 +35,7 @@ async fn fetch_qvix_daily(
     cols: &[usize; 4],
 ) -> Result<Vec<QvixDailyPoint>> {
     let body = client
-                .get("http://1.optbbs.com/d/csv/d/k.csv")
+        .get("http://1.optbbs.com/d/csv/d/k.csv")
         .send()
         .await
         .map_err(Error::from)?
@@ -74,12 +74,9 @@ async fn fetch_qvix_daily(
 }
 
 /// Fetch a single intraday QVIX CSV.
-async fn fetch_qvix_min(
-    client: &AkShareClient,
-    url: &str,
-) -> Result<Vec<QvixMinPoint>> {
+async fn fetch_qvix_min(client: &AkShareClient, url: &str) -> Result<Vec<QvixMinPoint>> {
     let body = client
-                .get(url)
+        .get(url)
         .send()
         .await
         .map_err(Error::from)?

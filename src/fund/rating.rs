@@ -12,14 +12,24 @@ impl AkShareClient {
             .get("https://api.fund.eastmoney.com/FundRating/GetFundRatingList")
             .header("Referer", "https://fund.eastmoney.com/")
             .query(&[
-                ("FundType", "0"), ("SortColumn", "SYL_1N"), ("Sort", "desc"),
-                ("pageIndex", "1"), ("pageSize", pn.as_str()),
+                ("FundType", "0"),
+                ("SortColumn", "SYL_1N"),
+                ("Sort", "desc"),
+                ("pageIndex", "1"),
+                ("pageSize", pn.as_str()),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let root: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let items = root.get("datas").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+        let items = root
+            .get("datas")
+            .and_then(|v| v.as_array())
+            .cloned()
+            .unwrap_or_default();
         if items.is_empty() {
             return Err(Error::not_found("no fund rating data"));
         }
@@ -45,8 +55,11 @@ impl AkShareClient {
     pub async fn fund_rating_all(&self) -> Result<Vec<FundRatingItem>> {
         let response = self
             .get("https://fund.eastmoney.com/data/fundrating.html")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
 
         let text = response.text().await.map_err(Error::from)?;
         // This returns HTML with embedded JS data; requires HTML parsing.

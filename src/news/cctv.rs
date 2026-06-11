@@ -22,7 +22,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://api.cctv.cn/getNewsList";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("serviceId", "finance"),
                 ("date", date_fmt.as_str()),
@@ -40,10 +40,19 @@ impl AkShareClient {
         let mut items = Vec::new();
         for entry in &data {
             let mut row = Row::new();
-            row.insert("title".into(), entry.get("title").cloned().unwrap_or_default());
+            row.insert(
+                "title".into(),
+                entry.get("title").cloned().unwrap_or_default(),
+            );
             row.insert("url".into(), entry.get("url").cloned().unwrap_or_default());
-            row.insert("time".into(), entry.get("time").cloned().unwrap_or_default());
-            row.insert("brief".into(), entry.get("brief").cloned().unwrap_or_default());
+            row.insert(
+                "time".into(),
+                entry.get("time").cloned().unwrap_or_default(),
+            );
+            row.insert(
+                "brief".into(),
+                entry.get("brief").cloned().unwrap_or_default(),
+            );
             items.push(row);
         }
         Ok(items)
@@ -55,7 +64,7 @@ impl AkShareClient {
     pub async fn news_economic_baidu(&self, symbol: &str) -> Result<Vec<Row>> {
         let url = "https://gushitong.baidu.com/opendata";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("resource_id", "5352"),
                 ("query", symbol),
@@ -103,7 +112,7 @@ impl AkShareClient {
     pub async fn news_report_time_baidu(&self, symbol: &str) -> Result<Vec<Row>> {
         let url = "https://gushitong.baidu.com/opendata";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("resource_id", "5352"),
                 ("query", symbol),
@@ -152,7 +161,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://gushitong.baidu.com/opendata";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("resource_id", "5352"),
                 ("query", "分红"),
@@ -202,7 +211,7 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://gushitong.baidu.com/opendata";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("resource_id", "5352"),
                 ("query", "停牌"),

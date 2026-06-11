@@ -24,7 +24,7 @@ impl AkShareClient {
     pub async fn forex_boc_rates(&self) -> Result<Vec<ForexRate>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("reportName", "RPT_FE_QUOTATION_BOCCN"),
                 ("columns", "ALL"),

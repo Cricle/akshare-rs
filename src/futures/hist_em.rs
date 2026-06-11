@@ -47,7 +47,7 @@ impl AkShareClient {
     pub async fn futures_hist_table_em(&self) -> Result<Vec<Row>> {
         let url = "https://futsse-static.eastmoney.com/redis";
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[("msgid", "gnweb")])
             .send()
             .await?
@@ -63,7 +63,7 @@ impl AkShareClient {
             // Fetch details per market
             let detail_url = "https://futsse-static.eastmoney.com/redis";
             let detail_body = match self
-                                .get(detail_url)
+                .get(detail_url)
                 .query(&[("msgid", &mkt_id.to_string())])
                 .send()
                 .await
@@ -75,17 +75,18 @@ impl AkShareClient {
                 continue;
             }
             if let Ok(detail_data) = serde_json::from_str::<serde_json::Value>(&detail_body)
-                && let Some(arr) = detail_data.as_array() {
-                    for entry in arr {
-                        let mut row = Row::new();
-                        row.insert("market_name".into(), entry["mktname"].clone());
-                        row.insert("contract_name".into(), entry["name"].clone());
-                        row.insert("contract_code".into(), entry["code"].clone());
-                        row.insert("variety_code".into(), entry["vcode"].clone());
-                        row.insert("variety_name".into(), entry["vname"].clone());
-                        items.push(row);
-                    }
+                && let Some(arr) = detail_data.as_array()
+            {
+                for entry in arr {
+                    let mut row = Row::new();
+                    row.insert("market_name".into(), entry["mktname"].clone());
+                    row.insert("contract_name".into(), entry["name"].clone());
+                    row.insert("contract_code".into(), entry["code"].clone());
+                    row.insert("variety_code".into(), entry["vcode"].clone());
+                    row.insert("variety_name".into(), entry["vname"].clone());
+                    items.push(row);
                 }
+            }
         }
         Ok(items)
     }
@@ -132,7 +133,7 @@ impl AkShareClient {
 
         let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("secid", sec_id.as_str()),
                 ("klt", period_code),
@@ -141,7 +142,10 @@ impl AkShareClient {
                 ("end", "20500000"),
                 ("iscca", "1"),
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+                ),
                 ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
                 ("forcect", "1"),
             ])

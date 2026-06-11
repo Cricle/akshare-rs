@@ -4,7 +4,7 @@ use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
 
-use super::shared::{fetch_em_report, fetch_em_industry_index, fetch_jin10_report};
+use super::shared::{fetch_em_industry_index, fetch_em_report, fetch_jin10_report};
 
 /// Strip HTML tags and extract text content.
 fn extract_html_text(html: &str) -> String {
@@ -30,7 +30,7 @@ async fn fetch_sina_macro(
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://quotes.sina.cn/mac/api/jsonp_v3.php/SINAREMOTECALLCALLBACK/MacPage_Service.get_pagedata";
     let resp_text = client
-                .get(url)
+        .get(url)
         .query(&[
             ("cate", cate),
             ("event", event),
@@ -91,7 +91,8 @@ async fn fetch_sina_macro(
                     let mut date = String::new();
                     let mut value = 0.0f64;
                     for (key, val) in row_obj {
-                        if key.contains("时间") || key.contains("月份") || key.contains("统计") {
+                        if key.contains("时间") || key.contains("月份") || key.contains("统计")
+                        {
                             date = val.as_str().unwrap_or("").to_string();
                         }
                     }
@@ -162,7 +163,13 @@ impl AkShareClient {
 
     /// Enterprise commodity price index (企业商品价格指数).
     pub async fn china_goods_index(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_GOODS_INDEX", "REPORT_DATE", "China Goods Index").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_GOODS_INDEX",
+            "REPORT_DATE",
+            "China Goods Index",
+        )
+        .await
     }
 
     /// Foreign direct investment (外商直接投资).
@@ -177,12 +184,24 @@ impl AkShareClient {
 
     /// New house price index (新建住宅价格指数).
     pub async fn china_new_house_price(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_HOUSE_PRICE", "REPORT_DATE", "China New House Price").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_HOUSE_PRICE",
+            "REPORT_DATE",
+            "China New House Price",
+        )
+        .await
     }
 
     /// Enterprise boom index (企业景气指数).
     pub async fn china_enterprise_boom_index(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_BOOM_INDEX", "REPORT_DATE", "China Enterprise Boom Index").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_BOOM_INDEX",
+            "REPORT_DATE",
+            "China Enterprise Boom Index",
+        )
+        .await
     }
 
     /// National tax receipts (全国税收收入).
@@ -192,57 +211,123 @@ impl AkShareClient {
 
     /// New financial credit (新增信贷).
     pub async fn china_new_financial_credit(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_RMB_LOAN", "REPORT_DATE", "China New Credit").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_RMB_LOAN",
+            "REPORT_DATE",
+            "China New Credit",
+        )
+        .await
     }
 
     /// Foreign exchange and gold reserves (外汇和黄金储备).
     pub async fn china_fx_gold(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_GOLD_CURRENCY", "REPORT_DATE", "China FX Gold").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_GOLD_CURRENCY",
+            "REPORT_DATE",
+            "China FX Gold",
+        )
+        .await
     }
 
     /// Stock market statistics (股市统计).
     pub async fn china_stock_market_cap(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_STOCK_STATISTICS", "REPORT_DATE", "China Stock Market Cap").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_STOCK_STATISTICS",
+            "REPORT_DATE",
+            "China Stock Market Cap",
+        )
+        .await
     }
 
     /// Fixed asset investment (固定资产投资).
     pub async fn china_fixed_asset_investment(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_ASSET_INVEST", "REPORT_DATE", "China Fixed Asset Investment").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_ASSET_INVEST",
+            "REPORT_DATE",
+            "China Fixed Asset Investment",
+        )
+        .await
     }
 
     /// Fiscal revenue (财政收入).
     pub async fn china_fiscal_revenue(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_INCOME", "REPORT_DATE", "China Fiscal Revenue").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_INCOME",
+            "REPORT_DATE",
+            "China Fiscal Revenue",
+        )
+        .await
     }
 
     /// Foreign exchange loans (外汇贷款).
     pub async fn china_fx_loans(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_FOREX_LOAN", "REPORT_DATE", "China FX Loans").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_FOREX_LOAN",
+            "REPORT_DATE",
+            "China FX Loans",
+        )
+        .await
     }
 
     /// Foreign exchange deposits (外汇存款).
     pub async fn china_fx_deposits(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_FOREX_DEPOSIT", "REPORT_DATE", "China FX Deposits").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_FOREX_DEPOSIT",
+            "REPORT_DATE",
+            "China FX Deposits",
+        )
+        .await
     }
 
     /// Consumer confidence index (消费者信心指数).
     pub async fn china_consumer_confidence(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_FAITH_INDEX", "REPORT_DATE", "China Consumer Confidence").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_FAITH_INDEX",
+            "REPORT_DATE",
+            "China Consumer Confidence",
+        )
+        .await
     }
 
     /// Industrial value-added growth (工业增加值).
     pub async fn china_industrial_growth(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_INDUS_GROW", "REPORT_DATE", "China Industrial Growth").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_INDUS_GROW",
+            "REPORT_DATE",
+            "China Industrial Growth",
+        )
+        .await
     }
 
     /// Deposit reserve ratio (存款准备金率).
     pub async fn china_reserve_requirement_ratio(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_DEPOSIT_RESERVE", "REPORT_DATE", "China RRR").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_DEPOSIT_RESERVE",
+            "REPORT_DATE",
+            "China RRR",
+        )
+        .await
     }
 
     /// Total retail sales of consumer goods (社会消费品零售总额).
     pub async fn china_consumer_goods_retail(&self) -> Result<Vec<MacroDataPoint>> {
-        fetch_em_report(self, "RPT_ECONOMY_TOTAL_RETAIL", "REPORT_DATE", "China Consumer Goods Retail").await
+        fetch_em_report(
+            self,
+            "RPT_ECONOMY_TOTAL_RETAIL",
+            "REPORT_DATE",
+            "China Consumer Goods Retail",
+        )
+        .await
     }
 }
 
@@ -418,12 +503,7 @@ impl AkShareClient {
     /// Shibor rates (上海银行业同业拆借报告).
     pub async fn china_shibor(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/il_1.json";
-        let resp: Jin10CdnCdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnCdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -432,13 +512,14 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (tenor, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                                items.push(MacroDataPoint {
-                                    date: date.clone(),
-                                    value: val,
-                                    name: format!("Shibor {}", tenor),
-                                });
-                            }
+                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                        {
+                            items.push(MacroDataPoint {
+                                date: date.clone(),
+                                value: val,
+                                name: format!("Shibor {}", tenor),
+                            });
+                        }
                     }
                 }
             }
@@ -450,12 +531,7 @@ impl AkShareClient {
     /// HIBOR rates (香港同业拆借报告).
     pub async fn china_hibor(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/il_2.json";
-        let resp: Jin10CdnCdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnCdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -464,13 +540,14 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (tenor, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                                items.push(MacroDataPoint {
-                                    date: date.clone(),
-                                    value: val,
-                                    name: format!("HIBOR {}", tenor),
-                                });
-                            }
+                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                        {
+                            items.push(MacroDataPoint {
+                                date: date.clone(),
+                                value: val,
+                                name: format!("HIBOR {}", tenor),
+                            });
+                        }
                     }
                 }
             }
@@ -482,12 +559,7 @@ impl AkShareClient {
     /// RMB central parity rates (人民币汇率中间价报告).
     pub async fn china_rmb_central_parity(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/exchange_rate.json";
-        let resp: Jin10CdnCdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnCdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -496,13 +568,14 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (pair, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                                items.push(MacroDataPoint {
-                                    date: date.clone(),
-                                    value: val,
-                                    name: format!("RMB {}", pair),
-                                });
-                            }
+                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                        {
+                            items.push(MacroDataPoint {
+                                date: date.clone(),
+                                value: val,
+                                name: format!("RMB {}", pair),
+                            });
+                        }
                     }
                 }
             }
@@ -514,12 +587,7 @@ impl AkShareClient {
     /// Shenzhen margin trading report (深圳融资融券报告).
     pub async fn china_margin_sz(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/fs_2.json";
-        let resp: Jin10CdnCdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnCdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -544,25 +612,21 @@ impl AkShareClient {
     /// Shanghai margin trading report (上海融资融券报告).
     pub async fn china_margin_sh(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/fs_1.json";
-        let resp: Jin10CdnCdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnCdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
         if let Some(obj) = values.as_object() {
             for (date, row) in obj {
                 if let Some(arr) = row.as_array()
-                    && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                        items.push(MacroDataPoint {
-                            date: date.clone(),
-                            value: val,
-                            name: "SH Margin Buy".to_string(),
-                        });
-                    }
+                    && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                {
+                    items.push(MacroDataPoint {
+                        date: date.clone(),
+                        value: val,
+                        name: "SH Margin Buy".to_string(),
+                    });
+                }
             }
         }
         items.sort_by(|a, b| a.date.cmp(&b.date));
@@ -572,12 +636,7 @@ impl AkShareClient {
     /// Shanghai Gold Exchange report (上海黄金交易所报告).
     pub async fn china_sge_report(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://cdn.jin10.com/data_center/reports/sge.json";
-        let resp: Jin10CdnCdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnCdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -587,12 +646,8 @@ impl AkShareClient {
                     for product in arr {
                         if let Some(parr) = product.as_array() {
                             // First element is product name, last numeric is volume
-                            let name = parr.first()
-                                .and_then(|v| v.as_str())
-                                .unwrap_or("unknown");
-                            let volume = parr.get(8)
-                                .and_then(|v| v.as_f64())
-                                .unwrap_or(0.0);
+                            let name = parr.first().and_then(|v| v.as_str()).unwrap_or("unknown");
+                            let volume = parr.get(8).and_then(|v| v.as_f64()).unwrap_or(0.0);
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: volume,
@@ -908,12 +963,7 @@ impl AkShareClient {
     /// Social financing scale (社会融资规模增量统计).
     pub async fn macro_china_shrzgm(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://data.mofcom.gov.cn/datamofcom/front/gnmy/shrzgmQuery";
-        let resp: serde_json::Value = self
-                        .post(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: serde_json::Value = self.post(url).send().await?.json().await?;
 
         let mut items = Vec::new();
         if let Some(arr) = resp.as_array() {
@@ -944,7 +994,7 @@ impl AkShareClient {
     pub async fn macro_rmb_loan(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://data.10jqka.com.cn/macro/loan/";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0 (compatible; akshare-rust/0.1)")
             .send()
             .await?
@@ -971,13 +1021,14 @@ impl AkShareClient {
                 let date_cell = extract_html_text(cells[1]);
                 let val_cell = extract_html_text(cells[2]);
                 if date_cell.contains("-")
-                    && let Ok(val) = val_cell.replace(',', "").parse::<f64>() {
-                        items.push(MacroDataPoint {
-                            date: date_cell,
-                            value: val,
-                            name: "RMB Loan".to_string(),
-                        });
-                    }
+                    && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
+                {
+                    items.push(MacroDataPoint {
+                        date: date_cell,
+                        value: val,
+                        name: "RMB Loan".to_string(),
+                    });
+                }
             }
         }
         items.sort_by(|a, b| a.date.cmp(&b.date));
@@ -988,7 +1039,7 @@ impl AkShareClient {
     pub async fn macro_rmb_deposit(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://data.10jqka.com.cn/macro/rmb/";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0 (compatible; akshare-rust/0.1)")
             .send()
             .await?
@@ -1003,13 +1054,14 @@ impl AkShareClient {
                 let date_cell = extract_html_text(cells[1]);
                 let val_cell = extract_html_text(cells[2]);
                 if date_cell.contains("-")
-                    && let Ok(val) = val_cell.replace(',', "").parse::<f64>() {
-                        items.push(MacroDataPoint {
-                            date: date_cell,
-                            value: val,
-                            name: "RMB Deposit".to_string(),
-                        });
-                    }
+                    && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
+                {
+                    items.push(MacroDataPoint {
+                        date: date_cell,
+                        value: val,
+                        name: "RMB Deposit".to_string(),
+                    });
+                }
             }
         }
         items.sort_by(|a, b| a.date.cmp(&b.date));
@@ -1020,12 +1072,7 @@ impl AkShareClient {
     pub async fn macro_china_daily_energy(&self) -> Result<Vec<MacroDataPoint>> {
         // Use Jin10 CDN for energy daily data
         let url = "https://cdn.jin10.com/data_center/reports/energy.json";
-        let resp: Jin10CdnCdnResp = self
-                        .get(url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: Jin10CdnCdnResp = self.get(url).send().await?.json().await?;
 
         let values = resp.values.unwrap_or_default();
         let mut items = Vec::new();
@@ -1034,13 +1081,14 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (col_name, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64()) {
-                                items.push(MacroDataPoint {
-                                    date: date.clone(),
-                                    value: val,
-                                    name: format!("Energy {}", col_name),
-                                });
-                            }
+                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                        {
+                            items.push(MacroDataPoint {
+                                date: date.clone(),
+                                value: val,
+                                name: format!("Energy {}", col_name),
+                            });
+                        }
                     }
                 }
             }
@@ -1050,47 +1098,98 @@ impl AkShareClient {
     }
 
     /// 国家统计局-全国数据 (Python: macro_china_nbs_nation)
-    pub async fn macro_china_nbs_nation(&self, kind: &str, path: &str, period: &str) -> Result<Vec<MacroDataPoint>> {
+    pub async fn macro_china_nbs_nation(
+        &self,
+        kind: &str,
+        path: &str,
+        period: &str,
+    ) -> Result<Vec<MacroDataPoint>> {
         let dbcode = match kind {
             "月度数据" => "hgyd",
             "季度数据" => "hgjd",
             "年度数据" => "hgnd",
-            _ => return Err(crate::error::Error::invalid_input(format!("invalid kind: {kind}"))),
+            _ => {
+                return Err(crate::error::Error::invalid_input(format!(
+                    "invalid kind: {kind}"
+                )));
+            }
         };
         let url = "https://data.stats.gov.cn/easyquery.htm";
-        let resp = self.post(url)
+        let resp = self
+            .post(url)
             .form(&[
                 ("m", "QueryData"),
                 ("dbcode", dbcode),
                 ("rowcode", "zb"),
                 ("colcode", "sj"),
                 ("wds", "[]"),
-                ("dfwds", format!("[{{\"wdcode\":\"zb\",\"valuecode\":\"{}\"}}]", path).as_str()),
+                (
+                    "dfwds",
+                    format!("[{{\"wdcode\":\"zb\",\"valuecode\":\"{}\"}}]", path).as_str(),
+                ),
                 ("k1", period),
             ])
             .header("User-Agent", "Mozilla/5.0")
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
-            .json::<serde_json::Value>().await?;
-        let items = resp.get("returndata").and_then(|r| r.get("datanodes")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(items.iter().filter_map(|v| {
-            let date = v.get("wds").and_then(|w| w.as_array()).and_then(|a| a.get(2)).and_then(|w| w.get("valuecode")).and_then(|v| v.as_str()).unwrap_or("");
-            let value = v.get("data").and_then(|d| d.get("data")).and_then(|d| d.as_f64()).unwrap_or(0.0);
-            Some(MacroDataPoint { date: date.to_string(), value, name: path.to_string() })
-        }).collect())
+            .json::<serde_json::Value>()
+            .await?;
+        let items = resp
+            .get("returndata")
+            .and_then(|r| r.get("datanodes"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(items
+            .iter()
+            .map(|v| {
+                let date = v
+                    .get("wds")
+                    .and_then(|w| w.as_array())
+                    .and_then(|a| a.get(2))
+                    .and_then(|w| w.get("valuecode"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                let value = v
+                    .get("data")
+                    .and_then(|d| d.get("data"))
+                    .and_then(|d| d.as_f64())
+                    .unwrap_or(0.0);
+                MacroDataPoint {
+                    date: date.to_string(),
+                    value,
+                    name: path.to_string(),
+                }
+            })
+            .collect())
     }
 
     /// 国家统计局-地区数据 (Python: macro_china_nbs_region)
-    pub async fn macro_china_nbs_region(&self, kind: &str, path: &str, indicator: &str, period: &str) -> Result<Vec<MacroDataPoint>> {
+    pub async fn macro_china_nbs_region(
+        &self,
+        kind: &str,
+        path: &str,
+        indicator: &str,
+        period: &str,
+    ) -> Result<Vec<MacroDataPoint>> {
         let dbcode = match kind {
             "分省月度数据" => "fsyd",
             "分省季度数据" => "fsjd",
             "分省年度数据" => "fsnd",
-            _ => return Err(crate::error::Error::invalid_input(format!("invalid kind: {kind}"))),
+            _ => {
+                return Err(crate::error::Error::invalid_input(format!(
+                    "invalid kind: {kind}"
+                )));
+            }
         };
         let url = "https://data.stats.gov.cn/easyquery.htm";
-        let dfwds = format!("[{{\"wdcode\":\"zb\",\"valuecode\":\"{}\"}},{{\"wdcode\":\"reg\",\"valuecode\":\"{}\"}}]", path, indicator);
-        let resp = self.post(url)
+        let dfwds = format!(
+            "[{{\"wdcode\":\"zb\",\"valuecode\":\"{}\"}},{{\"wdcode\":\"reg\",\"valuecode\":\"{}\"}}]",
+            path, indicator
+        );
+        let resp = self
+            .post(url)
             .form(&[
                 ("m", "QueryData"),
                 ("dbcode", dbcode),
@@ -1101,20 +1200,45 @@ impl AkShareClient {
                 ("k1", period),
             ])
             .header("User-Agent", "Mozilla/5.0")
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
-            .json::<serde_json::Value>().await?;
-        let items = resp.get("returndata").and_then(|r| r.get("datanodes")).and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(items.iter().filter_map(|v| {
-            let date = v.get("wds").and_then(|w| w.as_array()).and_then(|a| a.get(2)).and_then(|w| w.get("valuecode")).and_then(|v| v.as_str()).unwrap_or("");
-            let value = v.get("data").and_then(|d| d.get("data")).and_then(|d| d.as_f64()).unwrap_or(0.0);
-            Some(MacroDataPoint { date: date.to_string(), value, name: path.to_string() })
-        }).collect())
+            .json::<serde_json::Value>()
+            .await?;
+        let items = resp
+            .get("returndata")
+            .and_then(|r| r.get("datanodes"))
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(items
+            .iter()
+            .map(|v| {
+                let date = v
+                    .get("wds")
+                    .and_then(|w| w.as_array())
+                    .and_then(|a| a.get(2))
+                    .and_then(|w| w.get("valuecode"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                let value = v
+                    .get("data")
+                    .and_then(|d| d.get("data"))
+                    .and_then(|d| d.as_f64())
+                    .unwrap_or(0.0);
+                MacroDataPoint {
+                    date: date.to_string(),
+                    value,
+                    name: path.to_string(),
+                }
+            })
+            .collect())
     }
 
     /// 国家统计局-城镇调查失业率 (Python: macro_china_urban_unemployment)
     pub async fn macro_china_urban_unemployment(&self) -> Result<Vec<MacroDataPoint>> {
-        let url = "https://data.stats.gov.cn/dg/website/publicrelease/web/external/getEsDataByCidAndDt";
+        let url =
+            "https://data.stats.gov.cn/dg/website/publicrelease/web/external/getEsDataByCidAndDt";
         let payload = serde_json::json!({
             "cid": "ee3b7046b390415b9b7745e3d16f6052",
             "indicatorIds": [
@@ -1126,17 +1250,35 @@ impl AkShareClient {
             "das": [{"text": "全国", "value": "000000000000"}],
             "dt": "LAST60"
         });
-        let resp = self.post(url)
+        let resp = self
+            .post(url)
             .json(&payload)
             .header("User-Agent", "Mozilla/5.0")
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
-            .json::<serde_json::Value>().await?;
-        let items = resp.get("data").and_then(|d| d.as_array()).cloned().unwrap_or_default();
-        Ok(items.iter().filter_map(|v| {
-            let date = v.get("date").and_then(|d| d.as_str()).unwrap_or("").to_string();
-            let value = v.get("value").and_then(|d| d.as_f64()).unwrap_or(0.0);
-            Some(MacroDataPoint { date, value, name: "城镇调查失业率".to_string() })
-        }).collect())
+            .json::<serde_json::Value>()
+            .await?;
+        let items = resp
+            .get("data")
+            .and_then(|d| d.as_array())
+            .cloned()
+            .unwrap_or_default();
+        Ok(items
+            .iter()
+            .map(|v| {
+                let date = v
+                    .get("date")
+                    .and_then(|d| d.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let value = v.get("value").and_then(|d| d.as_f64()).unwrap_or(0.0);
+                MacroDataPoint {
+                    date,
+                    value,
+                    name: "城镇调查失业率".to_string(),
+                }
+            })
+            .collect())
     }
 }

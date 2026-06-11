@@ -57,7 +57,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "http://data.cpcadata.com/api/chartlist";
         let resp: CpcaChartResponse = self
-                        .get(url)
+            .get(url)
             .query(&[("charttype", "1")])
             .send()
             .await?
@@ -88,14 +88,15 @@ impl AkShareClient {
                     // Current year data is typically first
                     if let Some(year_data) = arr.first()
                         && let Some(year_arr) = year_data.as_array()
-                            && let Some(val) = year_arr.get(indicator_idx) {
-                                let value = val.as_f64().unwrap_or(0.0);
-                                items.push(MacroDataPoint {
-                                    date: month.clone(),
-                                    value,
-                                    name: format!("{}-{}", symbol, indicator),
-                                });
-                            }
+                        && let Some(val) = year_arr.get(indicator_idx)
+                    {
+                        let value = val.as_f64().unwrap_or(0.0);
+                        items.push(MacroDataPoint {
+                            date: month.clone(),
+                            value,
+                            name: format!("{}-{}", symbol, indicator),
+                        });
+                    }
                 }
             }
         }
@@ -117,7 +118,7 @@ impl AkShareClient {
             "http://data.cpcadata.com/api/chartlist"
         };
         let resp: CpcaChartResponse = self
-                        .get(url)
+            .get(url)
             .query(&[("charttype", "2")])
             .send()
             .await?
@@ -148,10 +149,7 @@ impl AkShareClient {
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string();
-                let value = arr
-                    .get(1)
-                    .and_then(|v| v.as_f64())
-                    .unwrap_or(0.0);
+                let value = arr.get(1).and_then(|v| v.as_f64()).unwrap_or(0.0);
                 if !name.is_empty() {
                     items.push(MacroDataPoint {
                         date: symbol.to_string(),
@@ -175,7 +173,7 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let url = "http://data.cpcadata.com/api/chartlist";
         let resp: CpcaChartResponse = self
-                        .get(url)
+            .get(url)
             .query(&[("charttype", "3")])
             .send()
             .await?
@@ -201,18 +199,19 @@ impl AkShareClient {
 
         for (i, month) in months.iter().enumerate() {
             if let Some(entry) = data_list.get(i)
-                && let Some(arr) = entry.as_array() {
-                    let value = arr
-                        .get(1)
-                        .and_then(|v| v.as_f64())
-                        .or_else(|| arr.first().and_then(|v| v.as_f64()))
-                        .unwrap_or(0.0);
-                    items.push(MacroDataPoint {
-                        date: month.clone(),
-                        value,
-                        name: format!("{}-{}", symbol, indicator),
-                    });
-                }
+                && let Some(arr) = entry.as_array()
+            {
+                let value = arr
+                    .get(1)
+                    .and_then(|v| v.as_f64())
+                    .or_else(|| arr.first().and_then(|v| v.as_f64()))
+                    .unwrap_or(0.0);
+                items.push(MacroDataPoint {
+                    date: month.clone(),
+                    value,
+                    name: format!("{}-{}", symbol, indicator),
+                });
+            }
         }
         Ok(items)
     }
@@ -223,7 +222,7 @@ impl AkShareClient {
     pub async fn car_market_fuel_cpca(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "http://data.cpcadata.com/api/chartlist";
         let resp: CpcaChartResponse = self
-                        .get(url)
+            .get(url)
             .query(&[("charttype", "6")])
             .send()
             .await?
@@ -248,17 +247,15 @@ impl AkShareClient {
 
         for (i, month) in months.iter().enumerate() {
             if let Some(entry) = data_list.get(i)
-                && let Some(arr) = entry.as_array() {
-                    let value = arr
-                        .get(2)
-                        .and_then(|v| v.as_f64())
-                        .unwrap_or(0.0);
-                    items.push(MacroDataPoint {
-                        date: month.clone(),
-                        value,
-                        name: format!("NEV - {}", symbol),
-                    });
-                }
+                && let Some(arr) = entry.as_array()
+            {
+                let value = arr.get(2).and_then(|v| v.as_f64()).unwrap_or(0.0);
+                items.push(MacroDataPoint {
+                    date: month.clone(),
+                    value,
+                    name: format!("NEV - {}", symbol),
+                });
+            }
         }
         Ok(items)
     }
@@ -298,7 +295,7 @@ impl AkShareClient {
         });
 
         let resp: GasgooResponse = self
-                        .post(url)
+            .post(url)
             .json(&payload)
             .header("Content-Type", "application/json; charset=UTF-8")
             .header("X-Requested-With", "XMLHttpRequest")
@@ -345,7 +342,7 @@ impl AkShareClient {
     pub async fn business_value_artist(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://data.eastmoney.com/Artist";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -368,7 +365,7 @@ impl AkShareClient {
     pub async fn online_value_artist(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://data.eastmoney.com/Artist/Online";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -389,7 +386,7 @@ impl AkShareClient {
     pub async fn video_tv(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://data.eastmoney.com/Video/TV";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -410,7 +407,7 @@ impl AkShareClient {
     pub async fn video_variety_show(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://data.eastmoney.com/Video/Variety";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
@@ -430,10 +427,7 @@ impl AkShareClient {
     /// TapTap game hot ranking.
     ///
     /// `symbol`: "热玩榜", "热门榜", "新品榜", "预约榜", "热卖榜"
-    pub async fn game_hot_rank_taptap(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<MacroDataPoint>> {
+    pub async fn game_hot_rank_taptap(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let type_map = [
             ("热玩榜", "pop"),
             ("热门榜", "hot"),
@@ -454,13 +448,16 @@ impl AkShareClient {
 
         loop {
             let resp: TapTapResponse = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("from", offset.to_string().as_str()),
                     ("limit", page_size.to_string().as_str()),
                     ("type_name", type_name),
                 ])
-                .header("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X)")
+                .header(
+                    "User-Agent",
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X)",
+                )
                 .header("Referer", "https://www.taptap.cn/")
                 .send()
                 .await?

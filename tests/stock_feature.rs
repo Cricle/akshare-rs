@@ -1,8 +1,8 @@
 mod common;
 use common::*;
 use wiremock::MockServer;
-use wiremock::{Mock, ResponseTemplate};
 use wiremock::matchers::{method, path_regex};
+use wiremock::{Mock, ResponseTemplate};
 
 // ===========================================================================
 // margin_em.rs
@@ -410,7 +410,9 @@ async fn test_stock_gpzy_individual_pledge_ratio_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gpzy_individual_pledge_ratio_detail_em("000001").await;
+    let result = client
+        .stock_gpzy_individual_pledge_ratio_detail_em("000001")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -605,7 +607,9 @@ async fn test_stock_info_global_ths() {
 #[tokio::test]
 async fn test_stock_info_sh_delist() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({"SECURITY_CODE": "000001", "DELIST_DATE": "2024-01-01"})]);
+    let body = em_datacenter_response(vec![
+        serde_json::json!({"SECURITY_CODE": "000001", "DELIST_DATE": "2024-01-01"}),
+    ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_info_sh_delist().await;
@@ -625,7 +629,9 @@ async fn test_stock_info_sz_change_name() {
 #[tokio::test]
 async fn test_stock_info_sz_delist() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({"SECURITY_CODE": "000001", "DELIST_DATE": "2024-01-01"})]);
+    let body = em_datacenter_response(vec![
+        serde_json::json!({"SECURITY_CODE": "000001", "DELIST_DATE": "2024-01-01"}),
+    ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_info_sz_delist().await;
@@ -1103,7 +1109,9 @@ async fn test_stock_report_disclosure() {
 #[tokio::test]
 async fn test_stock_report_fund_hold_detail() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({"SECURITY_CODE": "000001", "REPORT_DATE": "2024-01-01"})]);
+    let body = em_datacenter_response(vec![
+        serde_json::json!({"SECURITY_CODE": "000001", "REPORT_DATE": "2024-01-01"}),
+    ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_report_fund_hold_detail("20240101").await;
@@ -1233,7 +1241,8 @@ async fn test_stock_szse_area_summary() {
 #[tokio::test]
 async fn test_stock_szse_sector_summary() {
     let server = MockServer::start().await;
-    let body = serde_json::json!([{"data": {"data": [{"data": ["Manufacturing", "100", "5000"]}]}}]);
+    let body =
+        serde_json::json!([{"data": {"data": [{"data": ["Manufacturing", "100", "5000"]}]}}]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_szse_sector_summary("20240101").await;
@@ -1282,7 +1291,8 @@ async fn test_stock_value_em() {
 #[tokio::test]
 async fn test_stock_xgsr_ths() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"ipo_date": "2024-01-01", "listing_date": "2024-01-15"}]});
+    let body =
+        serde_json::json!({"data": [{"ipo_date": "2024-01-01", "listing_date": "2024-01-15"}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_xgsr_ths("600000").await;
@@ -1319,7 +1329,8 @@ async fn test_stock_zdhtmx_em() {
 #[tokio::test]
 async fn test_stock_zcfz_bj_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
+    let body =
+        serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_zcfz_bj_em("SZ000001").await;
@@ -1359,7 +1370,9 @@ async fn test_stock_analyst_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_analyst_detail_em("A001", "最新跟踪成分股").await;
+    let result = client
+        .stock_analyst_detail_em("A001", "最新跟踪成分股")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -1511,9 +1524,16 @@ async fn test_stock_financial_analysis_indicator_em() {
         "SECUCODE": "000001.SZ", "REPORT_DATE": "2024-01-01", "BASIC_EPS": 0.5
     })]);
     mock_any_get(&server, ".*", body).await;
-    mock_any_post(&server, ".*", serde_json::json!({"result": {"data": [{"REPORT_DATE": "2024-01-01"}], "pages": 1}})).await;
+    mock_any_post(
+        &server,
+        ".*",
+        serde_json::json!({"result": {"data": [{"REPORT_DATE": "2024-01-01"}], "pages": 1}}),
+    )
+    .await;
     let client = mock_client(&server);
-    let result = client.stock_financial_analysis_indicator_em("000001.SZ", "按报告期").await;
+    let result = client
+        .stock_financial_analysis_indicator_em("000001.SZ", "按报告期")
+        .await;
     // This may fail at runtime since the mock doesn't intercept all requests
     // but it compiles correctly for --no-run verification
     let _ = result;
@@ -1678,7 +1698,9 @@ async fn test_stock_hsgt_stock_statistics_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_stock_statistics_em("沪股通", "20240101", "20240131").await;
+    let result = client
+        .stock_hsgt_stock_statistics_em("沪股通", "20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -1691,7 +1713,9 @@ async fn test_stock_hsgt_institution_statistics_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_institution_statistics_em("沪股通", "20240101", "20240131").await;
+    let result = client
+        .stock_hsgt_institution_statistics_em("沪股通", "20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -1729,7 +1753,9 @@ async fn test_stock_hsgt_individual_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_individual_detail_em("000001", "今日排行").await;
+    let result = client
+        .stock_hsgt_individual_detail_em("000001", "今日排行")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -1788,7 +1814,8 @@ async fn test_stock_hot_rank_detail_em() {
 #[tokio::test]
 async fn test_stock_hot_rank_detail_realtime_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"currentTime": "2024-01-01 09:30", "currentRanking": 50}]});
+    let body =
+        serde_json::json!({"data": [{"currentTime": "2024-01-01 09:30", "currentRanking": 50}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_hot_rank_detail_realtime_em("SZ000001").await;
@@ -1862,7 +1889,9 @@ async fn test_stock_margin_account_info_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_margin_account_info_em("20240101", "20240131").await;
+    let result = client
+        .stock_margin_account_info_em("20240101", "20240131")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2004,7 +2033,9 @@ async fn test_stock_lhb_stock_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_stock_detail_em("000001", "20240101", "买入").await;
+    let result = client
+        .stock_lhb_stock_detail_em("000001", "20240101", "买入")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2034,7 +2065,9 @@ async fn test_stock_gdfx_free_holding_statistics_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_free_holding_statistics_em("20240101").await;
+    let result = client
+        .stock_gdfx_free_holding_statistics_em("20240101")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2082,7 +2115,9 @@ async fn test_stock_gdfx_free_top_10_em() {
     let body = serde_json::json!({"sdltgd": [{"HOLDER_NAME": "Fund A", "HOLD_NUM": 100000.0, "FREE_HOLDNUM_RATIO": 0.05}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_free_top_10_em("SZ000001", "20240101").await;
+    let result = client
+        .stock_gdfx_free_top_10_em("SZ000001", "20240101")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2118,7 +2153,9 @@ async fn test_stock_gdfx_holding_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_holding_detail_em("20240101", "个人", "001").await;
+    let result = client
+        .stock_gdfx_holding_detail_em("20240101", "个人", "001")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2182,7 +2219,9 @@ async fn test_stock_zh_a_disclosure_report_cninfo() {
     let body = serde_json::json!({"announcements": [{"secCode": "000001", "secName": "Test", "announcementTitle": "Report", "announcementTime": "2024-01-01", "adjunctUrl": "test.pdf"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_a_disclosure_report_cninfo("000001", "category_ndbg_szsh", "20240101", "20241231").await;
+    let result = client
+        .stock_zh_a_disclosure_report_cninfo("000001", "category_ndbg_szsh", "20240101", "20241231")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2286,7 +2325,8 @@ async fn test_stock_inner_trade_xq() {
 #[tokio::test]
 async fn test_stock_balance_sheet_by_report_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_ASSETS": 1000000.0}]});
+    let body =
+        serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_ASSETS": 1000000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_balance_sheet_by_report_em("SZ000001").await;
@@ -2296,7 +2336,8 @@ async fn test_stock_balance_sheet_by_report_em() {
 #[tokio::test]
 async fn test_stock_balance_sheet_by_yearly_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_ASSETS": 1000000.0}]});
+    let body =
+        serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_ASSETS": 1000000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_balance_sheet_by_yearly_em("SZ000001").await;
@@ -2336,7 +2377,8 @@ async fn test_stock_profit_sheet_by_quarterly_em() {
 #[tokio::test]
 async fn test_stock_cash_flow_sheet_by_report_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
+    let body =
+        serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_cash_flow_sheet_by_report_em("SZ000001").await;
@@ -2346,7 +2388,8 @@ async fn test_stock_cash_flow_sheet_by_report_em() {
 #[tokio::test]
 async fn test_stock_cash_flow_sheet_by_yearly_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
+    let body =
+        serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_cash_flow_sheet_by_yearly_em("SZ000001").await;
@@ -2356,10 +2399,13 @@ async fn test_stock_cash_flow_sheet_by_yearly_em() {
 #[tokio::test]
 async fn test_stock_cash_flow_sheet_by_quarterly_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
+    let body =
+        serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cash_flow_sheet_by_quarterly_em("SZ000001").await;
+    let result = client
+        .stock_cash_flow_sheet_by_quarterly_em("SZ000001")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2380,10 +2426,13 @@ async fn test_stock_info_cjzc_em() {
 #[tokio::test]
 async fn test_stock_balance_sheet_by_report_delisted_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
+    let body =
+        serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_balance_sheet_by_report_delisted_em("SZ000001").await;
+    let result = client
+        .stock_balance_sheet_by_report_delisted_em("SZ000001")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2393,7 +2442,9 @@ async fn test_stock_cash_flow_sheet_by_report_delisted_em() {
     let body = serde_json::json!({"data": [{"NETCASH_OPERATE": 100000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cash_flow_sheet_by_report_delisted_em("SZ000001").await;
+    let result = client
+        .stock_cash_flow_sheet_by_report_delisted_em("SZ000001")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2403,7 +2454,9 @@ async fn test_stock_profit_sheet_by_report_delisted_em() {
     let body = serde_json::json!({"data": [{"TOTAL_OPERATE_INCOME": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_profit_sheet_by_report_delisted_em("SZ000001").await;
+    let result = client
+        .stock_profit_sheet_by_report_delisted_em("SZ000001")
+        .await;
     assert!(result.is_ok());
 }
 
@@ -2462,13 +2515,20 @@ async fn test_stock_sgt_settlement_exchange_rate_szse() {
 #[tokio::test]
 async fn test_stock_changes_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
-            serde_json::json!({"f2": 10.5, "f3": 1.5, "f12": "000001", "f14": "平安银行"})
-        ]))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+                serde_json::json!({"f2": 10.5, "f3": 1.5, "f12": "000001", "f14": "平安银行"}),
+            ])),
+        )
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_changes_em("涨速").await;
 }
@@ -2476,13 +2536,20 @@ async fn test_stock_changes_em() {
 #[tokio::test]
 async fn test_stock_dxsyl_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
-            serde_json::json!({"SECURITY_CODE": "000001", "SECURITY_NAME": "测试"})
-        ]))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+                serde_json::json!({"SECURITY_CODE": "000001", "SECURITY_NAME": "测试"}),
+            ])),
+        )
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_dxsyl_em().await;
 }
@@ -2490,13 +2557,20 @@ async fn test_stock_dxsyl_em() {
 #[tokio::test]
 async fn test_stock_zt_pool_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
-            serde_json::json!({"f2": 10.5, "f12": "000001", "f14": "测试"})
-        ]))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+                serde_json::json!({"f2": 10.5, "f12": "000001", "f14": "测试"}),
+            ])),
+        )
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zt_pool_em("20240102").await;
 }
@@ -2504,12 +2578,16 @@ async fn test_stock_zt_pool_em() {
 #[tokio::test]
 async fn test_stock_zt_pool_strong_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zt_pool_strong_em("20240102").await;
 }
@@ -2517,12 +2595,16 @@ async fn test_stock_zt_pool_strong_em() {
 #[tokio::test]
 async fn test_stock_zt_pool_sub_new_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zt_pool_sub_new_em("20240102").await;
 }
@@ -2530,12 +2612,16 @@ async fn test_stock_zt_pool_sub_new_em() {
 #[tokio::test]
 async fn test_stock_zt_pool_previous_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zt_pool_previous_em("20240102").await;
 }
@@ -2543,12 +2629,16 @@ async fn test_stock_zt_pool_previous_em() {
 #[tokio::test]
 async fn test_stock_zt_pool_dtgc_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zt_pool_dtgc_em("20240102").await;
 }
@@ -2556,12 +2646,16 @@ async fn test_stock_zt_pool_dtgc_em() {
 #[tokio::test]
 async fn test_stock_zt_pool_zbgc_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zt_pool_zbgc_em("20240102").await;
 }
@@ -2569,13 +2663,20 @@ async fn test_stock_zt_pool_zbgc_em() {
 #[tokio::test]
 async fn test_stock_new_a_spot_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![
-            sample_em_stock_row("000001", "测试")
-        ]))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(em_push2_response(vec![sample_em_stock_row(
+                "000001", "测试",
+            )])),
+        )
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_new_a_spot_em().await;
 }
@@ -2583,12 +2684,16 @@ async fn test_stock_new_a_spot_em() {
 #[tokio::test]
 async fn test_stock_pg_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_pg_em().await;
 }
@@ -2596,12 +2701,16 @@ async fn test_stock_pg_em() {
 #[tokio::test]
 async fn test_stock_xgsglb_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_xgsglb_em("全部股票").await;
 }
@@ -2609,12 +2718,16 @@ async fn test_stock_xgsglb_em() {
 #[tokio::test]
 async fn test_stock_qbzf_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_qbzf_em().await;
 }
@@ -2622,12 +2735,16 @@ async fn test_stock_qbzf_em() {
 #[tokio::test]
 async fn test_stock_sy_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_sy_em("000001").await;
 }
@@ -2635,12 +2752,16 @@ async fn test_stock_sy_em() {
 #[tokio::test]
 async fn test_stock_sy_jz_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_sy_jz_em("000001").await;
 }
@@ -2648,12 +2769,16 @@ async fn test_stock_sy_jz_em() {
 #[tokio::test]
 async fn test_stock_sy_profile_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_sy_profile_em().await;
 }
@@ -2661,12 +2786,16 @@ async fn test_stock_sy_profile_em() {
 #[tokio::test]
 async fn test_stock_sy_yq_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_sy_yq_em("全部").await;
 }
@@ -2674,12 +2803,16 @@ async fn test_stock_sy_yq_em() {
 #[tokio::test]
 async fn test_stock_yjbb_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_yjbb_em("20240102").await;
 }
@@ -2687,12 +2820,16 @@ async fn test_stock_yjbb_em() {
 #[tokio::test]
 async fn test_stock_yjkb_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_yjkb_em("20240102").await;
 }
@@ -2700,12 +2837,16 @@ async fn test_stock_yjkb_em() {
 #[tokio::test]
 async fn test_stock_yjyg_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_yjyg_em("20240102").await;
 }
@@ -2713,12 +2854,16 @@ async fn test_stock_yjyg_em() {
 #[tokio::test]
 async fn test_stock_yysj_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_yysj_em("沪深A股", "20240102").await;
 }
@@ -2726,12 +2871,16 @@ async fn test_stock_yysj_em() {
 #[tokio::test]
 async fn test_stock_lrb_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_lrb_em("20240102").await;
 }
@@ -2739,12 +2888,16 @@ async fn test_stock_lrb_em() {
 #[tokio::test]
 async fn test_stock_zcfz_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zcfz_em("20240102").await;
 }
@@ -2752,12 +2905,16 @@ async fn test_stock_zcfz_em() {
 #[tokio::test]
 async fn test_stock_xjll_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_xjll_em("20240102").await;
 }
@@ -2765,12 +2922,16 @@ async fn test_stock_xjll_em() {
 #[tokio::test]
 async fn test_stock_ggcg_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_ggcg_em("000001").await;
 }
@@ -2778,12 +2939,16 @@ async fn test_stock_ggcg_em() {
 #[tokio::test]
 async fn test_stock_gpzy_pledge_ratio_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_gpzy_pledge_ratio_em().await;
 }
@@ -2791,12 +2956,16 @@ async fn test_stock_gpzy_pledge_ratio_em() {
 #[tokio::test]
 async fn test_stock_gpzy_pledge_detail_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_gpzy_pledge_detail_em().await;
 }
@@ -2804,12 +2973,16 @@ async fn test_stock_gpzy_pledge_detail_em() {
 #[tokio::test]
 async fn test_stock_gpzy_profile_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_gpzy_profile_em().await;
 }
@@ -2817,12 +2990,16 @@ async fn test_stock_gpzy_profile_em() {
 #[tokio::test]
 async fn test_stock_jgdy_detail_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_jgdy_detail_em("20240102").await;
 }
@@ -2830,12 +3007,16 @@ async fn test_stock_jgdy_detail_em() {
 #[tokio::test]
 async fn test_stock_jgdy_tj_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_jgdy_tj_em("20240102").await;
 }
@@ -2843,12 +3024,16 @@ async fn test_stock_jgdy_tj_em() {
 #[tokio::test]
 async fn test_stock_lh_yyb_capital() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_lh_yyb_capital().await;
 }
@@ -2856,12 +3041,16 @@ async fn test_stock_lh_yyb_capital() {
 #[tokio::test]
 async fn test_stock_lh_yyb_control() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_lh_yyb_control().await;
 }
@@ -2869,12 +3058,16 @@ async fn test_stock_lh_yyb_control() {
 #[tokio::test]
 async fn test_stock_lh_yyb_most() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_lh_yyb_most().await;
 }
@@ -2882,13 +3075,21 @@ async fn test_stock_lh_yyb_most() {
 #[tokio::test]
 async fn test_stock_zh_b_spot_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![
-            sample_em_stock_row("200001", "测试B股")
-        ]))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(em_push2_response(vec![sample_em_stock_row(
+                "200001",
+                "测试B股",
+            )])),
+        )
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zh_b_spot_em().await;
 }
@@ -2896,12 +3097,16 @@ async fn test_stock_zh_b_spot_em() {
 #[tokio::test]
 async fn test_stock_zh_ab_comparison_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_zh_ab_comparison_em().await;
 }
@@ -2910,39 +3115,58 @@ async fn test_stock_zh_ab_comparison_em() {
 async fn test_stock_hk_hist() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_kline_response(vec![&k1])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_kline_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_hist("00593", "daily", "qfq", "20240101", "20240131").await;
+    let _ = client
+        .stock_hk_hist("00593", "daily", "qfq", "20240101", "20240131")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_hk_hist_min_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": {"klines": ["2024-01-02 09:30,10.00,10.50,10.80,9.90,100000,10500000.0"]}
-        }))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"data": {"klines": []}})))
-        .mount(&server).await;
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!({"data": {"klines": []}})),
+        )
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_hist_min_em("00593", "5", "qfq", "20240101", "20240102").await;
+    let _ = client
+        .stock_hk_hist_min_em("00593", "5", "qfq", "20240101", "20240102")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_hk_main_board_spot_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_hk_main_board_spot_em().await;
 }
@@ -2950,74 +3174,112 @@ async fn test_stock_hk_main_board_spot_em() {
 #[tokio::test]
 async fn test_stock_hk_profit_forecast_et() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_profit_forecast_et("00593", "预测指标").await;
+    let _ = client
+        .stock_hk_profit_forecast_et("00593", "预测指标")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_us_hist() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_kline_response(vec![&k1])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_kline_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
-    let _ = client.stock_us_hist("AAPL", "daily", "qfq", "20240101", "20240131").await;
+    let _ = client
+        .stock_us_hist("AAPL", "daily", "qfq", "20240101", "20240131")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_us_hist_min_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": {"klines": ["2024-01-02 09:30,10.00,10.50,10.80,9.90,100000,10500000.0"]}
-        }))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"data": {"klines": []}})))
-        .mount(&server).await;
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!({"data": {"klines": []}})),
+        )
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
-    let _ = client.stock_us_hist_min_em("AAPL", "5", "qfq", "20240101", "20240102").await;
+    let _ = client
+        .stock_us_hist_min_em("AAPL", "5", "qfq", "20240101", "20240102")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_balance_sheet_by_report_em_typed() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
-    let _ = client.stock_balance_sheet_by_report_em_typed("000001").await;
+    let _ = client
+        .stock_balance_sheet_by_report_em_typed("000001")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_cash_flow_sheet_by_report_em_typed() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
-    let _ = client.stock_cash_flow_sheet_by_report_em_typed("000001").await;
+    let _ = client
+        .stock_cash_flow_sheet_by_report_em_typed("000001")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_profit_sheet_by_report_em_typed() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_profit_sheet_by_report_em_typed("000001").await;
 }
@@ -3025,39 +3287,72 @@ async fn test_stock_profit_sheet_by_report_em_typed() {
 #[tokio::test]
 async fn test_stock_financial_abstract_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_abstract_ths("000001", "按报告期").await;
+    let _ = client
+        .stock_financial_abstract_ths("000001", "按报告期")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_financial_abstract_new_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_abstract_new_ths("000001", "按报告期").await;
+    let _ = client
+        .stock_financial_abstract_new_ths("000001", "按报告期")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_financial_benefit_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_benefit_ths("000001", "按报告期").await;
+    let _ = client
+        .stock_financial_benefit_ths("000001", "按报告期")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_financial_benefit_new_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_benefit_new_ths("000001", "按报告期").await;
+    let _ = client
+        .stock_financial_benefit_new_ths("000001", "按报告期")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_financial_cash_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_financial_cash_ths("000001", "按报告期").await;
 }
@@ -3065,15 +3360,27 @@ async fn test_stock_financial_cash_ths() {
 #[tokio::test]
 async fn test_stock_financial_cash_new_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_cash_new_ths("000001", "按报告期").await;
+    let _ = client
+        .stock_financial_cash_new_ths("000001", "按报告期")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_financial_debt_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_financial_debt_ths("000001", "按报告期").await;
 }
@@ -3081,15 +3388,27 @@ async fn test_stock_financial_debt_ths() {
 #[tokio::test]
 async fn test_stock_financial_debt_new_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_debt_new_ths("000001", "按报告期").await;
+    let _ = client
+        .stock_financial_debt_new_ths("000001", "按报告期")
+        .await;
 }
 
 #[tokio::test]
 async fn test_stock_profit_forecast_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_profit_forecast_ths("000001", "预测指标").await;
 }
@@ -3097,13 +3416,20 @@ async fn test_stock_profit_forecast_ths() {
 #[tokio::test]
 async fn test_stock_info_a_code_name() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![
-            serde_json::json!({"f12": "000001", "f14": "平安银行"})
-        ]))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(em_push2_response(vec![
+                serde_json::json!({"f12": "000001", "f14": "平安银行"}),
+            ])),
+        )
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(em_push2_response(vec![])))
-        .mount(&server).await;
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_info_a_code_name().await;
 }
@@ -3111,13 +3437,20 @@ async fn test_stock_info_a_code_name() {
 #[tokio::test]
 async fn test_stock_info_global_em() {
     let server = MockServer::start().await;
-    Mock::given(method("GET")).and(path_regex(".*"))
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": {"list": [{"title": "测试新闻", "showTime": "2024-01-02"}]}
-        }))).mount(&server).await;
-    Mock::given(method("POST")).and(path_regex(".*"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"data": {"list": []}})))
-        .mount(&server).await;
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!({"data": {"list": []}})),
+        )
+        .mount(&server)
+        .await;
     let client = mock_client(&server);
     let _ = client.stock_info_global_em().await;
 }
@@ -3125,7 +3458,12 @@ async fn test_stock_info_global_em() {
 #[tokio::test]
 async fn test_stock_ipo_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_ipo_ths("全部A股").await;
 }
@@ -3133,7 +3471,12 @@ async fn test_stock_ipo_ths() {
 #[tokio::test]
 async fn test_stock_ipo_hk_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_ipo_hk_ths().await;
 }
@@ -3141,7 +3484,12 @@ async fn test_stock_ipo_hk_ths() {
 #[tokio::test]
 async fn test_stock_management_change_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_management_change_ths("000001").await;
 }
@@ -3149,7 +3497,12 @@ async fn test_stock_management_change_ths() {
 #[tokio::test]
 async fn test_stock_shareholder_change_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_shareholder_change_ths("000001").await;
 }
@@ -3157,7 +3510,12 @@ async fn test_stock_shareholder_change_ths() {
 #[tokio::test]
 async fn test_stock_zyjs_ths() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body><table><tr><td>数据</td></tr></table></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><table><tr><td>数据</td></tr></table></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let _ = client.stock_zyjs_ths("000001").await;
 }

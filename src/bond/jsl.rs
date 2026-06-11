@@ -21,7 +21,7 @@ impl AkShareClient {
     pub async fn bond_cb_jsl(&self) -> Result<Vec<Row>> {
         let url = "https://www.jisilu.cn/data/cbnew/cb_list/?___jsl=LST___t=1630000000000";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Referer", "https://www.jisilu.cn/data/cbnew/")
             .send()
@@ -52,7 +52,7 @@ impl AkShareClient {
     pub async fn bond_cb_index_jsl(&self) -> Result<Vec<Row>> {
         let url = "https://www.jisilu.cn/data/cbnew/cb_index/?___jsl=LST___t=1630000000000";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Referer", "https://www.jisilu.cn/data/cbnew/")
             .send()
@@ -83,7 +83,7 @@ impl AkShareClient {
     pub async fn bond_cb_adj_logs_jsl(&self) -> Result<Vec<Row>> {
         let url = "https://www.jisilu.cn/data/cbnew/cb_adj/?___jsl=LST___t=1630000000000";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Referer", "https://www.jisilu.cn/data/cbnew/")
             .send()
@@ -114,7 +114,7 @@ impl AkShareClient {
     pub async fn bond_cb_redeem_jsl(&self) -> Result<Vec<Row>> {
         let url = "https://www.jisilu.cn/data/cbnew/cb_redeem/?___jsl=LST___t=1630000000000";
         let body = self
-                        .get(url)
+            .get(url)
             .header("User-Agent", "Mozilla/5.0")
             .header("Referer", "https://www.jisilu.cn/data/cbnew/")
             .send()

@@ -110,20 +110,27 @@ impl AkShareClient {
     ) -> Result<Vec<OptionFinanceSseUnderlying>> {
         let url = match symbol {
             "\u{534e}\u{590f}\u{4e0a}\u{8bc1}50ETF\u{9009}\u{6743}" => SH_OPTION_URL_50,
-            "\u{534e}\u{6cf0}\u{67cf}\u{745e}\u{6caa}\u{6df1}300ETF\u{9009}\u{6743}" => SH_OPTION_URL_300,
+            "\u{534e}\u{6cf0}\u{67cf}\u{745e}\u{6caa}\u{6df1}300ETF\u{9009}\u{6743}" => {
+                SH_OPTION_URL_300
+            }
             "\u{5357}\u{65b9}\u{4e2d}\u{8bc1}500ETF\u{9009}\u{6743}" => SH_OPTION_URL_500,
             "\u{534e}\u{590f}\u{79d1}\u{521b}50ETF\u{9009}\u{6743}" => SH_OPTION_URL_KC_50,
-            "\u{6613}\u{65b9}\u{8fbe}\u{79d1}\u{521b}50ETF\u{9009}\u{6743}" => SH_OPTION_URL_KC_50_YFD,
+            "\u{6613}\u{65b9}\u{8fbe}\u{79d1}\u{521b}50ETF\u{9009}\u{6743}" => {
+                SH_OPTION_URL_KC_50_YFD
+            }
             other => {
                 return Err(Error::invalid_input(format!(
                     "unsupported SSE underlying symbol: {other}"
-                )))
+                )));
             }
         };
 
         let resp: SseListResponse = self
-                        .get(url)
-            .query(&[("select", "select: code,name,last,change,chg_rate,amp_rate,volume,amount,prev_close")])
+            .get(url)
+            .query(&[(
+                "select",
+                "select: code,name,last,change,chg_rate,amp_rate,volume,amount,prev_close",
+            )])
             .send()
             .await
             .map_err(Error::from)?
@@ -235,7 +242,7 @@ impl AkShareClient {
         let url = url_template.replace("{}", month_suffix);
 
         let resp: SseListResponse = self
-                        .get(&url)
+            .get(&url)
             .query(&[("select", "contractid,last,chg_rate,presetpx,exepx")])
             .send()
             .await
@@ -279,7 +286,7 @@ impl AkShareClient {
 
         // First request to get page count
         let body = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("SHOWTYPE", "JSON"),
                 ("CATALOGID", "ysplbrb"),
@@ -294,8 +301,8 @@ impl AkShareClient {
             .await
             .map_err(Error::from)?;
 
-        let json_val: serde_json::Value =
-            serde_json::from_str(&body).map_err(|e| Error::decode(format!("szse board json: {e}")))?;
+        let json_val: serde_json::Value = serde_json::from_str(&body)
+            .map_err(|e| Error::decode(format!("szse board json: {e}")))?;
 
         let page_count = json_val
             .as_array()
@@ -309,7 +316,7 @@ impl AkShareClient {
         for page in 1..=page_count {
             let page_str = page.to_string();
             let body = self
-                                .get(url)
+                .get(url)
                 .query(&[
                     ("SHOWTYPE", "JSON"),
                     ("CATALOGID", "ysplbrb"),
@@ -324,8 +331,8 @@ impl AkShareClient {
                 .await
                 .map_err(Error::from)?;
 
-            let json_val: serde_json::Value =
-                serde_json::from_str(&body).map_err(|e| Error::decode(format!("szse board page json: {e}")))?;
+            let json_val: serde_json::Value = serde_json::from_str(&body)
+                .map_err(|e| Error::decode(format!("szse board page json: {e}")))?;
 
             let data = json_val
                 .as_array()
@@ -343,9 +350,10 @@ impl AkShareClient {
                     // Filter by end_month
                     let exercise_date = arr[6].as_str().unwrap_or("");
                     if let Some(mm) = extract_month(exercise_date)
-                        && mm != month_suffix {
-                            continue;
-                        }
+                        && mm != month_suffix
+                    {
+                        continue;
+                    }
 
                     all_rows.push(OptionFinanceBoardRow {
                         datetime: String::new(),
@@ -407,12 +415,13 @@ impl AkShareClient {
                 let instrument = fields[idx];
                 // Extract month from instrument code like "IO2306-C-4000" -> "06"
                 if let Some(code_part) = instrument.split('-').next()
-                    && code_part.len() >= 6 {
-                        let mm = &code_part[code_part.len() - 2..];
-                        if mm != month_suffix {
-                            continue;
-                        }
+                    && code_part.len() >= 6
+                {
+                    let mm = &code_part[code_part.len() - 2..];
+                    if mm != month_suffix {
+                        continue;
                     }
+                }
             }
 
             let extra = serde_json::to_value(

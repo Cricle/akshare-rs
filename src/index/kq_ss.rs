@@ -14,10 +14,7 @@ impl AkShareClient {
     ///
     /// `symbol` is one of many sub-indices, e.g. "柯桥时尚指数", "时尚创意指数",
     /// "时尚设计人才数", etc.
-    pub async fn index_kq_fashion(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<KqFashionPoint>> {
+    pub async fn index_kq_fashion(&self, symbol: &str) -> Result<Vec<KqFashionPoint>> {
         let struct_code = match symbol {
             "柯桥时尚指数" => "root",
             "时尚创意指数" => "01",
@@ -36,9 +33,11 @@ impl AkShareClient {
             "企业参展次数" => "0302",
             "外商驻点数量变化" => "0302",
             "时尚评价指数" => "04",
-            _ => return Err(Error::invalid_input(format!(
-                "unknown KQ fashion index: {symbol}"
-            ))),
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unknown KQ fashion index: {symbol}"
+                )));
+            }
         };
 
         #[derive(Deserialize)]
@@ -56,7 +55,7 @@ impl AkShareClient {
         }
 
         let response = self
-                        .get("http://api.idx365.com/index/project/34/data")
+            .get("http://api.idx365.com/index/project/34/data")
             .query(&[("structCode", struct_code)])
             .send()
             .await

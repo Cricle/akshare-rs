@@ -37,7 +37,7 @@ impl AkShareClient {
         let url = format!("https://hq.sinajs.cn/rn=mtf2t&list={symbols}");
 
         let body = self
-                        .get(&url)
+            .get(&url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")
             .send()
             .await
@@ -78,7 +78,7 @@ impl AkShareClient {
     /// 东方财富 — 港股指数实时行情.
     pub async fn index_hk_spot_em(&self) -> Result<Vec<HkIndexSpotItem>> {
         let response = self
-                        .get("https://15.push2.eastmoney.com/api/qt/clist/get")
+            .get("https://15.push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", "200"),

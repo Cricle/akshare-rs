@@ -61,11 +61,10 @@ const SW_SECID_PREFIX: &str = "90";
 ///
 /// This list is stable and covers the standard 31 Level-1 industries.
 const SW_LEVEL1_CODES: &[&str] = &[
-    "801010", "801020", "801030", "801040", "801050", "801060", "801080",
-    "801110", "801120", "801130", "801140", "801150", "801160", "801170",
-    "801180", "801200", "801210", "801230", "801710", "801720", "801730",
-    "801740", "801750", "801760", "801770", "801780", "801790", "801880",
-    "801890", "801950", "801960", "801970", "801980",
+    "801010", "801020", "801030", "801040", "801050", "801060", "801080", "801110", "801120",
+    "801130", "801140", "801150", "801160", "801170", "801180", "801200", "801210", "801230",
+    "801710", "801720", "801730", "801740", "801750", "801760", "801770", "801780", "801790",
+    "801880", "801890", "801950", "801960", "801970", "801980",
 ];
 
 // ---------------------------------------------------------------------------
@@ -79,11 +78,7 @@ impl AkShareClient {
     /// `"801180"` (房地产), etc.  The `90.` prefix is added automatically.
     ///
     /// Returns the most recent `limit` daily candle points (forward-adjusted).
-    pub async fn sw_index_candles(
-        &self,
-        symbol: &str,
-        limit: usize,
-    ) -> Result<Vec<CandlePoint>> {
+    pub async fn sw_index_candles(&self, symbol: &str, limit: usize) -> Result<Vec<CandlePoint>> {
         let code = symbol.trim().to_uppercase();
         // Validate: must be 6 digits
         if code.len() != 6 || !code.chars().all(|c| c.is_ascii_digit()) {
@@ -115,7 +110,7 @@ impl AkShareClient {
     pub async fn sw_index_second_info(&self) -> Result<Vec<crate::types::Row>> {
         let url = "https://push2.eastmoney.com/api/qt/clist/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("pn", "1"),
                 ("pz", "500"),
@@ -136,12 +131,32 @@ impl AkShareClient {
         let diff = data["data"]["diff"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &diff {
+        for mut row in diff {
             let mut r = crate::types::Row::new();
-            r.insert("code".into(), row["f12"].clone());
-            r.insert("name".into(), row["f14"].clone());
-            r.insert("close".into(), row["f2"].clone());
-            r.insert("change_pct".into(), row["f3"].clone());
+            r.insert(
+                "code".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f12"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "name".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f14"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "close".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f2"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "change_pct".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f3"))
+                    .unwrap_or_default(),
+            );
             r.insert("level".into(), serde_json::json!("2"));
             items.push(r);
         }
@@ -155,7 +170,7 @@ impl AkShareClient {
         let secid = format!("90.{}", symbol);
         let url = "https://push2.eastmoney.com/api/qt/clist/get";
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("pn", "1"),
                 ("pz", "500"),
@@ -177,12 +192,32 @@ impl AkShareClient {
         let diff = data["data"]["diff"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &diff {
+        for mut row in diff {
             let mut r = crate::types::Row::new();
-            r.insert("code".into(), row["f12"].clone());
-            r.insert("name".into(), row["f14"].clone());
-            r.insert("close".into(), row["f2"].clone());
-            r.insert("change_pct".into(), row["f3"].clone());
+            r.insert(
+                "code".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f12"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "name".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f14"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "close".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f2"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "change_pct".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f3"))
+                    .unwrap_or_default(),
+            );
             items.push(r);
         }
         Ok(items)
@@ -191,15 +226,11 @@ impl AkShareClient {
     /// Shenwan third-level index info (申万三级行业信息).
     ///
     /// `symbol`: Shenwan Level-2 parent code (optional filter)
-    pub async fn sw_index_third_info(&self, symbol: &str) -> Result<Vec<crate::types::Row>> {
+    pub async fn sw_index_third_info(&self, _symbol: &str) -> Result<Vec<crate::types::Row>> {
         let url = "https://push2.eastmoney.com/api/qt/clist/get";
-        let fs = if symbol.is_empty() {
-            "m:90+t:4".to_string()
-        } else {
-            "m:90+t:4".to_string()
-        };
+        let fs = "m:90+t:4".to_string();
         let response = self
-                        .get(url)
+            .get(url)
             .query(&[
                 ("pn", "1"),
                 ("pz", "500"),
@@ -220,12 +251,32 @@ impl AkShareClient {
         let diff = data["data"]["diff"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
-        for row in &diff {
+        for mut row in diff {
             let mut r = crate::types::Row::new();
-            r.insert("code".into(), row["f12"].clone());
-            r.insert("name".into(), row["f14"].clone());
-            r.insert("close".into(), row["f2"].clone());
-            r.insert("change_pct".into(), row["f3"].clone());
+            r.insert(
+                "code".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f12"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "name".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f14"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "close".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f2"))
+                    .unwrap_or_default(),
+            );
+            r.insert(
+                "change_pct".into(),
+                row.as_object_mut()
+                    .and_then(|m| m.remove("f3"))
+                    .unwrap_or_default(),
+            );
             r.insert("level".into(), serde_json::json!("3"));
             items.push(r);
         }
@@ -242,7 +293,7 @@ impl AkShareClient {
         // use the sector filter `m:90+t:2` which covers Shenwan industry indices.
         let pz = "200".to_string();
         let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
                 ("pn", "1"),
                 ("pz", pz.as_str()),
