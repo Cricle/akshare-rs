@@ -1,0 +1,28 @@
+[package]
+name = "akshare"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "100% pure Rust implementation of akshare — unified access to Chinese and global financial market data APIs"
+repository.workspace = true
+homepage = "https://github.com/Cricle/akshare-rs"
+documentation = "https://docs.rs/akshare"
+readme = "README.md"
+keywords = ["akshare", "finance", "stock", "china", "market-data"]
+categories = ["api-bindings", "finance"]
+exclude = ["/tests", "/.github", "/.gitignore"]
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = "0.4"
+regex = "1"
+
+[dev-dependencies]
+wiremock = "0.6"
+tokio = { version = "1", features = ["full", "test-util"] }
+
+[lints.rust]
+unsafe_code = "forbid"
