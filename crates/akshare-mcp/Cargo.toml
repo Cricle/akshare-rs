@@ -8,7 +8,7 @@ repository.workspace = true
 description = "MCP server for akshare-rs — financial market data via Model Context Protocol"
 
 [dependencies]
-akshare = { path = "../akshare" }
+akshare = { path = "../akshare", version = "0.1.0" }
 rmcp = { version = "1.7", features = [
     "server",
     "client",
