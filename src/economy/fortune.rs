@@ -140,7 +140,9 @@ impl AkShareClient {
         for line in body.lines() {
             let trimmed = line.trim();
             if trimmed.contains("href=") && trimmed.contains("/lists/") {
-                if let (Some(href_start), Some(href_end)) = (trimmed.find("href=\""), trimmed.find("\"")) {
+                if let (Some(href_start), Some(href_end)) =
+                    (trimmed.find("href=\""), trimmed.find("\""))
+                {
                     let href = &trimmed[href_start + 6..href_end];
                     // Extract text content
                     let text = extract_text_between_tags(trimmed);

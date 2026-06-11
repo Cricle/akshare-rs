@@ -119,7 +119,9 @@ impl AkShareClient {
                     if let Some(keys) = data.get("keys").and_then(|k| k.as_array()) {
                         let col_names: Vec<String> = keys
                             .iter()
-                            .filter_map(|k| k.get("name").and_then(|n| n.as_str()).map(String::from))
+                            .filter_map(|k| {
+                                k.get("name").and_then(|n| n.as_str()).map(String::from)
+                            })
                             .collect();
                         // Get last row (total OPEC production)
                         if let Some(last_row) = values.last().and_then(|r| r.as_array()) {

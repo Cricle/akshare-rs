@@ -281,7 +281,9 @@ impl AkShareClient {
             // Data lines look like: "  20200102  0.123456"
             let parts: Vec<&str> = trimmed.split_whitespace().collect();
             if parts.len() >= 2 {
-                if let (Ok(date_val), Ok(rv_val)) = (parts[0].parse::<i64>(), parts[1].parse::<f64>()) {
+                if let (Ok(date_val), Ok(rv_val)) =
+                    (parts[0].parse::<i64>(), parts[1].parse::<f64>())
+                {
                     if date_val > 19000000 {
                         in_data = true;
                         let date_str =
