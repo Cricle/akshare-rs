@@ -11,6 +11,7 @@ description = "MCP server for akshare-rs — financial market data via Model Con
 akshare = { path = "../akshare" }
 rmcp = { version = "1.7", features = [
     "server",
+    "client",
     "macros",
     "transport-io",
     "transport-streamable-http-server",
@@ -25,3 +26,6 @@ clap = { version = "4", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 anyhow = "1"
+
+[dev-dependencies]
+tempfile = "3"
