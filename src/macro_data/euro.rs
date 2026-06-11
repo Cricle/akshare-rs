@@ -107,14 +107,14 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(cols) = row.as_object() {
                     for (col_name, col_data) in cols {
-                        if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
-                        {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("LME Holding {}", col_name),
-                            });
+                        if let Some(arr) = col_data.as_array() {
+                            if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                                items.push(MacroDataPoint {
+                                    date: date.clone(),
+                                    value: val,
+                                    name: format!("LME Holding {}", col_name),
+                                });
+                            }
                         }
                     }
                 }
@@ -135,14 +135,14 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(cols) = row.as_object() {
                     for (col_name, col_data) in cols {
-                        if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
-                        {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("LME Stock {}", col_name),
-                            });
+                        if let Some(arr) = col_data.as_array() {
+                            if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                                items.push(MacroDataPoint {
+                                    date: date.clone(),
+                                    value: val,
+                                    name: format!("LME Stock {}", col_name),
+                                });
+                            }
                         }
                     }
                 }

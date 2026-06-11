@@ -511,14 +511,14 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(cols) = row.as_object() {
                     for (tenor, col_data) in cols {
-                        if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
-                        {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("Shibor {}", tenor),
-                            });
+                        if let Some(arr) = col_data.as_array() {
+                            if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                                items.push(MacroDataPoint {
+                                    date: date.clone(),
+                                    value: val,
+                                    name: format!("Shibor {}", tenor),
+                                });
+                            }
                         }
                     }
                 }
@@ -539,14 +539,14 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(cols) = row.as_object() {
                     for (tenor, col_data) in cols {
-                        if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
-                        {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("HIBOR {}", tenor),
-                            });
+                        if let Some(arr) = col_data.as_array() {
+                            if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                                items.push(MacroDataPoint {
+                                    date: date.clone(),
+                                    value: val,
+                                    name: format!("HIBOR {}", tenor),
+                                });
+                            }
                         }
                     }
                 }
@@ -567,14 +567,14 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(cols) = row.as_object() {
                     for (pair, col_data) in cols {
-                        if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
-                        {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("RMB {}", pair),
-                            });
+                        if let Some(arr) = col_data.as_array() {
+                            if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                                items.push(MacroDataPoint {
+                                    date: date.clone(),
+                                    value: val,
+                                    name: format!("RMB {}", pair),
+                                });
+                            }
                         }
                     }
                 }
@@ -618,14 +618,14 @@ impl AkShareClient {
         let mut items = Vec::new();
         if let Some(obj) = values.as_object() {
             for (date, row) in obj {
-                if let Some(arr) = row.as_array()
-                    && let Some(val) = arr.first().and_then(|v| v.as_f64())
-                {
-                    items.push(MacroDataPoint {
-                        date: date.clone(),
-                        value: val,
-                        name: "SH Margin Buy".to_string(),
-                    });
+                if let Some(arr) = row.as_array() {
+                    if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                        items.push(MacroDataPoint {
+                            date: date.clone(),
+                            value: val,
+                            name: "SH Margin Buy".to_string(),
+                        });
+                    }
                 }
             }
         }
@@ -1020,14 +1020,14 @@ impl AkShareClient {
             if cells.len() >= 3 {
                 let date_cell = extract_html_text(cells[1]);
                 let val_cell = extract_html_text(cells[2]);
-                if date_cell.contains("-")
-                    && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
-                {
-                    items.push(MacroDataPoint {
-                        date: date_cell,
-                        value: val,
-                        name: "RMB Loan".to_string(),
-                    });
+                if date_cell.contains("-") {
+                    if let Ok(val) = val_cell.replace(',', "").parse::<f64>() {
+                        items.push(MacroDataPoint {
+                            date: date_cell,
+                            value: val,
+                            name: "RMB Loan".to_string(),
+                        });
+                    }
                 }
             }
         }
@@ -1053,14 +1053,14 @@ impl AkShareClient {
             if cells.len() >= 3 {
                 let date_cell = extract_html_text(cells[1]);
                 let val_cell = extract_html_text(cells[2]);
-                if date_cell.contains("-")
-                    && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
-                {
-                    items.push(MacroDataPoint {
-                        date: date_cell,
-                        value: val,
-                        name: "RMB Deposit".to_string(),
-                    });
+                if date_cell.contains("-") {
+                    if let Ok(val) = val_cell.replace(',', "").parse::<f64>() {
+                        items.push(MacroDataPoint {
+                            date: date_cell,
+                            value: val,
+                            name: "RMB Deposit".to_string(),
+                        });
+                    }
                 }
             }
         }
@@ -1080,14 +1080,14 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(cols) = row.as_object() {
                     for (col_name, col_data) in cols {
-                        if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
-                        {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: val,
-                                name: format!("Energy {}", col_name),
-                            });
+                        if let Some(arr) = col_data.as_array() {
+                            if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                                items.push(MacroDataPoint {
+                                    date: date.clone(),
+                                    value: val,
+                                    name: format!("Energy {}", col_name),
+                                });
+                            }
                         }
                     }
                 }

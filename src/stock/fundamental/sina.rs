@@ -107,11 +107,11 @@ fn parse_html_tables(html: &str) -> Vec<(Vec<String>, Vec<Vec<String>>)> {
         }
 
         // If no headers found in thead, try first row
-        if headers.is_empty()
-            && let Some(first_row) = rows.first()
-        {
-            headers = first_row.clone();
-            rows.remove(0);
+        if headers.is_empty() {
+            if let Some(first_row) = rows.first() {
+                headers = first_row.clone();
+                rows.remove(0);
+            }
         }
 
         if !headers.is_empty() || !rows.is_empty() {
@@ -356,10 +356,10 @@ impl AkShareClient {
                     .and_then(|v| v.as_array())
                     .cloned()
                     .unwrap_or_default();
-                if let Some(item) = items.get(i)
-                    && let Some(val) = item.get("item_value")
-                {
-                    row.insert(key.clone(), val.clone());
+                if let Some(item) = items.get(i) {
+                    if let Some(val) = item.get("item_value") {
+                        row.insert(key.clone(), val.clone());
+                    }
                 }
             }
             all_rows.push(row);

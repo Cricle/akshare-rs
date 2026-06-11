@@ -91,16 +91,16 @@ impl AkShareClient {
         // Parse XML manually (lightweight parser)
         for line in body.lines() {
             let trimmed = line.trim();
-            if trimmed.contains("<AQI>")
-                && let (Some(start), Some(end)) = (trimmed.find("<AQI>"), trimmed.find("</AQI>"))
-            {
-                let aqi_str = &trimmed[start + 5..end];
-                if let Ok(aqi) = aqi_str.parse::<f64>() {
-                    items.push(MacroDataPoint {
-                        date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
-                        value: aqi,
-                        name: "Hebei AQI".to_string(),
-                    });
+            if trimmed.contains("<AQI>") {
+                if let (Some(start), Some(end)) = (trimmed.find("<AQI>"), trimmed.find("</AQI>")) {
+                    let aqi_str = &trimmed[start + 5..end];
+                    if let Ok(aqi) = aqi_str.parse::<f64>() {
+                        items.push(MacroDataPoint {
+                            date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
+                            value: aqi,
+                            name: "Hebei AQI".to_string(),
+                        });
+                    }
                 }
             }
         }
@@ -133,11 +133,10 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut cities: Vec<String> = Vec::new();
         for v in &data {
-            if let Some(city) = v.get("CITY").and_then(|x| x.as_str())
-                && !city.is_empty()
-                && !cities.contains(&city.to_string())
-            {
-                cities.push(city.to_string());
+            if let Some(city) = v.get("CITY").and_then(|x| x.as_str()) {
+                if !city.is_empty() && !cities.contains(&city.to_string()) {
+                    cities.push(city.to_string());
+                }
             }
         }
 

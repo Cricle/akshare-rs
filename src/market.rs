@@ -67,15 +67,15 @@ pub fn normalize_hk_symbol(symbol: &str) -> Option<String> {
         return Some(format!("{:0>5}", trimmed));
     }
     // Check for explicit .HK suffix
-    if let Some((code, suffix)) = symbol.trim().split_once('.')
-        && suffix.eq_ignore_ascii_case("HK")
-    {
-        let code_trimmed = code.trim_start_matches('0');
-        if !code_trimmed.is_empty()
-            && code_trimmed.len() <= 5
-            && code_trimmed.chars().all(|c| c.is_ascii_digit())
-        {
-            return Some(format!("{:0>5}", code_trimmed));
+    if let Some((code, suffix)) = symbol.trim().split_once('.') {
+        if suffix.eq_ignore_ascii_case("HK") {
+            let code_trimmed = code.trim_start_matches('0');
+            if !code_trimmed.is_empty()
+                && code_trimmed.len() <= 5
+                && code_trimmed.chars().all(|c| c.is_ascii_digit())
+            {
+                return Some(format!("{:0>5}", code_trimmed));
+            }
         }
     }
     None

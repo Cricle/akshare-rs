@@ -104,23 +104,23 @@ impl AkShareClient {
             // Parse table rows
             if trimmed.contains("<tr") || trimmed.contains("<td") {
                 let cells = extract_html_cells(trimmed);
-                if !cells.is_empty()
-                    && !headers.is_empty()
-                    && let Some(rank_str) = cells.first()
-                    && rank_str.chars().all(|c| c.is_ascii_digit())
-                {
-                    let net_worth = cells
-                        .get(3)
-                        .and_then(|s| s.parse::<f64>().ok())
-                        .unwrap_or(0.0);
-                    items.push(MacroDataPoint {
-                        date: year.to_string(),
-                        value: net_worth,
-                        name: cells
-                            .get(1)
-                            .cloned()
-                            .unwrap_or_else(|| "Unknown".to_string()),
-                    });
+                if !cells.is_empty() && !headers.is_empty() {
+                    if let Some(rank_str) = cells.first() {
+                        if rank_str.chars().all(|c| c.is_ascii_digit()) {
+                            let net_worth = cells
+                                .get(3)
+                                .and_then(|s| s.parse::<f64>().ok())
+                                .unwrap_or(0.0);
+                            items.push(MacroDataPoint {
+                                date: year.to_string(),
+                                value: net_worth,
+                                name: cells
+                                    .get(1)
+                                    .cloned()
+                                    .unwrap_or_else(|| "Unknown".to_string()),
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -139,16 +139,14 @@ impl AkShareClient {
         let mut list_urls: Vec<(String, String)> = Vec::new();
         for line in body.lines() {
             let trimmed = line.trim();
-            if trimmed.contains("href=")
-                && trimmed.contains("/lists/")
-                && let (Some(href_start), Some(href_end)) =
-                    (trimmed.find("href=\""), trimmed.find("\""))
-            {
-                let href = &trimmed[href_start + 6..href_end];
-                // Extract text content
-                let text = extract_text_between_tags(trimmed);
-                if !text.is_empty() && href.contains("/lists/") {
-                    list_urls.push((text, format!("https://www.forbeschina.com{}", href)));
+            if trimmed.contains("href=") && trimmed.contains("/lists/") {
+                if let (Some(href_start), Some(href_end)) = (trimmed.find("href=\""), trimmed.find("\"")) {
+                    let href = &trimmed[href_start + 6..href_end];
+                    // Extract text content
+                    let text = extract_text_between_tags(trimmed);
+                    if !text.is_empty() && href.contains("/lists/") {
+                        list_urls.push((text, format!("https://www.forbeschina.com{}", href)));
+                    }
                 }
             }
         }

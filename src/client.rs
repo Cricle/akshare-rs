@@ -24,11 +24,11 @@ impl AkShareClient {
     /// Redirect a URL to the mock server if mock_uri is set.
     pub(crate) fn redirect_url(&self, url: &str) -> String {
         if let Some(mock) = &self.mock_uri {
-            if let Some(proto_end) = url.find("//")
-                && let Some(path_start) = url[proto_end + 2..].find('/')
-            {
-                let path = &url[proto_end + 2 + path_start..];
-                return format!("{}{}", mock.trim_end_matches('/'), path);
+            if let Some(proto_end) = url.find("//") {
+                if let Some(path_start) = url[proto_end + 2..].find('/') {
+                    let path = &url[proto_end + 2 + path_start..];
+                    return format!("{}{}", mock.trim_end_matches('/'), path);
+                }
             }
             mock.clone()
         } else {
@@ -109,10 +109,10 @@ impl AkShareClientBuilder {
             .timeout(self.timeout)
             .pool_max_idle_per_host(8);
 
-        if let Some(proxy_url) = &self.proxy
-            && let Ok(proxy) = reqwest::Proxy::all(proxy_url)
-        {
-            builder = builder.proxy(proxy);
+        if let Some(proxy_url) = &self.proxy {
+            if let Ok(proxy) = reqwest::Proxy::all(proxy_url) {
+                builder = builder.proxy(proxy);
+            }
         }
 
         let http = builder.build().unwrap_or_else(|_| reqwest::Client::new());

@@ -104,18 +104,18 @@ impl AkShareClient {
             .await?;
 
         let mut items = Vec::new();
-        if let Some(data) = resp.get("data")
-            && let Some(values) = data.get("values").and_then(|v| v.as_object())
-        {
-            for (date, row) in values {
-                if let Some(cols) = row.as_object() {
-                    for (pair, val) in cols {
-                        if let Some(v) = val.as_f64() {
-                            items.push(MacroDataPoint {
-                                date: date.clone(),
-                                value: v,
-                                name: format!("FX Sentiment {}", pair),
-                            });
+        if let Some(data) = resp.get("data") {
+            if let Some(values) = data.get("values").and_then(|v| v.as_object()) {
+                for (date, row) in values {
+                    if let Some(cols) = row.as_object() {
+                        for (pair, val) in cols {
+                            if let Some(v) = val.as_f64() {
+                                items.push(MacroDataPoint {
+                                    date: date.clone(),
+                                    value: v,
+                                    name: format!("FX Sentiment {}", pair),
+                                });
+                            }
                         }
                     }
                 }
@@ -140,31 +140,31 @@ impl AkShareClient {
             .await?;
 
         let mut items = Vec::new();
-        if let Some(data) = resp.data
-            && let Some(macro_items) = data.items
-        {
-            for item in &macro_items {
-                let title = item.get("title").and_then(|v| v.as_str()).unwrap_or("");
-                let actual = item.get("actual").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                let pub_date = item
-                    .get("public_date")
-                    .and_then(|v| v.as_i64())
-                    .unwrap_or(0);
+        if let Some(data) = resp.data {
+            if let Some(macro_items) = data.items {
+                for item in &macro_items {
+                    let title = item.get("title").and_then(|v| v.as_str()).unwrap_or("");
+                    let actual = item.get("actual").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                    let pub_date = item
+                        .get("public_date")
+                        .and_then(|v| v.as_i64())
+                        .unwrap_or(0);
 
-                // Convert unix timestamp to date string
-                let date_str = if pub_date > 0 {
-                    chrono::DateTime::from_timestamp(pub_date, 0)
-                        .map(|d| d.format("%Y-%m-%d").to_string())
-                        .unwrap_or_default()
-                } else {
-                    date[..8].to_string()
-                };
+                    // Convert unix timestamp to date string
+                    let date_str = if pub_date > 0 {
+                        chrono::DateTime::from_timestamp(pub_date, 0)
+                            .map(|d| d.format("%Y-%m-%d").to_string())
+                            .unwrap_or_default()
+                    } else {
+                        date[..8].to_string()
+                    };
 
-                items.push(MacroDataPoint {
-                    date: date_str,
-                    value: actual,
-                    name: title.to_string(),
-                });
+                    items.push(MacroDataPoint {
+                        date: date_str,
+                        value: actual,
+                        name: title.to_string(),
+                    });
+                }
             }
         }
         Ok(items)
@@ -189,14 +189,14 @@ impl AkShareClient {
             if cells.len() >= 3 {
                 let date_cell = extract_html_text_other(cells[1]);
                 let val_cell = extract_html_text_other(cells[2]);
-                if (date_cell.contains("-") || date_cell.contains("/"))
-                    && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
-                {
-                    items.push(MacroDataPoint {
-                        date: date_cell,
-                        value: val,
-                        name: "Stock Finance".to_string(),
-                    });
+                if (date_cell.contains("-") || date_cell.contains("/")) {
+                    if let Ok(val) = val_cell.replace(',', "").parse::<f64>() {
+                        items.push(MacroDataPoint {
+                            date: date_cell,
+                            value: val,
+                            name: "Stock Finance".to_string(),
+                        });
+                    }
                 }
             }
         }

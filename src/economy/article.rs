@@ -188,19 +188,19 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for entry in data_arr {
-            if let Some(arr) = entry.as_array()
-                && arr.len() >= 2
-            {
-                let ts_ms = arr[0].as_i64().unwrap_or(0);
-                let date = chrono::DateTime::from_timestamp_millis(ts_ms)
-                    .map(|dt| dt.format("%Y-%m-%d").to_string())
-                    .unwrap_or_default();
-                let value = arr[1].as_f64().unwrap_or(0.0);
-                items.push(MacroDataPoint {
-                    date,
-                    value,
-                    name: symbol.to_string(),
-                });
+            if let Some(arr) = entry.as_array() {
+                if arr.len() >= 2 {
+                    let ts_ms = arr[0].as_i64().unwrap_or(0);
+                    let date = chrono::DateTime::from_timestamp_millis(ts_ms)
+                        .map(|dt| dt.format("%Y-%m-%d").to_string())
+                        .unwrap_or_default();
+                    let value = arr[1].as_f64().unwrap_or(0.0);
+                    items.push(MacroDataPoint {
+                        date,
+                        value,
+                        name: symbol.to_string(),
+                    });
+                }
             }
         }
         Ok(items)
@@ -280,19 +280,19 @@ impl AkShareClient {
             }
             // Data lines look like: "  20200102  0.123456"
             let parts: Vec<&str> = trimmed.split_whitespace().collect();
-            if parts.len() >= 2
-                && let (Ok(date_val), Ok(rv_val)) =
-                    (parts[0].parse::<i64>(), parts[1].parse::<f64>())
-                && date_val > 19000000
-            {
-                in_data = true;
-                let date_str =
-                    format!("{}-{}-{}", &parts[0][..4], &parts[0][4..6], &parts[0][6..8]);
-                items.push(MacroDataPoint {
-                    date: date_str,
-                    value: rv_val,
-                    name: format!("RLab RV - {}", symbol),
-                });
+            if parts.len() >= 2 {
+                if let (Ok(date_val), Ok(rv_val)) = (parts[0].parse::<i64>(), parts[1].parse::<f64>()) {
+                    if date_val > 19000000 {
+                        in_data = true;
+                        let date_str =
+                            format!("{}-{}-{}", &parts[0][..4], &parts[0][4..6], &parts[0][6..8]);
+                        items.push(MacroDataPoint {
+                            date: date_str,
+                            value: rv_val,
+                            name: format!("RLab RV - {}", symbol),
+                        });
+                    }
+                }
             }
         }
 

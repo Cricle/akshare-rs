@@ -264,26 +264,26 @@ impl AkShareClient {
             .await?;
 
         let mut items = Vec::new();
-        if let Some(result) = body.get("Result").or_else(|| body.get("result"))
-            && let Some(arr) = result.as_array()
-        {
-            for entry in arr {
-                let name = entry
-                    .get("name")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let price = entry
-                    .get("price")
-                    .or_else(|| entry.get("currentPrice"))
-                    .and_then(|v| v.as_f64())
-                    .unwrap_or(0.0);
-                if !name.is_empty() {
-                    items.push(MacroDataPoint {
-                        date: pair.to_string(),
-                        value: price,
-                        name,
-                    });
+        if let Some(result) = body.get("Result").or_else(|| body.get("result")) {
+            if let Some(arr) = result.as_array() {
+                for entry in arr {
+                    let name = entry
+                        .get("name")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    let price = entry
+                        .get("price")
+                        .or_else(|| entry.get("currentPrice"))
+                        .and_then(|v| v.as_f64())
+                        .unwrap_or(0.0);
+                    if !name.is_empty() {
+                        items.push(MacroDataPoint {
+                            date: pair.to_string(),
+                            value: price,
+                            name,
+                        });
+                    }
                 }
             }
         }

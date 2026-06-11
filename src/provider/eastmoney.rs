@@ -220,10 +220,10 @@ impl AkShareClient {
                     item.classify.as_deref(),
                     item.security_type_name.as_deref(),
                 )?;
-                if let Some(expected) = market
-                    && expected != market_name
-                {
-                    return None;
+                if let Some(expected) = market {
+                    if expected != market_name {
+                        return None;
+                    }
                 }
                 Some(StockSearchResult {
                     symbol,
