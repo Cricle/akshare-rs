@@ -189,7 +189,7 @@ impl AkShareClient {
             if cells.len() >= 3 {
                 let date_cell = extract_html_text_other(cells[1]);
                 let val_cell = extract_html_text_other(cells[2]);
-                if (date_cell.contains("-") || date_cell.contains("/")) {
+                if date_cell.contains("-") || date_cell.contains("/") {
                     if let Ok(val) = val_cell.replace(',', "").parse::<f64>() {
                         items.push(MacroDataPoint {
                             date: date_cell,
