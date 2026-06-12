@@ -312,6 +312,14 @@ impl AkShareClient {
         end_date: &str,
         adjust: &str,
     ) -> Result<Vec<HkDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         let code = symbol.trim_start_matches('0');
         let code = if code.is_empty() { "0" } else { code };
         let secid = format!("116.{code}");
@@ -339,15 +347,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -383,6 +382,14 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_hk_famous_spot_em()`
     pub async fn stock_hk_famous_spot_em(&self) -> Result<Vec<HkFamousStock>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<serde_json::Value>,
+        }
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
@@ -402,15 +409,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<serde_json::Value>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -463,6 +461,14 @@ impl AkShareClient {
     ///
     /// - `symbol`: HK index code like "HSTECH"
     pub async fn stock_hk_index_daily_em(&self, symbol: &str) -> Result<Vec<HkIndexDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         // Use secid format: internal_id.symbol
         // Default internal_id mapping for common indices
         let secid = format!("100.{symbol}");
@@ -489,15 +495,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -588,6 +585,14 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_hk_index_spot_em()`
     pub async fn stock_hk_index_spot_em(&self) -> Result<Vec<HkIndexSpotEm>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
@@ -607,15 +612,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -711,6 +707,15 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_hk_hot_rank_em()`
     pub async fn stock_hk_hot_rank_em(&self) -> Result<Vec<HkHotRank>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<Vec<RankItem>>,
+        }
+        #[derive(Deserialize)]
+        struct RankItem {
+            sc: Option<String>,
+            rk: Option<i64>,
+        }
         let url = "https://emappdata.eastmoney.com/stockrank/getAllCurrHkUsList";
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -728,16 +733,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<Vec<RankItem>>,
-        }
-        #[derive(Deserialize)]
-        struct RankItem {
-            sc: Option<String>,
-            rk: Option<i64>,
-        }
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let rank_data = env
@@ -813,6 +808,15 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_hk_hot_rank_detail_em(symbol)`
     pub async fn stock_hk_hot_rank_detail_em(&self, symbol: &str) -> Result<Vec<HkHotRankDetail>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<Vec<RankDetailItem>>,
+        }
+        #[derive(Deserialize)]
+        struct RankDetailItem {
+            dt: Option<String>,
+            rk: Option<i64>,
+        }
         let url = "https://emappdata.eastmoney.com/stockrank/getHisHkUsList";
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -829,16 +833,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<Vec<RankDetailItem>>,
-        }
-        #[derive(Deserialize)]
-        struct RankDetailItem {
-            dt: Option<String>,
-            rk: Option<i64>,
-        }
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -867,6 +861,15 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<HkHotRankDetail>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<Vec<RankDetailItem>>,
+        }
+        #[derive(Deserialize)]
+        struct RankDetailItem {
+            dt: Option<String>,
+            rk: Option<i64>,
+        }
         let url = "https://emappdata.eastmoney.com/stockrank/getCurrentHkUsList";
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -883,16 +886,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<Vec<RankDetailItem>>,
-        }
-        #[derive(Deserialize)]
-        struct RankDetailItem {
-            dt: Option<String>,
-            rk: Option<i64>,
-        }
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -990,6 +983,14 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
         let filter = format!("(SECUCODE=\"{symbol}.HK\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
@@ -1013,15 +1014,6 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        #[derive(Deserialize)]
-        struct Env {
-            result: Option<EnvResult>,
-        }
-        #[derive(Deserialize)]
-        struct EnvResult {
-            data: Option<Vec<serde_json::Value>>,
-        }
-
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload
             .result
@@ -1041,6 +1033,14 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
@@ -1063,15 +1063,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            result: Option<EnvResult>,
-        }
-        #[derive(Deserialize)]
-        struct EnvResult {
-            data: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -1144,6 +1135,14 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
@@ -1166,15 +1165,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            result: Option<EnvResult>,
-        }
-        #[derive(Deserialize)]
-        struct EnvResult {
-            data: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload

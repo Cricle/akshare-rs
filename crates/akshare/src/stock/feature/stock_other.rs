@@ -593,19 +593,79 @@ impl AkShareClient {
             .collect())
     }
 
-    /// 东方财富-个股新闻
+    /// 东方财富-个股新闻 (A股)
     pub async fn stock_news_em(&self, symbol: &str) -> Result<Vec<StockNews>> {
-        let url = "https://search-api-web.eastmoney.com/search/jsonp";
-        let callback = format!("jQuery{}", chrono::Utc::now().timestamp_millis());
-        let resp = self.get(url)
+        self.stock_news_em_inner(symbol, "default").await
+    }
+
+    /// 东方财富-港股个股新闻
+    pub async fn stock_news_em_hk(&self, symbol: &str) -> Result<Vec<StockNews>> {
+        self.stock_news_em_inner(symbol, "default").await
+    }
+
+    /// 东方财富-美股个股新闻
+    pub async fn stock_news_em_us(&self, symbol: &str) -> Result<Vec<StockNews>> {
+        self.stock_news_em_inner(symbol, "default").await
+    }
+
+    async fn stock_news_em_inner(&self, symbol: &str, scope: &str) -> Result<Vec<StockNews>> {
+        use crate::news::search::{parse_search_entries, strip_jsonp};
+
+        let inner_param = serde_json::json!({
+            "uid": "",
+            "keyword": symbol,
+            "type": ["cmsArticleWebOld"],
+            "client": "web",
+            "clientType": "web",
+            "clientVersion": "curr",
+            "param": {
+                "cmsArticleWebOld": {
+                    "searchScope": scope,
+                    "sort": "default",
+                    "pageIndex": 1,
+                    "pageSize": 20,
+                    "preTag": "",
+                    "postTag": "",
+                }
+            }
+        });
+
+        let referer = format!("https://so.eastmoney.com/news/s?keyword={symbol}");
+
+        let raw_text = self
+            .get("https://search-api-web.eastmoney.com/search/jsonp")
             .query(&[
-                ("cb", callback.as_str()),
-                ("param", format!("{{\"uid\":\"\",\"keyword\":\"{symbol}\",\"type\":[\"cmsArticleWebOld\"],\"client\":\"web\",\"clientType\":\"web\",\"clientVersion\":\"curr\",\"param\":{{\"cmsArticleWebOld\":{{\"searchScope\":\"default\",\"sort\":\"default\",\"pageIndex\":1,\"pageSize\":20,\"preTag\":\"\",\"postTag\":\"\"}}}}}}").as_str()),
+                ("cb", "jQuery_callback"),
+                ("param", &inner_param.to_string()),
             ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
-        let _text = resp.text().await.map_err(Error::from)?;
-        Ok(vec![])
+            .header("Referer", &referer)
+            .send()
+            .await?
+            .text()
+            .await?;
+
+        let json_str = strip_jsonp(&raw_text)?;
+        let root: serde_json::Value = serde_json::from_str(json_str)
+            .map_err(|e| Error::decode(format!("JSON parse: {e}")))?;
+
+        let list = root
+            .pointer("/result/cmsArticleWebOld")
+            .and_then(|v| v.as_array())
+            .cloned()
+            .unwrap_or_default();
+
+        let news_items = parse_search_entries(&list, 20);
+
+        Ok(news_items
+            .into_iter()
+            .map(|item| StockNews {
+                title: item.title,
+                content: Some(item.summary),
+                publish_time: item.published_at,
+                source: Some(item.source),
+                url: item.url,
+            })
+            .collect())
     }
 
     /// 财联社-重要新闻
@@ -1602,6 +1662,3 @@ impl AkShareClient {
             .collect())
     }
 }
-
-// chrono is used for timestamp generation
-use chrono;

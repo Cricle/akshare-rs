@@ -686,8 +686,7 @@ impl AkShareClient {
             "全部股票" => "000300",
             "沪市A股" => "000001",
             "科创板" => "000688",
-            "深市A股" => "399001",
-            "创业板" => "399001",
+            "深市A股" | "创业板" => "399001",
             "京市A股" => "999999",
             _ => {
                 return Err(Error::invalid_input(format!(
@@ -745,7 +744,7 @@ impl AkShareClient {
         );
         let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
 
-        let filter = format!(r#"(FREE_DATE>='{sd}')(FREE_DATE<='{ed}')"#);
+        let filter = format!(r"(FREE_DATE>='{sd}')(FREE_DATE<='{ed}')");
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_LIFT_STAGE",

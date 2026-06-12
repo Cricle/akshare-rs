@@ -39,6 +39,7 @@ const BOND_TYPE_MAP: &[(&str, &str)] = &[
 ];
 
 /// List available bond type names for close yield curves.
+#[must_use]
 pub fn bond_china_close_return_types() -> Vec<&'static str> {
     BOND_TYPE_MAP.iter().map(|(name, _)| *name).collect()
 }

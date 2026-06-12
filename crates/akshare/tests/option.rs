@@ -1008,13 +1008,13 @@ async fn test_option_margin() {
     let list_html = r#"<html><body>
         <a href="/qiquan/yuanyou">原油期权</a>
     </body></html>"#;
-    let margin_html = r#"<html><body>
+    let margin_html = r"<html><body>
         <small>最近更新 2024-01-02</small>
         <table>
             <tr><th>合约</th><th>结算价</th><th>交易乘数</th><th>买方权利金</th><th>卖方保证金</th><th>开仓手续费</th><th>平今手续费</th><th>平昨手续费</th></tr>
             <tr><td>sc2405C600</td><td>50.0</td><td>1000</td><td>50000</td><td>80000</td><td>20</td><td>20</td><td>20</td></tr>
         </table>
-    </body></html>"#;
+    </body></html>";
     // Mount two mocks: first matches the symbol list URL, second matches the margin page
     mock_any_get_text(&server, "yuanyou", list_html).await;
     mock_any_get_text(&server, "qiquan", margin_html).await;
@@ -1082,11 +1082,11 @@ async fn test_option_comm_symbol() {
 async fn test_option_comm_info() {
     let server = MockServer::start().await;
     // First request: symbol list page, second: commission data page
-    let list_html = r##"<html><body>
+    let list_html = r#"<html><body>
         <div id="inst_list">
             <a href="?heyue=si">工业硅期权</a>
         </div>
-    </body></html>"##;
+    </body></html>"#;
     let info_html = r##"<html><body>
         <a id="dlink" href="#">下载</a>
         <table>

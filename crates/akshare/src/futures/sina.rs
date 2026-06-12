@@ -98,7 +98,7 @@ impl AkShareClient {
             .and_then(|start| {
                 body[start..]
                     .find('}')
-                    .map(|end| &body[start..start + end + 1])
+                    .map(|end| &body[start..=start + end])
             })
             .ok_or_else(|| Error::decode("sina symbol mark: invalid JS response"))?;
 

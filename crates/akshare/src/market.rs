@@ -3,6 +3,7 @@
 use crate::types::MarketKind;
 
 /// Detect market from symbol. Returns None if unrecognized.
+#[must_use]
 pub fn detect_market(symbol: &str) -> MarketKind {
     if normalize_a_share_symbol(symbol).is_some() {
         return MarketKind::AShare;
@@ -15,6 +16,7 @@ pub fn detect_market(symbol: &str) -> MarketKind {
 
 /// Normalize A-share symbol to ts_code format (e.g., "600000" -> "600000.SH").
 /// Returns None if not an A-share symbol.
+#[must_use]
 pub fn normalize_a_share_symbol(symbol: &str) -> Option<String> {
     let trimmed = symbol.trim();
     // Already normalized: 600000.SH, 000001.SZ, etc.
@@ -62,6 +64,7 @@ fn infer_a_share_exchange(code: &str) -> Option<&'static str> {
 }
 
 /// Normalize HK symbol. Returns None if not a HK symbol.
+#[must_use]
 pub fn normalize_hk_symbol(symbol: &str) -> Option<String> {
     let trimmed = symbol.trim().trim_start_matches('0').to_string();
     // HK stocks are 1-5 digit numeric codes

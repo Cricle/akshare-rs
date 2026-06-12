@@ -17,7 +17,14 @@ pub struct NewsSymbolParams {
     pub symbol: String,
 }
 
-fn default_limit() -> usize {
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct StockNewsSearchParams {
+    pub symbol: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+const fn default_limit() -> usize {
     20
 }
 

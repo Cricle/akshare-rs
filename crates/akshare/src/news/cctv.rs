@@ -88,6 +88,7 @@ impl AkShareClient {
             .unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for entry in &data {
             let rows = entry["DisplayData"]["resultData"]["tplData"]["result"]["rows"]
                 .as_array()
@@ -95,7 +96,7 @@ impl AkShareClient {
                 .unwrap_or_default();
             for row_val in &rows {
                 let mut row = Row::new();
-                for (k, v) in row_val.as_object().unwrap_or(&serde_json::Map::new()) {
+                for (k, v) in row_val.as_object().unwrap_or(&empty_map) {
                     row.insert(k.clone(), v.clone());
                 }
                 if !row.is_empty() {
@@ -136,6 +137,7 @@ impl AkShareClient {
             .unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for entry in &data {
             let rows = entry["DisplayData"]["resultData"]["tplData"]["result"]["rows"]
                 .as_array()
@@ -143,7 +145,7 @@ impl AkShareClient {
                 .unwrap_or_default();
             for row_val in &rows {
                 let mut row = Row::new();
-                for (k, v) in row_val.as_object().unwrap_or(&serde_json::Map::new()) {
+                for (k, v) in row_val.as_object().unwrap_or(&empty_map) {
                     row.insert(k.clone(), v.clone());
                 }
                 if !row.is_empty() {
@@ -186,6 +188,7 @@ impl AkShareClient {
             .unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for entry in &data {
             let rows = entry["DisplayData"]["resultData"]["tplData"]["result"]["rows"]
                 .as_array()
@@ -193,7 +196,7 @@ impl AkShareClient {
                 .unwrap_or_default();
             for row_val in &rows {
                 let mut row = Row::new();
-                for (k, v) in row_val.as_object().unwrap_or(&serde_json::Map::new()) {
+                for (k, v) in row_val.as_object().unwrap_or(&empty_map) {
                     row.insert(k.clone(), v.clone());
                 }
                 if !row.is_empty() {
@@ -236,6 +239,7 @@ impl AkShareClient {
             .unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for entry in &data {
             let rows = entry["DisplayData"]["resultData"]["tplData"]["result"]["rows"]
                 .as_array()
@@ -243,7 +247,7 @@ impl AkShareClient {
                 .unwrap_or_default();
             for row_val in &rows {
                 let mut row = Row::new();
-                for (k, v) in row_val.as_object().unwrap_or(&serde_json::Map::new()) {
+                for (k, v) in row_val.as_object().unwrap_or(&empty_map) {
                     row.insert(k.clone(), v.clone());
                 }
                 if !row.is_empty() {

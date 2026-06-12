@@ -279,7 +279,7 @@ impl AkShareClient {
                         let qty = parse_f64(&row["todayQty"]);
                         let qty_chg = row
                             .get("qtySub")
-                            .or(row.get("todayQtyChg"))
+                            .or_else(|| row.get("todayQtyChg"))
                             .map_or(0.0, parse_f64);
 
                         // Merge into items by rank

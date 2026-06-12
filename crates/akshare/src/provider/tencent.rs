@@ -43,16 +43,16 @@ impl AkShareClient {
         adjust: &str,
         limit: usize,
     ) -> Result<Vec<CandlePoint>> {
+        #[derive(serde::Deserialize)]
+        struct Resp {
+            data: Option<serde_json::Value>,
+        }
+
         let ts = crate::market::tencent_market_symbol(symbol)?;
         let period = "day";
         let url = format!(
             "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={ts},{period},,,{limit},{adjust}"
         );
-
-        #[derive(serde::Deserialize)]
-        struct Resp {
-            data: Option<serde_json::Value>,
-        }
 
         let resp: Resp = self.get(&url).send().await?.json().await?;
         let data = resp
@@ -139,17 +139,17 @@ impl AkShareClient {
         symbol: &str,
         limit: usize,
     ) -> Result<Vec<CandlePoint>> {
+        #[derive(serde::Deserialize)]
+        struct Resp {
+            data: Option<serde_json::Value>,
+        }
+
         let code = crate::market::normalize_hk_symbol(symbol)
             .ok_or_else(|| Error::invalid_input(format!("invalid HK symbol: {symbol}")))?;
         let hk_symbol = format!("r_hk{code}");
         let url = format!(
             "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={hk_symbol},day,,,{limit},qfq"
         );
-
-        #[derive(serde::Deserialize)]
-        struct Resp {
-            data: Option<serde_json::Value>,
-        }
 
         let resp: Resp = self.get(&url).send().await?.json().await?;
         let data = resp

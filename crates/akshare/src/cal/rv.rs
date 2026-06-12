@@ -74,7 +74,7 @@ impl AkShareClient {
             let di = (curr_low / curr_open).ln();
 
             // RS = ui*(ui-ci) + di*(di-ci)
-            let rs = ui * (ui - ci) + di * (di - ci);
+            let rs = (ui - ci).mul_add(ui, di * (di - ci));
             rs_values.push(rs);
         }
 
@@ -109,7 +109,7 @@ impl AkShareClient {
         let vrs: f64 = rs_values.iter().sum::<f64>() / n;
 
         // Yang-Zhang RV
-        let yz_rv_squared = vo + k * vc + (1.0 - k) * vrs;
+        let yz_rv_squared = (1.0 - k).mul_add(vrs, k.mul_add(vc, vo));
         let yz_rv = yz_rv_squared.sqrt();
 
         // Return the final volatility as a single data point
@@ -131,15 +131,15 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<MacroDataPoint>> {
-        let klines = self.futures_zh_minute_sina(symbol, "1").await?;
-        if klines.is_empty() {
-            return Err(Error::not_found(format!("no minute data for {symbol}")));
-        }
-
         fn row_f64(row: &crate::types::Row, key: &str) -> f64 {
             row.get(key)
                 .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0)
+        }
+
+        let klines = self.futures_zh_minute_sina(symbol, "1").await?;
+        if klines.is_empty() {
+            return Err(Error::not_found(format!("no minute data for {symbol}")));
         }
 
         let bars: Vec<OhlcBar> = klines
@@ -206,7 +206,7 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for window_start in 0..(data.len() - window_size) {
-            let window = &data[window_start..window_start + window_size + 1];
+            let window = &data[window_start..=window_start + window_size];
             if let Ok(mut result) = self.volatility_yz_rv(window)
                 && let Some(point) = result.pop()
             {
@@ -294,10 +294,10 @@ mod tests {
         let bars: Vec<OhlcBar> = (0..10)
             .map(|i| OhlcBar {
                 date: format!("2024-01-{:02}", i + 1),
-                open: 100.0 + i as f64,
-                high: 105.0 + i as f64,
-                low: 99.0 + i as f64,
-                close: 103.0 + i as f64,
+                open: 100.0 + f64::from(i),
+                high: 105.0 + f64::from(i),
+                low: 99.0 + f64::from(i),
+                close: 103.0 + f64::from(i),
             })
             .collect();
 

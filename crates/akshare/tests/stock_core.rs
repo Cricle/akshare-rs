@@ -382,7 +382,7 @@ var hq_str_hkHSTECH="Hang Seng TECH,4000.00,4050.00,4100.00,4150.00,3950.00,4100
 
 /// THS HK fhpx HTML response.
 fn sample_ths_fhpx_html() -> String {
-    r#"<html><body><table><tr><td>2024-01-02</td><td>10派2</td><td>2024-02-01</td><td>2024-02-15</td><td>2024-01-20</td><td>2024-01-31</td><td>现金红利</td><td>实施</td><td>-</td></tr></table></body></html>"#.to_string()
+    r"<html><body><table><tr><td>2024-01-02</td><td>10派2</td><td>2024-02-01</td><td>2024-02-15</td><td>2024-01-20</td><td>2024-01-31</td><td>现金红利</td><td>实施</td><td>-</td></tr></table></body></html>".to_string()
 }
 
 /// HK famous stocks body with f20 field.

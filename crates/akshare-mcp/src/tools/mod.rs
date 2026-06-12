@@ -1,6 +1,6 @@
 //! MCP tool definitions for akshare financial data.
 //!
-//! All 42 tools are defined on [`AkShareMcpService`] and organized by category:
+//! All 86 tools are defined on [`AkShareMcpService`] and organized by category:
 //! stock, fund, bond, futures, option, forex, crypto, index, macro_data, economy, news.
 
 pub mod bond;
@@ -23,7 +23,7 @@ use rmcp::{
     tool, tool_handler, tool_router,
 };
 
-/// Central MCP service exposing 42 akshare financial data tools.
+/// Central MCP service exposing 86 akshare financial data tools.
 ///
 /// Implements [`ServerHandler`] for the MCP protocol and routes tool calls
 /// to the appropriate akshare API methods.
@@ -31,12 +31,13 @@ use rmcp::{
 pub struct AkShareMcpService {
     client: AkShareClient,
     #[allow(dead_code)]
-    tool_router: ToolRouter<AkShareMcpService>,
+    tool_router: ToolRouter<Self>,
 }
 
 #[tool_router]
 impl AkShareMcpService {
     /// Create a new service instance with default configuration.
+    #[must_use]
     pub fn new() -> Self {
         let client = AkShareClient::new();
         Self {
@@ -138,10 +139,43 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get A-share real-time spot data from Eastmoney")]
-    async fn stock_zh_a_spot_em(&self) -> Result<CallToolResult, McpError> {
+    async fn stock_zh_a_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .stock_zh_a_spot_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock real-time spot data from Eastmoney")]
+    async fn stock_hk_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_spot_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get US stock real-time spot data from Eastmoney")]
+    async fn stock_us_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_us_spot_em()
             .await
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
         Ok(CallToolResult::success(vec![Content::text(
@@ -162,7 +196,543 @@ impl AkShareMcpService {
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
-            .stock_zh_a_hist(&symbol, &period, &start_date, &end_date, &adjust)
+            .stock_zh_a_hist(&symbol, &period, &adjust, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock historical data from Eastmoney")]
+    async fn stock_hk_hist(
+        &self,
+        Parameters(stock::StockHistParams {
+            symbol,
+            period,
+            start_date,
+            end_date,
+            adjust,
+        }): Parameters<stock::StockHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_hist(&symbol, &period, &adjust, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get US stock historical data from Eastmoney")]
+    async fn stock_us_hist(
+        &self,
+        Parameters(stock::StockHistParams {
+            symbol,
+            period,
+            start_date,
+            end_date,
+            adjust,
+        }): Parameters<stock::StockHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_us_hist(&symbol, &period, &adjust, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    // ── HK/US Minute K-line ─────────────────────────────────────
+
+    #[tool(description = "Get HK stock minute-level K-line. Period: '1','5','15','30','60'")]
+    async fn stock_hk_hist_min(
+        &self,
+        Parameters(stock::StockHistParams {
+            symbol,
+            period,
+            start_date,
+            end_date,
+            adjust,
+        }): Parameters<stock::StockHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_hist_min_em(&symbol, &period, &adjust, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get US stock minute-level K-line. Period: '1','5','15','30','60'")]
+    async fn stock_us_hist_min(
+        &self,
+        Parameters(stock::StockHistParams {
+            symbol,
+            period,
+            start_date,
+            end_date,
+            adjust,
+        }): Parameters<stock::StockHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_us_hist_min_em(&symbol, &period, &adjust, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    // ── HK/US Daily K-line (Sina source) ──────────────────────
+
+    #[tool(description = "Get HK stock daily K-line from Sina. Adjust: '','qfq','hfq'")]
+    async fn stock_hk_daily(
+        &self,
+        Parameters(stock::StockHistParams {
+            symbol,
+            start_date,
+            end_date,
+            adjust,
+            ..
+        }): Parameters<stock::StockHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_daily(&symbol, &start_date, &end_date, &adjust)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get US stock daily K-line from Eastmoney")]
+    async fn stock_us_daily(
+        &self,
+        Parameters(stock::StockDailyParams {
+            symbol,
+            start_date,
+            end_date,
+        }): Parameters<stock::StockDailyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_us_daily(&symbol, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    // ── HK Special Data ───────────────────────────────────────
+
+    #[tool(description = "Get famous HK stocks from Eastmoney")]
+    async fn stock_hk_famous_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_famous_spot_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock hot rank from Eastmoney")]
+    async fn stock_hk_hot_rank_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_hot_rank_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock latest hot rank detail")]
+    async fn stock_hk_hot_rank_latest_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_hot_rank_latest_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock historical hot rank detail")]
+    async fn stock_hk_hot_rank_detail_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_hot_rank_detail_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK index real-time spot data")]
+    async fn stock_hk_index_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_index_spot_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK index daily K-line. Symbol: e.g. 'HSTECH', 'HSI'")]
+    async fn stock_hk_index_daily_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_index_daily_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(
+        description = "Get HK stock valuation from Baidu. Indicator: '总市值','市盈率(TTM)','市净率','市现率'. Period: '近一年','近三年','全部'"
+    )]
+    async fn stock_hk_valuation_baidu(
+        &self,
+        Parameters(stock::ValuationParams {
+            symbol,
+            indicator,
+            period,
+        }): Parameters<stock::ValuationParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_valuation_baidu(&symbol, &indicator, &period)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock financial indicators from Eastmoney")]
+    async fn stock_hk_financial_indicator_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_financial_indicator_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock dividend payout history from Eastmoney")]
+    async fn stock_hk_dividend_payout_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_dividend_payout_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock scale comparison from Eastmoney")]
+    async fn stock_hk_scale_comparison_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_scale_comparison_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HSI (Hang Seng Index) dividend yield history")]
+    async fn stock_hk_gxl_lg(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_gxl_lg()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK Stock Connect (港股通) constituent stocks")]
+    async fn stock_hk_ggt_components_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_ggt_components_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK security profile from Eastmoney")]
+    async fn stock_hk_security_profile_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_security_profile_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK company profile from Eastmoney")]
+    async fn stock_hk_company_profile_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_company_profile_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK growth comparison (peer comparison) from Eastmoney")]
+    async fn stock_hk_growth_comparison_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_growth_comparison_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK valuation comparison (peer comparison) from Eastmoney")]
+    async fn stock_hk_valuation_comparison_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_valuation_comparison_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get all HK stock spot data from Sina")]
+    async fn stock_hk_spot(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_spot()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK index daily K-line from Sina")]
+    async fn stock_hk_index_daily_sina(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_index_daily_sina(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK index spot data from Sina")]
+    async fn stock_hk_index_spot_sina(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_index_spot_sina()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock realtime hot rank detail")]
+    async fn stock_hk_hot_rank_detail_realtime_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_hot_rank_detail_realtime_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock dividend detail from THS (同花顺)")]
+    async fn stock_hk_fhpx_detail_ths(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_fhpx_detail_ths(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK stock indicators from Eniu (requires auth, may return error)")]
+    async fn stock_hk_indicator_eniu(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hk_indicator_eniu(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    // ── US Special Data ───────────────────────────────────────
+
+    #[tool(
+        description = "Get famous US stocks by category. Category: '科技类','金融类','医药食品类','媒体类','汽车能源类','制造零售类'"
+    )]
+    async fn stock_us_famous_spot_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_us_famous_spot_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get US pink sheet (OTC) stocks from Eastmoney")]
+    async fn stock_us_pink_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_us_pink_spot_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(
+        description = "Get US stock valuation from Baidu. Indicator: '总市值','市盈率(TTM)','市净率','市现率'. Period: '近一年','近三年','全部'"
+    )]
+    async fn stock_us_valuation_baidu(
+        &self,
+        Parameters(stock::ValuationParams {
+            symbol,
+            indicator,
+            period,
+        }): Parameters<stock::ValuationParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_us_valuation_baidu(&symbol, &indicator, &period)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get US stock name list from Sina")]
+    async fn get_us_stock_name(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .get_us_stock_name()
             .await
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
         Ok(CallToolResult::success(vec![Content::text(
@@ -171,7 +741,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get industry board list from Eastmoney")]
-    async fn stock_board_industry_name_em(&self) -> Result<CallToolResult, McpError> {
+    async fn stock_board_industry_name_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .stock_board_industry_name_em(100)
@@ -182,7 +755,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get individual stock fund flow from Eastmoney")]
+    #[tool(
+        description = "Get individual stock fund flow from Eastmoney (auto-detects A-share/HK/US market)"
+    )]
     async fn stock_individual_fund_flow(
         &self,
         Parameters(stock::FundFlowParams {
@@ -191,9 +766,50 @@ impl AkShareMcpService {
             limit,
         }): Parameters<stock::FundFlowParams>,
     ) -> Result<CallToolResult, McpError> {
+        let market = if market.is_empty() {
+            detect_fund_flow_market(&symbol)
+        } else {
+            market
+        };
         let data = self
             .client
             .stock_individual_fund_flow(&symbol, &market, limit)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(
+        description = "Get main fund flow (主力资金流向) for a stock. Supports A-share (e.g. 600000), HK (e.g. 00700), and US (e.g. AAPL)"
+    )]
+    async fn stock_main_fund_flow(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_main_fund_flow(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(
+        description = "Get fund flow ranking for A-share stocks. Indicator: 'today', '3day', '5day', '10day'"
+    )]
+    async fn stock_individual_fund_flow_rank(
+        &self,
+        Parameters(stock::FundFlowRankParams { indicator, limit }): Parameters<
+            stock::FundFlowRankParams,
+        >,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_individual_fund_flow_rank(&indicator, limit)
             .await
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
         Ok(CallToolResult::success(vec![Content::text(
@@ -219,7 +835,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get fund manager list from Eastmoney")]
-    async fn fund_manager_em(&self) -> Result<CallToolResult, McpError> {
+    async fn fund_manager_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .fund_manager_em()
@@ -231,7 +850,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get ETF real-time spot data from Eastmoney")]
-    async fn fund_etf_spot_em(&self) -> Result<CallToolResult, McpError> {
+    async fn fund_etf_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .fund_etf_spot_em()
@@ -243,7 +865,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get LOF real-time spot data from Eastmoney")]
-    async fn fund_lof_spot_em(&self) -> Result<CallToolResult, McpError> {
+    async fn fund_lof_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .fund_lof_spot_em()
@@ -262,6 +887,38 @@ impl AkShareMcpService {
         let data = self
             .client
             .fund_open_fund_rank_em(&symbol, limit)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK fund ranking from Eastmoney")]
+    async fn fund_hk_rank_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .fund_hk_rank_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(
+        description = "Get HK fund historical NAV. Query type: '历史净值明细' or '分红送配详情'"
+    )]
+    async fn fund_hk_fund_hist_em(
+        &self,
+        Parameters(fund::FundHkHistParams { code, query_type }): Parameters<fund::FundHkHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .fund_hk_fund_hist_em(&code, &query_type)
             .await
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
         Ok(CallToolResult::success(vec![Content::text(
@@ -320,7 +977,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get bond spot deal data")]
-    async fn bond_spot_deal(&self) -> Result<CallToolResult, McpError> {
+    async fn bond_spot_deal(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .bond_spot_deal()
@@ -443,7 +1103,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get SSE option current day data")]
-    async fn option_current_day_sse(&self) -> Result<CallToolResult, McpError> {
+    async fn option_current_day_sse(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .option_current_day_sse()
@@ -489,7 +1152,10 @@ impl AkShareMcpService {
     // ── Forex ──────────────────────────────────────────────────
 
     #[tool(description = "Get BOC (Bank of China) forex rates")]
-    async fn forex_boc_rates(&self) -> Result<CallToolResult, McpError> {
+    async fn forex_boc_rates(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .forex_boc_rates()
@@ -501,7 +1167,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get Eastmoney forex rates")]
-    async fn forex_em_rates(&self) -> Result<CallToolResult, McpError> {
+    async fn forex_em_rates(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .forex_em_rates()
@@ -513,7 +1182,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get real-time forex spot rates from Eastmoney")]
-    async fn forex_spot_em(&self) -> Result<CallToolResult, McpError> {
+    async fn forex_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .forex_spot_em()
@@ -561,7 +1233,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get Bitcoin holding report")]
-    async fn crypto_bitcoin_hold_report(&self) -> Result<CallToolResult, McpError> {
+    async fn crypto_bitcoin_hold_report(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .crypto_bitcoin_hold_report()
@@ -607,7 +1282,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get index stock info list")]
-    async fn index_stock_info(&self) -> Result<CallToolResult, McpError> {
+    async fn index_stock_info(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .index_stock_info()
@@ -637,10 +1315,79 @@ impl AkShareMcpService {
         )]))
     }
 
+    #[tool(description = "Get HK index spot data from Sina (index module)")]
+    async fn index_hk_spot_sina(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .index_hk_spot_sina()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get HK index spot data from Eastmoney (index module)")]
+    async fn index_hk_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .index_hk_spot_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(
+        description = "Get HK index daily K-line from Eastmoney. Use index_hk_spot_em to discover internal_id"
+    )]
+    async fn index_hk_daily_em(
+        &self,
+        Parameters(index::IndexHkDailyParams {
+            symbol,
+            internal_id,
+            limit,
+        }): Parameters<index::IndexHkDailyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .index_hk_daily_em(&symbol, &internal_id, limit)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get US stock index from Sina (requires JS decoding, may return error)")]
+    async fn index_us_stock_sina(
+        &self,
+        Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .index_us_stock_sina(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
     // ── Macro Data ─────────────────────────────────────────────
 
     #[tool(description = "Get China GDP data")]
-    async fn macro_china_gdp(&self) -> Result<CallToolResult, McpError> {
+    async fn macro_china_gdp(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .macro_china_gdp()
@@ -652,7 +1399,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get US CPI year-over-year data")]
-    async fn macro_usa_cpi_yoy(&self) -> Result<CallToolResult, McpError> {
+    async fn macro_usa_cpi_yoy(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .macro_usa_cpi_yoy()
@@ -664,7 +1414,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get China GDP yearly data")]
-    async fn macro_china_gdp_yearly(&self) -> Result<CallToolResult, McpError> {
+    async fn macro_china_gdp_yearly(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .macro_china_gdp_yearly()
@@ -676,7 +1429,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get US CPI monthly data")]
-    async fn macro_usa_cpi_monthly(&self) -> Result<CallToolResult, McpError> {
+    async fn macro_usa_cpi_monthly(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .macro_usa_cpi_monthly()
@@ -690,7 +1446,10 @@ impl AkShareMcpService {
     // ── Economy ────────────────────────────────────────────────
 
     #[tool(description = "Get China auto sales data")]
-    async fn economy_auto_sales(&self) -> Result<CallToolResult, McpError> {
+    async fn economy_auto_sales(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .economy_auto_sales()
@@ -702,7 +1461,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get box office data")]
-    async fn economy_box_office(&self) -> Result<CallToolResult, McpError> {
+    async fn economy_box_office(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .economy_box_office()
@@ -714,7 +1476,10 @@ impl AkShareMcpService {
     }
 
     #[tool(description = "Get real-time movie box office data")]
-    async fn movie_boxoffice_realtime(&self) -> Result<CallToolResult, McpError> {
+    async fn movie_boxoffice_realtime(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
             .movie_boxoffice_realtime()
@@ -770,6 +1535,31 @@ impl AkShareMcpService {
         )]))
     }
 
+    #[tool(
+        description = "Search stock-specific news by symbol. Supports A-share (e.g. 600000), HK (e.g. 00700), and US (e.g. AAPL) stocks"
+    )]
+    async fn stock_news_em(
+        &self,
+        Parameters(news::StockNewsSearchParams { symbol, limit }): Parameters<
+            news::StockNewsSearchParams,
+        >,
+    ) -> Result<CallToolResult, McpError> {
+        use akshare::market::detect_market;
+        use akshare::types::MarketKind;
+
+        let market = detect_market(&symbol);
+        let data = match market {
+            MarketKind::AShare => self.client.stock_news_em(&symbol).await,
+            MarketKind::HongKong => self.client.stock_news_em_hk(&symbol).await,
+            MarketKind::UsEquity => self.client.stock_news_em_us(&symbol).await,
+        };
+        let mut data = data.map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        data.truncate(limit);
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
     #[tool(description = "Get economic news from Baidu")]
     async fn news_economic_baidu(
         &self,
@@ -798,6 +1588,25 @@ impl AkShareMcpService {
         Ok(CallToolResult::success(vec![Content::text(
             serde_json::to_string_pretty(&data).unwrap(),
         )]))
+    }
+}
+
+/// Auto-detect market code for fund flow from symbol.
+fn detect_fund_flow_market(symbol: &str) -> String {
+    use akshare::market::detect_market;
+    use akshare::types::MarketKind;
+
+    match detect_market(symbol) {
+        MarketKind::HongKong => "hk".to_string(),
+        MarketKind::UsEquity => "us".to_string(),
+        MarketKind::AShare => {
+            let trimmed = symbol.trim();
+            if trimmed.starts_with('6') {
+                "sh".to_string()
+            } else {
+                "sz".to_string()
+            }
+        }
     }
 }
 

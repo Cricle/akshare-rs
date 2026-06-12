@@ -49,6 +49,22 @@ impl AkShareClient {
 
     /// Sina US daily candles.
     pub async fn sina_us_daily(&self, symbol: &str, limit: usize) -> Result<Vec<CandlePoint>> {
+        #[derive(serde::Deserialize)]
+        struct KlineEntry {
+            #[serde(default)]
+            d: String,
+            #[serde(default)]
+            o: String,
+            #[serde(default)]
+            h: String,
+            #[serde(default)]
+            l: String,
+            #[serde(default)]
+            c: String,
+            #[serde(default)]
+            v: String,
+        }
+
         let url = format!(
             "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/IO.XSRV2.CallbackList/US_MinKService.getDailyK?symbol={symbol}&_var=kline_dayqfq&range={limit}d"
         );
@@ -65,22 +81,6 @@ impl AkShareClient {
             .and_then(|(_, rest)| rest.rsplit_once(')'))
             .map(|(s, _)| s)
             .ok_or_else(|| Error::decode("invalid sina US kline JSONP"))?;
-
-        #[derive(serde::Deserialize)]
-        struct KlineEntry {
-            #[serde(default)]
-            d: String,
-            #[serde(default)]
-            o: String,
-            #[serde(default)]
-            h: String,
-            #[serde(default)]
-            l: String,
-            #[serde(default)]
-            c: String,
-            #[serde(default)]
-            v: String,
-        }
 
         let entries: Vec<KlineEntry> = serde_json::from_str(json_str).map_err(|e| {
             Error::decode(format!(

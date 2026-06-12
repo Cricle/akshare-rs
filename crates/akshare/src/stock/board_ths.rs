@@ -311,8 +311,8 @@ impl AkShareClient {
     async fn fetch_ths_board_index(
         &self,
         board_code: &str,
-        _start_date: &str,
-        _end_date: &str,
+        start_date: &str,
+        end_date: &str,
     ) -> Result<Vec<ThsBoardIndexPoint>> {
         // THS kline data is served from d.10jqka.com.cn
         // The inner_code is typically the same as the board_code for THS boards
@@ -320,8 +320,8 @@ impl AkShareClient {
         let mut all_points = Vec::new();
 
         // Fetch kline data for each year
-        let start_year: i32 = _start_date[..4].parse().unwrap_or(2020);
-        let end_year: i32 = _end_date[..4].parse().unwrap_or(2025);
+        let start_year: i32 = start_date[..4].parse().unwrap_or(2020);
+        let end_year: i32 = end_date[..4].parse().unwrap_or(2025);
 
         for year in start_year..=end_year {
             let url = format!("https://d.10jqka.com.cn/v4/line/bk_{board_code}/01/{year}.js");

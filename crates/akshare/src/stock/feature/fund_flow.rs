@@ -14,14 +14,8 @@ use crate::error::{Error, Result};
 impl AkShareClient {
     /// 同花顺-数据中心-资金流向-个股资金流
     /// Uses Eastmoney API as equivalent data source.
-    pub async fn stock_fund_flow_individual(&self, symbol: &str) -> Result<Vec<FundFlowEntry>> {
-        let sort_field = match symbol {
-            "3日排行" => "f62",
-            "5日排行" => "f62",
-            "10日排行" => "f62",
-            "20日排行" => "f62",
-            _ => "f62",
-        };
+    pub async fn stock_fund_flow_individual(&self, _symbol: &str) -> Result<Vec<FundFlowEntry>> {
+        let sort_field = "f62";
         let data = self
             .cistock_fetch(
                 "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
@@ -153,10 +147,28 @@ impl AkShareClient {
             .collect())
     }
 
-    /// 东方财富-主力资金流向
+    /// 东方财富-主力资金流向 (A-share / HK / US)
     pub async fn stock_main_fund_flow(&self, symbol: &str) -> Result<Vec<MainFundFlow>> {
-        let market_code = if symbol.starts_with('6') { "1" } else { "0" };
-        let secid = format!("{market_code}.{symbol}");
+        let secid = match crate::market::detect_market(symbol) {
+            crate::types::MarketKind::HongKong => {
+                let code = symbol.trim().trim_start_matches('0');
+                format!("116.{code:0>5}")
+            }
+            crate::types::MarketKind::UsEquity => {
+                let market_code =
+                    if crate::stock::eastmoney_fund_flow::is_nyse_symbol(symbol.trim()) {
+                        "106"
+                    } else {
+                        "105"
+                    };
+                format!("{market_code}.{}", symbol.trim())
+            }
+            crate::types::MarketKind::AShare => {
+                // A-share: SH=1, SZ/BJ=0
+                let market_code = if symbol.starts_with('6') { "1" } else { "0" };
+                format!("{market_code}.{symbol}")
+            }
+        };
         let url = "https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get";
         let resp = self
             .get(url)

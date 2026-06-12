@@ -131,8 +131,8 @@ impl AkShareClient {
 
         let mut result = Vec::with_capacity(rows.len());
         for mut row in rows {
-            row.commission_update_time = comm_time.clone();
-            row.price_update_time = price_time.clone();
+            row.commission_update_time.clone_from(&comm_time);
+            row.price_update_time.clone_from(&price_time);
             result.push(row);
         }
 

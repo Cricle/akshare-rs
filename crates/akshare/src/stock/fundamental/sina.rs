@@ -29,7 +29,7 @@ static RE_HTML_TAG: LazyLock<regex::Regex> =
 static RE_YEAR_TABLE: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r#"id="con02-1".*?<table[^>]*>(.*?)</table>"#).unwrap());
 static RE_LINK_YEAR: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r#"<a[^>]*>(\d{4})</a>"#).unwrap());
+    LazyLock::new(|| regex::Regex::new(r"<a[^>]*>(\d{4})</a>").unwrap());
 static RE_MENU_LINK: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"<li[^>]*><a[^>]*href="([^"]*)"[^>]*>([^<]*)</a></li>"#).unwrap()
 });
@@ -109,7 +109,7 @@ fn parse_html_tables(html: &str) -> Vec<(Vec<String>, Vec<Vec<String>>)> {
         if headers.is_empty()
             && let Some(first_row) = rows.first()
         {
-            headers = first_row.clone();
+            headers.clone_from(first_row);
             rows.remove(0);
         }
 
@@ -553,7 +553,7 @@ impl AkShareClient {
         }
 
         let (headers, rows) = &tables[13];
-        parse_shareholder_table(headers, rows, "截止日期")
+        Ok(parse_shareholder_table(headers, rows, "截止日期"))
     }
 
     /// Sina fund stock holders (基金持股).
@@ -572,7 +572,7 @@ impl AkShareClient {
         }
 
         let (headers, rows) = &tables[13];
-        parse_shareholder_table(headers, rows, "截止日期")
+        Ok(parse_shareholder_table(headers, rows, "截止日期"))
     }
 
     /// Sina main stock holders (主要股东).
@@ -591,7 +591,7 @@ impl AkShareClient {
         }
 
         let (headers, rows) = &tables[13];
-        parse_shareholder_table(headers, rows, "截至日期")
+        Ok(parse_shareholder_table(headers, rows, "截至日期"))
     }
 
     // -----------------------------------------------------------------------
@@ -671,7 +671,7 @@ impl AkShareClient {
                     "其他指标",
                 ];
                 if categories.contains(&first.as_str()) {
-                    current_category = first.clone();
+                    current_category.clone_from(first);
                     continue;
                 }
 
@@ -905,9 +905,9 @@ fn parse_shareholder_table(
     _headers: &[String],
     rows: &[Vec<String>],
     date_field: &str,
-) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+) -> Vec<HashMap<String, serde_json::Value>> {
     if rows.is_empty() {
-        return Ok(vec![]);
+        return vec![];
     }
 
     // Simple approach: treat each row as a record with the available columns
@@ -926,13 +926,13 @@ fn parse_shareholder_table(
         if row[0].contains("截止日期") || row[0].contains("截至日期") {
             // Next element might be the date
             if row.len() > 1 {
-                current_date = row[1].clone();
+                current_date.clone_from(&row[1]);
             }
             continue;
         }
         if row[0].contains("公告日期") {
             if row.len() > 1 {
-                current_ann_date = row[1].clone();
+                current_ann_date.clone_from(&row[1]);
             }
             continue;
         }
@@ -969,5 +969,5 @@ fn parse_shareholder_table(
         all_records.push(record);
     }
 
-    Ok(all_records)
+    all_records
 }

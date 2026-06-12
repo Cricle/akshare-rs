@@ -496,7 +496,7 @@ impl AkShareClient {
                 break;
             }
 
-            for item in diff.iter() {
+            for item in &diff {
                 // Items may be objects with numeric keys or direct arrays
                 let values = if let Some(arr) = item.as_array() {
                     arr.clone()
@@ -621,7 +621,7 @@ fn em_i64(arr: &[serde_json::Value], idx: usize) -> i64 {
     }
 }
 
-fn all_data_len(diff: &[serde_json::Value]) -> usize {
+const fn all_data_len(diff: &[serde_json::Value]) -> usize {
     diff.len()
 }
 

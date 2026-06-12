@@ -136,6 +136,14 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<UsDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         // Normalize to Eastmoney secid format for US stocks
         let secid = if symbol.contains('.') {
             symbol.to_string()
@@ -160,15 +168,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -207,6 +206,14 @@ impl AkShareClient {
     /// Note: Sina US stock API requires JavaScript execution for full data.
     /// This returns a basic set from the Sina API.
     pub async fn stock_us_spot(&self) -> Result<Vec<UsSpotSina>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
         // Use Eastmoney US spot API as a more reliable alternative
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
@@ -227,15 +234,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -277,6 +275,14 @@ impl AkShareClient {
     ///
     /// - `symbol`: category like "科技类", "金融类", "医药食品类", "媒体类", "汽车能源类", "制造零售类"
     pub async fn stock_us_famous_spot_em(&self, symbol: &str) -> Result<Vec<UsFamousStock>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<serde_json::Value>,
+        }
         let market_map: std::collections::HashMap<&str, &str> = [
             ("科技类", "0216"),
             ("金融类", "0217"),
@@ -314,15 +320,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<serde_json::Value>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -390,6 +387,14 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_us_pink_spot_em()`
     pub async fn stock_us_pink_spot_em(&self) -> Result<Vec<UsPinkStock>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
@@ -409,15 +414,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload

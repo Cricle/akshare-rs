@@ -34,6 +34,7 @@ struct SgeBenchmarkResp {
 }
 
 /// List available SGE symbols.
+#[must_use]
 pub fn spot_symbol_table_sge() -> Vec<&'static str> {
     SGE_SYMBOLS.to_vec()
 }

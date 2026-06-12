@@ -59,7 +59,7 @@ impl AkShareClient {
             if let Some(start) = resp.find("({")
                 && let Some(end) = resp.rfind(");")
             {
-                let json_str = &resp[start + 1..end + 1];
+                let json_str = &resp[start + 1..=end];
                 if let Ok(data) = serde_json::from_str::<serde_json::Value>(json_str)
                     && let Some(arr) = data.get("data").and_then(|d| d.as_array())
                 {

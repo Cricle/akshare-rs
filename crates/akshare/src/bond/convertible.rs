@@ -51,9 +51,8 @@ fn cb_secid(symbol: &str) -> Result<String> {
     }
     let market = if code.starts_with('1') && code.len() >= 2 {
         match &code[..2] {
-            "11" => "1", // Shanghai
             "12" => "0", // Shenzhen
-            _ => "1",
+            _ => "1",    // Shanghai
         }
     } else {
         "1"

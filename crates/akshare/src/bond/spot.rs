@@ -25,9 +25,10 @@ impl AkShareClient {
         let records = resp["records"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for rec in &records {
             let mut row = crate::types::Row::new();
-            for (k, v) in rec.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in rec.as_object().unwrap_or(&empty_map) {
                 row.insert(k.clone(), v.clone());
             }
             if !row.is_empty() {
@@ -54,9 +55,10 @@ impl AkShareClient {
         let records = resp["records"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for rec in &records {
             let mut row = crate::types::Row::new();
-            for (k, v) in rec.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in rec.as_object().unwrap_or(&empty_map) {
                 row.insert(k.clone(), v.clone());
             }
             if !row.is_empty() {

@@ -15,11 +15,13 @@ pub struct AkShareClient {
 }
 
 impl AkShareClient {
+    #[must_use]
     pub fn new() -> Self {
         Self::builder().build()
     }
 
     /// Create a test client that redirects all HTTP requests to a mock server.
+    #[must_use]
     pub fn with_mock(mock_uri: String) -> Self {
         let mut client = Self::new();
         client.mock_uri = Some(mock_uri);
@@ -51,6 +53,7 @@ impl AkShareClient {
         self.http.post(self.redirect_url(url))
     }
 
+    #[must_use]
     pub fn builder() -> AkShareClientBuilder {
         AkShareClientBuilder {
             tushare_token: None,
@@ -81,31 +84,37 @@ pub struct AkShareClientBuilder {
 }
 
 impl AkShareClientBuilder {
+    #[must_use]
     pub fn tushare_token(mut self, token: impl Into<String>) -> Self {
         self.tushare_token = Some(token.into());
         self
     }
 
+    #[must_use]
     pub fn user_agent(mut self, ua: impl Into<String>) -> Self {
         self.user_agent = ua.into();
         self
     }
 
-    pub fn timeout(mut self, timeout: Duration) -> Self {
+    #[must_use]
+    pub const fn timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
     }
 
-    pub fn connect_timeout(mut self, timeout: Duration) -> Self {
+    #[must_use]
+    pub const fn connect_timeout(mut self, timeout: Duration) -> Self {
         self.connect_timeout = timeout;
         self
     }
 
+    #[must_use]
     pub fn proxy(mut self, proxy: impl Into<String>) -> Self {
         self.proxy = Some(proxy.into());
         self
     }
 
+    #[must_use]
     pub fn build(self) -> AkShareClient {
         let mut builder = reqwest::Client::builder()
             .user_agent(&self.user_agent)

@@ -571,7 +571,8 @@ impl AkShareClient {
         // Forward-fill dates
         for i in 1..rows.len() {
             if rows[i].date.is_empty() {
-                rows[i].date = rows[i - 1].date.clone();
+                let prev_date = rows[i - 1].date.clone();
+                rows[i].date = prev_date;
             }
         }
 

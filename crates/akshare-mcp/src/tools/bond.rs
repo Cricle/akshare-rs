@@ -17,7 +17,7 @@ pub struct BondYieldParams {
     pub end_date: String,
 }
 
-fn default_limit() -> usize {
+const fn default_limit() -> usize {
     100
 }
 
@@ -34,7 +34,7 @@ mod tests {
 
     #[test]
     fn test_bond_limit_params() {
-        let json = r#"{}"#;
+        let json = r"{}";
         let params: BondLimitParams = serde_json::from_str(json).unwrap();
         assert_eq!(params.limit, 100);
     }

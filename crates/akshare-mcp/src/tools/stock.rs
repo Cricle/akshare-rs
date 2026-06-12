@@ -1,6 +1,9 @@
 use rmcp::schemars;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct EmptyParams {}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
 pub struct SymbolParams {
     pub symbol: String,
 }
@@ -28,17 +31,58 @@ pub struct StockHistParams {
 #[derive(serde::Deserialize, schemars::JsonSchema)]
 pub struct FundFlowParams {
     pub symbol: String,
+    /// Market code: "sh", "sz", "bj", "hk", "us". Auto-detected if omitted.
+    #[serde(default)]
     pub market: String,
     #[serde(default = "default_limit")]
     pub limit: usize,
 }
 
-fn default_limit() -> usize {
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct FundFlowRankParams {
+    /// Indicator: "today", "3day", "5day", "10day"
+    #[serde(default = "default_indicator")]
+    pub indicator: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct StockDailyParams {
+    pub symbol: String,
+    #[serde(default)]
+    pub start_date: String,
+    #[serde(default)]
+    pub end_date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct ValuationParams {
+    pub symbol: String,
+    #[serde(default = "default_valuation_indicator")]
+    pub indicator: String,
+    #[serde(default = "default_valuation_period")]
+    pub period: String,
+}
+
+const fn default_limit() -> usize {
     60
 }
 
 fn default_period() -> String {
     "daily".to_string()
+}
+
+fn default_indicator() -> String {
+    "today".to_string()
+}
+
+fn default_valuation_indicator() -> String {
+    "总市值".to_string()
+}
+
+fn default_valuation_period() -> String {
+    "近一年".to_string()
 }
 
 #[cfg(test)]

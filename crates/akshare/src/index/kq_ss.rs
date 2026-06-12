@@ -15,31 +15,6 @@ impl AkShareClient {
     /// `symbol` is one of many sub-indices, e.g. "柯桥时尚指数", "时尚创意指数",
     /// "时尚设计人才数", etc.
     pub async fn index_kq_fashion(&self, symbol: &str) -> Result<Vec<KqFashionPoint>> {
-        let struct_code = match symbol {
-            "柯桥时尚指数" => "root",
-            "时尚创意指数" => "01",
-            "时尚设计人才数" => "0101",
-            "新花型推出数" => "0102",
-            "创意产品成交数" => "0103",
-            "创意企业数量" => "0104",
-            "时尚活跃度指数" => "02",
-            "电商运行数" => "0201",
-            "时尚平台拓展数" => "0201",
-            "新产品销售额占比" => "0201",
-            "企业合作占比" => "0201",
-            "品牌传播费用" => "0201",
-            "时尚推广度指数" => "03",
-            "国际交流合作次数" => "0301",
-            "企业参展次数" => "0302",
-            "外商驻点数量变化" => "0302",
-            "时尚评价指数" => "04",
-            _ => {
-                return Err(Error::invalid_input(format!(
-                    "unknown KQ fashion index: {symbol}"
-                )));
-            }
-        };
-
         #[derive(Deserialize)]
         struct Envelope {
             data: Option<Vec<FashionItem>>,
@@ -53,6 +28,30 @@ impl AkShareClient {
             #[serde(default)]
             indexValue: Option<f64>,
         }
+
+        let struct_code = match symbol {
+            "柯桥时尚指数" => "root",
+            "时尚创意指数" => "01",
+            "时尚设计人才数" => "0101",
+            "新花型推出数" => "0102",
+            "创意产品成交数" => "0103",
+            "创意企业数量" => "0104",
+            "时尚活跃度指数" => "02",
+            "电商运行数"
+            | "时尚平台拓展数"
+            | "新产品销售额占比"
+            | "企业合作占比"
+            | "品牌传播费用" => "0201",
+            "时尚推广度指数" => "03",
+            "国际交流合作次数" => "0301",
+            "企业参展次数" | "外商驻点数量变化" => "0302",
+            "时尚评价指数" => "04",
+            _ => {
+                return Err(Error::invalid_input(format!(
+                    "unknown KQ fashion index: {symbol}"
+                )));
+            }
+        };
 
         let response = self
             .get("http://api.idx365.com/index/project/34/data")

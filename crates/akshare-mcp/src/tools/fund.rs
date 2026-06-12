@@ -1,6 +1,19 @@
 use rmcp::schemars;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct FundHkHistParams {
+    /// HK fund code (from fund_hk_rank_em)
+    pub code: String,
+    /// Query type: "历史净值明细" or "分红送配详情"
+    #[serde(default = "default_query_type")]
+    pub query_type: String,
+}
+
+fn default_query_type() -> String {
+    "历史净值明细".to_string()
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
 pub struct FundHistParams {
     pub symbol: String,
     #[serde(default = "default_limit")]
@@ -14,7 +27,7 @@ pub struct FundRankParams {
     pub limit: usize,
 }
 
-fn default_limit() -> usize {
+const fn default_limit() -> usize {
     60
 }
 

@@ -103,7 +103,6 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<FuturesHistKline>> {
         let period_code = match period {
-            "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
             _ => "101",
@@ -119,8 +118,6 @@ impl AkShareClient {
             let variety = RE_ALPHA.find(symbol).map_or("", |m| m.as_str());
             let market = match variety.to_uppercase().as_str() {
                 "IF" | "IC" | "IH" | "IM" | "T" | "TF" | "TS" => "8",
-                "rb" | "cu" | "al" | "zn" | "au" | "ag" | "fu" | "ru" | "bu" | "hc" | "ni"
-                | "sn" | "pb" | "ss" | "sp" | "nr" | "lu" | "bc" => "113",
                 "m" | "y" | "a" | "b" | "c" | "cs" | "jd" | "pp" | "v" | "l" | "eg" | "eb"
                 | "pg" | "rr" | "lh" | "fb" | "bb" => "114",
                 "CF" | "SR" | "TA" | "OI" | "MA" | "FG" | "RM" | "RS" | "ZC" | "SF" | "SM"

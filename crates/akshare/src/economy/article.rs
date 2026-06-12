@@ -84,7 +84,7 @@ impl AkShareClient {
             "https://s3.amazonaws.com/files.fred.stlouisfed.org/fred-md/monthly/{date}.csv"
         );
         let body = self.get(&url).send().await?.text().await?;
-        parse_fred_csv(&body, &format!("FRED-MD {date}"))
+        Ok(parse_fred_csv(&body, &format!("FRED-MD {date}")))
     }
 
     /// FRED-QD quarterly macroeconomic dataset.
@@ -95,7 +95,7 @@ impl AkShareClient {
             "https://s3.amazonaws.com/files.fred.stlouisfed.org/fred-md/quarterly/{date}.csv"
         );
         let body = self.get(&url).send().await?.text().await?;
-        parse_fred_csv(&body, &format!("FRED-QD {date}"))
+        Ok(parse_fred_csv(&body, &format!("FRED-QD {date}")))
     }
 
     /// Oxford-Man Institute Realized Library - full realized volatility data.
@@ -304,17 +304,17 @@ impl AkShareClient {
 
 /// Parse a FRED CSV file (first column = date, remaining = data columns).
 /// Returns one `MacroDataPoint` per row per numeric column.
-fn parse_fred_csv(body: &str, name_prefix: &str) -> Result<Vec<MacroDataPoint>> {
+fn parse_fred_csv(body: &str, name_prefix: &str) -> Vec<MacroDataPoint> {
     let mut items = Vec::new();
     let lines: Vec<&str> = body.lines().collect();
     if lines.is_empty() {
-        return Ok(items);
+        return items;
     }
 
     // Parse header to get column names
     let header: Vec<&str> = lines[0].split(',').map(str::trim).collect();
     if header.len() < 2 {
-        return Ok(items);
+        return items;
     }
 
     for line in &lines[1..] {
@@ -340,7 +340,7 @@ fn parse_fred_csv(body: &str, name_prefix: &str) -> Result<Vec<MacroDataPoint>> 
             }
         }
     }
-    Ok(items)
+    items
 }
 
 #[cfg(test)]
@@ -350,7 +350,7 @@ mod tests {
     #[test]
     fn test_parse_fred_csv() {
         let csv = "DATE,VALUE1,VALUE2\n2023-01-01,100.5,200.3\n2023-02-01,101.0,201.0\n";
-        let items = parse_fred_csv(csv, "test").unwrap();
+        let items = parse_fred_csv(csv, "test");
         assert_eq!(items.len(), 4);
         assert_eq!(items[0].date, "2023-01-01");
         assert!((items[0].value - 100.5).abs() < 0.01);
@@ -358,13 +358,13 @@ mod tests {
 
     #[test]
     fn test_parse_fred_csv_empty() {
-        let items = parse_fred_csv("", "test").unwrap();
+        let items = parse_fred_csv("", "test");
         assert!(items.is_empty());
     }
 
     #[test]
     fn test_parse_fred_csv_header_only() {
-        let items = parse_fred_csv("DATE,VALUE\n", "test").unwrap();
+        let items = parse_fred_csv("DATE,VALUE\n", "test");
         assert!(items.is_empty());
     }
 }

@@ -5,7 +5,7 @@ use crate::error::{Error, Result};
 use crate::types::NewsItem;
 
 /// Strip `<em>` / `</em>` highlight tags and other HTML tags from text.
-fn strip_em_tags(text: &str) -> String {
+pub(crate) fn strip_em_tags(text: &str) -> String {
     text.replace("<em>", "").replace("</em>", "")
 }
 
@@ -13,7 +13,7 @@ fn strip_em_tags(text: &str) -> String {
 ///
 /// Response format: `jQuery...({...})`  -- we strip the callback prefix and
 /// trailing `)` to extract the inner JSON object.
-fn strip_jsonp(raw: &str) -> Result<&str> {
+pub(crate) fn strip_jsonp(raw: &str) -> Result<&str> {
     // Find the first `(` which marks the start of the JSON payload.
     let start = raw
         .find('(')
@@ -26,12 +26,83 @@ fn strip_jsonp(raw: &str) -> Result<&str> {
     Ok(inner[..end].trim())
 }
 
+/// Parse a list of Eastmoney search result entries into `NewsItem`s.
+pub(crate) fn parse_search_entries(list: &[serde_json::Value], limit: usize) -> Vec<NewsItem> {
+    let mut items = Vec::with_capacity(list.len().min(limit));
+    for entry in list {
+        if items.len() >= limit {
+            break;
+        }
+        let title_raw = entry.get("title").and_then(|v| v.as_str()).unwrap_or("");
+        let content_raw = entry.get("content").and_then(|v| v.as_str()).unwrap_or("");
+        let date = entry
+            .get("date")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+        let media = entry
+            .get("mediaName")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+
+        let url = entry
+            .get("articleUrl")
+            .and_then(|v| v.as_str())
+            .map(std::string::ToString::to_string)
+            .or_else(|| {
+                entry
+                    .get("code")
+                    .and_then(|v| v.as_str())
+                    .map(|code| format!("http://finance.eastmoney.com/a/{code}.html"))
+            });
+
+        let summary = strip_em_tags(content_raw)
+            .replace("\u{3000}", "")
+            .replace("\r\n", " ")
+            .trim()
+            .to_string();
+
+        items.push(NewsItem {
+            published_at: date,
+            title: strip_em_tags(title_raw),
+            summary,
+            source: media,
+            url,
+        });
+    }
+    items
+}
+
 impl AkShareClient {
     /// Search financial news from Eastmoney.
     ///
     /// Queries `https://search-api-web.eastmoney.com/search/jsonp` with the
     /// given keyword and returns up to `limit` news items.
     pub async fn news_search(&self, query: &str, limit: usize) -> Result<Vec<NewsItem>> {
+        self.news_search_inner(query, limit, "default").await
+    }
+
+    /// Search financial news with a specific search scope.
+    ///
+    /// `scope` controls the search breadth:
+    /// - `"default"` — standard A-share focused news
+    /// - `"global"` — broader scope covering HK/US market news
+    pub async fn news_search_with_scope(
+        &self,
+        query: &str,
+        limit: usize,
+        scope: &str,
+    ) -> Result<Vec<NewsItem>> {
+        self.news_search_inner(query, limit, scope).await
+    }
+
+    async fn news_search_inner(
+        &self,
+        query: &str,
+        limit: usize,
+        scope: &str,
+    ) -> Result<Vec<NewsItem>> {
         if query.is_empty() {
             return Err(Error::invalid_input("query must not be empty"));
         }
@@ -39,7 +110,7 @@ impl AkShareClient {
             return Ok(Vec::new());
         }
 
-        let page_size = limit.min(100); // Eastmoney caps at 100 per page
+        let page_size = limit.min(100);
 
         let inner_param = serde_json::json!({
             "uid": "",
@@ -50,7 +121,7 @@ impl AkShareClient {
             "clientVersion": "curr",
             "param": {
                 "cmsArticleWebOld": {
-                    "searchScope": "default",
+                    "searchScope": scope,
                     "sort": "default",
                     "pageIndex": 1,
                     "pageSize": page_size,
@@ -84,53 +155,7 @@ impl AkShareClient {
             .cloned()
             .unwrap_or_default();
 
-        let mut items = Vec::with_capacity(list.len().min(limit));
-        for entry in &list {
-            if items.len() >= limit {
-                break;
-            }
-            let title_raw = entry.get("title").and_then(|v| v.as_str()).unwrap_or("");
-            let content_raw = entry.get("content").and_then(|v| v.as_str()).unwrap_or("");
-            let date = entry
-                .get("date")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let media = entry
-                .get("mediaName")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-
-            // The API may return articleUrl directly or a code field.
-            let url = entry
-                .get("articleUrl")
-                .and_then(|v| v.as_str())
-                .map(std::string::ToString::to_string)
-                .or_else(|| {
-                    entry
-                        .get("code")
-                        .and_then(|v| v.as_str())
-                        .map(|code| format!("http://finance.eastmoney.com/a/{code}.html"))
-                });
-
-            // Clean up the HTML-tagged summary: strip tags, whitespace artifacts
-            let summary = strip_em_tags(content_raw)
-                .replace("\u{3000}", "")
-                .replace("\r\n", " ")
-                .trim()
-                .to_string();
-
-            items.push(NewsItem {
-                published_at: date,
-                title: strip_em_tags(title_raw),
-                summary,
-                source: media,
-                url,
-            });
-        }
-
-        Ok(items)
+        Ok(parse_search_entries(&list, limit))
     }
 }
 

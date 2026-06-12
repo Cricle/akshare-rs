@@ -238,6 +238,14 @@ impl AkShareClient {
     ///
     /// `symbol` is a board filter like "行业板块" or "概念板块".
     pub async fn stock_board_change_em(&self, symbol: &str) -> Result<Vec<BoardChangeRow>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
         let fs = match symbol {
             "行业板块" => "m:90 t:2 f:!50",
             "概念板块" => "m:90 t:3 f:!50",
@@ -263,15 +271,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -309,6 +308,14 @@ impl AkShareClient {
 
     /// Resolve board symbol (name or code) to an Eastmoney secid like "90.BK0715".
     async fn resolve_board_secid(&self, symbol: &str, board_type: &str) -> Result<String> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
         // If it already looks like a BK code, use directly
         if symbol.starts_with("BK") {
             return Ok(format!("90.{symbol}"));
@@ -344,15 +351,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload

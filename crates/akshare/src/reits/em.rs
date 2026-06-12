@@ -122,7 +122,6 @@ impl AkShareClient {
         _adjust: &str,
     ) -> Result<Vec<CandlePoint>> {
         let klt = match period {
-            "daily" => "101",
             "weekly" => "102",
             "monthly" => "103",
             _ => "101",

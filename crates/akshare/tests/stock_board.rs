@@ -101,12 +101,12 @@ fn ths_kline_js(year: &str) -> String {
 
 /// THS board summary HTML with date patterns.
 fn ths_summary_html() -> String {
-    r#"<!DOCTYPE html><html><body>
+    r"<!DOCTYPE html><html><body>
 <table>
 <tr><td>2024-01-02</td><td>summary data 1</td></tr>
 <tr><td>2024-01-03</td><td>summary data 2</td></tr>
 </table>
-</body></html>"#
+</body></html>"
         .to_string()
 }
 
@@ -593,7 +593,7 @@ fn sina_finance_report_body() -> serde_json::Value {
 
 /// Sina HTML with a simple table.
 fn sina_table_html() -> String {
-    r#"<!DOCTYPE html><html><body>
+    r"<!DOCTYPE html><html><body>
 <table>
 <thead><tr><th>股票代码</th><th>股票名称</th><th>分红</th></tr></thead>
 <tbody>
@@ -601,7 +601,7 @@ fn sina_table_html() -> String {
 <tr><td>600000</td><td>浦发银行</td><td>0.30</td></tr>
 </tbody>
 </table>
-</body></html>"#
+</body></html>"
         .to_string()
 }
 
@@ -642,14 +642,14 @@ fn sina_financial_analysis_html() -> String {
 
 /// Sina institute hold HTML table.
 fn sina_institute_html() -> String {
-    r#"<!DOCTYPE html><html><body>
+    r"<!DOCTYPE html><html><body>
 <table>
 <thead><tr><th>机构名称</th><th>持股数</th><th>市值</th></tr></thead>
 <tbody>
 <tr><td>Test Fund</td><td>1000000</td><td>10500000</td></tr>
 </tbody>
 </table>
-</body></html>"#
+</body></html>"
         .to_string()
 }
 

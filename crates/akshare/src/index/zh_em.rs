@@ -169,6 +169,15 @@ impl AkShareClient {
 
     // Private: 1-min trends
     async fn index_zh_a_hist_trends(&self, symbol: &str) -> Result<Vec<IndexZhAHistMinPoint>> {
+        #[derive(Deserialize)]
+        struct TrendsEnvelope {
+            data: Option<TrendsData>,
+        }
+        #[derive(Deserialize)]
+        struct TrendsData {
+            trends: Option<Vec<String>>,
+        }
+
         let secid = format!("1.{symbol}");
         let response = self
             .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
@@ -184,15 +193,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct TrendsEnvelope {
-            data: Option<TrendsData>,
-        }
-        #[derive(Deserialize)]
-        struct TrendsData {
-            trends: Option<Vec<String>>,
-        }
 
         let payload: TrendsEnvelope = response.json().await.map_err(Error::from)?;
         let trends = payload.data.and_then(|d| d.trends).unwrap_or_default();

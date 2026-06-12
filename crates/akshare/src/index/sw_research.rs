@@ -349,6 +349,16 @@ impl AkShareClient {
 
     /// 申万宏源研究 — 周/月报表日期序列.
     pub async fn index_analysis_week_month_sw(&self, symbol: &str) -> Result<Vec<String>> {
+        #[derive(Deserialize)]
+        struct DateEnvelope {
+            data: Option<Vec<DateItem>>,
+        }
+        #[derive(Deserialize)]
+        struct DateItem {
+            #[serde(default)]
+            bargaindate: String,
+        }
+
         let period = symbol.to_uppercase();
 
         let response = self
@@ -359,16 +369,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct DateEnvelope {
-            data: Option<Vec<DateItem>>,
-        }
-        #[derive(Deserialize)]
-        struct DateItem {
-            #[serde(default)]
-            bargaindate: String,
-        }
 
         let payload: DateEnvelope = response.json().await.map_err(Error::from)?;
         let dates: Vec<String> = payload

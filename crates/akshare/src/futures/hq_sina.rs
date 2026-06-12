@@ -50,6 +50,7 @@ impl AkShareClient {
     /// List of foreign commodity subscribe exchange symbols (Python-compatible name).
     ///
     /// Returns symbol-code pairs for all supported foreign futures.
+    #[must_use]
     pub fn futures_foreign_commodity_subscribe_exchange_symbol(&self) -> Vec<Row> {
         self.futures_hq_subscribe_exchange_symbol()
     }
@@ -57,6 +58,7 @@ impl AkShareClient {
     /// List of foreign commodity subscribe exchange symbols.
     ///
     /// Returns symbol-code pairs for all supported foreign futures.
+    #[must_use]
     pub fn futures_hq_subscribe_exchange_symbol(&self) -> Vec<Row> {
         exchange_symbol_map()
             .into_iter()
@@ -70,6 +72,7 @@ impl AkShareClient {
     }
 
     /// List of all foreign commodity Sina subscription codes.
+    #[must_use]
     pub fn futures_foreign_commodity_subscribe_codes(&self) -> Vec<String> {
         exchange_symbol_map()
             .into_iter()
@@ -79,7 +82,7 @@ impl AkShareClient {
 
     /// Foreign commodity realtime quotes from Sina.
     ///
-    /// `symbols` is a list of Sina codes (e.g., ["CL", "GC", "XAU"]).
+    /// `symbols` is a list of Sina codes (e.g., `CL`, `GC`, `XAU`).
     pub async fn futures_foreign_commodity_realtime(
         &self,
         symbols: &[&str],

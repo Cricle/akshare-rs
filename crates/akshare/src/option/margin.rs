@@ -66,7 +66,6 @@ impl AkShareClient {
             // Find the enclosing <a> tag
             let before = &search[..pos];
             let a_start = before.rfind("<a ");
-            let _after = &search[pos..];
 
             if let Some(start) = a_start {
                 let tag_area = &search[start..];

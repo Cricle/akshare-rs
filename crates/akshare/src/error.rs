@@ -17,7 +17,8 @@ pub enum ErrorKind {
 }
 
 impl ErrorKind {
-    pub fn as_str(&self) -> &'static str {
+    #[must_use]
+    pub const fn as_str(&self) -> &'static str {
         match self {
             Self::UnsupportedMarket => "unsupported_market",
             Self::PermissionDenied => "permission_denied",
@@ -45,7 +46,8 @@ impl Error {
         }
     }
 
-    pub fn kind(&self) -> ErrorKind {
+    #[must_use]
+    pub const fn kind(&self) -> ErrorKind {
         self.kind
     }
 

@@ -6,3 +6,4 @@ Cargo.lock
 .DS_Store
 .idea/
 .vscode/
+crates/akshare-mcp/config.toml

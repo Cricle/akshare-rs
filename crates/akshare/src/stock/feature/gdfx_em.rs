@@ -274,7 +274,7 @@ impl AkShareClient {
     pub async fn stock_gdfx_holding_detail_em(
         &self,
         date: &str,
-        indicator: &str,
+        _indicator: &str,
         symbol: &str,
     ) -> Result<Vec<GdfxHoldingDetail>> {
         let filter = format!(
@@ -282,10 +282,7 @@ impl AkShareClient {
             fmt_date(date),
             symbol
         );
-        let report = match indicator {
-            "个人" => "RPT_F10_EH_HOLDERS",
-            _ => "RPT_F10_EH_HOLDERS",
-        };
+        let report = "RPT_F10_EH_HOLDERS";
         let data = self
             .dc_fetch_all(
                 report,

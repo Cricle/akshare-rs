@@ -105,7 +105,6 @@ fn ths_period_code(indicator: &str) -> &str {
         "一季度" => "1",
         "二季度" => "2",
         "三季度" => "3",
-        "四季度" | "按年度" => "4",
         _ => "4",
     }
 }
@@ -207,7 +206,9 @@ impl AkShareClient {
         let data_json: serde_json::Value = serde_json::from_str(&json_str)
             .map_err(|e| Error::decode(format!("THS finance JSON parse error: {e}")))?;
 
-        Self::parse_ths_finance_json(&data_json, indicator, "report")
+        Ok(Self::parse_ths_finance_json(
+            &data_json, indicator, "report",
+        ))
     }
 
     /// THS balance sheet (资产负债表) - old API.
@@ -272,14 +273,18 @@ impl AkShareClient {
             .map_err(|e| Error::decode(format!("THS flashData JSON parse error: {e}")))?;
 
         let default_key = if has_simple { "simple" } else { "report" };
-        Self::parse_ths_finance_json(&data_json, indicator, default_key)
+        Ok(Self::parse_ths_finance_json(
+            &data_json,
+            indicator,
+            default_key,
+        ))
     }
 
     fn parse_ths_finance_json(
         data_json: &serde_json::Value,
         indicator: &str,
         default_key: &str,
-    ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    ) -> Vec<HashMap<String, serde_json::Value>> {
         // Extract title (row labels)
         let titles: Vec<String> = data_json
             .get("title")
@@ -323,7 +328,7 @@ impl AkShareClient {
             .unwrap_or_default();
 
         if table_data.is_empty() {
-            return Ok(vec![]);
+            return vec![];
         }
 
         // First row is column headers (report dates)
@@ -369,7 +374,7 @@ impl AkShareClient {
             }
         }
 
-        Ok(all_records)
+        all_records
     }
 
     // -----------------------------------------------------------------------
@@ -686,7 +691,6 @@ impl AkShareClient {
         // Check if there's a "no forecast" message
         if html.contains("本年度暂无机构做出业绩预测") {
             match indicator {
-                "预测年报每股收益" | "预测年报净利润" => return Ok(vec![]),
                 "业绩预测详表-机构" => {
                     if tables.is_empty() {
                         return Ok(vec![]);

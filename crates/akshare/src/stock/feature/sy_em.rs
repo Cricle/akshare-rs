@@ -38,7 +38,6 @@ impl AkShareClient {
     /// 商誉减值预期明细
     pub async fn stock_sy_yq_em(&self, indicator: &str) -> Result<Vec<SyYqDetail>> {
         let report_name = match indicator {
-            "沪深京" => "RPT_GOODWILL_EXPECT",
             "沪市主板" => "RPT_GOODWILL_EXPECT_SH",
             "深市主板" => "RPT_GOODWILL_EXPECT_SZ",
             "创业板" => "RPT_GOODWILL_EXPECT_CYB",

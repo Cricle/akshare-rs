@@ -121,6 +121,14 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_zh_index_spot_em()`
     pub async fn stock_zh_index_spot_em(&self) -> Result<Vec<IndexSpotEm>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
@@ -140,15 +148,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -198,6 +197,14 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<IndexDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         // Determine market prefix: 1 for SH indices, 0 for SZ indices
         let market = if symbol.starts_with('0') || symbol.starts_with('3') {
             "1"
@@ -223,15 +230,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -275,6 +273,10 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<IndexDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Resp {
+            data: Option<serde_json::Value>,
+        }
         // Normalize to Tencent format
         let tx_symbol = if symbol.starts_with("sh") || symbol.starts_with("sz") {
             symbol.to_string()
@@ -287,11 +289,6 @@ impl AkShareClient {
         let url = format!(
             "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={tx_symbol},day,{start_date},{end_date},640,"
         );
-
-        #[derive(Deserialize)]
-        struct Resp {
-            data: Option<serde_json::Value>,
-        }
 
         let resp: Resp = self.get(&url).send().await?.json().await?;
         let data = resp
@@ -418,6 +415,10 @@ impl AkShareClient {
     ///
     /// - `symbol`: index code like "H30374"
     pub async fn stock_zh_index_value_csindex(&self, symbol: &str) -> Result<Vec<CsIndexValue>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<Vec<serde_json::Value>>,
+        }
         let url = "https://www.csindex.com.cn/csindex-home/perf/index-perf";
         let start_date = "20000101";
         let end_date = chrono::Utc::now().format("%Y%m%d").to_string();
@@ -434,11 +435,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload

@@ -41,6 +41,7 @@ struct SinaGlobalRow {
 
 impl AkShareClient {
     /// 新浪财经 — 环球市场指数名称-代码映射表.
+    #[must_use]
     pub fn index_global_name_table(&self) -> Vec<GlobalSinaNameEntry> {
         GLOBAL_SINA_SYMBOL_MAP
             .iter()

@@ -90,7 +90,6 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<HsgtHoldStock>> {
         let indicator_type = match indicator {
-            "今日排行" => "1",
             "3日排行" => "3",
             "5日排行" => "5",
             "10日排行" => "10",
@@ -243,7 +242,6 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<HsgtBoardRank>> {
         let indicator_type = match indicator {
-            "今日排行" => "1",
             "3日排行" => "3",
             "5日排行" => "5",
             "10日排行" => "10",
@@ -290,7 +288,6 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<HsgtIndividualDetail>> {
         let indicator_type = match indicator {
-            "今日排行" => "1",
             "3日排行" => "3",
             "5日排行" => "5",
             "10日排行" => "10",
@@ -327,12 +324,8 @@ impl AkShareClient {
     /// 沪深港通资金流向-分钟数据 (Python: stock_hsgt_fund_min_em)
     pub async fn stock_hsgt_fund_min_em(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let market = match symbol {
-            "沪股通" => "1",
-            "深股通" => "2",
-            "北向" => "3",
-            "港股通沪" => "1",
-            "港股通深" => "2",
-            "南向" => "3",
+            "深股通" | "港股通深" => "2",
+            "北向" | "南向" => "3",
             _ => "1",
         };
         let url = format!(

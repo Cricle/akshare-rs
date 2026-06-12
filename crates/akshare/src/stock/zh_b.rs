@@ -171,6 +171,14 @@ impl AkShareClient {
         end_date: &str,
         adjust: &str,
     ) -> Result<Vec<ZhBDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         let secid = eastmoney_secid(symbol)?;
         let fqt = match adjust {
             "" => "0",
@@ -196,15 +204,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload

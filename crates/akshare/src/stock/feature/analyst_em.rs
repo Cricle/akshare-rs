@@ -50,7 +50,6 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<AnalystDetail>> {
         let (report, cols) = match indicator {
-            "最新跟踪成分股" => ("RPT_ANALYST_INDEX_LATEST", "ALL"),
             "历史跟踪成分股" => ("RPT_ANALYST_INDEX_HISTORY", "ALL"),
             "历史指数" => ("RPT_ANALYST_INDEX_HIST", "ALL"),
             _ => ("RPT_ANALYST_INDEX_LATEST", "ALL"),

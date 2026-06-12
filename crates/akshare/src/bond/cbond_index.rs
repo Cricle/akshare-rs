@@ -43,11 +43,13 @@ const PERIOD_MAP: &[(&str, &str)] = &[
 ];
 
 /// List available indicator names.
+#[must_use]
 pub fn bond_cbond_indicators() -> Vec<&'static str> {
     INDICATOR_MAP.iter().map(|(n, _)| *n).collect()
 }
 
 /// List available period names.
+#[must_use]
 pub fn bond_cbond_periods() -> Vec<&'static str> {
     PERIOD_MAP.iter().map(|(n, _)| *n).collect()
 }

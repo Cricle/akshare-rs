@@ -80,23 +80,29 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_individual_fund_flow(stock, market)`
     ///
-    /// `market` is "sh", "sz", or "bj".
+    /// `market` is "sh", "sz", "bj", "hk", or "us".
     pub async fn stock_individual_fund_flow(
         &self,
         symbol: &str,
         market: &str,
         limit: usize,
     ) -> Result<Vec<CapitalFlowPoint>> {
-        let market_code = match market {
-            "sh" => "1",
-            "sz" | "bj" => "0",
+        let secid = match market {
+            "sh" => format!("1.{symbol}"),
+            "sz" | "bj" => format!("0.{symbol}"),
+            "hk" => format!("116.{symbol}"),
+            "us" => {
+                // NASDAQ: 105, NYSE: 106 — default to NASDAQ
+                // Common NYSE tickers: single-letter or specific known ones
+                let market_code = if is_nyse_symbol(symbol) { "106" } else { "105" };
+                format!("{market_code}.{symbol}")
+            }
             _ => {
                 return Err(Error::invalid_input(format!(
                     "unsupported market: {market}"
                 )));
             }
         };
-        let secid = format!("{market_code}.{symbol}");
         let lmt = limit.to_string();
         let response = self
             .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
@@ -230,6 +236,72 @@ impl AkShareClient {
         }
         Ok(items)
     }
+}
+
+// ---------------------------------------------------------------------------
+// Market detection helpers
+// ---------------------------------------------------------------------------
+
+/// Heuristic to detect NYSE vs NASDAQ for US stocks.
+/// NYSE tends to have shorter tickers (1-3 chars) and known patterns.
+pub(crate) fn is_nyse_symbol(symbol: &str) -> bool {
+    // Single-letter tickers are almost always NYSE
+    if symbol.len() == 1 {
+        return true;
+    }
+    // Known NYSE tickers (common ones)
+    matches!(
+        symbol,
+        "BABA"
+            | "TSM"
+            | "NIO"
+            | "JD"
+            | "PDD"
+            | "LI"
+            | "XPEV"
+            | "V"
+            | "JPM"
+            | "WMT"
+            | "PG"
+            | "JNJ"
+            | "UNH"
+            | "HD"
+            | "MA"
+            | "DIS"
+            | "NV"
+            | "KO"
+            | "PEP"
+            | "MRK"
+            | "ABBV"
+            | "CVX"
+            | "XOM"
+            | "LLY"
+            | "TMO"
+            | "COST"
+            | "WFC"
+            | "BAC"
+            | "CRM"
+            | "AMD"
+            | "ORCL"
+            | "T"
+            | "VZ"
+            | "NFLX"
+            | "INTC"
+            | "GS"
+            | "CAT"
+            | "BA"
+            | "MMM"
+            | "IBM"
+            | "RTX"
+            | "LMT"
+            | "GE"
+            | "F"
+            | "GM"
+            | "AAL"
+            | "DAL"
+            | "UAL"
+            | "CCL"
+    )
 }
 
 // ---------------------------------------------------------------------------

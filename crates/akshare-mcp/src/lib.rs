@@ -29,6 +29,8 @@
 //! mcp_key = "your-secret-key"
 //! ```
 
+#![allow(clippy::missing_errors_doc, clippy::doc_markdown)]
+
 pub mod auth;
 pub mod config;
 pub mod tools;

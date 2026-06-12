@@ -9,7 +9,6 @@ impl AkShareClient {
     /// Fetch registration data from Eastmoney datacenter.
     async fn register_fetch(&self, board: &str) -> Result<Vec<RegisterEntry>> {
         let filter = match board {
-            "全部" => "",
             "科创板" => "(MARKET=\"科创板\")",
             "创业板" => "(MARKET=\"创业板\")",
             "北交所" => "(MARKET=\"北交所\")",

@@ -51,11 +51,13 @@ const US_GB_MAP: &[(&str, &str)] = &[
 ];
 
 /// List all available China government bond tenor names.
+#[must_use]
 pub fn bond_gb_zh_symbols() -> Vec<&'static str> {
     ZH_GB_MAP.iter().map(|(name, _)| *name).collect()
 }
 
 /// List all available US government bond tenor names.
+#[must_use]
 pub fn bond_gb_us_symbols() -> Vec<&'static str> {
     US_GB_MAP.iter().map(|(name, _)| *name).collect()
 }

@@ -14,6 +14,12 @@ impl AkShareClient {
     ///
     /// `symbol` is one of: "价格指数", "景气指数", "外贸指数".
     pub async fn index_kq_fz(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct PageEnvelope {
+            page: Option<i64>,
+            result: Option<Vec<serde_json::Value>>,
+        }
+
         let index_type = match symbol {
             "价格指数" => "1_1",
             "景气指数" => "1_2",
@@ -40,12 +46,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct PageEnvelope {
-            page: Option<i64>,
-            result: Option<Vec<serde_json::Value>>,
-        }
 
         let first: PageEnvelope = resp.json().await.map_err(Error::from)?;
         let page_count = first.page.unwrap_or(1);

@@ -188,6 +188,14 @@ impl AkShareClient {
         end_date: &str,
         adjust: &str,
     ) -> Result<Vec<KcbDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         let secid = eastmoney_secid(symbol)?;
         let fqt = match adjust {
             "" => "0",
@@ -213,15 +221,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -268,24 +267,6 @@ impl AkShareClient {
         let mut all_reports = Vec::new();
 
         for page in from_page..=to_page.min(from_page + 10) {
-            let page_str = page.to_string();
-            let response = self
-                .get(url)
-                .query(&[
-                    ("sr", "-1"),
-                    ("page_size", "100"),
-                    ("page_index", page_str.as_str()),
-                    ("ann_type", "KCB"),
-                    ("client_source", "web"),
-                    ("f_node", "0"),
-                    ("s_node", "0"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
-
             #[derive(Deserialize)]
             struct Env {
                 data: Option<EnvData>,
@@ -311,6 +292,23 @@ impl AkShareClient {
             struct ColumnItem {
                 column_name: Option<String>,
             }
+            let page_str = page.to_string();
+            let response = self
+                .get(url)
+                .query(&[
+                    ("sr", "-1"),
+                    ("page_size", "100"),
+                    ("page_index", page_str.as_str()),
+                    ("ann_type", "KCB"),
+                    ("client_source", "web"),
+                    ("f_node", "0"),
+                    ("s_node", "0"),
+                ])
+                .send()
+                .await
+                .map_err(Error::from)?
+                .error_for_status()
+                .map_err(Error::from)?;
 
             let payload: Env = response.json().await.map_err(Error::from)?;
             let list = payload.data.and_then(|d| d.list).unwrap_or_default();

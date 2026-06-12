@@ -168,7 +168,7 @@ fn czce_symbol_to_code(symbol: &str) -> Result<&'static str> {
     }
 }
 
-fn czce_code_to_filter(code: &str) -> &str {
+const fn czce_code_to_filter(code: &str) -> &str {
     code
 }
 

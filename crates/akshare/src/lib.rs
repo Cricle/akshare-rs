@@ -92,6 +92,25 @@
 //!
 //! Rust **1.85** (edition 2024)
 
+// Pedantic/nursery suppressions for large categories that don't improve code quality:
+// - missing_errors_doc: 1400+ functions return Result; adding docs to all is impractical
+// - similar_names: financial code naturally has similar variable names (e.g. open_price/open_value)
+// - doc_markdown: Chinese financial terms in docs don't need backticks
+#![allow(
+    clippy::missing_errors_doc,
+    clippy::similar_names,
+    clippy::doc_markdown,
+    clippy::unused_async, // 45 stubs that must stay async for API compatibility
+    clippy::cast_possible_truncation, // financial data: f64→i64, usize→i32, etc. are intentional
+    clippy::cast_precision_loss,      // i64→f64, usize→f64 precision loss acceptable for display
+    clippy::cast_possible_wrap,       // usize→i64 wrap is safe for data sizes in practice
+    clippy::cast_sign_loss,           // i64→u64, f64→u64 sign loss acceptable for volume/prices
+    clippy::redundant_pub_crate,      // pub(crate) items in private modules are intentional
+    clippy::option_if_let_else,       // if-let is often clearer than map_or_else for complex cases
+    clippy::too_many_lines,           // some parsing functions are inherently long
+    clippy::missing_panics_doc,       // internal parsing helpers; panics are documented in context
+)]
+
 // Equity Markets
 pub mod index;
 pub mod stock;

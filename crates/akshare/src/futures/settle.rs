@@ -155,7 +155,7 @@ impl AkShareClient {
         for row in rows {
             let sym = row
                 .get("INSTRUMENTID")
-                .or(row.get("symbol"))
+                .or_else(|| row.get("symbol"))
                 .and_then(|v| v.as_str())
                 .unwrap_or("")
                 .to_string();
@@ -203,7 +203,7 @@ impl AkShareClient {
         for row in rows {
             let sym = row
                 .get("INSTRUMENTID")
-                .or(row.get("symbol"))
+                .or_else(|| row.get("symbol"))
                 .and_then(|v| v.as_str())
                 .unwrap_or("")
                 .to_string();

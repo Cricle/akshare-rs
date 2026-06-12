@@ -18,7 +18,7 @@ pub struct DateParams {
     pub date: String,
 }
 
-fn default_limit() -> usize {
+const fn default_limit() -> usize {
     60
 }
 
@@ -36,7 +36,7 @@ mod tests {
 
     #[test]
     fn test_futures_limit_params_default() {
-        let json = r#"{}"#;
+        let json = r"{}";
         let params: FuturesLimitParams = serde_json::from_str(json).unwrap();
         assert_eq!(params.limit, 60);
     }

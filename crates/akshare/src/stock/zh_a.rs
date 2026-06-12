@@ -256,6 +256,14 @@ impl AkShareClient {
         end_date: &str,
         adjust: &str,
     ) -> Result<Vec<ZhADailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         let secid = eastmoney_secid(symbol)?;
         let fqt = match adjust {
             "" => "0",
@@ -281,15 +289,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -491,6 +490,14 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_zh_a_stop_em()`
     pub async fn stock_zh_a_stop_em(&self) -> Result<Vec<ZhAStopStock>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
             .query(&[
@@ -510,15 +517,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -564,6 +562,14 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<ZhADailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
         let secid = eastmoney_secid(symbol)?;
 
         let response = self
@@ -583,15 +589,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -635,6 +632,14 @@ impl AkShareClient {
         _start_time: &str,
         _end_time: &str,
     ) -> Result<Vec<ZhAMinuteCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            trends: Option<Vec<String>>,
+        }
         let secid = eastmoney_secid(symbol)?;
 
         let response = self
@@ -651,15 +656,6 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            trends: Option<Vec<String>>,
-        }
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let trends = payload
@@ -706,6 +702,10 @@ impl AkShareClient {
         end_date: &str,
         adjust: &str,
     ) -> Result<Vec<ZhAHistTx>> {
+        #[derive(Deserialize)]
+        struct Resp {
+            data: Option<serde_json::Value>,
+        }
         let ts = crate::market::tencent_market_symbol(symbol)?;
         let adjust_suffix = match adjust {
             "" => "",
@@ -717,11 +717,6 @@ impl AkShareClient {
         let url = format!(
             "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={ts},day,{start_date},{end_date},640,{adjust_suffix}"
         );
-
-        #[derive(Deserialize)]
-        struct Resp {
-            data: Option<serde_json::Value>,
-        }
 
         let resp: Resp = self.get(&url).send().await?.json().await?;
         let data = resp

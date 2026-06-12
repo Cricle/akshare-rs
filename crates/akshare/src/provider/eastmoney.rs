@@ -481,7 +481,7 @@ impl AkShareClient {
             .into_iter()
             .map(|item| BillboardEntry {
                 trade_date: item.trade_date.unwrap_or_default(),
-                symbol: item.security_code.unwrap_or_else(|| code.to_string()),
+                symbol: item.security_code.unwrap_or_else(|| code.clone()),
                 name: item.security_name.unwrap_or_else(|| "未知股票".to_string()),
                 close_price: item.close_price.unwrap_or_default(),
                 change_rate_pct: item.change_rate.unwrap_or_default(),
@@ -551,7 +551,7 @@ impl AkShareClient {
             .into_iter()
             .map(|item| BillboardSeatDetail {
                 trade_date: item.trade_date.unwrap_or_default(),
-                symbol: item.security_code.unwrap_or_else(|| code.to_string()),
+                symbol: item.security_code.unwrap_or_else(|| code.clone()),
                 department_name: item
                     .department_name
                     .unwrap_or_else(|| "未知席位".to_string()),
@@ -609,7 +609,7 @@ impl AkShareClient {
                         format!("https://data.eastmoney.com/notices/detail/{code}/{art_code}.html")
                     }),
                     art_code,
-                    symbol: code.to_string(),
+                    symbol: code.clone(),
                     title: item.title.unwrap_or_else(|| "公司公告".to_string()),
                     published_at: item.notice_date.unwrap_or_default(),
                     source: "Eastmoney 公告".to_string(),
@@ -763,12 +763,10 @@ fn classify_search_market(
     security_type_name: Option<&str>,
 ) -> Option<&'static str> {
     match (classify, security_type_name) {
-        (Some("AStock"), _) => Some("A股"),
-        (Some("Fund" | "OTCFUND"), _) => Some("A股"),
-        (_, Some("基金")) => Some("A股"),
+        (Some("AStock" | "Fund" | "OTCFUND" | "BStock" | "NEEQ"), _) | (_, Some("基金")) => {
+            Some("A股")
+        }
         (Some("Index"), _) => Some("指数"),
-        (Some("BStock"), _) => Some("A股"),
-        (Some("NEEQ"), _) => Some("A股"),
         (Some("UsStock"), _) => Some("美股"),
         (Some("HK"), _) => Some("港股"),
         _ => None,

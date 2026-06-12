@@ -137,6 +137,7 @@ pub struct GlobalEmSpotItem {
 /// Well-known global index symbol map (Eastmoney).
 ///
 /// Maps Chinese name -> (market_id, code).
+#[must_use]
 pub fn global_em_symbol_map(name: &str) -> Option<(&str, &str)> {
     match name {
         "上证指数" => Some(("1", "000001")),

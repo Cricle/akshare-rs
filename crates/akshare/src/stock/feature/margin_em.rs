@@ -203,7 +203,6 @@ impl AkShareClient {
     ) -> Result<Vec<MarginRatioPa>> {
         let market_code = match symbol {
             "深市" => "00",
-            "沪市" => "10",
             "北交所" => "30",
             _ => "10",
         };

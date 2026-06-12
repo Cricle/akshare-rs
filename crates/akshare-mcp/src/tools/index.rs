@@ -1,6 +1,15 @@
 use rmcp::schemars;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct IndexHkDailyParams {
+    pub symbol: String,
+    /// Eastmoney internal market id (e.g. "100", "124"). Get from index_hk_spot_em.
+    pub internal_id: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
 pub struct IndexSymbolParams {
     pub symbol: String,
 }
@@ -19,7 +28,7 @@ pub struct IndexHistParams {
     pub end_date: String,
 }
 
-fn default_limit() -> usize {
+const fn default_limit() -> usize {
     60
 }
 
