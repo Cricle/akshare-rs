@@ -14,8 +14,7 @@ impl AkShareClient {
             "中证商品期货价格指数" => "000001.CCI",
             _ => {
                 return Err(Error::invalid_input(format!(
-                    "unknown CCIDX index: {}",
-                    symbol
+                    "unknown CCIDX index: {symbol}"
                 )));
             }
         };

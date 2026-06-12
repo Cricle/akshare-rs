@@ -22,8 +22,7 @@ impl AkShareClient {
             now.format("%d")
         );
         let url = format!(
-            "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_S{0}=/GlobalFuturesService.getGlobalFuturesDailyKLine",
-            today
+            "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_S{today}=/GlobalFuturesService.getGlobalFuturesDailyKLine"
         );
 
         let body = self
@@ -37,15 +36,11 @@ impl AkShareClient {
         // Extract JSON array from JSONP
         let start = body.find('[').ok_or_else(|| {
             Error::decode(format!(
-                "foreign futures JSONP: no array start for {}",
-                symbol
+                "foreign futures JSONP: no array start for {symbol}"
             ))
         })?;
         let end = body.rfind(']').ok_or_else(|| {
-            Error::decode(format!(
-                "foreign futures JSONP: no array end for {}",
-                symbol
-            ))
+            Error::decode(format!("foreign futures JSONP: no array end for {symbol}"))
         })?;
         let json_str = &body[start..=end];
 
@@ -62,8 +57,14 @@ impl AkShareClient {
                 high: row[2].as_f64().unwrap_or(0.0),
                 low: row[3].as_f64().unwrap_or(0.0),
                 close: row[4].as_f64().unwrap_or(0.0),
-                volume: row.get(5).and_then(|v| v.as_f64()).unwrap_or(0.0),
-                hold: row.get(6).and_then(|v| v.as_f64()).unwrap_or(0.0),
+                volume: row
+                    .get(5)
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0),
+                hold: row
+                    .get(6)
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0),
             });
         }
         Ok(items)
@@ -88,9 +89,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -125,9 +127,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -162,9 +165,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -199,9 +203,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -236,9 +241,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -273,9 +279,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -307,9 +314,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -340,9 +348,10 @@ impl AkShareClient {
         let rows = data["data"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
+        let empty_map = serde_json::Map::new();
         for row in &rows {
             let mut r = Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            for (k, v) in row.as_object().unwrap_or(&empty_map) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {
@@ -359,10 +368,7 @@ impl AkShareClient {
 
     /// Foreign futures contract detail from Sina.
     pub async fn futures_foreign_detail(&self, symbol: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://finance.sina.com.cn/futures/quotes/{}.shtml",
-            symbol
-        );
+        let url = format!("https://finance.sina.com.cn/futures/quotes/{symbol}.shtml");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")

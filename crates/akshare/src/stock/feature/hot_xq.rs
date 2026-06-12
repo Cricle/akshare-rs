@@ -1,6 +1,6 @@
 //! Xueqiu hot stocks (雪球热度排行).
 
-use super::types::*;
+use super::types::HotStockXq;
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -49,8 +49,14 @@ impl AkShareClient {
                         .and_then(|x| x.as_str())
                         .unwrap_or("")
                         .to_string(),
-                    value: v.get(order_by).and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    latest_price: v.get("current").and_then(|x| x.as_f64()).unwrap_or(0.0),
+                    value: v
+                        .get(order_by)
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    latest_price: v
+                        .get("current")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
                 });
             }
         }

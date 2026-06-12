@@ -179,8 +179,7 @@ fn parse_comm_table(html: &str, exchange: &str) -> Vec<OptionCommInfoRow> {
     let table_pos = html.find("<table").unwrap_or(0);
     let table_end = html[table_pos..]
         .find("</table>")
-        .map(|i| i + table_pos)
-        .unwrap_or(html.len());
+        .map_or(html.len(), |i| i + table_pos);
     let table = &html[table_pos..table_end];
 
     let mut search = table;
@@ -237,12 +236,11 @@ fn extract_update_times(html: &str) -> (String, String) {
             let comm_time = text
                 .split('\u{ff0c}')
                 .next()
-                .map(|s| {
+                .map_or("", |s| {
                     s.trim_start_matches(
                         "\u{ff08}\u{624b}\u{7eed}\u{8d39}\u{66f4}\u{65b0}\u{65f6}\u{95f4}\u{effd}",
                     )
                 })
-                .unwrap_or("")
                 .to_string();
             let price_time = text
                 .split('\u{ff0c}')

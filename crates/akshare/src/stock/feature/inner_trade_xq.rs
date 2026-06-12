@@ -1,7 +1,7 @@
 //! Insider trading (内部交易) from Xueqiu.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_str};
+use super::types::InnerTradeXq;
 use crate::client::AkShareClient;
 use crate::error::Result;
 

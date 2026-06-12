@@ -90,7 +90,7 @@ impl AkShareClient {
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
             .chars()
-            .filter(|c| c.is_ascii_digit())
+            .filter(char::is_ascii_digit)
             .collect::<String>()
             .parse()
             .unwrap_or(0);
@@ -255,9 +255,9 @@ impl AkShareClient {
             // B-share: 900xxx -> sh, 200xxx -> sz
             let code = symbol.trim_start_matches('0');
             if code.starts_with('9') {
-                format!("sh{}", symbol)
+                format!("sh{symbol}")
             } else {
-                format!("sz{}", symbol)
+                format!("sz{symbol}")
             }
         };
 

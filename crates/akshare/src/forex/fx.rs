@@ -109,12 +109,12 @@ impl AkShareClient {
 
             // Extract swap points for different tenors
             for tenor in &["ON", "1W", "2W", "1M", "3M", "6M", "1Y"] {
-                let key = format!("swapPoint{}", tenor);
-                if let Some(val) = record.get(&key).and_then(|v| v.as_f64()) {
+                let key = format!("swapPoint{tenor}");
+                if let Some(val) = record.get(&key).and_then(serde_json::Value::as_f64) {
                     items.push(MacroDataPoint {
                         date: date.clone(),
                         value: val,
-                        name: format!("FX C-Swap {} {}", pair, tenor),
+                        name: format!("FX C-Swap {pair} {tenor}"),
                     });
                 }
             }
@@ -150,12 +150,12 @@ impl AkShareClient {
                 .to_string();
             let bid = record
                 .get("bidPips")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date,
                 value: bid,
-                name: format!("FX Quote {}", pair),
+                name: format!("FX Quote {pair}"),
             });
         }
         Ok(items)
@@ -194,12 +194,12 @@ impl AkShareClient {
                 .to_string();
             let spot = record
                 .get("spotMid")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date,
                 value: spot,
-                name: format!("FX Spot {}", pair),
+                name: format!("FX Spot {pair}"),
             });
         }
         Ok(items)
@@ -238,12 +238,12 @@ impl AkShareClient {
                 .to_string();
             let swap_pips = record
                 .get("swapPoint")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date,
                 value: swap_pips,
-                name: format!("FX Swap {}", pair),
+                name: format!("FX Swap {pair}"),
             });
         }
         Ok(items)
@@ -276,7 +276,7 @@ impl AkShareClient {
                 let price = entry
                     .get("price")
                     .or_else(|| entry.get("currentPrice"))
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0);
                 if !name.is_empty() {
                     items.push(MacroDataPoint {
@@ -289,7 +289,7 @@ impl AkShareClient {
         }
 
         if items.is_empty() {
-            return Err(Error::not_found(format!("baidu fx: no data for {}", pair)));
+            return Err(Error::not_found(format!("baidu fx: no data for {pair}")));
         }
         Ok(items)
     }

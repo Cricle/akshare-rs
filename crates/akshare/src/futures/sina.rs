@@ -3,7 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, Row};
-use crate::util::*;
+use crate::util::{amplitude_pct, apply_change_metrics};
 
 impl AkShareClient {
     /// Fetch main contract futures candles from Sina Finance.
@@ -143,9 +143,9 @@ impl AkShareClient {
             .find(|r| r.get("symbol").and_then(|v| v.as_str()) == Some(symbol))
             .and_then(|r| {
                 r.get("mark")
-                    .and_then(|v| v.as_str().map(|s| s.to_string()))
+                    .and_then(|v| v.as_str().map(std::string::ToString::to_string))
             })
-            .ok_or_else(|| Error::not_found(format!("sina: unknown futures symbol: {}", symbol)))?;
+            .ok_or_else(|| Error::not_found(format!("sina: unknown futures symbol: {symbol}")))?;
 
         let url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQFuturesData";
         let body = self
@@ -169,7 +169,8 @@ impl AkShareClient {
         let mut items = Vec::new();
         for entry in &data {
             let mut r = Row::new();
-            for (key, val) in entry.as_object().unwrap_or(&serde_json::Map::new()) {
+            let empty = serde_json::Map::new();
+            for (key, val) in entry.as_object().unwrap_or(&empty) {
                 r.insert(key.clone(), val.clone());
             }
             items.push(r);
@@ -189,7 +190,7 @@ impl AkShareClient {
         let list_str = subscribe_list.join(",");
         let rn = format!("{:x}", chrono::Utc::now().timestamp_millis());
 
-        let url = format!("https://hq.sinajs.cn/rn={}&list={}", rn, list_str);
+        let url = format!("https://hq.sinajs.cn/rn={rn}&list={list_str}");
         let body = self
             .get(&url)
             .header("Referer", "https://vip.stock.finance.sina.com.cn/")

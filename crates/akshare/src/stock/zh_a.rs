@@ -169,7 +169,7 @@ impl AkShareClient {
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
             .chars()
-            .filter(|c| c.is_ascii_digit())
+            .filter(char::is_ascii_digit)
             .collect::<String>()
             .parse()
             .unwrap_or(0);
@@ -423,7 +423,7 @@ impl AkShareClient {
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
             .chars()
-            .filter(|c| c.is_ascii_digit())
+            .filter(char::is_ascii_digit)
             .collect::<String>()
             .parse()
             .unwrap_or(0);
@@ -534,15 +534,15 @@ impl AkShareClient {
                 Some(ZhAStopStock {
                     code,
                     name,
-                    latest_price: item.get("f2").and_then(|v| v.as_f64()),
-                    change_pct: item.get("f3").and_then(|v| v.as_f64()),
-                    change_amount: item.get("f4").and_then(|v| v.as_f64()),
-                    volume: item.get("f5").and_then(|v| v.as_f64()),
-                    amount: item.get("f6").and_then(|v| v.as_f64()),
-                    high: item.get("f15").and_then(|v| v.as_f64()),
-                    low: item.get("f16").and_then(|v| v.as_f64()),
-                    open: item.get("f17").and_then(|v| v.as_f64()),
-                    prev_close: item.get("f18").and_then(|v| v.as_f64()),
+                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
+                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
+                    change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
+                    volume: item.get("f5").and_then(serde_json::Value::as_f64),
+                    amount: item.get("f6").and_then(serde_json::Value::as_f64),
+                    high: item.get("f15").and_then(serde_json::Value::as_f64),
+                    low: item.get("f16").and_then(serde_json::Value::as_f64),
+                    open: item.get("f17").and_then(serde_json::Value::as_f64),
+                    prev_close: item.get("f18").and_then(serde_json::Value::as_f64),
                 })
             })
             .collect();
@@ -715,8 +715,7 @@ impl AkShareClient {
         };
 
         let url = format!(
-            "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={ts},day,{},{},640,{}",
-            start_date, end_date, adjust_suffix
+            "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={ts},day,{start_date},{end_date},640,{adjust_suffix}"
         );
 
         #[derive(Deserialize)]

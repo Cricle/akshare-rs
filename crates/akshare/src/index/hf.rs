@@ -15,8 +15,7 @@ impl AkShareClient {
     /// `year` ranges from "2012" to "2018".
     pub async fn hf_sp_500(&self, year: &str) -> Result<Vec<MacroDataPoint>> {
         let url = format!(
-            "https://github.com/FutureSharks/financial-data/raw/master/pyfinancialdata/data/stocks/histdata/SPXUSD/DAT_ASCII_SPXUSD_M1_{}.csv",
-            year
+            "https://github.com/FutureSharks/financial-data/raw/master/pyfinancialdata/data/stocks/histdata/SPXUSD/DAT_ASCII_SPXUSD_M1_{year}.csv"
         );
 
         let body = self
@@ -47,8 +46,7 @@ impl AkShareClient {
 
         if items.is_empty() {
             return Err(Error::not_found(format!(
-                "hf sp500: no data for year {}",
-                year
+                "hf sp500: no data for year {year}"
             )));
         }
         Ok(items)

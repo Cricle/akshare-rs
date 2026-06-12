@@ -1,7 +1,7 @@
 //! Industry data (行业数据) from CNINFO and Shenwan.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_str, json_str_opt};
+use super::types::{IndustryCategory, IndustryChange, IndustryClfHistSw, IndustryPeRatio};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 

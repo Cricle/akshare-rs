@@ -50,8 +50,7 @@ impl AkShareClient {
             let data = line
                 .split_once('=')
                 .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
-                .map(|(s, _)| s)
-                .unwrap_or("");
+                .map_or("", |(s, _)| s);
             if data.is_empty() {
                 continue;
             }
@@ -106,8 +105,7 @@ mod tests {
         let data = line
             .split_once('=')
             .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
-            .map(|(s, _)| s)
-            .unwrap_or("");
+            .map_or("", |(s, _)| s);
         let fields: Vec<&str> = data.split(',').collect();
         assert!(fields.len() >= 7);
         let buy = parse_f64_safe(fields[1]);

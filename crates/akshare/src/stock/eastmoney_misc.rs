@@ -293,14 +293,20 @@ impl AkShareClient {
                 trade_date: v
                     .get("TRADE_DATE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
-                sh_index: v.get("SZ_INDEX").and_then(|v| v.as_f64()),
-                sh_change_rate: v.get("SZ_CHANGE_RATE").and_then(|v| v.as_f64()),
-                blocktrade_deal_amt: v.get("BLOCKTRADE_DEAL_AMT").and_then(|v| v.as_f64()),
-                premium_deal_amt: v.get("PREMIUM_DEAL_AMT").and_then(|v| v.as_f64()),
-                premium_ratio: v.get("PREMIUM_RATIO").and_then(|v| v.as_f64()),
-                discount_deal_amt: v.get("DISCOUNT_DEAL_AMT").and_then(|v| v.as_f64()),
-                discount_ratio: v.get("DISCOUNT_RATIO").and_then(|v| v.as_f64()),
+                    .map(std::string::ToString::to_string),
+                sh_index: v.get("SZ_INDEX").and_then(serde_json::Value::as_f64),
+                sh_change_rate: v.get("SZ_CHANGE_RATE").and_then(serde_json::Value::as_f64),
+                blocktrade_deal_amt: v
+                    .get("BLOCKTRADE_DEAL_AMT")
+                    .and_then(serde_json::Value::as_f64),
+                premium_deal_amt: v
+                    .get("PREMIUM_DEAL_AMT")
+                    .and_then(serde_json::Value::as_f64),
+                premium_ratio: v.get("PREMIUM_RATIO").and_then(serde_json::Value::as_f64),
+                discount_deal_amt: v
+                    .get("DISCOUNT_DEAL_AMT")
+                    .and_then(serde_json::Value::as_f64),
+                discount_ratio: v.get("DISCOUNT_RATIO").and_then(serde_json::Value::as_f64),
             })
             .collect();
 
@@ -341,10 +347,8 @@ impl AkShareClient {
             &start_date[6..8]
         );
         let ed = format!("{}-{}-{}", &end_date[..4], &end_date[4..6], &end_date[6..8]);
-        let filter = format!(
-            "(MARKET_TYPE=\"{}\")(TRADE_DATE>='{}')(TRADE_DATE<='{}')",
-            asset_code, sd, ed
-        );
+        let filter =
+            format!("(MARKET_TYPE=\"{asset_code}\")(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
         let page_size = limit.min(5000).to_string();
 
         let response = self
@@ -382,29 +386,29 @@ impl AkShareClient {
                 trade_date: v
                     .get("TRADE_DATE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 symbol: v
                     .get("SECURITY_CODE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 name: v
                     .get("SECURITY_NAME_ABBR")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
-                close_price: v.get("CLOSE_PRICE").and_then(|v| v.as_f64()),
-                change_rate: v.get("CHANGE_RATE").and_then(|v| v.as_f64()),
-                deal_price: v.get("DEAL_PRICE").and_then(|v| v.as_f64()),
-                deal_volume: v.get("DEAL_VOLUME").and_then(|v| v.as_f64()),
-                deal_amount: v.get("DEAL_AMT").and_then(|v| v.as_f64()),
-                premium_ratio: v.get("PREMIUM_RATIO").and_then(|v| v.as_f64()),
+                    .map(std::string::ToString::to_string),
+                close_price: v.get("CLOSE_PRICE").and_then(serde_json::Value::as_f64),
+                change_rate: v.get("CHANGE_RATE").and_then(serde_json::Value::as_f64),
+                deal_price: v.get("DEAL_PRICE").and_then(serde_json::Value::as_f64),
+                deal_volume: v.get("DEAL_VOLUME").and_then(serde_json::Value::as_f64),
+                deal_amount: v.get("DEAL_AMT").and_then(serde_json::Value::as_f64),
+                premium_ratio: v.get("PREMIUM_RATIO").and_then(serde_json::Value::as_f64),
                 buyer: v
                     .get("BUYER_NAME")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 seller: v
                     .get("SELLER_NAME")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
             })
             .collect();
 
@@ -452,31 +456,31 @@ impl AkShareClient {
                 symbol: v
                     .get("DIM_SCODE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 name: v
                     .get("SECURITYSHORTNAME")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
-                latest_price: v.get("NEWPRICE").and_then(|v| v.as_f64()),
-                repurchase_price_cap: v.get("REPURPRICECAP").and_then(|v| v.as_f64()),
-                repurchase_num_lower: v.get("REPURNUMLOWER").and_then(|v| v.as_f64()),
-                repurchase_num_cap: v.get("REPURNUMCAP").and_then(|v| v.as_f64()),
-                repurchase_amount_lower: v.get("JEXX").and_then(|v| v.as_f64()),
-                repurchase_amount_cap: v.get("JESX").and_then(|v| v.as_f64()),
+                    .map(std::string::ToString::to_string),
+                latest_price: v.get("NEWPRICE").and_then(serde_json::Value::as_f64),
+                repurchase_price_cap: v.get("REPURPRICECAP").and_then(serde_json::Value::as_f64),
+                repurchase_num_lower: v.get("REPURNUMLOWER").and_then(serde_json::Value::as_f64),
+                repurchase_num_cap: v.get("REPURNUMCAP").and_then(serde_json::Value::as_f64),
+                repurchase_amount_lower: v.get("JEXX").and_then(serde_json::Value::as_f64),
+                repurchase_amount_cap: v.get("JESX").and_then(serde_json::Value::as_f64),
                 start_date: v
                     .get("DIM_TRADEDATE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 progress: v
                     .get("REPURPROGRESS")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
-                repurchased_num: v.get("REPURNUM").and_then(|v| v.as_f64()),
-                repurchased_amount: v.get("REPURAMOUNT").and_then(|v| v.as_f64()),
+                    .map(std::string::ToString::to_string),
+                repurchased_num: v.get("REPURNUM").and_then(serde_json::Value::as_f64),
+                repurchased_amount: v.get("REPURAMOUNT").and_then(serde_json::Value::as_f64),
                 update_date: v
                     .get("UPDATEDATE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
             })
             .collect();
 
@@ -493,7 +497,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_gsrl_gsdt_em(date)`
     pub async fn stock_gsrl_gsdt_em(&self, date: &str) -> Result<Vec<CompanyEvent>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
-        let filter = format!("(TRADE_DATE='{}')", date_fmt);
+        let filter = format!("(TRADE_DATE='{date_fmt}')");
         let response = self
             .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
             .query(&[
@@ -528,23 +532,23 @@ impl AkShareClient {
                 symbol: v
                     .get("SECURITY_CODE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 name: v
                     .get("SECURITY_NAME_ABBR")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 event_type: v
                     .get("EVENT_TYPE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 event_content: v
                     .get("EVENT_CONTENT")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 trade_date: v
                     .get("TRADE_DATE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
             })
             .collect();
 
@@ -616,30 +620,32 @@ impl AkShareClient {
                 symbol: v
                     .get("SECURITY_CODE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
                     .or_else(|| {
                         v.get("SCODE")
                             .and_then(|v| v.as_str())
-                            .map(|s| s.to_string())
+                            .map(std::string::ToString::to_string)
                     }),
                 name: v
                     .get("SECURITY_NAME_ABBR")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
                     .or_else(|| {
                         v.get("SNAME")
                             .and_then(|v| v.as_str())
-                            .map(|s| s.to_string())
+                            .map(std::string::ToString::to_string)
                     }),
-                holder_count: v.get("HOULD_NUM").and_then(|v| v.as_i64()),
-                hold_shares: v.get("HOLD_NUM").and_then(|v| v.as_f64()),
-                hold_market_value: v.get("HOLD_MARKET_CAP").and_then(|v| v.as_f64()),
+                holder_count: v.get("HOULD_NUM").and_then(serde_json::Value::as_i64),
+                hold_shares: v.get("HOLD_NUM").and_then(serde_json::Value::as_f64),
+                hold_market_value: v.get("HOLD_MARKET_CAP").and_then(serde_json::Value::as_f64),
                 change: v
                     .get("HOLD_CHANGE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
-                change_amount: v.get("HOLDCHANGE").and_then(|v| v.as_f64()),
-                change_ratio: v.get("HOLD_RATIO_CHANGE").and_then(|v| v.as_f64()),
+                    .map(std::string::ToString::to_string),
+                change_amount: v.get("HOLDCHANGE").and_then(serde_json::Value::as_f64),
+                change_ratio: v
+                    .get("HOLD_RATIO_CHANGE")
+                    .and_then(serde_json::Value::as_f64),
             })
             .collect();
 
@@ -683,11 +689,15 @@ impl AkShareClient {
                 category: v
                     .get("STAT_NAME")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string()),
-                count: v.get("STAT_NUM").and_then(|v| v.as_i64()),
-                trade_amount: v.get("TRADE_AMOUNT").and_then(|v| v.as_f64()),
-                total_market_cap: v.get("TOTAL_MARKET_CAP").and_then(|v| v.as_f64()),
-                float_market_cap: v.get("FLOAT_MARKET_CAP").and_then(|v| v.as_f64()),
+                    .map(std::string::ToString::to_string),
+                count: v.get("STAT_NUM").and_then(serde_json::Value::as_i64),
+                trade_amount: v.get("TRADE_AMOUNT").and_then(serde_json::Value::as_f64),
+                total_market_cap: v
+                    .get("TOTAL_MARKET_CAP")
+                    .and_then(serde_json::Value::as_f64),
+                float_market_cap: v
+                    .get("FLOAT_MARKET_CAP")
+                    .and_then(serde_json::Value::as_f64),
             })
             .collect();
 
@@ -708,7 +718,7 @@ impl AkShareClient {
         } else {
             return Err(Error::invalid_input("symbol must be in format SZ000895"));
         };
-        let filter = format!("(SECUCODE=\"{}\")", secucode);
+        let filter = format!("(SECUCODE=\"{secucode}\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_GROWTH", &filter, "HSF10")
             .await
     }
@@ -726,7 +736,7 @@ impl AkShareClient {
         } else {
             return Err(Error::invalid_input("symbol must be in format SZ000895"));
         };
-        let filter = format!("(SECUCODE=\"{}\")", secucode);
+        let filter = format!("(SECUCODE=\"{secucode}\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_CVALUE", &filter, "HSF10")
             .await
     }
@@ -735,10 +745,7 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_hk_growth_comparison_em(symbol)`
     pub async fn stock_hk_growth_comparison_em(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
-        let filter = format!(
-            "(SECUCODE=\"{}.HK\")(CORRE_SECUCODE=\"{}.HK\")",
-            symbol, symbol
-        );
+        let filter = format!("(SECUCODE=\"{symbol}.HK\")(CORRE_SECUCODE=\"{symbol}.HK\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_HKGROWTH", &filter, "F10")
             .await
     }
@@ -750,10 +757,7 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<PeerComparison>> {
-        let filter = format!(
-            "(SECUCODE=\"{}.HK\")(CORRE_SECUCODE=\"{}.HK\")",
-            symbol, symbol
-        );
+        let filter = format!("(SECUCODE=\"{symbol}.HK\")(CORRE_SECUCODE=\"{symbol}.HK\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_HKCVALUE", &filter, "F10")
             .await
     }
@@ -799,11 +803,11 @@ impl AkShareClient {
                 let symbol = v
                     .get("CORRE_SECURITY_CODE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string());
+                    .map(std::string::ToString::to_string);
                 let name = v
                     .get("CORRE_SECURITY_NAME")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string());
+                    .map(std::string::ToString::to_string);
 
                 let mut metrics = std::collections::HashMap::new();
                 if let Some(obj) = v.as_object() {

@@ -1,7 +1,7 @@
 //! Block trade (大宗交易) data from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64, json_i64, json_str};
+use super::types::{DzjyHygtj, DzjyHyyybtj, DzjyMrtj, DzjyYybph};
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -10,7 +10,7 @@ impl AkShareClient {
     pub async fn stock_dzjy_mrtj(&self, start_date: &str, end_date: &str) -> Result<Vec<DzjyMrtj>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
-        let filter = format!("(TRADE_DATE>='{}')(TRADE_DATE<='{}')", sd, ed);
+        let filter = format!("(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
         let data = self
             .dc_fetch_all(
                 "RPT_BLOCKTRADE_DAILYSTATISTIC",
@@ -49,7 +49,7 @@ impl AkShareClient {
     ) -> Result<Vec<DzjyHygtj>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
-        let filter = format!("(TRADE_DATE>='{}')(TRADE_DATE<='{}')", sd, ed);
+        let filter = format!("(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
         let data = self
             .dc_fetch_all(
                 "RPT_BLOCKTRADE_INDUSTRYSTATISTIC",
@@ -82,7 +82,7 @@ impl AkShareClient {
     ) -> Result<Vec<DzjyHyyybtj>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
-        let filter = format!("(TRADE_DATE>='{}')(TRADE_DATE<='{}')", sd, ed);
+        let filter = format!("(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
         let data = self
             .dc_fetch_all(
                 "RPT_BLOCKTRADE_INDUSTRYDAILY",
@@ -116,7 +116,7 @@ impl AkShareClient {
     ) -> Result<Vec<DzjyYybph>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
-        let filter = format!("(TRADE_DATE>='{}')(TRADE_DATE<='{}')", sd, ed);
+        let filter = format!("(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
         let data = self
             .dc_fetch_all(
                 "RPT_BLOCKTRADE_DEPTSTATISTIC",

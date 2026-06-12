@@ -36,8 +36,8 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let text = resp.text().await.map_err(Error::from)?;
-        let json_start = text.find("([").map(|i| i + 1).unwrap_or(0);
-        let json_end = text.rfind("])").map(|i| i + 1).unwrap_or(text.len());
+        let json_start = text.find("([").map_or(0, |i| i + 1);
+        let json_end = text.rfind("])").map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
         let items: Vec<serde_json::Value> = serde_json::from_str(json_str)

@@ -1,7 +1,7 @@
 //! Datacenter financial reports (三大报表-数据中心) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64_opt, json_str, json_str_opt};
+use super::types::{BalanceSheet, CashFlowSheet, ProfitSheet};
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -10,8 +10,7 @@ impl AkShareClient {
     pub async fn stock_zcfz_em(&self, date: &str) -> Result<Vec<BalanceSheet>> {
         let date_fmt = fmt_date(date);
         let filter = format!(
-            "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{}')",
-            date_fmt
+            "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{date_fmt}')"
         );
         let data = self
             .dc_fetch_all(
@@ -50,8 +49,7 @@ impl AkShareClient {
     pub async fn stock_lrb_em(&self, date: &str) -> Result<Vec<ProfitSheet>> {
         let date_fmt = fmt_date(date);
         let filter = format!(
-            "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{}')",
-            date_fmt
+            "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{date_fmt}')"
         );
         let data = self
             .dc_fetch_all(
@@ -91,8 +89,7 @@ impl AkShareClient {
     pub async fn stock_xjll_em(&self, date: &str) -> Result<Vec<CashFlowSheet>> {
         let date_fmt = fmt_date(date);
         let filter = format!(
-            "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{}')",
-            date_fmt
+            "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{date_fmt}')"
         );
         let data = self
             .dc_fetch_all(

@@ -175,7 +175,7 @@ impl AkShareClient {
             .map_err(Error::from)?;
 
         let json_start = body.find('{').unwrap_or(0);
-        let json_end = body.rfind('}').map(|i| i + 1).unwrap_or(body.len());
+        let json_end = body.rfind('}').map_or(body.len(), |i| i + 1);
         let json_str = &body[json_start..json_end];
 
         let data: SinaOptionDataResponse = serde_json::from_str(json_str)
@@ -198,71 +198,26 @@ impl AkShareClient {
             let put_row = down.get(i);
 
             rows.push(CffexOptionSpotRow {
-                call_bid_qty: call_row
-                    .and_then(|r| r.first())
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                call_bid_price: call_row
-                    .and_then(|r| r.get(1))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                call_latest_price: call_row
-                    .and_then(|r| r.get(2))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                call_ask_price: call_row
-                    .and_then(|r| r.get(3))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                call_ask_qty: call_row
-                    .and_then(|r| r.get(4))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                call_open_interest: call_row
-                    .and_then(|r| r.get(5))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                call_change: call_row
-                    .and_then(|r| r.get(6))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                strike_price: call_row
-                    .and_then(|r| r.get(7))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
+                call_bid_qty: call_row.and_then(|r| r.first()).map_or(0.0, json_to_f64),
+                call_bid_price: call_row.and_then(|r| r.get(1)).map_or(0.0, json_to_f64),
+                call_latest_price: call_row.and_then(|r| r.get(2)).map_or(0.0, json_to_f64),
+                call_ask_price: call_row.and_then(|r| r.get(3)).map_or(0.0, json_to_f64),
+                call_ask_qty: call_row.and_then(|r| r.get(4)).map_or(0.0, json_to_f64),
+                call_open_interest: call_row.and_then(|r| r.get(5)).map_or(0.0, json_to_f64),
+                call_change: call_row.and_then(|r| r.get(6)).map_or(0.0, json_to_f64),
+                strike_price: call_row.and_then(|r| r.get(7)).map_or(0.0, json_to_f64),
                 call_id: call_row
                     .and_then(|r| r.get(8))
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string(),
-                put_bid_qty: put_row
-                    .and_then(|r| r.first())
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                put_bid_price: put_row
-                    .and_then(|r| r.get(1))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                put_latest_price: put_row
-                    .and_then(|r| r.get(2))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                put_ask_price: put_row
-                    .and_then(|r| r.get(3))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                put_ask_qty: put_row
-                    .and_then(|r| r.get(4))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                put_open_interest: put_row
-                    .and_then(|r| r.get(5))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
-                put_change: put_row
-                    .and_then(|r| r.get(6))
-                    .map(json_to_f64)
-                    .unwrap_or(0.0),
+                put_bid_qty: put_row.and_then(|r| r.first()).map_or(0.0, json_to_f64),
+                put_bid_price: put_row.and_then(|r| r.get(1)).map_or(0.0, json_to_f64),
+                put_latest_price: put_row.and_then(|r| r.get(2)).map_or(0.0, json_to_f64),
+                put_ask_price: put_row.and_then(|r| r.get(3)).map_or(0.0, json_to_f64),
+                put_ask_qty: put_row.and_then(|r| r.get(4)).map_or(0.0, json_to_f64),
+                put_open_interest: put_row.and_then(|r| r.get(5)).map_or(0.0, json_to_f64),
+                put_change: put_row.and_then(|r| r.get(6)).map_or(0.0, json_to_f64),
                 put_id: put_row
                     .and_then(|r| r.get(7))
                     .and_then(|v| v.as_str())
@@ -305,7 +260,7 @@ impl AkShareClient {
 
         // Extract JSON array from JSONP
         let arr_start = body.find('[').unwrap_or(0);
-        let arr_end = body.rfind(']').map(|i| i + 1).unwrap_or(body.len());
+        let arr_end = body.rfind(']').map_or(body.len(), |i| i + 1);
         if arr_start >= arr_end {
             return Err(Error::decode("sina commodity hist: no JSON array found"));
         }

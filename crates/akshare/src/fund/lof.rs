@@ -69,9 +69,18 @@ impl AkShareClient {
                         .unwrap_or("")
                         .to_string(),
                     date: date.clone(),
-                    nav: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    acc_nav: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    change_pct: v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0),
+                    nav: v
+                        .get("f2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    acc_nav: v
+                        .get("f2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    change_pct: v
+                        .get("f3")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
                     fund_type: Some("lof".to_string()),
                 })
             })
@@ -353,22 +362,58 @@ impl AkShareClient {
                         .and_then(|x| x.as_str())
                         .unwrap_or("")
                         .to_string(),
-                    latest_price: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    change_pct: v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    change_amount: v.get("f4").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    volume: v.get("f5").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    amount: v.get("f6").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    open: v.get("f17").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    high: v.get("f15").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    low: v.get("f16").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    prev_close: v.get("f18").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    amplitude: v.get("f7").and_then(|x| x.as_f64()).unwrap_or(0.0),
+                    latest_price: v
+                        .get("f2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    change_pct: v
+                        .get("f3")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    change_amount: v
+                        .get("f4")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    volume: v
+                        .get("f5")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    amount: v
+                        .get("f6")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    open: v
+                        .get("f17")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    high: v
+                        .get("f15")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    low: v
+                        .get("f16")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    prev_close: v
+                        .get("f18")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    amplitude: v
+                        .get("f7")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
                     turnover_rate: 0.0,
                     iopv: 0.0,
                     discount_rate: 0.0,
                     shares: 0.0,
-                    circ_mv: v.get("f21").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    total_mv: v.get("f20").and_then(|x| x.as_f64()).unwrap_or(0.0),
+                    circ_mv: v
+                        .get("f21")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    total_mv: v
+                        .get("f20")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
                     data_date: String::new(),
                 })
             })

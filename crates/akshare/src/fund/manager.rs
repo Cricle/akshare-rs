@@ -27,7 +27,7 @@ impl AkShareClient {
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text.strip_prefix("var returnjson= ").unwrap_or(&text);
         let json_start = json_str.find('{').unwrap_or(0);
-        let json_end = json_str.rfind('}').map(|i| i + 1).unwrap_or(json_str.len());
+        let json_end = json_str.rfind('}').map_or(json_str.len(), |i| i + 1);
         let json_body = &json_str[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_body)

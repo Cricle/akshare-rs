@@ -89,7 +89,7 @@ impl AkShareClient {
 
             // Parse the response - try JSON first
             let json_start = text.find('{').unwrap_or(0);
-            let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+            let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
             let json_text = &text[json_start..json_end];
 
             let data: serde_json::Value = match serde_json::from_str(json_text) {
@@ -187,7 +187,7 @@ impl AkShareClient {
             let response = self
                 .get(&url)
                 .query(&[
-                    ("_var", format!("kline_day{}{}", adjust, year).as_str()),
+                    ("_var", format!("kline_day{adjust}{year}").as_str()),
                     (param_key, param_value.as_str()),
                     ("r", r.as_str()),
                 ])
@@ -206,7 +206,7 @@ impl AkShareClient {
 
             // Parse response
             let json_start = text.find('{').unwrap_or(0);
-            let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+            let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
             let json_text = &text[json_start..json_end];
 
             let data: serde_json::Value = match serde_json::from_str(json_text) {
@@ -217,12 +217,12 @@ impl AkShareClient {
             let kline_key = if adjust.is_empty() {
                 "day"
             } else {
-                &format!("{}day", adjust)
+                &format!("{adjust}day")
             };
 
             let klines = data
                 .get("data")
-                .and_then(|d| d.get(format!("hk{}", symbol)))
+                .and_then(|d| d.get(format!("hk{symbol}")))
                 .and_then(|v| v.get(kline_key))
                 .and_then(|v| v.as_array());
 
@@ -277,7 +277,7 @@ impl AkShareClient {
             let text = response.text().await.map_err(Error::from)?;
 
             let json_start = text.find('{').unwrap_or(0);
-            let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+            let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
             let json_text = &text[json_start..json_end];
 
             let data: serde_json::Value = match serde_json::from_str(json_text) {

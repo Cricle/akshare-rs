@@ -2,8 +2,10 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
-use crate::util::*;
+use crate::types::{CandlePoint, QuoteSnapshot};
+use crate::util::{
+    amplitude_pct, apply_change_metrics, normalize_trade_date, parse_f64_safe, parse_i64_safe,
+};
 
 impl AkShareClient {
     /// Tencent A-share realtime quote.
@@ -18,8 +20,7 @@ impl AkShareClient {
         let data = line
             .split_once('=')
             .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
-            .map(|(s, _)| s)
-            .unwrap_or("");
+            .map_or("", |(s, _)| s);
         let p: Vec<&str> = data.split('~').collect();
         if p.len() < 45 {
             return Err(Error::decode("tencent quote: insufficient fields"));
@@ -117,8 +118,7 @@ impl AkShareClient {
         let data = line
             .split_once('=')
             .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
-            .map(|(s, _)| s)
-            .unwrap_or("");
+            .map_or("", |(s, _)| s);
         let p: Vec<&str> = data.split('~').collect();
         if p.len() < 30 {
             return Err(Error::decode("tencent HK quote: insufficient fields"));

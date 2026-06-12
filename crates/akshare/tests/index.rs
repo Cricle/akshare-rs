@@ -540,7 +540,7 @@ async fn test_index_hk_spot_em() {
     let rows = vec![serde_json::json!({
         "f12": "HSI", "f14": "恒生指数", "f2": 1800000, "f3": 5000,
         "f4": 100, "f7": 200, "f15": 1810000, "f16": 1790000,
-        "f17": 1800000, "f18": 1799900, "f124": 1704067200000i64
+        "f17": 1800000, "f18": 1799900, "f124": 1704067200000_i64
     })];
     mock_any_get(&server, "/api/qt/clist/get", em_push2_response(rows)).await;
     let client = mock_client(&server);

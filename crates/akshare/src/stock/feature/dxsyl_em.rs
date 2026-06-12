@@ -1,7 +1,7 @@
 //! IPO subscription yield (打新收益率) and new stock subscription (新股申购) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_f64_opt, json_str, json_str_opt};
+use super::types::{Dxsyl, Xgsglb};
 use crate::client::AkShareClient;
 use crate::error::Result;
 

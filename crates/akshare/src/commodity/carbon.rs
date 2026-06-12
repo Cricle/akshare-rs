@@ -96,7 +96,10 @@ impl AkShareClient {
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("")
                                 .to_string();
-                            let price = entry.get("cjj").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                            let price = entry
+                                .get("cjj")
+                                .and_then(serde_json::Value::as_f64)
+                                .unwrap_or(0.0);
                             if !date.is_empty() {
                                 items.push(MacroDataPoint {
                                     date: date.get(..10).unwrap_or(&date).to_string(),
@@ -147,7 +150,7 @@ impl AkShareClient {
             .query(&[
                 ("reportName", "RPTA_WEB_YJ_JH"),
                 ("columns", "ALL"),
-                ("filter", &format!("(dim_date='{}')", formatted_date)),
+                ("filter", &format!("(dim_date='{formatted_date}')")),
                 ("sortColumns", "cityname"),
                 ("sortTypes", "1"),
                 ("token", "894050c76af8597a853f5b408b759f5d"),
@@ -177,13 +180,13 @@ impl AkShareClient {
             let price_92 = v
                 .get("v_92")
                 .or_else(|| v.get("V_92"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             if !region.is_empty() {
                 items.push(MacroDataPoint {
                     date: formatted_date.clone(),
                     value: price_92,
-                    name: format!("Oil 92# {}", region),
+                    name: format!("Oil 92# {region}"),
                 });
             }
         }

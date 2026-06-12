@@ -1,7 +1,18 @@
 //! Miscellaneous stock feature functions from Eastmoney, CNINFO, Legulegu, Sina, etc.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{
+    fmt_date, json_f64, json_f64_opt, json_i64, json_i64_opt, json_str, json_str_opt,
+};
+use super::types::{
+    AccountStatistics, AllotmentCninfo, BuffettIndexLg, CgEquityMortgage, CgGuarantee, CgLawsuit,
+    ClassifySina, ConceptConsFutu, CongestionLg, CxMainNews, CyqData, DelistedReport,
+    DividendCninfo, EbsLg, EsgRateSina, ExchangeRateEntry, FhpsThs, FundHoldDetail, GddhEntry,
+    GpzyIndustry, GxlLg, IpoBenefitThs, IpoSummaryCninfo, MarketActivityLegu, NewGhCninfo,
+    NewIpoCninfo, PriceJs, ProfileCninfo, QsjyEntry, ReportDisclosure, ResearchReport,
+    SectorDetail, ShareChangeCninfo, ShareHoldChangeEntry, SseDealDaily, SseInfo, StockNews,
+    StockValue, SzseAreaSummary, SzseSectorSummary, SzseSummaryEntry, TfpInfo, XgsrThs, YzxdrEntry,
+    ZdhtmxEntry,
+};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
@@ -109,12 +120,12 @@ impl AkShareClient {
 
     /// 股票代码转换
     pub async fn stock_a_code_to_symbol(&self, code: &str) -> Result<String> {
-        if code.starts_with("6") || code.starts_with("5") {
-            Ok(format!("sh{}", code))
-        } else if code.starts_with("0") || code.starts_with("3") || code.starts_with("1") {
-            Ok(format!("sz{}", code))
-        } else if code.starts_with("4") || code.starts_with("8") {
-            Ok(format!("bj{}", code))
+        if code.starts_with('6') || code.starts_with('5') {
+            Ok(format!("sh{code}"))
+        } else if code.starts_with('0') || code.starts_with('3') || code.starts_with('1') {
+            Ok(format!("sz{code}"))
+        } else if code.starts_with('4') || code.starts_with('8') {
+            Ok(format!("bj{code}"))
         } else {
             Ok(code.to_string())
         }
@@ -283,8 +294,8 @@ impl AkShareClient {
             "hfq" => "2",
             _ => "0",
         };
-        let market_code = if symbol.starts_with("6") { 1 } else { 0 };
-        let secid = format!("{}.{}", market_code, symbol);
+        let market_code = i32::from(symbol.starts_with('6'));
+        let secid = format!("{market_code}.{symbol}");
         let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
         let resp = self
             .get(url)
@@ -374,7 +385,7 @@ impl AkShareClient {
 
     /// 新浪-ESG评级
     pub async fn stock_esg_rate_sina(&self, symbol: &str) -> Result<Vec<EsgRateSina>> {
-        let url = format!("https://finance.sina.com.cn/esg/stock/{}", symbol);
+        let url = format!("https://finance.sina.com.cn/esg/stock/{symbol}");
         let resp = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -389,7 +400,7 @@ impl AkShareClient {
 
     /// 同花顺-分红配送明细
     pub async fn stock_fhps_detail_ths(&self, symbol: &str) -> Result<Vec<FhpsThs>> {
-        let url = format!("https://basic.10jqka.com.cn/api/stockph/fhsp/{}", symbol);
+        let url = format!("https://basic.10jqka.com.cn/api/stockph/fhsp/{symbol}");
         let resp = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -589,7 +600,7 @@ impl AkShareClient {
         let resp = self.get(url)
             .query(&[
                 ("cb", callback.as_str()),
-                ("param", format!("{{\"uid\":\"\",\"keyword\":\"{}\",\"type\":[\"cmsArticleWebOld\"],\"client\":\"web\",\"clientType\":\"web\",\"clientVersion\":\"curr\",\"param\":{{\"cmsArticleWebOld\":{{\"searchScope\":\"default\",\"sort\":\"default\",\"pageIndex\":1,\"pageSize\":20,\"preTag\":\"\",\"postTag\":\"\"}}}}}}", symbol).as_str()),
+                ("param", format!("{{\"uid\":\"\",\"keyword\":\"{symbol}\",\"type\":[\"cmsArticleWebOld\"],\"client\":\"web\",\"clientType\":\"web\",\"clientVersion\":\"curr\",\"param\":{{\"cmsArticleWebOld\":{{\"searchScope\":\"default\",\"sort\":\"default\",\"pageIndex\":1,\"pageSize\":20,\"preTag\":\"\",\"postTag\":\"\"}}}}}}").as_str()),
             ])
             .send().await.map_err(Error::from)?
             .error_for_status().map_err(Error::from)?;
@@ -630,7 +641,7 @@ impl AkShareClient {
 
     /// JS实时价格
     pub async fn stock_price_js(&self, symbol: &str) -> Result<Vec<PriceJs>> {
-        let url = format!("https://qt.gtimg.cn/q={}", symbol);
+        let url = format!("https://qt.gtimg.cn/q={symbol}");
         let resp = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -668,7 +679,7 @@ impl AkShareClient {
     /// 东方财富-券商业绩月报
     pub async fn stock_qsjy_em(&self, date: &str) -> Result<Vec<QsjyEntry>> {
         let sd = fmt_date(date);
-        let filter = format!("(END_DATE='{}')", sd);
+        let filter = format!("(END_DATE='{sd}')");
         let data = self.dc_fetch_all(
             "RPT_PERFORMANCE",
             "SECURITY_CODE,SECURITY_NAME_ABBR,END_DATE,NETPROFIT,NP_YOY,NP_QOQ,ACCUMPROFIT,ACCUMPROFIT_YOY,OPERATE_INCOME,OI_YOY,OI_QOQ,ACCUMOI,ACCUMOI_YOY,NET_ASSETS,NA_YOY",
@@ -703,7 +714,7 @@ impl AkShareClient {
     /// 信息披露
     pub async fn stock_report_disclosure(&self, date: &str) -> Result<Vec<ReportDisclosure>> {
         let sd = fmt_date(date);
-        let filter = format!("(NOTICE_DATE='{}')", sd);
+        let filter = format!("(NOTICE_DATE='{sd}')");
         let data = self
             .dc_fetch_all(
                 "RPT_F10_REPORT_DISCLOSURE",
@@ -725,7 +736,7 @@ impl AkShareClient {
     /// 基金持仓明细
     pub async fn stock_report_fund_hold_detail(&self, date: &str) -> Result<Vec<FundHoldDetail>> {
         let sd = fmt_date(date);
-        let filter = format!("(REPORT_DATE='{}')", sd);
+        let filter = format!("(REPORT_DATE='{sd}')");
         let data = self
             .dc_fetch_all(
                 "RPT_MUTUAL_HOLD_DET",
@@ -790,7 +801,7 @@ impl AkShareClient {
                 industry: json_str_opt(v, "indvInduName"),
                 date: json_str(v, "publishDate"),
                 pdf_url: json_str_opt(v, "encodeUrl")
-                    .map(|c| format!("https://pdf.dfcfw.com/pdf/H3_{}_1.pdf", c)),
+                    .map(|c| format!("https://pdf.dfcfw.com/pdf/H3_{c}_1.pdf")),
             })
             .collect())
     }
@@ -798,7 +809,7 @@ impl AkShareClient {
     /// 板块详情
     pub async fn stock_sector_detail(&self, sector: &str) -> Result<Vec<SectorDetail>> {
         let data = self
-            .clist_spot_fetch(&format!("b:{}", sector), "f2,f3,f12,f14", "5000", "f3")
+            .clist_spot_fetch(&format!("b:{sector}"), "f2,f3,f12,f14", "5000", "f3")
             .await?;
         Ok(data
             .iter()
@@ -870,7 +881,7 @@ impl AkShareClient {
         date: &str,
     ) -> Result<Vec<ShareHoldChangeEntry>> {
         let sd = fmt_date(date);
-        let filter = format!("(TRADE_DATE='{}')", sd);
+        let filter = format!("(TRADE_DATE='{sd}')");
         let data = self
             .dc_fetch_all(
                 "RPT_BSE_HOLD_CHANGE",
@@ -895,7 +906,7 @@ impl AkShareClient {
         date: &str,
     ) -> Result<Vec<ShareHoldChangeEntry>> {
         let sd = fmt_date(date);
-        let filter = format!("(TRADE_DATE='{}')", sd);
+        let filter = format!("(TRADE_DATE='{sd}')");
         let data = self
             .dc_fetch_all(
                 "RPT_SSE_HOLD_CHANGE",
@@ -920,7 +931,7 @@ impl AkShareClient {
         date: &str,
     ) -> Result<Vec<ShareHoldChangeEntry>> {
         let sd = fmt_date(date);
-        let filter = format!("(TRADE_DATE='{}')", sd);
+        let filter = format!("(TRADE_DATE='{sd}')");
         let data = self
             .dc_fetch_all(
                 "RPT_SZSE_HOLD_CHANGE",
@@ -1131,7 +1142,7 @@ impl AkShareClient {
     /// 东方财富-停复牌
     pub async fn stock_tfp_em(&self, date: &str) -> Result<Vec<TfpInfo>> {
         let sd = fmt_date(date);
-        let filter = format!("(MARKET=\"全部\")(DATETIME='{}')", sd);
+        let filter = format!("(MARKET=\"全部\")(DATETIME='{sd}')");
         let data = self
             .dc_fetch_all(
                 "RPT_CUSTOM_SUSPEND_DATA_INTERFACE",
@@ -1163,7 +1174,7 @@ impl AkShareClient {
 
     /// 东方财富-估值分析
     pub async fn stock_value_em(&self, symbol: &str) -> Result<Vec<StockValue>> {
-        let filter = format!("(SECURITY_CODE=\"{}\")", symbol);
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
                 "RPT_VALUEANALYSIS_DET",
@@ -1198,7 +1209,7 @@ impl AkShareClient {
 
     /// 同花顺-新股上市日
     pub async fn stock_xgsr_ths(&self, symbol: &str) -> Result<Vec<XgsrThs>> {
-        let url = format!("https://basic.10jqka.com.cn/api/stockph/xgsr/{}", symbol);
+        let url = format!("https://basic.10jqka.com.cn/api/stockph/xgsr/{symbol}");
         let resp = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -1219,7 +1230,7 @@ impl AkShareClient {
     /// 东方财富-一致行动人
     pub async fn stock_yzxdr_em(&self, date: &str) -> Result<Vec<YzxdrEntry>> {
         let sd = fmt_date(date);
-        let filter = format!("(enddate='{}')", sd);
+        let filter = format!("(enddate='{sd}')");
         let data = self
             .dc_fetch_all(
                 "RPTA_WEB_YZXDRINDEX",
@@ -1258,7 +1269,7 @@ impl AkShareClient {
     ) -> Result<Vec<ZdhtmxEntry>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
-        let filter = format!("(DIM_RDATE>='{}')(DIM_RDATE<='{}')", sd, ed);
+        let filter = format!("(DIM_RDATE>='{sd}')(DIM_RDATE<='{ed}')");
         let data = self
             .dc_fetch_all(
                 "RPTA_WEB_ZDHT_LIST",
@@ -1509,8 +1520,7 @@ impl AkShareClient {
         ]);
         let code = symbol_map.get(symbol).unwrap_or(&"000300.SH");
         let url = format!(
-            "https://legulegu.com/api/stockdata/index-basic-pb?token=public&indexCode={}",
-            code
+            "https://legulegu.com/api/stockdata/index-basic-pb?token=public&indexCode={code}"
         );
         let resp = self
             .get(&url)
@@ -1529,7 +1539,10 @@ impl AkShareClient {
             .iter()
             .map(|v| {
                 let date = v.get("date").and_then(|d| d.as_str()).unwrap_or("");
-                let value = v.get("pb").and_then(|d| d.as_f64()).unwrap_or(0.0);
+                let value = v
+                    .get("pb")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 MacroDataPoint {
                     date: date.to_string(),
                     value,
@@ -1557,8 +1570,7 @@ impl AkShareClient {
         ]);
         let code = symbol_map.get(symbol).unwrap_or(&"000300.SH");
         let url = format!(
-            "https://legulegu.com/api/stockdata/index-basic-pe?token=public&indexCode={}",
-            code
+            "https://legulegu.com/api/stockdata/index-basic-pe?token=public&indexCode={code}"
         );
         let resp = self
             .get(&url)
@@ -1577,7 +1589,10 @@ impl AkShareClient {
             .iter()
             .map(|v| {
                 let date = v.get("date").and_then(|d| d.as_str()).unwrap_or("");
-                let value = v.get("pe").and_then(|d| d.as_f64()).unwrap_or(0.0);
+                let value = v
+                    .get("pe")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 MacroDataPoint {
                     date: date.to_string(),
                     value,

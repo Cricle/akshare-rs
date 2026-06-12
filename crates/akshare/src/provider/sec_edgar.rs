@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
+use crate::types::FundamentalsSnapshot;
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]

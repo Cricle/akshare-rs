@@ -235,7 +235,7 @@ impl AkShareClient {
         fields: &str,
     ) -> Result<Vec<Vec<serde_json::Value>>> {
         let mut all_data = Vec::new();
-        let mut page = 1u32;
+        let mut page = 1_u32;
         let page_size = 100;
 
         loop {

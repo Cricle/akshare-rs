@@ -49,7 +49,7 @@ impl AkShareClient {
 
     // Internal helper
     async fn fetch_qdii_jsl(&self, market: &str, cookie: &str) -> Result<Vec<MacroDataPoint>> {
-        let url = format!("https://www.jisilu.cn/data/qdii/qdii_list/{}", market);
+        let url = format!("https://www.jisilu.cn/data/qdii/qdii_list/{market}");
 
         let mut req = self
             .get(&url)
@@ -76,8 +76,14 @@ impl AkShareClient {
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string();
-                let price = cell.get("price").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                let nav = cell.get("fund_nav").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let price = cell
+                    .get("price")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
+                let nav = cell
+                    .get("fund_nav")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 let discount_rt = cell
                     .get("discount_rt")
                     .and_then(|v| v.as_str())

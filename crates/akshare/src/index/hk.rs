@@ -5,7 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, HkIndexSpotItem};
-use crate::util::*;
+use crate::util::parse_f64_safe;
 
 // ---------------------------------------------------------------------------
 // Wire types

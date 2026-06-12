@@ -293,8 +293,7 @@ impl AkShareClient {
                 .filter(|r| {
                     r.get("REPORT_TYPE")
                         .and_then(|v| v.as_str())
-                        .map(|s| s == "年报")
-                        .unwrap_or(false)
+                        .is_some_and(|s| s == "年报")
                 })
                 .collect()
         } else {
@@ -422,7 +421,7 @@ impl AkShareClient {
         data.first()
             .and_then(|v| v.get("SECUCODE"))
             .and_then(|v| v.as_str())
-            .map(|s| s.to_string())
+            .map(std::string::ToString::to_string)
             .ok_or_else(|| Error::not_found(format!("US stock {symbol} not found")))
     }
 
@@ -466,7 +465,7 @@ impl AkShareClient {
             .filter_map(|r| {
                 r.get("REPORT")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
             })
             .collect();
 
@@ -1079,7 +1078,7 @@ impl AkShareClient {
         let f_node = report_map.get(report_type).copied().unwrap_or("0");
 
         let mut all_items = Vec::new();
-        let mut page = 1u64;
+        let mut page = 1_u64;
 
         loop {
             let ps = "100";
@@ -1121,7 +1120,7 @@ impl AkShareClient {
             let payload: serde_json::Value = resp.json().await?;
             let total_hits = payload
                 .pointer("/data/total_hits")
-                .and_then(|v| v.as_u64())
+                .and_then(serde_json::Value::as_u64)
                 .unwrap_or(0);
 
             let list = payload

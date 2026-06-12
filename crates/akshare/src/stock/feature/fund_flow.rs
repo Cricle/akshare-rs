@@ -3,8 +3,11 @@
 //! Note: THS-based fund flow functions use Eastmoney push2 API as fallback
 //! since THS requires hexin-v token from JavaScript execution.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64_opt, json_str};
+use super::types::{
+    ConceptFundFlowHist, FundFlowEntry, MainFundFlow, MarketFundFlow, SectorFundFlowHist,
+    SectorFundFlowRank, SectorFundFlowSummary,
+};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
@@ -152,8 +155,8 @@ impl AkShareClient {
 
     /// 东方财富-主力资金流向
     pub async fn stock_main_fund_flow(&self, symbol: &str) -> Result<Vec<MainFundFlow>> {
-        let market_code = if symbol.starts_with("6") { "1" } else { "0" };
-        let secid = format!("{}.{}", market_code, symbol);
+        let market_code = if symbol.starts_with('6') { "1" } else { "0" };
+        let secid = format!("{market_code}.{symbol}");
         let url = "https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get";
         let resp = self
             .get(url)

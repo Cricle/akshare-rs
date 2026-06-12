@@ -1,7 +1,7 @@
 //! Earnings report (业绩报表) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64, json_str, json_str_opt};
+use super::types::EarningsReport;
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -9,7 +9,7 @@ impl AkShareClient {
     /// 业绩报表
     pub async fn stock_yjbb_em(&self, date: &str) -> Result<Vec<EarningsReport>> {
         let date_fmt = fmt_date(date);
-        let filter = format!("(REPORTDATE='{}')", date_fmt);
+        let filter = format!("(REPORTDATE='{date_fmt}')");
         let data = self
             .dc_fetch_all(
                 "RPT_LICO_FN_CPD",

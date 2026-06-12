@@ -90,7 +90,7 @@ impl AkShareClient {
     ) -> Result<Vec<DupontComparison>> {
         let filter = if symbol.len() >= 2 {
             let (prefix, code) = symbol.split_at(2);
-            format!("(SECUCODE=\"{}.{}\")", code, prefix)
+            format!("(SECUCODE=\"{code}.{prefix}\")")
         } else {
             return Err(Error::invalid_input("symbol must be like SZ000895"));
         };
@@ -127,7 +127,7 @@ impl AkShareClient {
     pub async fn stock_zh_scale_comparison_em(&self, symbol: &str) -> Result<Vec<ScaleComparison>> {
         let filter = if symbol.len() >= 2 {
             let (prefix, code) = symbol.split_at(2);
-            format!("(SECUCODE=\"{}.{}\")", code, prefix)
+            format!("(SECUCODE=\"{code}.{prefix}\")")
         } else {
             return Err(Error::invalid_input("symbol must be like SZ000895"));
         };
@@ -253,10 +253,14 @@ impl AkShareClient {
                     if item_type == *period {
                         votes.push(BaiduVote {
                             period: period.to_string(),
-                            bullish: item.get("bullCount").and_then(|v| v.as_i64()),
-                            bearish: item.get("bearCount").and_then(|v| v.as_i64()),
-                            bullish_ratio: item.get("bullRatio").and_then(|v| v.as_f64()),
-                            bearish_ratio: item.get("bearRatio").and_then(|v| v.as_f64()),
+                            bullish: item.get("bullCount").and_then(serde_json::Value::as_i64),
+                            bearish: item.get("bearCount").and_then(serde_json::Value::as_i64),
+                            bullish_ratio: item
+                                .get("bullRatio")
+                                .and_then(serde_json::Value::as_f64),
+                            bearish_ratio: item
+                                .get("bearRatio")
+                                .and_then(serde_json::Value::as_f64),
                         });
                     }
                 }
@@ -283,9 +287,8 @@ async fn parse_datacenter_response<T: serde::de::DeserializeOwned>(
 
     let mut items = Vec::new();
     for val in data_arr {
-        match serde_json::from_value::<T>(val.clone()) {
-            Ok(item) => items.push(item),
-            Err(_) => continue,
+        if let Ok(item) = serde_json::from_value::<T>(val.clone()) {
+            items.push(item);
         }
     }
 

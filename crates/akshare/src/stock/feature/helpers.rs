@@ -55,27 +55,31 @@ pub(crate) fn json_str(v: &serde_json::Value, key: &str) -> String {
 
 /// Get a string field as Option from a JSON value.
 pub(crate) fn json_str_opt(v: &serde_json::Value, key: &str) -> Option<String> {
-    v.get(key).and_then(|v| v.as_str()).map(|s| s.to_string())
+    v.get(key)
+        .and_then(|v| v.as_str())
+        .map(std::string::ToString::to_string)
 }
 
 /// Get a f64 field from a JSON value, returning 0.0 if missing.
 pub(crate) fn json_f64(v: &serde_json::Value, key: &str) -> f64 {
-    v.get(key).and_then(|v| v.as_f64()).unwrap_or(0.0)
+    v.get(key)
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(0.0)
 }
 
 /// Get a f64 field as Option from a JSON value.
 pub(crate) fn json_f64_opt(v: &serde_json::Value, key: &str) -> Option<f64> {
-    v.get(key).and_then(|v| v.as_f64())
+    v.get(key).and_then(serde_json::Value::as_f64)
 }
 
 /// Get an i64 field from a JSON value, returning 0 if missing.
 pub(crate) fn json_i64(v: &serde_json::Value, key: &str) -> i64 {
-    v.get(key).and_then(|v| v.as_i64()).unwrap_or(0)
+    v.get(key).and_then(serde_json::Value::as_i64).unwrap_or(0)
 }
 
 /// Get an i64 field as Option from a JSON value.
 pub(crate) fn json_i64_opt(v: &serde_json::Value, key: &str) -> Option<i64> {
-    v.get(key).and_then(|v| v.as_i64())
+    v.get(key).and_then(serde_json::Value::as_i64)
 }
 
 impl AkShareClient {
@@ -97,7 +101,7 @@ impl AkShareClient {
         let mut all_data = Vec::new();
         let ps = page_size.to_string();
 
-        let mut page = 1i64;
+        let mut page = 1_i64;
         loop {
             let pn = page.to_string();
             let mut builder = self
@@ -242,8 +246,7 @@ impl AkShareClient {
 
         // Get date list
         let date_url = format!(
-            "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{}DateAjaxNew",
-            report_type
+            "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}DateAjaxNew"
         );
         let code_lower = code.to_lowercase();
         let resp = self
@@ -277,15 +280,14 @@ impl AkShareClient {
             .filter_map(|d| {
                 d.get("REPORT_DATE")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
             })
             .collect();
 
         for chunk in date_strs.chunks(5) {
             let dates_param = chunk.join(",");
             let data_url = format!(
-                "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{}AjaxNew",
-                report_type
+                "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}AjaxNew"
             );
             let resp = self
                 .get(&data_url)

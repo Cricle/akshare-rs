@@ -1,7 +1,10 @@
 //! HSGT (沪深港通) data from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
+use super::types::{
+    HsgtBoardRank, HsgtFundFlowSummary, HsgtHist, HsgtHoldStock, HsgtIndividualDetail,
+    HsgtInstitutionStatistic, HsgtStockStatistic, SpotQuote,
+};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
@@ -333,8 +336,7 @@ impl AkShareClient {
             _ => "1",
         };
         let url = format!(
-            "https://push2.eastmoney.com/api/qt/kamtbs.rtmin/get?fields1=f1,f2,f3,f4&fields2=f51,f52,f53,f54,f55,f56&ut=b2884a393a59ad64002292a3e90d46a5&klt={}",
-            market
+            "https://push2.eastmoney.com/api/qt/kamtbs.rtmin/get?fields1=f1,f2,f3,f4&fields2=f51,f52,f53,f54,f55,f56&ut=b2884a393a59ad64002292a3e90d46a5&klt={market}"
         );
         let resp = self
             .get(&url)

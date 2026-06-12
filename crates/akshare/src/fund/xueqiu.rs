@@ -41,7 +41,7 @@ impl AkShareClient {
         let nav = data
             .get("nav")
             .or_else(|| data.get("unit_nav"))
-            .and_then(|v| v.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .or_else(|| {
                 data.get("nav")
                     .or_else(|| data.get("unit_nav"))
@@ -51,7 +51,7 @@ impl AkShareClient {
             .unwrap_or(0.0);
         let acc_nav = data
             .get("acc_nav")
-            .and_then(|v| v.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .or_else(|| {
                 data.get("acc_nav")
                     .and_then(|v| v.as_str())
@@ -61,7 +61,7 @@ impl AkShareClient {
         let change_pct = data
             .get("percent")
             .or_else(|| data.get("rzdf"))
-            .and_then(|v| v.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .or_else(|| {
                 data.get("percent")
                     .or_else(|| data.get("rzdf"))
@@ -227,26 +227,26 @@ impl AkShareClient {
                     .to_string(),
                 risk_return_ratio: item
                     .get("investment_cost_performance")
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0),
                 risk_control: item
                     .get("risk_control")
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0),
                 volatility: item
                     .get("self_index")
                     .and_then(|s| s.get("volatility_rank"))
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0),
                 sharpe: item
                     .get("self_index")
                     .and_then(|s| s.get("sharpe_rank"))
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0),
                 max_drawdown: item
                     .get("self_index")
                     .and_then(|s| s.get("max_draw_down"))
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0),
             });
         }
@@ -348,7 +348,10 @@ impl AkShareClient {
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string(),
-                percent: item.get("percent").and_then(|v| v.as_f64()).unwrap_or(0.0),
+                percent: item
+                    .get("percent")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0),
             });
         }
         Ok(result)

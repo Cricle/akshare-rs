@@ -111,7 +111,7 @@ impl AkShareClient {
                     .to_string();
 
                 for key in &["FR001", "FR007", "FR014", "FDR001", "FDR007", "FDR014"] {
-                    if let Some(val) = fr_map.get(*key).and_then(|v| v.as_f64()) {
+                    if let Some(val) = fr_map.get(*key).and_then(serde_json::Value::as_f64) {
                         items.push(MacroDataPoint {
                             date: date.clone(),
                             value: val,

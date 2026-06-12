@@ -58,8 +58,14 @@ impl AkShareClient {
                     .and_then(|x| x.as_str())
                     .unwrap_or("")
                     .to_string();
-                let price = v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0);
-                let change_pct = v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0);
+                let price = v
+                    .get("f2")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
+                let change_pct = v
+                    .get("f3")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 Some(FundSnapshot {
                     symbol: code,
                     name,
@@ -346,22 +352,70 @@ impl AkShareClient {
                         .and_then(|x| x.as_str())
                         .unwrap_or("")
                         .to_string(),
-                    latest_price: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    change_pct: v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    change_amount: v.get("f4").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    volume: v.get("f5").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    amount: v.get("f6").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    open: v.get("f17").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    high: v.get("f15").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    low: v.get("f16").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    prev_close: v.get("f18").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    amplitude: v.get("f7").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    turnover_rate: v.get("f38").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    iopv: v.get("f441").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    discount_rate: v.get("f402").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    shares: v.get("f38").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    circ_mv: v.get("f21").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    total_mv: v.get("f20").and_then(|x| x.as_f64()).unwrap_or(0.0),
+                    latest_price: v
+                        .get("f2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    change_pct: v
+                        .get("f3")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    change_amount: v
+                        .get("f4")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    volume: v
+                        .get("f5")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    amount: v
+                        .get("f6")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    open: v
+                        .get("f17")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    high: v
+                        .get("f15")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    low: v
+                        .get("f16")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    prev_close: v
+                        .get("f18")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    amplitude: v
+                        .get("f7")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    turnover_rate: v
+                        .get("f38")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    iopv: v
+                        .get("f441")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    discount_rate: v
+                        .get("f402")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    shares: v
+                        .get("f38")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    circ_mv: v
+                        .get("f21")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    total_mv: v
+                        .get("f20")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
                     data_date: v
                         .get("f297")
                         .and_then(|x| x.as_str())
@@ -505,7 +559,11 @@ impl AkShareClient {
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string(),
-                shares: item.get("TOT_VOL").and_then(|v| v.as_f64()).unwrap_or(0.0) * 10000.0,
+                shares: item
+                    .get("TOT_VOL")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0)
+                    * 10000.0,
             });
         }
 
@@ -550,8 +608,7 @@ impl AkShareClient {
         let inner_symbol = symbol_map
             .iter()
             .find(|(n, _)| *n == symbol)
-            .map(|(_, c)| *c)
-            .unwrap_or("ETF");
+            .map_or("ETF", |(_, c)| *c);
 
         let inner_date = if !date.is_empty() && date.len() >= 8 {
             format!("{}-{}-{}", &date[0..4], &date[4..6], &date[6..8])
@@ -560,8 +617,7 @@ impl AkShareClient {
         };
 
         let url = format!(
-            "https://fund.10jqka.com.cn/data/Net/info/{}_rate_desc_{}_0_1_9999_0_0_0_jsonp_g.html",
-            inner_symbol, inner_date
+            "https://fund.10jqka.com.cn/data/Net/info/{inner_symbol}_rate_desc_{inner_date}_0_1_9999_0_0_0_jsonp_g.html"
         );
 
         let response = self
@@ -615,10 +671,7 @@ impl AkShareClient {
     ///
     /// `symbol`: e.g. "sh510050" (with exchange prefix).
     pub async fn fund_etf_dividend_sina(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        let factor_url = format!(
-            "https://finance.sina.com.cn/realstock/company/{}/hfq.js",
-            symbol
-        );
+        let factor_url = format!("https://finance.sina.com.cn/realstock/company/{symbol}/hfq.js");
         let response = self
             .get(&factor_url)
             .send()
@@ -634,7 +687,7 @@ impl AkShareClient {
 
         // Parse the JS variable assignment: var xxx={...}
         let json_start = text.find('{').unwrap_or(0);
-        let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+        let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_str)

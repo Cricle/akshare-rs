@@ -439,7 +439,7 @@ fn get_i64(val: &serde_json::Value, key: &str) -> Option<i64> {
 }
 
 fn get_string(val: &serde_json::Value, key: &str) -> Option<String> {
-    val.get(key)?.as_str().map(|s| s.to_string())
+    val.get(key)?.as_str().map(std::string::ToString::to_string)
 }
 
 fn parse_spot_rows(diff: &serde_json::Value, limit: usize) -> Vec<SpotRow> {

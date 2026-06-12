@@ -78,10 +78,7 @@ impl AkShareClient {
         } else {
             year
         };
-        let url = format!(
-            "https://stats.areppim.com/listes/list_billionaires{}xwor.htm",
-            short_year
-        );
+        let url = format!("https://stats.areppim.com/listes/list_billionaires{short_year}xwor.htm");
         let body = self.get(&url).send().await?.text().await?;
 
         let mut items = Vec::new();
@@ -142,13 +139,13 @@ impl AkShareClient {
             if trimmed.contains("href=")
                 && trimmed.contains("/lists/")
                 && let (Some(href_start), Some(href_end)) =
-                    (trimmed.find("href=\""), trimmed.find("\""))
+                    (trimmed.find("href=\""), trimmed.find('"'))
             {
                 let href = &trimmed[href_start + 6..href_end];
                 // Extract text content
                 let text = extract_text_between_tags(trimmed);
                 if !text.is_empty() && href.contains("/lists/") {
-                    list_urls.push((text, format!("https://www.forbeschina.com{}", href)));
+                    list_urls.push((text, format!("https://www.forbeschina.com{href}")));
                 }
             }
         }
@@ -158,7 +155,7 @@ impl AkShareClient {
             .iter()
             .find(|(name, _)| name.contains(symbol))
             .map(|(_, url)| url.as_str())
-            .ok_or_else(|| Error::not_found(format!("forbes: list '{}' not found", symbol)))?;
+            .ok_or_else(|| Error::not_found(format!("forbes: list '{symbol}' not found")))?;
 
         let list_body = self.get(target_url).send().await?.text().await?;
         let mut items = Vec::new();
@@ -342,17 +339,16 @@ fn extract_text_between_tags(html: &str) -> String {
 
 fn build_hurun_params(indicator: &str, year: &str) -> Vec<(&'static str, String)> {
     let num = match indicator {
-        "胡润百富榜" => format!("rich_{}", year),
-        "胡润全球富豪榜" => format!("global_{}", year),
-        "胡润印度榜" => format!("india_{}", year),
-        "胡润全球独角兽榜" => format!("unicorn_{}", year),
-        "中国瞪羚企业榜" => format!("cgazelles_{}", year),
-        "全球瞪羚企业榜" => format!("ggazelles_{}", year),
-        "胡润Under30s创业领袖榜" => format!("u30_{}", year),
-        "胡润中国500强民营企业" => format!("ctop500_{}", year),
-        "胡润世界500强" => format!("gtop500_{}", year),
-        "胡润艺术榜" => format!("art_{}", year),
-        _ => format!("rich_{}", year),
+        "胡润全球富豪榜" => format!("global_{year}"),
+        "胡润印度榜" => format!("india_{year}"),
+        "胡润全球独角兽榜" => format!("unicorn_{year}"),
+        "中国瞪羚企业榜" => format!("cgazelles_{year}"),
+        "全球瞪羚企业榜" => format!("ggazelles_{year}"),
+        "胡润Under30s创业领袖榜" => format!("u30_{year}"),
+        "胡润中国500强民营企业" => format!("ctop500_{year}"),
+        "胡润世界500强" => format!("gtop500_{year}"),
+        "胡润艺术榜" => format!("art_{year}"),
+        _ => format!("rich_{year}"),
     };
     vec![
         ("num", num),
@@ -364,7 +360,6 @@ fn build_hurun_params(indicator: &str, year: &str) -> Vec<(&'static str, String)
 
 fn get_hurun_wealth_key(indicator: &str) -> String {
     match indicator {
-        "胡润百富榜" => "hs_Rank_Rich_Wealth".to_string(),
         "胡润全球富豪榜" => "hs_Rank_Global_Wealth".to_string(),
         "胡润印度榜" => "hs_Rank_India_Wealth".to_string(),
         "胡润全球独角兽榜" => "hs_Rank_Unicorn_Wealth".to_string(),
@@ -377,7 +372,6 @@ fn get_hurun_wealth_key(indicator: &str) -> String {
 
 fn get_hurun_name_key(indicator: &str) -> String {
     match indicator {
-        "胡润百富榜" => "hs_Rank_Rich_ChaName_Cn".to_string(),
         "胡润全球富豪榜" => "hs_Rank_Global_ChaName_Cn".to_string(),
         "胡润印度榜" => "hs_Rank_India_ChaName_Cn".to_string(),
         "胡润全球独角兽榜" => "hs_Rank_Unicorn_ChaName_Cn".to_string(),

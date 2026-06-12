@@ -25,8 +25,7 @@ impl AkShareClient {
         let ft = type_map
             .iter()
             .find(|(n, _)| *n == symbol)
-            .map(|(_, c)| *c)
-            .unwrap_or("all");
+            .map_or("all", |(_, c)| *c);
 
         let now = chrono::Utc::now().format("%Y-%m-%d").to_string();
         let pn = limit.max(1).to_string();
@@ -58,7 +57,7 @@ impl AkShareClient {
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);
-        let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+        let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_str)
@@ -120,7 +119,7 @@ impl AkShareClient {
 
         let text = response.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);
-        let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+        let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_str)

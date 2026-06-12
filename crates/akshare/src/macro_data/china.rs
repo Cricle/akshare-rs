@@ -58,7 +58,7 @@ async fn fetch_sina_macro(
             if let Some(row_obj) = row.as_object() {
                 // Try to find a date-like key and a numeric value
                 let mut date = String::new();
-                let mut value = 0.0f64;
+                let mut value = 0.0_f64;
                 for (key, val) in row_obj {
                     if key.contains("时间") || key.contains("月份") || key.contains("统计") {
                         date = val.as_str().unwrap_or("").to_string();
@@ -89,7 +89,7 @@ async fn fetch_sina_macro(
             for row in arr {
                 if let Some(row_obj) = row.as_object() {
                     let mut date = String::new();
-                    let mut value = 0.0f64;
+                    let mut value = 0.0_f64;
                     for (key, val) in row_obj {
                         if key.contains("时间") || key.contains("月份") || key.contains("统计")
                         {
@@ -512,12 +512,12 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (tenor, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                            && let Some(val) = arr.first().and_then(serde_json::Value::as_f64)
                         {
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: val,
-                                name: format!("Shibor {}", tenor),
+                                name: format!("Shibor {tenor}"),
                             });
                         }
                     }
@@ -540,12 +540,12 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (tenor, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                            && let Some(val) = arr.first().and_then(serde_json::Value::as_f64)
                         {
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: val,
-                                name: format!("HIBOR {}", tenor),
+                                name: format!("HIBOR {tenor}"),
                             });
                         }
                     }
@@ -568,12 +568,12 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (pair, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                            && let Some(val) = arr.first().and_then(serde_json::Value::as_f64)
                         {
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: val,
-                                name: format!("RMB {}", pair),
+                                name: format!("RMB {pair}"),
                             });
                         }
                     }
@@ -595,7 +595,7 @@ impl AkShareClient {
             for (date, row) in obj {
                 if let Some(arr) = row.as_array() {
                     // First element is margin buy amount
-                    if let Some(val) = arr.first().and_then(|v| v.as_f64()) {
+                    if let Some(val) = arr.first().and_then(serde_json::Value::as_f64) {
                         items.push(MacroDataPoint {
                             date: date.clone(),
                             value: val,
@@ -619,7 +619,7 @@ impl AkShareClient {
         if let Some(obj) = values.as_object() {
             for (date, row) in obj {
                 if let Some(arr) = row.as_array()
-                    && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                    && let Some(val) = arr.first().and_then(serde_json::Value::as_f64)
                 {
                     items.push(MacroDataPoint {
                         date: date.clone(),
@@ -647,11 +647,14 @@ impl AkShareClient {
                         if let Some(parr) = product.as_array() {
                             // First element is product name, last numeric is volume
                             let name = parr.first().and_then(|v| v.as_str()).unwrap_or("unknown");
-                            let volume = parr.get(8).and_then(|v| v.as_f64()).unwrap_or(0.0);
+                            let volume = parr
+                                .get(8)
+                                .and_then(serde_json::Value::as_f64)
+                                .unwrap_or(0.0);
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: volume,
-                                name: format!("SGE {}", name),
+                                name: format!("SGE {name}"),
                             });
                         }
                     }
@@ -1005,10 +1008,10 @@ impl AkShareClient {
         // Parse HTML table - look for rows with date patterns
         for line in body.lines() {
             let trimmed = line.trim();
-            if trimmed.contains("<td") && trimmed.contains("-") {
+            if trimmed.contains("<td") && trimmed.contains('-') {
                 // Simple extraction from HTML
                 let text = extract_html_text(trimmed);
-                if text.contains("-") && text.len() <= 10 {
+                if text.contains('-') && text.len() <= 10 {
                     // This might be a date cell
                 }
             }
@@ -1020,7 +1023,7 @@ impl AkShareClient {
             if cells.len() >= 3 {
                 let date_cell = extract_html_text(cells[1]);
                 let val_cell = extract_html_text(cells[2]);
-                if date_cell.contains("-")
+                if date_cell.contains('-')
                     && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
                 {
                     items.push(MacroDataPoint {
@@ -1053,7 +1056,7 @@ impl AkShareClient {
             if cells.len() >= 3 {
                 let date_cell = extract_html_text(cells[1]);
                 let val_cell = extract_html_text(cells[2]);
-                if date_cell.contains("-")
+                if date_cell.contains('-')
                     && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
                 {
                     items.push(MacroDataPoint {
@@ -1081,12 +1084,12 @@ impl AkShareClient {
                 if let Some(cols) = row.as_object() {
                     for (col_name, col_data) in cols {
                         if let Some(arr) = col_data.as_array()
-                            && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                            && let Some(val) = arr.first().and_then(serde_json::Value::as_f64)
                         {
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: val,
-                                name: format!("Energy {}", col_name),
+                                name: format!("Energy {col_name}"),
                             });
                         }
                     }
@@ -1125,7 +1128,7 @@ impl AkShareClient {
                 ("wds", "[]"),
                 (
                     "dfwds",
-                    format!("[{{\"wdcode\":\"zb\",\"valuecode\":\"{}\"}}]", path).as_str(),
+                    format!("[{{\"wdcode\":\"zb\",\"valuecode\":\"{path}\"}}]").as_str(),
                 ),
                 ("k1", period),
             ])
@@ -1154,7 +1157,7 @@ impl AkShareClient {
                 let value = v
                     .get("data")
                     .and_then(|d| d.get("data"))
-                    .and_then(|d| d.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0);
                 MacroDataPoint {
                     date: date.to_string(),
@@ -1185,8 +1188,7 @@ impl AkShareClient {
         };
         let url = "https://data.stats.gov.cn/easyquery.htm";
         let dfwds = format!(
-            "[{{\"wdcode\":\"zb\",\"valuecode\":\"{}\"}},{{\"wdcode\":\"reg\",\"valuecode\":\"{}\"}}]",
-            path, indicator
+            "[{{\"wdcode\":\"zb\",\"valuecode\":\"{path}\"}},{{\"wdcode\":\"reg\",\"valuecode\":\"{indicator}\"}}]"
         );
         let resp = self
             .post(url)
@@ -1224,7 +1226,7 @@ impl AkShareClient {
                 let value = v
                     .get("data")
                     .and_then(|d| d.get("data"))
-                    .and_then(|d| d.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0);
                 MacroDataPoint {
                     date: date.to_string(),
@@ -1272,7 +1274,10 @@ impl AkShareClient {
                     .and_then(|d| d.as_str())
                     .unwrap_or("")
                     .to_string();
-                let value = v.get("value").and_then(|d| d.as_f64()).unwrap_or(0.0);
+                let value = v
+                    .get("value")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 MacroDataPoint {
                     date,
                     value,

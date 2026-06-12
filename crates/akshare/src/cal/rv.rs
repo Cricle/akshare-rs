@@ -133,11 +133,13 @@ impl AkShareClient {
     ) -> Result<Vec<MacroDataPoint>> {
         let klines = self.futures_zh_minute_sina(symbol, "1").await?;
         if klines.is_empty() {
-            return Err(Error::not_found(format!("no minute data for {}", symbol)));
+            return Err(Error::not_found(format!("no minute data for {symbol}")));
         }
 
         fn row_f64(row: &crate::types::Row, key: &str) -> f64 {
-            row.get(key).and_then(|v| v.as_f64()).unwrap_or(0.0)
+            row.get(key)
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(0.0)
         }
 
         let bars: Vec<OhlcBar> = klines
@@ -170,7 +172,7 @@ impl AkShareClient {
             .stock_zh_a_hist_min_em(symbol, "5", "qfq", "", "")
             .await?;
         if klines.is_empty() {
-            return Err(Error::not_found(format!("no minute data for {}", symbol)));
+            return Err(Error::not_found(format!("no minute data for {symbol}")));
         }
 
         let bars: Vec<OhlcBar> = klines
@@ -203,7 +205,7 @@ impl AkShareClient {
         }
 
         let mut items = Vec::new();
-        for window_start in 0..=(data.len() - window_size - 1) {
+        for window_start in 0..(data.len() - window_size) {
             let window = &data[window_start..window_start + window_size + 1];
             if let Ok(mut result) = self.volatility_yz_rv(window)
                 && let Some(point) = result.pop()
@@ -250,7 +252,7 @@ pub fn yang_zhang_rv(
     // Use a temporary client for the calculation
     let client = AkShareClient::new();
     let result = client.volatility_yz_rv(&bars)?;
-    Ok(result.first().map(|p| p.value).unwrap_or(0.0))
+    Ok(result.first().map_or(0.0, |p| p.value))
 }
 
 #[cfg(test)]

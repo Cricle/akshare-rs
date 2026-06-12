@@ -1,7 +1,7 @@
 //! Dividends (分红送配) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64_opt, json_str, json_str_opt};
+use super::types::DividendInfo;
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -9,7 +9,7 @@ impl AkShareClient {
     /// 分红送配
     pub async fn stock_fhps_em(&self, date: &str) -> Result<Vec<DividendInfo>> {
         let date_fmt = fmt_date(date);
-        let filter = format!("(REPORT_DATE='{}')", date_fmt);
+        let filter = format!("(REPORT_DATE='{date_fmt}')");
         let data = self
             .dc_fetch_all(
                 "RPT_SHAREBONUS_DET",
@@ -49,7 +49,7 @@ impl AkShareClient {
 
     /// 分红送配详情
     pub async fn stock_fhps_detail_em(&self, symbol: &str) -> Result<Vec<DividendInfo>> {
-        let filter = format!("(SECURITY_CODE=\"{}\")", symbol);
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
                 "RPT_SHAREBONUS_DET",

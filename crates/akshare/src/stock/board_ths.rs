@@ -324,10 +324,7 @@ impl AkShareClient {
         let end_year: i32 = _end_date[..4].parse().unwrap_or(2025);
 
         for year in start_year..=end_year {
-            let url = format!(
-                "https://d.10jqka.com.cn/v4/line/bk_{}/01/{}.js",
-                board_code, year
-            );
+            let url = format!("https://d.10jqka.com.cn/v4/line/bk_{board_code}/01/{year}.js");
 
             let response = match self
                                 .get(&url)

@@ -70,12 +70,12 @@ impl AkShareClient {
             };
             let val = obj
                 .get("indexValue")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let ts = obj
                 .get("stage")
                 .and_then(|s| s.get("publishTime"))
-                .and_then(|v| v.as_i64())
+                .and_then(serde_json::Value::as_i64)
                 .unwrap_or(0);
             let date = chrono::DateTime::from_timestamp_millis(ts)
                 .map(|dt| dt.format("%Y-%m-%d").to_string())
@@ -106,10 +106,14 @@ impl AkShareClient {
             };
             volumes.push(
                 obj.get("totalQuantity")
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0),
             );
-            amounts.push(obj.get("totalCost").and_then(|v| v.as_f64()).unwrap_or(0.0));
+            amounts.push(
+                obj.get("totalCost")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0),
+            );
         }
 
         let len = dates.len().min(volumes.len());

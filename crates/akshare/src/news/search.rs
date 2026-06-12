@@ -106,7 +106,7 @@ impl AkShareClient {
             let url = entry
                 .get("articleUrl")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string())
+                .map(std::string::ToString::to_string)
                 .or_else(|| {
                     entry
                         .get("code")

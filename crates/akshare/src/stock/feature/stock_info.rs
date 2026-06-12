@@ -1,6 +1,6 @@
 //! Stock info utilities from Eastmoney.
 
-use super::helpers::*;
+use super::helpers::json_str;
 use crate::client::AkShareClient;
 use crate::error::Result;
 

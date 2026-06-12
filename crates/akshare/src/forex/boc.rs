@@ -56,17 +56,17 @@ impl AkShareClient {
             let buy_rate = v
                 .get("BUYING_RATE")
                 .or_else(|| v.get("BUY_RATE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let sell_rate = v
                 .get("SELLING_RATE")
                 .or_else(|| v.get("SELL_RATE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let middle_rate = v
                 .get("MIDDLE_RATE")
                 .or_else(|| v.get("CENTRAL_RATE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let date = v
                 .get("DATE")

@@ -42,8 +42,7 @@ mod tests {
         headers
             .get("X-MCP-KEY")
             .and_then(|v| v.to_str().ok())
-            .map(|k| k == mcp_key)
-            .unwrap_or(false)
+            .is_some_and(|k| k == mcp_key)
     }
 
     #[test]

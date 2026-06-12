@@ -51,7 +51,7 @@ impl AkShareClient {
             items.push(MacroDataPoint {
                 date: date.clone(),
                 value: rate.as_f64().unwrap_or(0.0),
-                name: format!("{}/{}", base, currency),
+                name: format!("{base}/{currency}"),
             });
         }
         Ok(items)
@@ -95,7 +95,7 @@ impl AkShareClient {
             items.push(MacroDataPoint {
                 date: date.to_string(),
                 value: rate.as_f64().unwrap_or(0.0),
-                name: format!("{}/{}", base, currency),
+                name: format!("{base}/{currency}"),
             });
         }
         Ok(items)
@@ -143,7 +143,7 @@ impl AkShareClient {
                     items.push(MacroDataPoint {
                         date: date.clone(),
                         value: rate.as_f64().unwrap_or(0.0),
-                        name: format!("{}/{}", base, currency),
+                        name: format!("{base}/{currency}"),
                     });
                 }
             }
@@ -218,12 +218,12 @@ impl AkShareClient {
 
         let value = response
             .get("value")
-            .and_then(|v| v.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
 
         let timestamp = response
             .get("timestamp")
-            .and_then(|v| v.as_i64())
+            .and_then(serde_json::Value::as_i64)
             .unwrap_or(0);
 
         let date = chrono::DateTime::from_timestamp(timestamp, 0)
@@ -233,7 +233,7 @@ impl AkShareClient {
         Ok(vec![MacroDataPoint {
             date,
             value,
-            name: format!("{}/{}", from, to),
+            name: format!("{from}/{to}"),
         }])
     }
 
@@ -267,10 +267,7 @@ impl AkShareClient {
             "菲律宾比索" => "PHP",
             "韩国元" => "KRW",
             _ => {
-                return Err(Error::invalid_input(format!(
-                    "unknown currency: {}",
-                    symbol
-                )));
+                return Err(Error::invalid_input(format!("unknown currency: {symbol}")));
             }
         };
 
@@ -310,7 +307,7 @@ impl AkShareClient {
                     items.push(MacroDataPoint {
                         date,
                         value: buy_rate,
-                        name: format!("BOC {}", symbol),
+                        name: format!("BOC {symbol}"),
                     });
                 }
             }
@@ -351,7 +348,7 @@ impl AkShareClient {
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: val,
-                                name: format!("SAFE Rate Col{}", i),
+                                name: format!("SAFE Rate Col{i}"),
                             });
                         }
                     }

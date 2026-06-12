@@ -89,23 +89,22 @@ impl AkShareClient {
             .iter()
             .find(|(k, _)| *k == market)
             .map(|(_, v)| *v)
-            .ok_or_else(|| Error::invalid_input(format!("unknown market: {}", market)))?;
+            .ok_or_else(|| Error::invalid_input(format!("unknown market: {market}")))?;
 
         let currency_code = currency_map
             .iter()
             .find(|(k, _)| *k == symbol)
             .map(|(_, v)| *v)
-            .ok_or_else(|| Error::invalid_input(format!("unknown symbol: {}", symbol)))?;
+            .ok_or_else(|| Error::invalid_input(format!("unknown symbol: {symbol}")))?;
 
         let indicator_code = indicator_map
             .iter()
             .find(|(k, _)| *k == indicator)
             .map(|(_, v)| *v)
-            .ok_or_else(|| Error::invalid_input(format!("unknown indicator: {}", indicator)))?;
+            .ok_or_else(|| Error::invalid_input(format!("unknown indicator: {indicator}")))?;
 
         let filter = format!(
-            r#"(MARKET_CODE="{}")(CURRENCY_CODE="{}")(INDICATOR_ID="{}")"#,
-            market_code, currency_code, indicator_code
+            r#"(MARKET_CODE="{market_code}")(CURRENCY_CODE="{currency_code}")(INDICATOR_ID="{indicator_code}")"#
         );
 
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
@@ -139,11 +138,14 @@ impl AkShareClient {
             if date.is_empty() {
                 continue;
             }
-            let rate = v.get("IR_RATE").and_then(|x| x.as_f64()).unwrap_or(0.0);
+            let rate = v
+                .get("IR_RATE")
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value: rate,
-                name: format!("{} {} {}", market, symbol, indicator),
+                name: format!("{market} {symbol} {indicator}"),
             });
         }
         Ok(items)
@@ -171,6 +173,9 @@ mod tests {
         let resp: EmDatacenterResp = serde_json::from_str(json).unwrap();
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 1);
-        assert_eq!(data[0].get("IR_RATE").and_then(|v| v.as_f64()), Some(1.5));
+        assert_eq!(
+            data[0].get("IR_RATE").and_then(serde_json::Value::as_f64),
+            Some(1.5)
+        );
     }
 }

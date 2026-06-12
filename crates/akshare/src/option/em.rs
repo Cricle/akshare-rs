@@ -5,7 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::OptionSnapshot;
-use crate::util::*;
+use crate::util::{parse_csv_line, parse_f64_safe, today_iso};
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -97,37 +97,36 @@ impl AkShareClient {
             let date = v
                 .get("TRADE_DATE")
                 .and_then(|x| x.as_str())
-                .map(|s| s.get(..10).unwrap_or(s).to_string())
-                .unwrap_or_else(|| today.clone());
+                .map_or_else(|| today.clone(), |s| s.get(..10).unwrap_or(s).to_string());
 
             let close = v
                 .get("CLOSE_PRICE")
                 .or_else(|| v.get("LATEST_PRICE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
 
             let change_pct = v
                 .get("CHANGE_RATE")
                 .or_else(|| v.get("CHANGE_PCT"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
 
             let volume = v
                 .get("VOLUME")
                 .or_else(|| v.get("TRADE_VOLUME"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
 
             let open_interest = v
                 .get("OPEN_INTEREST")
                 .or_else(|| v.get("HOLD_VOLUME"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
 
             let strike_price = v
                 .get("STRIKE_PRICE")
                 .or_else(|| v.get("EXERCISE_PRICE"))
-                .and_then(|x| x.as_f64());
+                .and_then(serde_json::Value::as_f64);
 
             let expiry_date = v
                 .get("EXPIRE_DATE")
@@ -415,7 +414,7 @@ impl AkShareClient {
 
         // Response is JSONP: quotepushdata1({...})
         let json_start = resp.find('{').unwrap_or(0);
-        let json_end = resp.rfind('}').map(|i| i + 1).unwrap_or(resp.len());
+        let json_end = resp.rfind('}').map_or(resp.len(), |i| i + 1);
         let json_str = &resp[json_start..json_end];
 
         let data: serde_json::Value = serde_json::from_str(json_str)
@@ -458,7 +457,7 @@ impl AkShareClient {
     /// Fetch SSE/SZSE options via the push2 clist API with pagination.
     async fn fetch_em_option_clist_current(&self) -> Result<Vec<OptionCurrentEmRow>> {
         let mut all_rows = Vec::new();
-        let mut page = 1u32;
+        let mut page = 1_u32;
         let page_size = 100;
 
         loop {

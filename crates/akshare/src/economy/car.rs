@@ -39,7 +39,7 @@ impl AkShareClient {
         items.push(MacroDataPoint {
             date: "today".to_string(),
             value: body.len() as f64,
-            name: format!("CPCA Country - {}", symbol),
+            name: format!("CPCA Country - {symbol}"),
         });
         Ok(items)
     }
@@ -67,7 +67,7 @@ impl AkShareClient {
         items.push(MacroDataPoint {
             date: "today".to_string(),
             value: body.len() as f64,
-            name: format!("{}-{}", symbol, indicator),
+            name: format!("{symbol}-{indicator}"),
         });
         Ok(items)
     }
@@ -113,7 +113,7 @@ impl AkShareClient {
                 .or_else(|| v.get("INDICATOR_VALUE"))
                 .or_else(|| v.get("VALUE"))
                 .or_else(|| v.get("TOTAL_SALES"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
@@ -143,7 +143,9 @@ mod tests {
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
         assert_eq!(
-            data[0].get("SALES_VOLUME").and_then(|v| v.as_f64()),
+            data[0]
+                .get("SALES_VOLUME")
+                .and_then(serde_json::Value::as_f64),
             Some(269.4)
         );
     }

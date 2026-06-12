@@ -138,7 +138,7 @@ impl AkShareClient {
             };
             let get_f64 = |idx: usize| -> f64 {
                 arr.and_then(|a| a.get(idx))
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0)
             };
 

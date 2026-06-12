@@ -569,7 +569,7 @@ async fn test_fund_exchange_rank_em() {
         "股票型",
     ];
     let row = fields.join(",");
-    let text_body = format!("var rankHandler={{\"datas\":[\"{}\"]}}", row);
+    let text_body = format!("var rankHandler={{\"datas\":[\"{row}\"]}}");
     mock_any_get_text(&server, ".*", text_body.as_str()).await;
     let client = mock_client(&server);
     let result = client.fund_exchange_rank_em().await;

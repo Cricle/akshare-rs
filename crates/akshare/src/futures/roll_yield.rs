@@ -38,8 +38,7 @@ impl AkShareClient {
 
         if variety_bars.len() < 2 {
             return Err(Error::not_found(format!(
-                "not enough contracts for variety {}",
-                variety
+                "not enough contracts for variety {variety}"
             )));
         }
 
@@ -47,7 +46,7 @@ impl AkShareClient {
             let bar = variety_bars
                 .iter()
                 .find(|b| b.symbol == s)
-                .ok_or_else(|| Error::not_found(format!("contract {} not found", s)))?;
+                .ok_or_else(|| Error::not_found(format!("contract {s} not found")))?;
             (s.to_string(), bar.close)
         } else {
             (variety_bars[0].symbol.clone(), variety_bars[0].close)
@@ -57,7 +56,7 @@ impl AkShareClient {
             let bar = variety_bars
                 .iter()
                 .find(|b| b.symbol == s)
-                .ok_or_else(|| Error::not_found(format!("contract {} not found", s)))?;
+                .ok_or_else(|| Error::not_found(format!("contract {s} not found")))?;
             (s.to_string(), bar.close)
         } else {
             (variety_bars[1].symbol.clone(), variety_bars[1].close)
@@ -68,15 +67,15 @@ impl AkShareClient {
         }
 
         // Extract month codes
-        let a: String = s1.chars().filter(|c| c.is_ascii_digit()).collect();
-        let b: String = s2.chars().filter(|c| c.is_ascii_digit()).collect();
+        let a: String = s1.chars().filter(char::is_ascii_digit).collect();
+        let b: String = s2.chars().filter(char::is_ascii_digit).collect();
         let a_1: i32 = a[..a.len() - 2].parse().unwrap_or(0);
         let a_2: i32 = a[a.len() - 2..].parse().unwrap_or(0);
         let b_1: i32 = b[..b.len() - 2].parse().unwrap_or(0);
         let b_2: i32 = b[b.len() - 2..].parse().unwrap_or(0);
         let c = (a_1 - b_1) * 12 + (a_2 - b_2);
 
-        let ry = (c2 / c1).ln() / c as f64 * 12.0;
+        let ry = (c2 / c1).ln() / f64::from(c) * 12.0;
 
         if c > 0 {
             Ok((ry, s2, s1))

@@ -39,15 +39,15 @@ impl AkShareClient {
             let row = data.get(i);
             let composite = row
                 .and_then(|r| r.first())
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let raw = row
                 .and_then(|r| r.get(1))
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let spot = row
                 .and_then(|r| r.get(2))
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             points.push(SugarMsweetPoint {
                 date: date.clone(),
@@ -89,7 +89,7 @@ impl AkShareClient {
             let date = date_raw.replace('/', "-");
             let get = |idx: usize| -> f64 {
                 row.and_then(|r| r.get(idx))
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0)
             };
             points.push(SugarInnerQuotePoint {
@@ -143,7 +143,7 @@ impl AkShareClient {
             let date = date_raw.replace('/', "-");
             let get = |idx: usize| -> f64 {
                 row.and_then(|r| r.get(idx))
-                    .and_then(|v| v.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0)
             };
             points.push(SugarOuterQuotePoint {

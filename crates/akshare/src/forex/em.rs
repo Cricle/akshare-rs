@@ -6,7 +6,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, ForexRate};
-use crate::util::*;
+use crate::util::{parse_csv_line, parse_f64_safe, today_iso};
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -265,7 +265,7 @@ mod tests {
         assert!((point.close - 7.105).abs() < 0.001);
         assert!((point.high - 7.11).abs() < 0.001);
         assert!((point.low - 7.09).abs() < 0.001);
-        assert_eq!(point.volume, 100000);
+        assert_eq!(point.volume, 100_000);
     }
 
     #[test]

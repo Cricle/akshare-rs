@@ -1,7 +1,10 @@
 //! Margin trading (融资融券) from Eastmoney, SSE, SZSE, PA.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64, json_f64_opt, json_i64_opt, json_str};
+use super::types::{
+    MarginAccountInfo, MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail,
+    MarginSzseSummary, MarginUnderlyingInfoSzse,
+};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
@@ -165,7 +168,7 @@ impl AkShareClient {
                 if cols.len() < 8 {
                     return None;
                 }
-                let clean = |s: &str| s.replace(",", "").replace("&nbsp;", "").trim().to_string();
+                let clean = |s: &str| s.replace(',', "").replace("&nbsp;", "").trim().to_string();
                 Some(MarginSzseDetail {
                     code: cols[0].as_str().unwrap_or("").to_string(),
                     name: clean(cols[1].as_str().unwrap_or("")),
@@ -331,7 +334,7 @@ impl AkShareClient {
                 if cols.len() < 6 {
                     return None;
                 }
-                let clean = |s: &str| s.replace(",", "").trim().to_string();
+                let clean = |s: &str| s.replace(',', "").trim().to_string();
                 Some(MarginSzseSummary {
                     fin_buy_amount: clean(cols[0].as_str().unwrap_or("0"))
                         .parse()

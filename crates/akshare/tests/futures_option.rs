@@ -869,7 +869,7 @@ async fn test_futures_news() {
         "data": {
             "dataList": [
                 [
-                    1, "title", "summary", 1704153600000i64, "tag", "content text"
+                    1, "title", "summary", 1704153600000_i64, "tag", "content text"
                 ]
             ]
         }
@@ -1005,10 +1005,10 @@ async fn test_option_sse_spot_price_sina() {
     let server = MockServer::start().await;
     // Returns: var hq_str_CON_OP_10003720="val1,val2,...";
     let values = (0..42)
-        .map(|i| format!("{}", i))
+        .map(|i| format!("{i}"))
         .collect::<Vec<_>>()
         .join(",");
-    let body_text = format!(r#"var hq_str_CON_OP_10003720="{}";"#, values);
+    let body_text = format!(r#"var hq_str_CON_OP_10003720="{values}";"#);
     mock_any_get_text(&server, ".*", &body_text).await;
     let client = mock_client(&server);
     let result = client.option_sse_spot_price_sina("10003720").await;
@@ -1020,10 +1020,10 @@ async fn test_option_sse_underlying_spot_price_sina() {
     let server = MockServer::start().await;
     // Returns: var hq_str_sh510050="val1,val2,...";
     let values = (0..33)
-        .map(|i| format!("{}", i))
+        .map(|i| format!("{i}"))
         .collect::<Vec<_>>()
         .join(",");
-    let body_text = format!(r#"var hq_str_sh510050="{}";"#, values);
+    let body_text = format!(r#"var hq_str_sh510050="{values}";"#);
     mock_any_get_text(&server, ".*", &body_text).await;
     let client = mock_client(&server);
     let result = client
@@ -1037,10 +1037,10 @@ async fn test_option_sse_greeks_sina() {
     let server = MockServer::start().await;
     // Returns: var hq_str_CON_SO_10003720="val1,val2,...";
     let values = (0..13)
-        .map(|i| format!("{}", i))
+        .map(|i| format!("{i}"))
         .collect::<Vec<_>>()
         .join(",");
-    let body_text = format!(r#"var hq_str_CON_SO_10003720="{}";"#, values);
+    let body_text = format!(r#"var hq_str_CON_SO_10003720="{values}";"#);
     mock_any_get_text(&server, ".*", &body_text).await;
     let client = mock_client(&server);
     let result = client.option_sse_greeks_sina("10003720").await;

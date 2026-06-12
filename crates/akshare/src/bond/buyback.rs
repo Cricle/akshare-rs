@@ -89,8 +89,14 @@ impl AkShareClient {
                     .and_then(|x| x.as_str())
                     .unwrap_or("")
                     .to_string();
-                let price = v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0);
-                let change_pct = v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0);
+                let price = v
+                    .get("f2")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
+                let change_pct = v
+                    .get("f3")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 Some(BondSnapshot {
                     symbol: code,
                     name,

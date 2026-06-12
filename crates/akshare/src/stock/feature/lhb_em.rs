@@ -1,7 +1,11 @@
 //! Billboard (龙虎榜) data from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
+use super::types::{
+    LhbDetail, LhbHyyyb, LhbJgmmtj, LhbJgstatistic, LhbSinaDetail, LhbSinaGgtj, LhbSinaJgmx,
+    LhbSinaJgzz, LhbSinaYytj, LhbStockDetail, LhbStockDetailDate, LhbStockStatistic,
+    LhbTraderStatistic, LhbYybDetail, LhbYybph,
+};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
@@ -64,7 +68,6 @@ impl AkShareClient {
         symbol: &str,
     ) -> Result<Vec<LhbStockStatistic>> {
         let cycle = match symbol {
-            "近一月" => "01",
             "近三月" => "02",
             "近六月" => "03",
             "近一年" => "04",
@@ -156,7 +159,6 @@ impl AkShareClient {
     /// 机构席位追踪
     pub async fn stock_lhb_jgstatistic_em(&self, symbol: &str) -> Result<Vec<LhbJgstatistic>> {
         let cycle = match symbol {
-            "近一月" => "01",
             "近三月" => "02",
             "近六月" => "03",
             "近一年" => "04",
@@ -238,7 +240,6 @@ impl AkShareClient {
     /// 营业部排行
     pub async fn stock_lhb_yybph_em(&self, symbol: &str) -> Result<Vec<LhbYybph>> {
         let cycle = match symbol {
-            "近一月" => "01",
             "近三月" => "02",
             "近六月" => "03",
             "近一年" => "04",
@@ -286,7 +287,6 @@ impl AkShareClient {
         symbol: &str,
     ) -> Result<Vec<LhbTraderStatistic>> {
         let cycle = match symbol {
-            "近一月" => "01",
             "近三月" => "02",
             "近六月" => "03",
             "近一年" => "04",
@@ -369,7 +369,6 @@ impl AkShareClient {
         flag: &str,
     ) -> Result<Vec<LhbStockDetail>> {
         let report = match flag {
-            "买入" => "RPT_BILLBOARD_DAILYDETAILSBUY",
             "卖出" => "RPT_BILLBOARD_DAILYDETAILSSELL",
             _ => "RPT_BILLBOARD_DAILYDETAILSBUY",
         };

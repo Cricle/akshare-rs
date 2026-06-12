@@ -1,6 +1,6 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
+use crate::types::{CandlePoint, QuoteSnapshot};
 
 impl AkShareClient {
     /// Get US stock quote. Derived from the latest candle of `us_candles`.
@@ -46,8 +46,7 @@ impl AkShareClient {
         let mut all_stocks = Vec::new();
         for page in 1..=5 {
             let url = format!(
-                "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/callback/US_CategoryService.getList?page={}&num=20&sort=&asc=0&market=&id=",
-                page
+                "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/callback/US_CategoryService.getList?page={page}&num=20&sort=&asc=0&market=&id="
             );
             let resp = self
                 .get(&url)

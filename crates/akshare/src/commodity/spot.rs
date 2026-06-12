@@ -75,7 +75,7 @@ impl AkShareClient {
                 .or_else(|| v.get("PRICE"))
                 .or_else(|| v.get("INDICATOR_VALUE"))
                 .or_else(|| v.get("VALUE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
 
             // Use the commodity name if available, otherwise a generic label.
@@ -130,7 +130,7 @@ mod tests {
         let date = first.get("REPORT_DATE").and_then(|v| v.as_str()).unwrap();
         assert_eq!(&date[..10], "2025-06-01");
         assert_eq!(
-            first.get("CLOSE_PRICE").and_then(|v| v.as_f64()),
+            first.get("CLOSE_PRICE").and_then(serde_json::Value::as_f64),
             Some(580.50)
         );
     }
@@ -171,7 +171,7 @@ mod tests {
         let value = v
             .get("CLOSE_PRICE")
             .or_else(|| v.get("LATEST_PRICE"))
-            .and_then(|x| x.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
         assert_eq!(value, 1024.0);
 

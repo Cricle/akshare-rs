@@ -1,7 +1,7 @@
 //! Institutional research (机构调研) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64_opt, json_i64, json_str, json_str_opt};
+use super::types::{JgdyDetail, JgdyTj};
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -9,10 +9,7 @@ impl AkShareClient {
     /// 机构调研统计
     pub async fn stock_jgdy_tj_em(&self, date: &str) -> Result<Vec<JgdyTj>> {
         let date_fmt = fmt_date(date);
-        let filter = format!(
-            "(NUMBERNEW=\"1\")(IS_SOURCE=\"1\")(NOTICE_DATE>'{}')",
-            date_fmt
-        );
+        let filter = format!("(NUMBERNEW=\"1\")(IS_SOURCE=\"1\")(NOTICE_DATE>'{date_fmt}')");
         let data = self
             .dc_fetch_all(
                 "RPT_ORG_SURVEYNEW",
@@ -45,7 +42,7 @@ impl AkShareClient {
     /// 机构调研详细
     pub async fn stock_jgdy_detail_em(&self, date: &str) -> Result<Vec<JgdyDetail>> {
         let date_fmt = fmt_date(date);
-        let filter = format!("(NOTICE_DATE>'{}')", date_fmt);
+        let filter = format!("(NOTICE_DATE>'{date_fmt}')");
         let data = self
             .dc_fetch_all(
                 "RPT_ORG_SURVEY",

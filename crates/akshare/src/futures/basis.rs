@@ -13,7 +13,7 @@ impl AkShareClient {
     /// Data available from 20110104.
     pub async fn futures_spot_price(&self, date: &str) -> Result<Vec<Row>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
-        let url = format!("https://www.100ppi.com/sf/day-{}.html", date_fmt);
+        let url = format!("https://www.100ppi.com/sf/day-{date_fmt}.html");
         let _body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -61,7 +61,7 @@ impl AkShareClient {
     /// Historical spot price and basis from 100ppi (sf2 format).
     pub async fn futures_spot_price_previous(&self, date: &str) -> Result<Vec<Row>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
-        let url = format!("https://www.100ppi.com/sf2/day-{}.html", date_fmt);
+        let url = format!("https://www.100ppi.com/sf2/day-{date_fmt}.html");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")

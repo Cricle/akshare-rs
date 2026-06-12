@@ -23,7 +23,7 @@ impl AkShareClient {
     /// `start` and `end` are date strings in "YYYY-MM-DD" format.
     pub async fn bond_china_yield(&self, start: &str, end: &str) -> Result<Vec<BondSnapshot>> {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
-        let filter = format!("(SOLAR_DATE>='{}')(SOLAR_DATE<='{}')", start, end);
+        let filter = format!("(SOLAR_DATE>='{start}')(SOLAR_DATE<='{end}')");
         let resp: EmDatacenterResp = self
             .get(url)
             .query(&[
@@ -67,7 +67,7 @@ impl AkShareClient {
             ];
 
             for (field, tenor_label) in &tenors {
-                let yield_rate = v.get(*field).and_then(|x| x.as_f64());
+                let yield_rate = v.get(*field).and_then(serde_json::Value::as_f64);
                 if let Some(rate) = yield_rate {
                     items.push(BillSnapshotInner {
                         symbol: format!("CNGB{tenor_label}"),

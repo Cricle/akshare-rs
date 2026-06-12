@@ -39,7 +39,7 @@ impl AkShareClient {
             "机关" => "4113",
             "本级" => "4114",
             "分局本级" => "4115",
-            _ => return Err(Error::invalid_input(format!("unknown item type: {}", item))),
+            _ => return Err(Error::invalid_input(format!("unknown item type: {item}"))),
         };
 
         let url = "https://www.nfra.gov.cn/cbircweb/DocInfo/SelectDocByItemIdAndChild";
@@ -87,7 +87,11 @@ impl AkShareClient {
                 let _doc_id = row
                     .get("docId")
                     .and_then(|v| v.as_str())
-                    .or_else(|| row.get("docId").and_then(|v| v.as_i64()).map(|_| ""))
+                    .or_else(|| {
+                        row.get("docId")
+                            .and_then(serde_json::Value::as_i64)
+                            .map(|_| "")
+                    })
                     .unwrap_or("")
                     .to_string();
 
@@ -100,7 +104,7 @@ impl AkShareClient {
                 }
             }
 
-            let total_pages = (total as f64 / page_size as f64).ceil() as u64;
+            let total_pages = (total as f64 / f64::from(page_size)).ceil() as u64;
             if page as u64 >= total_pages {
                 break;
             }

@@ -1,7 +1,7 @@
 //! Financial reports (三大报表) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64_opt, json_str, json_str_opt};
+use super::types::{BalanceSheet, CashFlowSheet, ProfitSheet};
 use crate::client::AkShareClient;
 use crate::error::Result;
 

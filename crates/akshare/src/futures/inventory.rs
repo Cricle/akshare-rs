@@ -56,13 +56,10 @@ impl AkShareClient {
 
         let product_id = code_map
             .get(symbol)
-            .ok_or_else(|| Error::invalid_input(format!("unknown inventory symbol: {}", symbol)))?;
+            .ok_or_else(|| Error::invalid_input(format!("unknown inventory symbol: {symbol}")))?;
 
         // Step 2: Fetch inventory data
-        let filter = format!(
-            r#"(SECURITY_CODE="{}")(TRADE_DATE>='2020-10-28')"#,
-            product_id
-        );
+        let filter = format!(r#"(SECURITY_CODE="{product_id}")(TRADE_DATE>='2020-10-28')"#);
         let body2 = self
             .get(url)
             .query(&[

@@ -207,7 +207,7 @@ impl AkShareClient {
         let data_json: serde_json::Value = serde_json::from_str(&json_str)
             .map_err(|e| Error::decode(format!("THS finance JSON parse error: {e}")))?;
 
-        self.parse_ths_finance_json(&data_json, indicator, "report")
+        Self::parse_ths_finance_json(&data_json, indicator, "report")
     }
 
     /// THS balance sheet (资产负债表) - old API.
@@ -272,11 +272,10 @@ impl AkShareClient {
             .map_err(|e| Error::decode(format!("THS flashData JSON parse error: {e}")))?;
 
         let default_key = if has_simple { "simple" } else { "report" };
-        self.parse_ths_finance_json(&data_json, indicator, default_key)
+        Self::parse_ths_finance_json(&data_json, indicator, default_key)
     }
 
     fn parse_ths_finance_json(
-        &self,
         data_json: &serde_json::Value,
         indicator: &str,
         default_key: &str,

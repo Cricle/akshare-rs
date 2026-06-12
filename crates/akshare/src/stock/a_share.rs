@@ -1,8 +1,12 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::market::*;
-use crate::types::*;
-use crate::util::*;
+use crate::market::{eastmoney_secid, normalize_a_share_symbol};
+use crate::types::{
+    AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail, CandlePoint,
+    CapitalFlowPoint, QuoteSnapshot, SectorConstituent, SectorSnapshot, StockSearchResult,
+    TradeCalendarItem,
+};
+use crate::util::{days_ago_yyyymmdd, today_yyyymmdd};
 
 impl AkShareClient {
     /// Get A-share quote with fallback: Tencent -> Sina realtime -> Tushare daily

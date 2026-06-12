@@ -17,7 +17,7 @@ impl AkShareClient {
     pub async fn futures_contract_info_cffex(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..6];
         let day = &date[6..];
-        let url = format!("http://www.cffex.com.cn/sj/jycs/{}/{}/index.xml", year, day);
+        let url = format!("http://www.cffex.com.cn/sj/jycs/{year}/{day}/index.xml");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -48,8 +48,8 @@ impl AkShareClient {
                 "LOWERLIMITPRICE",
                 "LONG_LIMIT",
             ] {
-                let open_tag = format!("<{}>", tag);
-                let close_tag = format!("</{}>", tag);
+                let open_tag = format!("<{tag}>");
+                let close_tag = format!("</{tag}>");
                 if let Some(start) = record_text.find(&open_tag) {
                     let value_start = start + open_tag.len();
                     if let Some(end_pos) = record_text[value_start..].find(&close_tag) {
@@ -85,8 +85,7 @@ impl AkShareClient {
     /// Fetches XML data from CZCE for the given date (YYYYMMDD format).
     pub async fn futures_contract_info_czce(&self, date: &str) -> Result<Vec<Row>> {
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/FutureDataReferenceData.xml",
-            date
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{date}/FutureDataReferenceData.xml"
         );
         let body = self
             .get(&url)
@@ -147,8 +146,8 @@ impl AkShareClient {
                 "IntraDayTrdFee",
                 "TradingLimit",
             ] {
-                let open_tag = format!("<{}>", tag);
-                let close_tag = format!("</{}>", tag);
+                let open_tag = format!("<{tag}>");
+                let close_tag = format!("</{tag}>");
                 if let Some(start) = record_text.find(&open_tag) {
                     let value_start = start + open_tag.len();
                     if let Some(end_pos) = record_text[value_start..].find(&close_tag) {
@@ -295,10 +294,8 @@ impl AkShareClient {
 
     /// INE contract base info (上海国际能源交易中心交易参数).
     pub async fn futures_contract_info_ine(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://www.ine.cn/data/busiparamdata/future/ContractBaseInfo{}.dat",
-            date
-        );
+        let url =
+            format!("https://www.ine.cn/data/busiparamdata/future/ContractBaseInfo{date}.dat");
         let body = self
             .get(&url)
             .query(&[("rnd", "0.8312696798757147")])
@@ -366,10 +363,8 @@ impl AkShareClient {
 
     /// SHFE contract base info (上海期货交易所交易参数).
     pub async fn futures_contract_info_shfe(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/busiparamdata/future/ContractBaseInfo{}.dat",
-            date
-        );
+        let url =
+            format!("https://www.shfe.com.cn/data/busiparamdata/future/ContractBaseInfo{date}.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -451,8 +446,7 @@ impl AkShareClient {
             "土杂猪" => "3",
             _ => {
                 return Err(Error::invalid_input(format!(
-                    "unsupported hog core symbol: {}",
-                    symbol
+                    "unsupported hog core symbol: {symbol}"
                 )));
             }
         };
@@ -496,8 +490,7 @@ impl AkShareClient {
             "仔猪价格" => ("2", "https://xt.yangzhu.vip/data/getmapdata"),
             _ => {
                 return Err(Error::invalid_input(format!(
-                    "unsupported hog cost symbol: {}",
-                    symbol
+                    "unsupported hog cost symbol: {symbol}"
                 )));
             }
         };
@@ -555,8 +548,7 @@ impl AkShareClient {
             "猪粮比价" => "11",
             _ => {
                 return Err(Error::invalid_input(format!(
-                    "unsupported hog supply symbol: {}",
-                    symbol
+                    "unsupported hog supply symbol: {symbol}"
                 )));
             }
         };
@@ -756,8 +748,7 @@ impl AkShareClient {
         let date = "20210817";
         let date_formatted = format!("{}_{}_{}", &date[..4], &date[4..6], &date[6..8]);
         let url = format!(
-            "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_{}{}=/InnerFuturesNewService.getDailyKLine?symbol={}&_={}",
-            symbol, date_formatted, symbol, date_formatted
+            "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_{symbol}{date_formatted}=/InnerFuturesNewService.getDailyKLine?symbol={symbol}&_={date_formatted}"
         );
         let body = self
             .get(&url)

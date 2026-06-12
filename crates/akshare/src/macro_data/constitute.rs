@@ -125,11 +125,11 @@ impl AkShareClient {
                 // Get last row (total OPEC production)
                 if let Some(last_row) = values.last().and_then(|r| r.as_array()) {
                     for (i, col_name) in col_names.iter().enumerate() {
-                        if let Some(val) = last_row.get(i).and_then(|v| v.as_f64()) {
+                        if let Some(val) = last_row.get(i).and_then(serde_json::Value::as_f64) {
                             items.push(MacroDataPoint {
                                 date: date_str.to_string(),
                                 value: val,
-                                name: format!("OPEC {}", col_name),
+                                name: format!("OPEC {col_name}"),
                             });
                         }
                     }

@@ -1,6 +1,6 @@
 //! Per-stock financial reports (个股三大报表) from Eastmoney emweb.
 
-use super::types::*;
+use super::types::ThreeReportEntry;
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -15,8 +15,7 @@ impl AkShareClient {
     ) -> Result<Vec<ThreeReportEntry>> {
         let code = symbol.to_lowercase();
         let url = format!(
-            "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{}",
-            report_type
+            "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}"
         );
         let resp = self
             .get(&url)

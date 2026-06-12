@@ -82,8 +82,7 @@ fn parse_html_tables(html: &str) -> Vec<(Vec<String>, Vec<Vec<String>>)> {
         // Extract headers from <thead> or first <tr> with <th>
         let header_content = RE_THEAD
             .captures(table_content)
-            .map(|c| c[1].to_string())
-            .unwrap_or_else(|| table_content.to_string());
+            .map_or_else(|| table_content.to_string(), |c| c[1].to_string());
 
         let mut found_header = false;
         for row_cap in RE_TR.captures_iter(&header_content) {
@@ -340,7 +339,7 @@ impl AkShareClient {
             .filter_map(|item| {
                 item.get("item_title")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
             })
             .collect();
 

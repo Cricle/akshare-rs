@@ -1,7 +1,12 @@
 //! Shareholder analysis (股东分析) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{
+    fmt_date, json_f64, json_f64_opt, json_i64, json_i64_opt, json_str, json_str_opt,
+};
+use super::types::{
+    GdfxHoldingAnalyse, GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork,
+    GdfxTop10, HoldChangeCninfo, HoldControlCninfo, ManagementDetail,
+};
 use crate::client::AkShareClient;
 use crate::error::Result;
 

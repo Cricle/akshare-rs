@@ -12,7 +12,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, IndexSnapshot};
-use crate::util::*;
+use crate::util::today_iso;
 
 // ---------------------------------------------------------------------------
 // Wire types (private to this module)
@@ -167,7 +167,7 @@ impl AkShareClient {
     ///
     /// `symbol`: Shenwan Level-3 index code
     pub async fn sw_index_third_cons(&self, symbol: &str) -> Result<Vec<crate::types::Row>> {
-        let secid = format!("90.{}", symbol);
+        let secid = format!("90.{symbol}");
         let url = "https://push2.eastmoney.com/api/qt/clist/get";
         let response = self
             .get(url)

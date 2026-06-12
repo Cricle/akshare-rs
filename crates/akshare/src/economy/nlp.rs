@@ -96,7 +96,7 @@ impl AkShareClient {
                 .or_else(|| v.get("INDICATOR_VALUE"))
                 .or_else(|| v.get("VALUE"))
                 .or_else(|| v.get("SENTIMENT_INDEX"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
@@ -124,7 +124,7 @@ impl AkShareClient {
 
         let data = resp
             .data
-            .ok_or_else(|| Error::not_found(format!("ownthink: no data for '{}'", word)))?;
+            .ok_or_else(|| Error::not_found(format!("ownthink: no data for '{word}'")))?;
 
         let mut items = Vec::new();
         match indicator {
@@ -170,8 +170,7 @@ impl AkShareClient {
             }
             _ => {
                 return Err(Error::invalid_input(format!(
-                    "unknown indicator: {}",
-                    indicator
+                    "unknown indicator: {indicator}"
                 )));
             }
         }
@@ -219,7 +218,7 @@ mod tests {
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
         assert_eq!(
-            data[0].get("EPU_INDEX").and_then(|v| v.as_f64()),
+            data[0].get("EPU_INDEX").and_then(serde_json::Value::as_f64),
             Some(152.3)
         );
     }

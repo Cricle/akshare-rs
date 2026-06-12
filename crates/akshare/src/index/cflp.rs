@@ -129,9 +129,21 @@ async fn parse_cflp_response(response: reqwest::Response) -> Result<Vec<CflpInde
 
     for i in 0..len {
         let date = chart1.xLebal.get(i).cloned().unwrap_or_default();
-        let base = chart1.yLebal.get(i).and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let mom = chart2.yLebal.get(i).and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let yoy = chart3.yLebal.get(i).and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let base = chart1
+            .yLebal
+            .get(i)
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
+        let mom = chart2
+            .yLebal
+            .get(i)
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
+        let yoy = chart3
+            .yLebal
+            .get(i)
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         points.push(CflpIndexPoint {
             date,
             base_index: base,

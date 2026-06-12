@@ -1,7 +1,10 @@
 //! Pledge data (股权质押) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
+use super::types::{
+    GpzyDistributeEntry, GpzyIndustry, GpzyPledgeDetail, GpzyPledgeRatio, GpzyPledgeRatioDetail,
+    GpzyProfile,
+};
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -158,7 +161,7 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<GpzyPledgeRatioDetail>> {
-        let filter = format!("(SECURITY_CODE=\"{}\")", symbol);
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
                 "RPTA_APP_ACCUMDETAILS",

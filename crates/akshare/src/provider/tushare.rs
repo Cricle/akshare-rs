@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
+use crate::types::{CandlePoint, TradeCalendarItem};
 
 #[derive(Debug, Deserialize)]
 struct TushareResponse {
@@ -141,7 +141,9 @@ impl AkShareClient {
                 exchange: get("exchange").as_str().unwrap_or("").to_string(),
                 calendar_date: get("cal_date").as_str().unwrap_or("").to_string(),
                 is_open: get("is_open").as_i64().unwrap_or(0) == 1,
-                previous_trade_date: get("pretrade_date").as_str().map(|s| s.to_string()),
+                previous_trade_date: get("pretrade_date")
+                    .as_str()
+                    .map(std::string::ToString::to_string),
             });
         }
         Ok(items)

@@ -272,7 +272,7 @@ impl AkShareClient {
                 let ename = item
                     .get("name")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.to_string());
+                    .map(std::string::ToString::to_string);
 
                 all_quotes.push(HkSpotQuote {
                     code,
@@ -314,7 +314,7 @@ impl AkShareClient {
     ) -> Result<Vec<HkDailyCandle>> {
         let code = symbol.trim_start_matches('0');
         let code = if code.is_empty() { "0" } else { code };
-        let secid = format!("116.{}", code);
+        let secid = format!("116.{code}");
         let fqt = match adjust {
             "" => "0",
             "qfq" => "1",
@@ -436,17 +436,17 @@ impl AkShareClient {
                 items.push(HkFamousStock {
                     code: code.to_string(),
                     name: name.to_string(),
-                    latest_price: val.get("f2").and_then(|v| v.as_f64()),
-                    change_pct: val.get("f3").and_then(|v| v.as_f64()),
-                    change_amount: val.get("f4").and_then(|v| v.as_f64()),
-                    volume: val.get("f5").and_then(|v| v.as_f64()),
-                    amount: val.get("f6").and_then(|v| v.as_f64()),
-                    open: val.get("f17").and_then(|v| v.as_f64()),
-                    high: val.get("f15").and_then(|v| v.as_f64()),
-                    low: val.get("f16").and_then(|v| v.as_f64()),
-                    prev_close: val.get("f18").and_then(|v| v.as_f64()),
-                    market_cap: val.get("f20").and_then(|v| v.as_f64()),
-                    pe_ratio: val.get("f9").and_then(|v| v.as_f64()),
+                    latest_price: val.get("f2").and_then(serde_json::Value::as_f64),
+                    change_pct: val.get("f3").and_then(serde_json::Value::as_f64),
+                    change_amount: val.get("f4").and_then(serde_json::Value::as_f64),
+                    volume: val.get("f5").and_then(serde_json::Value::as_f64),
+                    amount: val.get("f6").and_then(serde_json::Value::as_f64),
+                    open: val.get("f17").and_then(serde_json::Value::as_f64),
+                    high: val.get("f15").and_then(serde_json::Value::as_f64),
+                    low: val.get("f16").and_then(serde_json::Value::as_f64),
+                    prev_close: val.get("f18").and_then(serde_json::Value::as_f64),
+                    market_cap: val.get("f20").and_then(serde_json::Value::as_f64),
+                    pe_ratio: val.get("f9").and_then(serde_json::Value::as_f64),
                 });
             }
         }
@@ -465,7 +465,7 @@ impl AkShareClient {
     pub async fn stock_hk_index_daily_em(&self, symbol: &str) -> Result<Vec<HkIndexDailyCandle>> {
         // Use secid format: internal_id.symbol
         // Default internal_id mapping for common indices
-        let secid = format!("100.{}", symbol);
+        let secid = format!("100.{symbol}");
 
         let response = self
             .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
@@ -534,10 +534,7 @@ impl AkShareClient {
     ///
     /// - `symbol`: HK index code like "CES100"
     pub async fn stock_hk_index_daily_sina(&self, symbol: &str) -> Result<Vec<HkIndexDailyCandle>> {
-        let url = format!(
-            "https://finance.sina.com.cn/stock/hkstock/{}/klc2_kl.js",
-            symbol
-        );
+        let url = format!("https://finance.sina.com.cn/stock/hkstock/{symbol}/klc2_kl.js");
 
         let response = self
             .get(&url)
@@ -640,15 +637,15 @@ impl AkShareClient {
                     code,
                     internal_id,
                     name,
-                    latest_price: item.get("f2").and_then(|v| v.as_f64()),
-                    change_pct: item.get("f3").and_then(|v| v.as_f64()),
-                    change_amount: item.get("f4").and_then(|v| v.as_f64()),
-                    volume: item.get("f5").and_then(|v| v.as_f64()),
-                    amount: item.get("f6").and_then(|v| v.as_f64()),
-                    high: item.get("f15").and_then(|v| v.as_f64()),
-                    low: item.get("f16").and_then(|v| v.as_f64()),
-                    open: item.get("f17").and_then(|v| v.as_f64()),
-                    prev_close: item.get("f18").and_then(|v| v.as_f64()),
+                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
+                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
+                    change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
+                    volume: item.get("f5").and_then(serde_json::Value::as_f64),
+                    amount: item.get("f6").and_then(serde_json::Value::as_f64),
+                    high: item.get("f15").and_then(serde_json::Value::as_f64),
+                    low: item.get("f16").and_then(serde_json::Value::as_f64),
+                    open: item.get("f17").and_then(serde_json::Value::as_f64),
+                    prev_close: item.get("f18").and_then(serde_json::Value::as_f64),
                 })
             })
             .collect();
@@ -993,7 +990,7 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let filter = format!("(SECUCODE=\"{}.HK\")", symbol);
+        let filter = format!("(SECUCODE=\"{symbol}.HK\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
@@ -1044,7 +1041,7 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let filter = format!("(SECURITY_CODE=\"{}\")", symbol);
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
@@ -1092,7 +1089,7 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_hk_fhpx_detail_ths(symbol)`
     pub async fn stock_hk_fhpx_detail_ths(&self, symbol: &str) -> Result<Vec<HkFhpxDetailThs>> {
-        let url = format!("https://basic.10jqka.com.cn/176/HK{}/bonus.html", symbol);
+        let url = format!("https://basic.10jqka.com.cn/176/HK{symbol}/bonus.html");
 
         let response = self
                         .get(&url)
@@ -1147,7 +1144,7 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let filter = format!("(SECURITY_CODE=\"{}\")", symbol);
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
@@ -1275,7 +1272,7 @@ async fn parse_em_stock_list<T: serde::de::DeserializeOwned>(
     let diff = payload
         .data
         .and_then(|d| d.diff)
-        .ok_or_else(|| Error::upstream(format!("{} missing data", context)))?;
+        .ok_or_else(|| Error::upstream(format!("{context} missing data")))?;
 
     let mut items = Vec::new();
 
@@ -1294,7 +1291,7 @@ async fn parse_em_stock_list<T: serde::de::DeserializeOwned>(
     }
 
     if items.is_empty() {
-        return Err(Error::not_found(format!("{} returned no data", context)));
+        return Err(Error::not_found(format!("{context} returned no data")));
     }
     Ok(items)
 }

@@ -3,7 +3,10 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
+use crate::types::{
+    AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail, CandlePoint,
+    CapitalFlowPoint, SectorConstituent, SectorSnapshot, StockSearchResult,
+};
 use crate::util::{parse_csv_line, parse_f64_safe};
 
 use serde::Deserialize;
@@ -761,7 +764,7 @@ fn classify_search_market(
 ) -> Option<&'static str> {
     match (classify, security_type_name) {
         (Some("AStock"), _) => Some("A股"),
-        (Some("Fund") | Some("OTCFUND"), _) => Some("A股"),
+        (Some("Fund" | "OTCFUND"), _) => Some("A股"),
         (_, Some("基金")) => Some("A股"),
         (Some("Index"), _) => Some("指数"),
         (Some("BStock"), _) => Some("A股"),

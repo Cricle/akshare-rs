@@ -61,7 +61,7 @@ impl AkShareClient {
             "city"
         };
         let area_id = get_area_id(area)
-            .ok_or_else(|| Error::invalid_input(format!("unknown area: {}", area)))?;
+            .ok_or_else(|| Error::invalid_input(format!("unknown area: {area}")))?;
 
         let url = "https://huiyan.baidu.com/migration/cityrank.jsonp";
         let body = self
@@ -120,7 +120,7 @@ impl AkShareClient {
             "city"
         };
         let area_id = get_area_id(area)
-            .ok_or_else(|| Error::invalid_input(format!("unknown area: {}", area)))?;
+            .ok_or_else(|| Error::invalid_input(format!("unknown area: {area}")))?;
 
         let url = "https://huiyan.baidu.com/migration/historycurve.jsonp";
         let body = self
@@ -142,7 +142,7 @@ impl AkShareClient {
             items.push(MacroDataPoint {
                 date: date_str.clone(),
                 value: *value,
-                name: format!("Migration Scale - {}", area),
+                name: format!("Migration Scale - {area}"),
             });
         }
         items.sort_by(|a, b| a.date.cmp(&b.date));

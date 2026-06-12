@@ -1,6 +1,6 @@
 //! Spot market data from Eastmoney (stock_zh_a_spot_em, stock_sh_a_spot_em, etc.)
 
-use super::helpers::*;
+use super::helpers::json_f64;
 use super::types::SpotQuote;
 use crate::client::AkShareClient;
 use crate::error::Result;

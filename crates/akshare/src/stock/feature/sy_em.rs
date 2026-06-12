@@ -1,7 +1,7 @@
 //! Goodwill (商誉) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_str, json_str_opt};
+use super::types::{SyDetail, SyJzDetail, SyProfile, SyYqDetail};
 use crate::client::AkShareClient;
 use crate::error::Result;
 

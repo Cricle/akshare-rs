@@ -64,7 +64,7 @@ impl AkShareClient {
             .json()
             .await?;
 
-        let idx = if symbol == "广义乘用车" { 1 } else { 0 };
+        let idx = usize::from(symbol == "广义乘用车");
         let chart = resp
             .data
             .get(idx)
@@ -73,7 +73,6 @@ impl AkShareClient {
         let data_list = chart.data_list.as_deref().unwrap_or(&[]);
         let months = chart.month.as_deref().unwrap_or(&[]);
         let indicator_idx = match indicator {
-            "产量" => 0usize,
             "批发" => 1,
             "零售" => 2,
             "出口" => 3,
@@ -94,7 +93,7 @@ impl AkShareClient {
                         items.push(MacroDataPoint {
                             date: month.clone(),
                             value,
-                            name: format!("{}-{}", symbol, indicator),
+                            name: format!("{symbol}-{indicator}"),
                         });
                     }
                 }
@@ -126,7 +125,6 @@ impl AkShareClient {
             .await?;
 
         let idx = match symbol {
-            "狭义乘用车-累计" => 0,
             "狭义乘用车-单月" => 1,
             "广义乘用车-累计" => 2,
             "广义乘用车-单月" => 3,
@@ -149,7 +147,10 @@ impl AkShareClient {
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string();
-                let value = arr.get(1).and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let value = arr
+                    .get(1)
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 if !name.is_empty() {
                     items.push(MacroDataPoint {
                         date: symbol.to_string(),
@@ -181,7 +182,6 @@ impl AkShareClient {
             .await?;
 
         let idx = match symbol {
-            "MPV" => 0,
             "SUV" => 1,
             "轿车" => 2,
             "占比" => 3,
@@ -203,13 +203,13 @@ impl AkShareClient {
             {
                 let value = arr
                     .get(1)
-                    .and_then(|v| v.as_f64())
-                    .or_else(|| arr.first().and_then(|v| v.as_f64()))
+                    .and_then(serde_json::Value::as_f64)
+                    .or_else(|| arr.first().and_then(serde_json::Value::as_f64))
                     .unwrap_or(0.0);
                 items.push(MacroDataPoint {
                     date: month.clone(),
                     value,
-                    name: format!("{}-{}", symbol, indicator),
+                    name: format!("{symbol}-{indicator}"),
                 });
             }
         }
@@ -230,7 +230,6 @@ impl AkShareClient {
             .await?;
 
         let idx = match symbol {
-            "整体市场" => 0,
             "销量占比-PHEV-BEV" => 1,
             "销量占比-ICE-NEV" => 2,
             _ => 0,
@@ -249,11 +248,14 @@ impl AkShareClient {
             if let Some(entry) = data_list.get(i)
                 && let Some(arr) = entry.as_array()
             {
-                let value = arr.get(2).and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let value = arr
+                    .get(2)
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 items.push(MacroDataPoint {
                     date: month.clone(),
                     value,
-                    name: format!("NEV - {}", symbol),
+                    name: format!("NEV - {symbol}"),
                 });
             }
         }
@@ -273,8 +275,7 @@ impl AkShareClient {
         let rank_type = symbol_map
             .iter()
             .find(|(k, _)| *k == symbol)
-            .map(|(_, v)| *v)
-            .unwrap_or("F");
+            .map_or("F", |(_, v)| *v);
 
         let url = "https://i.gasgoo.com/data/sales/AutoModelSalesRank.aspx/GetSalesRank";
         let year = &date[..4];
@@ -323,7 +324,7 @@ impl AkShareClient {
                 .get("SalesVolume")
                 .or_else(|| entry.get("salesVolume"))
                 .or_else(|| entry.get("Sales"))
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             if !name.is_empty() {
                 items.push(MacroDataPoint {
@@ -439,7 +440,7 @@ impl AkShareClient {
             .iter()
             .find(|(k, _)| *k == symbol)
             .map(|(_, v)| *v)
-            .ok_or_else(|| Error::invalid_input(format!("unknown taptap rank type: {}", symbol)))?;
+            .ok_or_else(|| Error::invalid_input(format!("unknown taptap rank type: {symbol}")))?;
 
         let url = "https://www.taptap.cn/webapiv2/app-top/v2/hits";
         let mut all_games: Vec<serde_json::Value> = Vec::new();
@@ -501,7 +502,7 @@ impl AkShareClient {
             let score = game
                 .pointer("/app/stat/rating/score")
                 .or_else(|| game.get("score"))
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
 
             if !name.is_empty() {

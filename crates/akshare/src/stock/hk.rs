@@ -1,6 +1,6 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
+use crate::types::{CandlePoint, QuoteSnapshot};
 
 /// Convert an HK stock symbol (e.g. "00593", "593") to Yahoo format ("00593.HK").
 fn hk_yahoo_symbol(symbol: &str) -> Result<String> {
@@ -23,7 +23,7 @@ fn hk_yahoo_symbol(symbol: &str) -> Result<String> {
         return Err(Error::invalid_input(format!("invalid HK symbol: {symbol}")));
     }
 
-    Ok(format!("{:0>5}.HK", digits_str))
+    Ok(format!("{digits_str:0>5}.HK"))
 }
 
 impl AkShareClient {

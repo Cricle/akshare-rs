@@ -242,7 +242,7 @@ impl AkShareClient {
         for item in &items {
             if let (Some(code), Some(id)) = (
                 item.get("f12").and_then(|v| v.as_str()),
-                item.get("f13").and_then(|v| v.as_i64()),
+                item.get("f13").and_then(serde_json::Value::as_i64),
             ) {
                 map.insert(code.to_string(), id);
             }

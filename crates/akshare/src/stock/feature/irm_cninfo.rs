@@ -3,7 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 
-use super::types::*;
+use super::types::IrmQuestion;
 
 impl AkShareClient {
     /// Fetch org_id for a stock symbol from cninfo keyboard API.
@@ -78,15 +78,15 @@ impl AkShareClient {
                     answer: v
                         .get("attachContent")
                         .and_then(|x| x.as_str())
-                        .map(|s| s.to_string()),
+                        .map(std::string::ToString::to_string),
                     questioner: v
                         .get("mainPerson")
                         .and_then(|x| x.as_str())
-                        .map(|s| s.to_string()),
+                        .map(std::string::ToString::to_string),
                     answerer: v
                         .get("attachPerson")
                         .and_then(|x| x.as_str())
-                        .map(|s| s.to_string()),
+                        .map(std::string::ToString::to_string),
                     question_time: v
                         .get("mainDate")
                         .and_then(|x| x.as_str())
@@ -95,8 +95,11 @@ impl AkShareClient {
                     source: Some("cninfo".to_string()),
                 });
             }
-            let total_pages = resp.get("totalPage").and_then(|t| t.as_i64()).unwrap_or(1);
-            if page as i64 >= total_pages {
+            let total_pages = resp
+                .get("totalPage")
+                .and_then(serde_json::Value::as_i64)
+                .unwrap_or(1);
+            if i64::from(page) >= total_pages {
                 break;
             }
         }
@@ -140,15 +143,15 @@ impl AkShareClient {
                 answer: v
                     .get("attachContent")
                     .and_then(|x| x.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 questioner: v
                     .get("mainPerson")
                     .and_then(|x| x.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 answerer: v
                     .get("attachPerson")
                     .and_then(|x| x.as_str())
-                    .map(|s| s.to_string()),
+                    .map(std::string::ToString::to_string),
                 question_time: v
                     .get("mainDate")
                     .and_then(|x| x.as_str())

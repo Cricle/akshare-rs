@@ -287,14 +287,14 @@ impl AkShareClient {
                 Some(BoardChangeRow {
                     code,
                     name,
-                    latest_price: item.get("f2").and_then(|v| v.as_f64()),
-                    change_pct: item.get("f3").and_then(|v| v.as_f64()),
-                    change_amount: item.get("f4").and_then(|v| v.as_f64()),
-                    volume: item.get("f5").and_then(|v| v.as_f64()),
-                    amount: item.get("f6").and_then(|v| v.as_f64()),
-                    turnover_rate: item.get("f8").and_then(|v| v.as_f64()),
-                    main_net_inflow: item.get("f62").and_then(|v| v.as_f64()),
-                    main_net_inflow_ratio: item.get("f184").and_then(|v| v.as_f64()),
+                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
+                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
+                    change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
+                    volume: item.get("f5").and_then(serde_json::Value::as_f64),
+                    amount: item.get("f6").and_then(serde_json::Value::as_f64),
+                    turnover_rate: item.get("f8").and_then(serde_json::Value::as_f64),
+                    main_net_inflow: item.get("f62").and_then(serde_json::Value::as_f64),
+                    main_net_inflow_ratio: item.get("f184").and_then(serde_json::Value::as_f64),
                 })
             })
             .collect();
@@ -585,7 +585,7 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for (field_key, label) in &field_map {
-            if let Some(val) = obj.get(*field_key).and_then(|v| v.as_f64()) {
+            if let Some(val) = obj.get(*field_key).and_then(serde_json::Value::as_f64) {
                 // Apply unit conversion: divide by 100 for most fields, keep volume/amount as-is
                 let converted = if *field_key == "f47" || *field_key == "f48" {
                     val

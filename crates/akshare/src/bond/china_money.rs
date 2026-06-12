@@ -95,7 +95,7 @@ impl AkShareClient {
                 let yield_val = v
                     .get("yield")
                     .or_else(|| v.get("closeYield"))
-                    .and_then(|x| x.as_f64())?;
+                    .and_then(serde_json::Value::as_f64)?;
                 Some(MacroDataPoint {
                     date: date.get(..10).unwrap_or(date).to_string(),
                     value: yield_val,

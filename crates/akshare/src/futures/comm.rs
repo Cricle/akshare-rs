@@ -33,10 +33,7 @@ impl AkShareClient {
     pub async fn futures_comm_js(&self, date: &str) -> Result<Vec<Row>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://mp-api.jin10.com/api/dynamic-data/child";
-        let search = format!(
-            r#"{{"range,date": "{},{}", "status": 1}}"#,
-            date_fmt, date_fmt
-        );
+        let search = format!(r#"{{"range,date": "{date_fmt},{date_fmt}", "status": 1}}"#);
 
         let body = self
             .get(url)

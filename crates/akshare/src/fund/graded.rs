@@ -47,9 +47,18 @@ impl AkShareClient {
                         .unwrap_or("")
                         .to_string(),
                     date: date.clone(),
-                    nav: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    acc_nav: v.get("f2").and_then(|x| x.as_f64()).unwrap_or(0.0),
-                    change_pct: v.get("f3").and_then(|x| x.as_f64()).unwrap_or(0.0),
+                    nav: v
+                        .get("f2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    acc_nav: v
+                        .get("f2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                    change_pct: v
+                        .get("f3")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
                     fund_type: Some("graded".to_string()),
                 })
             })

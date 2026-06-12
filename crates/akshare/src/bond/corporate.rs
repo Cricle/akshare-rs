@@ -115,7 +115,7 @@ fn extract_str(v: &serde_json::Value, keys: &[&str]) -> Option<String> {
 /// Extract an f64 from a JSON value by trying multiple possible keys.
 fn extract_f64(v: &serde_json::Value, keys: &[&str]) -> Option<f64> {
     for key in keys {
-        if let Some(n) = v.get(*key).and_then(|x| x.as_f64()) {
+        if let Some(n) = v.get(*key).and_then(serde_json::Value::as_f64) {
             return Some(n);
         }
     }

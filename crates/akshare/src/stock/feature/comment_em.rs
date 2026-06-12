@@ -1,7 +1,9 @@
 //! Stock comments (千股千评) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_str};
+use super::types::{
+    CommentDesireIndex, CommentFocusIndex, CommentHistScore, CommentOrgParticipation, StockComment,
+};
 use crate::client::AkShareClient;
 use crate::error::Result;
 

@@ -228,8 +228,12 @@ impl AkShareClient {
         for (i, rank_item) in rank_items.iter().enumerate() {
             let symbol = rank_item.sc.clone().unwrap_or_default();
             let quote = quotes.get(i);
-            let latest_price = quote.and_then(|q| q.get("f2")).and_then(|v| v.as_f64());
-            let change_pct = quote.and_then(|q| q.get("f3")).and_then(|v| v.as_f64());
+            let latest_price = quote
+                .and_then(|q| q.get("f2"))
+                .and_then(serde_json::Value::as_f64);
+            let change_pct = quote
+                .and_then(|q| q.get("f3"))
+                .and_then(serde_json::Value::as_f64);
             let name = quote
                 .and_then(|q| q.get("f14"))
                 .and_then(|v| v.as_str())
@@ -461,8 +465,12 @@ impl AkShareClient {
         for (i, rank_item) in rank_items.iter().enumerate() {
             let symbol = rank_item.sc.clone().unwrap_or_default();
             let quote = quotes.get(i);
-            let latest_price = quote.and_then(|q| q.get("f2")).and_then(|v| v.as_f64());
-            let change_pct = quote.and_then(|q| q.get("f3")).and_then(|v| v.as_f64());
+            let latest_price = quote
+                .and_then(|q| q.get("f2"))
+                .and_then(serde_json::Value::as_f64);
+            let change_pct = quote
+                .and_then(|q| q.get("f3"))
+                .and_then(serde_json::Value::as_f64);
             let name = quote
                 .and_then(|q| q.get("f14"))
                 .and_then(|v| v.as_str())
@@ -552,8 +560,7 @@ impl AkShareClient {
         _date: &str,
     ) -> Result<Vec<serde_json::Value>> {
         let url = format!(
-            "https://finance.pae.baidu.com/selfselect/listsugrecomm?srcid=5353&all=1&pointType=string&group=quotation_index&code={}&market_type=ab&newFormat=1&finClientType=pc",
-            symbol
+            "https://finance.pae.baidu.com/selfselect/listsugrecomm?srcid=5353&all=1&pointType=string&group=quotation_index&code={symbol}&market_type=ab&newFormat=1&finClientType=pc"
         );
         let response = self
             .get(&url)

@@ -162,8 +162,7 @@ fn parse_html_table(html: &str, update_time: &str) -> Vec<OptionMarginRow> {
     let table_start = html.find("<table").unwrap_or(0);
     let table_end = html[table_start..]
         .find("</table>")
-        .map(|i| i + table_start)
-        .unwrap_or(html.len());
+        .map_or(html.len(), |i| i + table_start);
     let table = &html[table_start..table_end];
 
     let mut rows = Vec::new();
@@ -197,7 +196,7 @@ fn parse_html_table(html: &str, update_time: &str) -> Vec<OptionMarginRow> {
                     open_fee: parse_f64_safe(&cells[5]),
                     close_today_fee: parse_f64_safe(&cells[6]),
                     close_yesterday_fee: parse_f64_safe(&cells[7]),
-                    total_fee: cells.get(8).map(|s| parse_f64_safe(s)).unwrap_or(0.0),
+                    total_fee: cells.get(8).map_or(0.0, |s| parse_f64_safe(s)),
                     update_time: update_time.to_string(),
                 });
             }

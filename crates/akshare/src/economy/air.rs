@@ -44,7 +44,7 @@ impl AkShareClient {
                 ("sortColumns", "REPORT_DATE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", &format!(r#"CITY="{}""#, city)),
+                ("filter", &format!(r#"CITY="{city}""#)),
             ])
             .send()
             .await?
@@ -68,12 +68,12 @@ impl AkShareClient {
                 .get("AQI")
                 .or_else(|| v.get("INDICATOR_VALUE"))
                 .or_else(|| v.get("VALUE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value,
-                name: format!("Air Quality - {}", city),
+                name: format!("Air Quality - {city}"),
             });
         }
         Ok(items)
@@ -198,7 +198,10 @@ impl AkShareClient {
                 .and_then(|x| x.as_str())
                 .unwrap_or("")
                 .to_string();
-            let aqi = v.get("AQI").and_then(|x| x.as_f64()).unwrap_or(0.0);
+            let aqi = v
+                .get("AQI")
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(0.0);
             if !city.is_empty() {
                 items.push(MacroDataPoint {
                     date: (i + 1).to_string(),
@@ -231,10 +234,7 @@ impl AkShareClient {
     pub async fn sunrise_daily(&self, date: &str, city: &str) -> Result<Vec<MacroDataPoint>> {
         let year = &date[..4];
         let month = &date[4..6];
-        let url = format!(
-            "https://www.timeanddate.com/sun/china/{}?month={}&year={}",
-            city, month, year
-        );
+        let url = format!("https://www.timeanddate.com/sun/china/{city}?month={month}&year={year}");
 
         let body = self.get(&url).send().await?.text().await?;
 
@@ -242,7 +242,7 @@ impl AkShareClient {
         // Parse HTML table for sunrise/sunset data
         for line in body.lines() {
             let trimmed = line.trim();
-            if trimmed.contains("<td") && trimmed.contains(":") {
+            if trimmed.contains("<td") && trimmed.contains(':') {
                 // Look for time patterns (HH:MM)
                 let parts: Vec<&str> = trimmed
                     .split(['<', '>'])
@@ -254,7 +254,7 @@ impl AkShareClient {
                     items.push(MacroDataPoint {
                         date: date.to_string(),
                         value: 1.0,
-                        name: format!("Sunrise: {}, Sunset: {}", sunrise, sunset),
+                        name: format!("Sunrise: {sunrise}, Sunset: {sunset}"),
                     });
                 }
             }
@@ -289,7 +289,10 @@ mod tests {
         let resp: EmDatacenterResp = serde_json::from_str(json).unwrap();
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
-        assert_eq!(data[0].get("AQI").and_then(|v| v.as_f64()), Some(75.0));
+        assert_eq!(
+            data[0].get("AQI").and_then(serde_json::Value::as_f64),
+            Some(75.0)
+        );
     }
 
     #[test]

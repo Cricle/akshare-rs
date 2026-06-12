@@ -7,7 +7,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
+use crate::types::CapitalFlowPoint;
 use crate::util::{parse_csv_line, parse_f64_safe};
 
 use serde::{Deserialize, Serialize};
@@ -207,18 +207,18 @@ impl AkShareClient {
                 Some(FundFlowRank {
                     symbol,
                     name,
-                    latest_price: item.get("f2").and_then(|v| v.as_f64()),
-                    change_pct: item.get("f3").and_then(|v| v.as_f64()),
-                    main_net_inflow: item.get("f62").and_then(|v| v.as_f64()),
-                    main_net_inflow_pct: item.get("f184").and_then(|v| v.as_f64()),
-                    super_large_net_inflow: item.get("f66").and_then(|v| v.as_f64()),
-                    super_large_net_inflow_pct: item.get("f69").and_then(|v| v.as_f64()),
-                    large_net_inflow: item.get("f72").and_then(|v| v.as_f64()),
-                    large_net_inflow_pct: item.get("f75").and_then(|v| v.as_f64()),
-                    medium_net_inflow: item.get("f78").and_then(|v| v.as_f64()),
-                    medium_net_inflow_pct: item.get("f81").and_then(|v| v.as_f64()),
-                    small_net_inflow: item.get("f84").and_then(|v| v.as_f64()),
-                    small_net_inflow_pct: item.get("f87").and_then(|v| v.as_f64()),
+                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
+                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
+                    main_net_inflow: item.get("f62").and_then(serde_json::Value::as_f64),
+                    main_net_inflow_pct: item.get("f184").and_then(serde_json::Value::as_f64),
+                    super_large_net_inflow: item.get("f66").and_then(serde_json::Value::as_f64),
+                    super_large_net_inflow_pct: item.get("f69").and_then(serde_json::Value::as_f64),
+                    large_net_inflow: item.get("f72").and_then(serde_json::Value::as_f64),
+                    large_net_inflow_pct: item.get("f75").and_then(serde_json::Value::as_f64),
+                    medium_net_inflow: item.get("f78").and_then(serde_json::Value::as_f64),
+                    medium_net_inflow_pct: item.get("f81").and_then(serde_json::Value::as_f64),
+                    small_net_inflow: item.get("f84").and_then(serde_json::Value::as_f64),
+                    small_net_inflow_pct: item.get("f87").and_then(serde_json::Value::as_f64),
                 })
             })
             .collect();

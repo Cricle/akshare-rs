@@ -192,7 +192,8 @@ impl AkShareClient {
         if let Some(arr) = resp.as_array() {
             for entry in arr {
                 let mut row = Row::new();
-                for (k, v) in entry.as_object().unwrap_or(&serde_json::Map::new()) {
+                let empty = serde_json::Map::new();
+                for (k, v) in entry.as_object().unwrap_or(&empty) {
                     row.insert(k.clone(), v.clone());
                 }
                 if !row.is_empty() {

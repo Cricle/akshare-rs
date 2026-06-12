@@ -1672,7 +1672,7 @@ async fn test_futures_news_shmet() {
     let body = serde_json::json!({
         "data": {
             "dataList": [
-                [1, 2, 3, 1710489600000i64, 5, "铜价上涨消息"]
+                [1, 2, 3, 1710489600000_i64, 5, "铜价上涨消息"]
             ]
         }
     });

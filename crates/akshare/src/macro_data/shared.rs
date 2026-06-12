@@ -81,7 +81,7 @@ pub(crate) async fn fetch_em_report(
             .or_else(|| v.get("PPI"))
             .or_else(|| v.get("PMI"))
             .or_else(|| v.get("M2"))
-            .and_then(|x| x.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
 
         if date.is_empty() {
@@ -106,7 +106,7 @@ pub(crate) async fn fetch_em_indicator(
     name_label: &str,
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
-    let filter = format!(r#"(INDICATOR_ID="{}")"#, indicator_id);
+    let filter = format!(r#"(INDICATOR_ID="{indicator_id}")"#);
     let resp: EmDatacenterResp = client
         .get(url)
         .query(&[
@@ -138,7 +138,7 @@ pub(crate) async fn fetch_em_indicator(
         let value = v
             .get("VALUE")
             .or_else(|| v.get("INDICATOR_VALUE"))
-            .and_then(|x| x.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
 
         if date.is_empty() {

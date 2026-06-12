@@ -79,7 +79,7 @@ impl AkShareClient {
                     ("EMM00166466", "中国国债收益率10年"),
                     ("EMM00166469", "中国国债收益率30年"),
                 ] {
-                    if let Some(val) = v.get(*field).and_then(|x| x.as_f64()) {
+                    if let Some(val) = v.get(*field).and_then(serde_json::Value::as_f64) {
                         all_items.push(MacroDataPoint {
                             date: date_short.clone(),
                             value: val,
@@ -95,7 +95,7 @@ impl AkShareClient {
                     ("EMG00001310", "美国国债收益率10年"),
                     ("EMG00001312", "美国国债收益率30年"),
                 ] {
-                    if let Some(val) = v.get(*field).and_then(|x| x.as_f64()) {
+                    if let Some(val) = v.get(*field).and_then(serde_json::Value::as_f64) {
                         all_items.push(MacroDataPoint {
                             date: date_short.clone(),
                             value: val,

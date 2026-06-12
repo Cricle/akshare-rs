@@ -95,8 +95,7 @@ fn ths_board_info_html() -> String {
 /// THS board index JS response for kline data.
 fn ths_kline_js(year: &str) -> String {
     format!(
-        r#"quote_data({{"data":"{}0102,10.00,10.50,10.80,9.90,100000,10500000;{}0103,10.50,11.00,11.20,10.30,120000,13200000"}});"#,
-        year, year
+        r#"quote_data({{"data":"{year}0102,10.00,10.50,10.80,9.90,100000,10500000;{year}0103,10.50,11.00,11.20,10.30,120000,13200000"}});"#
     )
 }
 
@@ -177,8 +176,8 @@ fn intraday_sse_body() -> String {
 fn individual_info_body() -> serde_json::Value {
     serde_json::json!({
         "f57": "000001", "f58": "平安银行",
-        "f84": 10000000000i64, "f85": 5000000000i64,
-        "f127": "银行", "f116": 105000000000i64, "f117": 52500000000i64,
+        "f84": 10000000000_i64, "f85": 5000000000_i64,
+        "f127": "银行", "f116": 105000000000_i64, "f117": 52500000000_i64,
         "f189": "1991-04-03", "f43": 1050
     })
 }
@@ -441,9 +440,9 @@ fn sse_summary_body() -> serde_json::Value {
         "result": [{
             "STAT_NAME": "主板",
             "STAT_NUM": 1500,
-            "TRADE_AMOUNT": 100000000000i64,
-            "TOTAL_MARKET_CAP": 50000000000000i64,
-            "FLOAT_MARKET_CAP": 30000000000000i64
+            "TRADE_AMOUNT": 100000000000_i64,
+            "TOTAL_MARKET_CAP": 50000000000000_i64,
+            "FLOAT_MARKET_CAP": 30000000000000_i64
         }]
     })
 }
@@ -505,10 +504,10 @@ fn xueqiu_quote_body() -> serde_json::Value {
                 "pe_lyr": 14.5,
                 "pb": 1.5,
                 "psr": 2.0,
-                "market_capital": 105000000000i64,
-                "float_market_capital": 52500000000i64,
-                "total_shares": 10000000000i64,
-                "float_shares": 5000000000i64,
+                "market_capital": 105000000000_i64,
+                "float_market_capital": 52500000000_i64,
+                "total_shares": 10000000000_i64,
+                "float_shares": 5000000000_i64,
                 "limit_up": 11.39,
                 "limit_down": 9.32,
                 "eps": 0.70,
@@ -520,7 +519,7 @@ fn xueqiu_quote_body() -> serde_json::Value {
                 "currency": "CNY",
                 "exchange": "SH",
                 "lot_size": 100,
-                "time": 1704182400000i64
+                "time": 1704182400000_i64
             }
         }
     })
@@ -532,7 +531,7 @@ fn xueqiu_basic_info_body() -> serde_json::Value {
         "data": {
             "name": "浦发银行",
             "industry": "银行",
-            "market_capital": 105000000000i64
+            "market_capital": 105000000000_i64
         }
     })
 }
@@ -699,7 +698,7 @@ fn em_hk_report_body() -> serde_json::Value {
                 "SECURITY_CODE": "00700",
                 "REPORT_DATE": "2023-12-31",
                 "STD_ITEM_NAME": "总资产",
-                "AMOUNT": 1000000000000i64
+                "AMOUNT": 1000000000000_i64
             }],
             "pages": 1
         }

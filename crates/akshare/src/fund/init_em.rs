@@ -25,7 +25,7 @@ impl AkShareClient {
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text.strip_prefix("var newfunddata=").unwrap_or(&text);
         let json_start = json_str.find('{').unwrap_or(0);
-        let json_end = json_str.rfind('}').map(|i| i + 1).unwrap_or(json_str.len());
+        let json_end = json_str.rfind('}').map_or(json_str.len(), |i| i + 1);
         let json_body = &json_str[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_body)
@@ -83,7 +83,7 @@ impl AkShareClient {
         let abs_start = start_idx + start_bracket;
 
         // Find matching closing brace
-        let mut count = 0i32;
+        let mut count = 0_i32;
         let mut end_idx = abs_start;
         for (i, ch) in text[abs_start..].char_indices() {
             if ch == '{' {
@@ -111,9 +111,19 @@ impl AkShareClient {
 
         // Filter by symbol
         if symbol == "发行中" {
-            items.retain(|v| v.get("zzfx").and_then(|z| z.as_i64()).unwrap_or(0) == 1);
+            items.retain(|v| {
+                v.get("zzfx")
+                    .and_then(serde_json::Value::as_i64)
+                    .unwrap_or(0)
+                    == 1
+            });
         } else if symbol == "将发行" {
-            items.retain(|v| v.get("zzfx").and_then(|z| z.as_i64()).unwrap_or(0) != 1);
+            items.retain(|v| {
+                v.get("zzfx")
+                    .and_then(serde_json::Value::as_i64)
+                    .unwrap_or(0)
+                    != 1
+            });
         }
 
         if items.is_empty() {

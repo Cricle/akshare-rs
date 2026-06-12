@@ -46,10 +46,7 @@ impl AkShareClient {
     ///
     /// Returns top 20 members by volume, long OI, and short OI for each contract.
     pub async fn futures_shfe_position_rank(&self, date: &str) -> Result<Vec<FuturesPositionRank>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/dailydata/kx/pm{}_new.dat",
-            date
-        );
+        let url = format!("https://www.shfe.com.cn/data/dailydata/kx/pm{date}_new.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -99,8 +96,7 @@ impl AkShareClient {
         // After 20251101 uses .xlsx, before uses .xls
         let ext = if date > "20251101" { "xlsx" } else { "xls" };
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/{}/FutureDataHolding.{}",
-            year, date, ext
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataHolding.{ext}"
         );
         let _body = self
             .get(&url)
@@ -284,8 +280,7 @@ impl AkShareClient {
                         let qty_chg = row
                             .get("qtySub")
                             .or(row.get("todayQtyChg"))
-                            .map(parse_f64)
-                            .unwrap_or(0.0);
+                            .map_or(0.0, parse_f64);
 
                         // Merge into items by rank
                         let idx = items.iter().position(|p: &FuturesPositionRank| {

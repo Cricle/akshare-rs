@@ -19,7 +19,7 @@ use akshare::AkShareClient;
 use rmcp::{
     ErrorData as McpError, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
-    model::*,
+    model::{CallToolResult, Content, Implementation, ServerCapabilities, ServerInfo},
     tool, tool_handler, tool_router,
 };
 
@@ -843,7 +843,7 @@ mod tests {
     #[test]
     fn test_service_clone() {
         let service = AkShareMcpService::new();
-        let cloned = service.clone();
+        let cloned = service;
         let info = cloned.get_info();
         assert!(info.capabilities.tools.is_some());
     }

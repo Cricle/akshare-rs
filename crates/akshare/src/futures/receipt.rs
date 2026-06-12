@@ -54,10 +54,8 @@ impl AkShareClient {
 
     /// SHFE registered warehouse receipt data.
     pub async fn get_shfe_receipt(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/tradedata/future/dailydata/{}dailystock.dat",
-            date
-        );
+        let url =
+            format!("https://www.shfe.com.cn/data/tradedata/future/dailydata/{date}dailystock.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")

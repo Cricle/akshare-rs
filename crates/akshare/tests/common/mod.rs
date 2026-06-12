@@ -83,7 +83,7 @@ pub async fn mock_any_get_text(server: &MockServer, path_pattern: &str, body: &s
 /// f16=low, f17=open, f18=prev_close).
 pub fn sample_em_stock_row(code: &str, name: &str) -> serde_json::Value {
     serde_json::json!({
-        "f2": 10.50, "f3": 1.5, "f4": 0.15, "f5": 1000000, "f6": 10500000.0,
+        "f2": 10.50, "f3": 1.5, "f4": 0.15, "f5": 1_000_000, "f6": 10_500_000.0,
         "f7": 2.0, "f8": 1.2, "f9": 15.0, "f10": 1.1, "f12": code, "f14": name,
         "f15": 10.80, "f16": 10.20, "f17": 10.30, "f18": 10.35
     })
@@ -91,10 +91,7 @@ pub fn sample_em_stock_row(code: &str, name: &str) -> serde_json::Value {
 
 /// Sample candlestick kline string: "2024-01-02,10.00,10.50,10.80,9.90,100000,10500000,2.0,1.5,0.15,1.2"
 pub fn sample_kline_str(date: &str) -> String {
-    format!(
-        "{},10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
-        date
-    )
+    format!("{date},10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2")
 }
 
 /// Sample MacroDataPoint-style JSON from Eastmoney datacenter.

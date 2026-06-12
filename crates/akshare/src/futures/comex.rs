@@ -14,17 +14,13 @@ impl AkShareClient {
             "白银" => "EMI00069027",
             _ => {
                 return Err(Error::invalid_input(format!(
-                    "unsupported COMEX symbol: {}",
-                    symbol
+                    "unsupported COMEX symbol: {symbol}"
                 )));
             }
         };
 
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
-        let filter = format!(
-            r#"(INDICATOR_ID1="{}")(@STORAGE_TON<>"NULL")"#,
-            indicator_id
-        );
+        let filter = format!(r#"(INDICATOR_ID1="{indicator_id}")(@STORAGE_TON<>"NULL")"#);
 
         let mut all_items = Vec::new();
         let mut page = 1;
@@ -59,9 +55,9 @@ impl AkShareClient {
             for row in &rows {
                 let mut r = Row::new();
                 r.insert("date".into(), row["REPORT_DATE"].clone());
-                r.insert(format!("comex_{}_ton", symbol), row["STORAGE_TON"].clone());
+                r.insert(format!("comex_{symbol}_ton"), row["STORAGE_TON"].clone());
                 r.insert(
-                    format!("comex_{}_ounce", symbol),
+                    format!("comex_{symbol}_ounce"),
                     row["STORAGE_OUNCE"].clone(),
                 );
                 all_items.push(r);

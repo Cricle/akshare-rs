@@ -89,8 +89,7 @@ impl AkShareClient {
             .header(
                 "Referer",
                 format!(
-                    "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={}",
-                    symbol
+                    "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={symbol}"
                 ),
             )
             .send()
@@ -134,8 +133,7 @@ impl AkShareClient {
                 .header(
                     "Referer",
                     format!(
-                        "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={}",
-                        symbol
+                        "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={symbol}"
                     ),
                 )
                 .send()
@@ -157,23 +155,23 @@ impl AkShareClient {
                         .get("price")
                         .and_then(|v| v.as_str())
                         .and_then(|s| s.parse().ok())
-                        .or_else(|| tick.get("price").and_then(|v| v.as_f64()))
+                        .or_else(|| tick.get("price").and_then(serde_json::Value::as_f64))
                         .unwrap_or(0.0),
                     volume: tick
                         .get("volume")
                         .and_then(|v| v.as_str())
                         .and_then(|s| s.parse().ok())
-                        .or_else(|| tick.get("volume").and_then(|v| v.as_f64()))
+                        .or_else(|| tick.get("volume").and_then(serde_json::Value::as_f64))
                         .unwrap_or(0.0),
                     prev_price: tick
                         .get("prev_price")
                         .and_then(|v| v.as_str())
                         .and_then(|s| s.parse().ok())
-                        .or_else(|| tick.get("prev_price").and_then(|v| v.as_f64())),
+                        .or_else(|| tick.get("prev_price").and_then(serde_json::Value::as_f64)),
                     buy_or_sell: tick
                         .get("type")
                         .and_then(|v| v.as_str())
-                        .map(|s| s.to_string()),
+                        .map(std::string::ToString::to_string),
                 });
             }
         }

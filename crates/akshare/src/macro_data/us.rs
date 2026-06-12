@@ -284,7 +284,7 @@ impl AkShareClient {
                 if let Some(arr) = row.as_array() {
                     // First key is total US crude production
                     if let Some(inner) = arr.first().and_then(|v| v.as_array())
-                        && let Some(val) = inner.first().and_then(|v| v.as_f64())
+                        && let Some(val) = inner.first().and_then(serde_json::Value::as_f64)
                     {
                         items.push(MacroDataPoint {
                             date: date.clone(),
@@ -513,11 +513,11 @@ impl AkShareClient {
                             let pz = parr.first().and_then(|v| v.as_str()).unwrap_or("");
                             let tc = parr.get(1).and_then(|v| v.as_str()).unwrap_or("");
                             // Column index 5 is volume
-                            if let Some(vol) = parr.get(5).and_then(|v| v.as_f64()) {
+                            if let Some(vol) = parr.get(5).and_then(serde_json::Value::as_f64) {
                                 items.push(MacroDataPoint {
                                     date: date.clone(),
                                     value: vol,
-                                    name: format!("CME {}-{}", pz, tc),
+                                    name: format!("CME {pz}-{tc}"),
                                 });
                             }
                         }
@@ -555,12 +555,12 @@ async fn fetch_cftc_holding(
             if let Some(cols) = row.as_object() {
                 for (col_name, col_data) in cols {
                     if let Some(arr) = col_data.as_array()
-                        && let Some(val) = arr.first().and_then(|v| v.as_f64())
+                        && let Some(val) = arr.first().and_then(serde_json::Value::as_f64)
                     {
                         items.push(MacroDataPoint {
                             date: date.clone(),
                             value: val,
-                            name: format!("{} {}", name_label, col_name),
+                            name: format!("{name_label} {col_name}"),
                         });
                     }
                 }

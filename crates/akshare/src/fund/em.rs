@@ -114,13 +114,11 @@ impl AkShareClient {
         let s_code = symbol_map
             .iter()
             .find(|(n, _)| *n == symbol)
-            .map(|(_, c)| *c)
-            .unwrap_or("");
+            .map_or("", |(_, c)| *c);
         let i_code = indicator_map
             .iter()
             .find(|(n, _)| *n == indicator)
-            .map(|(_, c)| *c)
-            .unwrap_or("");
+            .map_or("", |(_, c)| *c);
 
         let pn = limit.max(1).to_string();
         let resp = self
@@ -154,7 +152,7 @@ impl AkShareClient {
         let text = resp.text().await.map_err(Error::from)?;
         // Response is JS callback, extract JSON
         let json_start = text.find('{').unwrap_or(0);
-        let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+        let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_str)

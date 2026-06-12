@@ -35,8 +35,7 @@ impl AkShareClient {
         let flash_tag = symbol_map
             .iter()
             .find(|(k, _)| *k == category)
-            .map(|(_, v)| *v)
-            .unwrap_or("");
+            .map_or("", |(_, v)| *v);
 
         let payload = if flash_tag.is_empty() {
             serde_json::json!({

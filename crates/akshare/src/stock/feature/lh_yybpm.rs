@@ -4,7 +4,7 @@
 //! implemented in pure Rust. These functions are stub implementations
 //! that return empty results.
 
-use super::types::*;
+use super::types::LhYybRanking;
 use crate::client::AkShareClient;
 use crate::error::Result;
 

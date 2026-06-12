@@ -21,7 +21,7 @@ impl AkShareClient {
         // Extract table rows from HTML using simple string parsing.
         let mut result = Vec::new();
         // Look for table rows in the HTML
-        let mut rank = 0i32;
+        let mut rank = 0_i32;
         for line in text.lines() {
             if line.contains("<td") && line.contains("</td>") {
                 rank += 1;

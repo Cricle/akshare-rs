@@ -132,10 +132,7 @@ impl AkShareClient {
     ///
     /// Fetches daily OHLCV + settlement data from SHFE JSON API.
     pub async fn futures_daily_shfe(&self, date: &str) -> Result<Vec<FuturesDailyBar>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/tradedata/future/dailydata/kx{}.dat",
-            date
-        );
+        let url = format!("https://www.shfe.com.cn/data/tradedata/future/dailydata/kx{date}.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -166,15 +163,17 @@ impl AkShareClient {
             let variety = row
                 .get("PRODUCTGROUPID")
                 .and_then(|v| v.as_str())
-                .map(|s| s.trim().to_uppercase())
-                .unwrap_or_else(|| {
-                    row.get("PRODUCTID")
-                        .and_then(|v| v.as_str())
-                        .map(|s| s.split('_').next().unwrap_or("").to_uppercase())
-                        .unwrap_or_default()
-                });
-            let sym = format!("{}{}", variety, delivery_month);
-            let turnover = row.get("TURNOVER").map(parse_f64_val).unwrap_or(0.0);
+                .map_or_else(
+                    || {
+                        row.get("PRODUCTID")
+                            .and_then(|v| v.as_str())
+                            .map(|s| s.split('_').next().unwrap_or("").to_uppercase())
+                            .unwrap_or_default()
+                    },
+                    |s| s.trim().to_uppercase(),
+                );
+            let sym = format!("{variety}{delivery_month}");
+            let turnover = row.get("TURNOVER").map_or(0.0, parse_f64_val);
             items.push(FuturesDailyBar {
                 symbol: sym,
                 date: date.to_string(),
@@ -197,10 +196,7 @@ impl AkShareClient {
     ///
     /// Fetches daily OHLCV + settlement data from INE (Shanghai International Energy Exchange).
     pub async fn futures_daily_ine(&self, date: &str) -> Result<Vec<FuturesDailyBar>> {
-        let url = format!(
-            "https://www.ine.cn/data/tradedata/future/dailydata/kx{}.dat",
-            date
-        );
+        let url = format!("https://www.ine.cn/data/tradedata/future/dailydata/kx{date}.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -228,15 +224,17 @@ impl AkShareClient {
             let variety = row
                 .get("PRODUCTGROUPID")
                 .and_then(|v| v.as_str())
-                .map(|s| s.trim().to_uppercase())
-                .unwrap_or_else(|| {
-                    row.get("PRODUCTID")
-                        .and_then(|v| v.as_str())
-                        .map(|s| s.split('_').next().unwrap_or("").to_uppercase())
-                        .unwrap_or_default()
-                });
-            let sym = format!("{}{}", variety, delivery_month);
-            let turnover = row.get("TURNOVER").map(parse_f64_val).unwrap_or(0.0);
+                .map_or_else(
+                    || {
+                        row.get("PRODUCTID")
+                            .and_then(|v| v.as_str())
+                            .map(|s| s.split('_').next().unwrap_or("").to_uppercase())
+                            .unwrap_or_default()
+                    },
+                    |s| s.trim().to_uppercase(),
+                );
+            let sym = format!("{variety}{delivery_month}");
+            let turnover = row.get("TURNOVER").map_or(0.0, parse_f64_val);
             items.push(FuturesDailyBar {
                 symbol: sym,
                 date: date.to_string(),
@@ -311,8 +309,7 @@ impl AkShareClient {
     pub async fn futures_daily_czce(&self, date: &str) -> Result<Vec<FuturesDailyBar>> {
         let year = &date[..4];
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/{}/FutureDataDaily.txt",
-            year, date
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataDaily.txt"
         );
         let body = self
             .get(&url)
@@ -391,7 +388,7 @@ impl AkShareClient {
             }
             let variety_order = row["varietyOrder"].as_str().unwrap_or("").to_uppercase();
             let deliv_month = row["delivMonth"].as_str().unwrap_or("");
-            let sym = format!("{}{}", variety_order, deliv_month);
+            let sym = format!("{variety_order}{deliv_month}");
             items.push(FuturesDailyBar {
                 symbol: sym,
                 date: date.to_string(),
@@ -426,8 +423,7 @@ impl AkShareClient {
             "INE" => self.futures_daily_ine(date).await,
             "GFEX" => self.futures_daily_gfex(date).await,
             _ => Err(Error::invalid_input(format!(
-                "unsupported market: {}",
-                market
+                "unsupported market: {market}"
             ))),
         }
     }

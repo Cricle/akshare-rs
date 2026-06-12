@@ -1,7 +1,7 @@
 //! Registration data (注册制/新股注册) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64_opt, json_str, json_str_opt};
+use super::types::RegisterEntry;
 use crate::client::AkShareClient;
 use crate::error::Result;
 

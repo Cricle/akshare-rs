@@ -21,8 +21,7 @@ impl AkShareClient {
         let dates_str = body
             .split_once('=')
             .and_then(|(_, r)| r.split_once(';'))
-            .map(|(s, _)| s.trim_matches('"'))
-            .unwrap_or("");
+            .map_or("", |(s, _)| s.trim_matches('"'));
 
         if dates_str.is_empty() {
             return Err(Error::decode("sina trade date: empty response"));
@@ -61,8 +60,7 @@ mod tests {
         let dates_str = body
             .split_once('=')
             .and_then(|(_, r)| r.split_once(';'))
-            .map(|(s, _)| s.trim_matches('"'))
-            .unwrap_or("");
+            .map_or("", |(s, _)| s.trim_matches('"'));
         let dates: Vec<&str> = dates_str.split(',').collect();
         assert_eq!(dates.len(), 3);
         assert_eq!(dates[0], "2024-01-02");

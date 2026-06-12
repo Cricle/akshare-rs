@@ -16,10 +16,7 @@ impl AkShareClient {
     ///
     /// Fetches contract specifications from the Sina futures page.
     pub async fn futures_contract_detail_sina(&self, symbol: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://finance.sina.com.cn/futures/quotes/{}.shtml",
-            symbol
-        );
+        let url = format!("https://finance.sina.com.cn/futures/quotes/{symbol}.shtml");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -100,7 +97,7 @@ impl AkShareClient {
     /// Fetches contract specifications from Eastmoney.
     pub async fn futures_contract_detail_em(&self, symbol: &str) -> Result<Vec<Row>> {
         // Step 1: Get the inner symbol from the Eastmoney page
-        let url = format!("https://quote.eastmoney.com/qihuo/{}.html", symbol);
+        let url = format!("https://quote.eastmoney.com/qihuo/{symbol}.html");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -114,17 +111,13 @@ impl AkShareClient {
             Some(caps) => caps[1].to_string(),
             None => {
                 return Err(Error::decode(format!(
-                    "cannot extract futures ID from eastmoney page for {}",
-                    symbol
+                    "cannot extract futures ID from eastmoney page for {symbol}"
                 )));
             }
         };
 
         // Step 2: Fetch contract info
-        let info_url = format!(
-            "https://futsse-static.eastmoney.com/redis?msgid={}_info",
-            inner_id
-        );
+        let info_url = format!("https://futsse-static.eastmoney.com/redis?msgid={inner_id}_info");
         let info_body = self.get(&info_url).send().await?.text().await?;
 
         let data: serde_json::Value = serde_json::from_str(&info_body)?;

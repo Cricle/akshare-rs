@@ -3,7 +3,7 @@
 use super::types::HistData;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::market::*;
+use crate::market::eastmoney_secid;
 use crate::util::parse_csv_line;
 use crate::util::parse_f64_safe;
 
@@ -127,7 +127,6 @@ impl AkShareClient {
         let fqt = match adjust {
             "qfq" => "1",
             "hfq" => "2",
-            "" => "0",
             _ => "0",
         };
         let secid = eastmoney_secid(symbol)?;
@@ -218,7 +217,6 @@ impl AkShareClient {
         let fqt = match adjust {
             "qfq" => "1",
             "hfq" => "2",
-            "" => "0",
             _ => "0",
         };
         let secid = format!("116.{}", symbol.trim());
@@ -311,7 +309,6 @@ impl AkShareClient {
         let fqt = match adjust {
             "qfq" => "1",
             "hfq" => "2",
-            "" => "0",
             _ => "0",
         };
         let secid = format!("116.{}", symbol.trim());
@@ -402,7 +399,6 @@ impl AkShareClient {
         let fqt = match adjust {
             "qfq" => "1",
             "hfq" => "2",
-            "" => "0",
             _ => "0",
         };
         // US stocks use 105/106 market codes
@@ -412,16 +408,15 @@ impl AkShareClient {
                 let code = parts[0];
                 let suffix = parts[1].to_uppercase();
                 let market = match suffix.as_str() {
-                    "O" => "105",
                     "N" => "106",
                     _ => "105",
                 };
-                format!("{}.{}", market, code)
+                format!("{market}.{code}")
             } else {
-                format!("105.{}", symbol)
+                format!("105.{symbol}")
             }
         } else {
-            format!("105.{}", symbol)
+            format!("105.{symbol}")
         };
 
         let resp = self
@@ -513,10 +508,9 @@ impl AkShareClient {
         let fqt = match adjust {
             "qfq" => "1",
             "hfq" => "2",
-            "" => "0",
             _ => "0",
         };
-        let secid = format!("105.{}", symbol);
+        let secid = format!("105.{symbol}");
         let resp = self
             .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[

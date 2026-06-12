@@ -668,7 +668,7 @@ async fn test_article_oman_rv() {
         "var data = {};",
         serde_json::json!({
             ".FTSE": {
-                "dates": [1704067200000i64],
+                "dates": [1704067200000_i64],
                 "rv5": {"data": [0.15]}
             }
         })
@@ -686,7 +686,7 @@ async fn test_article_oman_rv_short() {
         "var data = {};",
         serde_json::json!({
             ".FTSE": {
-                "data": [[1704067200000i64, 0.15]]
+                "data": [[1704067200000_i64, 0.15]]
             }
         })
     );
@@ -976,7 +976,7 @@ async fn test_news_trade_notify_suspend_baidu() {
 async fn test_news_search() {
     let server = MockServer::start().await;
     let body = serde_json::json!({"result": {"cmsArticleWebOld": [{"title": "Test", "content": "Test content", "date": "2024-01-02", "url": "http://example.com"}]}});
-    mock_any_get_text(&server, ".*", &format!("jQuery123({})", body)).await;
+    mock_any_get_text(&server, ".*", &format!("jQuery123({body})")).await;
     let client = mock_client(&server);
     let result = client.news_search("test", 10).await;
     let _ = result;

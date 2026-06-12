@@ -73,11 +73,13 @@ pub fn json_take_str(v: &serde_json::Value, key: &str) -> String {
 /// Extract an f64 from a JSON value.
 #[allow(dead_code)]
 pub fn json_take_f64(v: &serde_json::Value, key: &str) -> f64 {
-    v.get(key).and_then(|v| v.as_f64()).unwrap_or(0.0)
+    v.get(key)
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(0.0)
 }
 
 /// Extract an i64 from a JSON value.
 #[allow(dead_code)]
 pub fn json_take_i64(v: &serde_json::Value, key: &str) -> i64 {
-    v.get(key).and_then(|v| v.as_i64()).unwrap_or(0)
+    v.get(key).and_then(serde_json::Value::as_i64).unwrap_or(0)
 }

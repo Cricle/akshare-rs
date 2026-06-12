@@ -1,7 +1,7 @@
 //! Limit-up/down pools (涨停/跌停股池) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_i64, json_str};
+use super::types::{ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc};
 use crate::client::AkShareClient;
 use crate::error::Result;
 

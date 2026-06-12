@@ -309,7 +309,7 @@ impl AkShareClient {
             .and_then(|arr| arr.first())
             .and_then(|v| v.get("metadata"))
             .and_then(|m| m.get("pagecount"))
-            .and_then(|p| p.as_u64())
+            .and_then(serde_json::Value::as_u64)
             .unwrap_or(1) as u64;
 
         // Fetch all pages

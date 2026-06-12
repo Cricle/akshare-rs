@@ -144,7 +144,7 @@ impl AkShareClient {
                         .to_string();
                     let id = product
                         .get("productId")
-                        .map(|v| v.to_string())
+                        .map(std::string::ToString::to_string)
                         .unwrap_or_default();
                     if !name.is_empty() {
                         products.push((name, id));

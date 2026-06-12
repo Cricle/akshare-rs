@@ -34,9 +34,10 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for row in &rows {
-            let cell = row.get("cell").cloned().unwrap_or(row.clone());
+            let cell = row.get("cell").cloned().unwrap_or_else(|| row.clone());
             let mut r = Row::new();
-            for (key, val) in cell.as_object().unwrap_or(&serde_json::Map::new()) {
+            let empty = serde_json::Map::new();
+            for (key, val) in cell.as_object().unwrap_or(&empty) {
                 r.insert(key.clone(), val.clone());
             }
             if !r.is_empty() {
@@ -65,9 +66,10 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for row in &rows {
-            let cell = row.get("cell").cloned().unwrap_or(row.clone());
+            let cell = row.get("cell").cloned().unwrap_or_else(|| row.clone());
             let mut r = Row::new();
-            for (key, val) in cell.as_object().unwrap_or(&serde_json::Map::new()) {
+            let empty = serde_json::Map::new();
+            for (key, val) in cell.as_object().unwrap_or(&empty) {
                 r.insert(key.clone(), val.clone());
             }
             if !r.is_empty() {
@@ -96,9 +98,10 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for row in &rows {
-            let cell = row.get("cell").cloned().unwrap_or(row.clone());
+            let cell = row.get("cell").cloned().unwrap_or_else(|| row.clone());
             let mut r = Row::new();
-            for (key, val) in cell.as_object().unwrap_or(&serde_json::Map::new()) {
+            let empty = serde_json::Map::new();
+            for (key, val) in cell.as_object().unwrap_or(&empty) {
                 r.insert(key.clone(), val.clone());
             }
             if !r.is_empty() {
@@ -127,9 +130,10 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for row in &rows {
-            let cell = row.get("cell").cloned().unwrap_or(row.clone());
+            let cell = row.get("cell").cloned().unwrap_or_else(|| row.clone());
             let mut r = Row::new();
-            for (key, val) in cell.as_object().unwrap_or(&serde_json::Map::new()) {
+            let empty = serde_json::Map::new();
+            for (key, val) in cell.as_object().unwrap_or(&empty) {
                 r.insert(key.clone(), val.clone());
             }
             if !r.is_empty() {

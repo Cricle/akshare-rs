@@ -1,7 +1,7 @@
 //! Shareholder count (股东户数) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64, json_f64_opt, json_str};
+use super::types::{Gdhs, GdhsDetail};
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -9,7 +9,7 @@ impl AkShareClient {
     /// 股东户数
     pub async fn stock_gdhs_em(&self, date: &str) -> Result<Vec<Gdhs>> {
         let date_fmt = fmt_date(date);
-        let filter = format!("(END_DATE='{}')", date_fmt);
+        let filter = format!("(END_DATE='{date_fmt}')");
         let data = self
             .dc_fetch_all(
                 "RPT_F10_EH_HOLDERSNUM",
@@ -83,7 +83,7 @@ impl AkShareClient {
         let (report, filter) = if symbol == "最新" {
             ("RPT_HOLDERNUMLATEST", String::new())
         } else {
-            ("RPT_HOLDERNUMLATEST", format!("(END_DATE='{}')", symbol))
+            ("RPT_HOLDERNUMLATEST", format!("(END_DATE='{symbol}')"))
         };
         let data = self
             .dc_fetch_all(

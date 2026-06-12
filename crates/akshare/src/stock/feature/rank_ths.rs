@@ -5,8 +5,8 @@
 //! This implementation uses a static fallback approach. For production use,
 //! consider integrating a JS runtime or reverse-engineering the token.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{fmt_date, json_f64_opt, json_str};
+use super::types::{ForecastCninfo, RankThsEntry};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 

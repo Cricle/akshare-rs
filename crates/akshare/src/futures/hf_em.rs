@@ -77,7 +77,7 @@ impl AkShareClient {
         // Determine market code from symbol prefix
         let base: String = symbol
             .chars()
-            .take_while(|c| c.is_ascii_alphabetic())
+            .take_while(char::is_ascii_alphabetic)
             .collect();
         let market_code = match base.as_str() {
             "HG" | "GC" | "SI" | "QI" | "QO" | "MGC" | "LTH" => 101,
@@ -88,14 +88,13 @@ impl AkShareClient {
             "SB" | "CT" | "SF" => 108,
             _ => {
                 return Err(Error::invalid_input(format!(
-                    "unknown symbol prefix: {}",
-                    base
+                    "unknown symbol prefix: {base}"
                 )));
             }
         };
 
         let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
-        let secid = format!("{}.{}", market_code, symbol);
+        let secid = format!("{market_code}.{symbol}");
         let response = self
             .get(url)
             .query(&[
@@ -136,8 +135,8 @@ impl AkShareClient {
             }
             let open_interest_chg = parse_f64(fields[13]);
             // Fix unsigned -> signed conversion
-            let unsigned_max: f64 = 4294967295.0; // 2^32 - 1
-            let signed_max: f64 = 2147483647.0; // 2^31 - 1
+            let unsigned_max: f64 = 4_294_967_295.0; // 2^32 - 1
+            let signed_max: f64 = 2_147_483_647.0; // 2^31 - 1
             let oi_chg = if open_interest_chg > signed_max {
                 open_interest_chg - (unsigned_max + 1.0)
             } else {

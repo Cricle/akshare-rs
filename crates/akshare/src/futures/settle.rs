@@ -90,8 +90,7 @@ impl AkShareClient {
     pub async fn futures_settle_czce(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..4];
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/{}/FutureDataClearParams.txt",
-            year, date
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataClearParams.txt"
         );
         let body = self
             .get(&url)
@@ -140,10 +139,7 @@ impl AkShareClient {
 
     /// SHFE settlement parameters.
     pub async fn futures_settle_shfe(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/tradedata/future/dailydata/js{}.dat",
-            date
-        );
+        let url = format!("https://www.shfe.com.cn/data/tradedata/future/dailydata/js{date}.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -191,10 +187,7 @@ impl AkShareClient {
 
     /// INE settlement parameters.
     pub async fn futures_settle_ine(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://www.ine.cn/data/tradedata/future/dailydata/js{}.dat",
-            date
-        );
+        let url = format!("https://www.ine.cn/data/tradedata/future/dailydata/js{date}.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -306,8 +299,7 @@ impl AkShareClient {
             .filter(|r| {
                 r.get("symbol")
                     .and_then(|v| v.as_str())
-                    .map(|s| s.contains(symbol) || symbol.is_empty())
-                    .unwrap_or(false)
+                    .is_some_and(|s| s.contains(symbol) || symbol.is_empty())
             })
             .collect();
         Ok(filtered)
@@ -324,8 +316,7 @@ impl AkShareClient {
             "INE" => self.futures_settle_ine(date).await,
             "GFEX" => self.futures_settle_gfex(date).await,
             _ => Err(Error::invalid_input(format!(
-                "unsupported market for settlement: {}",
-                market
+                "unsupported market for settlement: {market}"
             ))),
         }
     }

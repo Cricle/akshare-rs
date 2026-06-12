@@ -24,26 +24,26 @@ pub fn normalize_a_share_symbol(symbol: &str) -> Option<String> {
             && code.len() == 6
             && code.chars().all(|c| c.is_ascii_digit())
         {
-            return Some(format!("{}.{}", code, suffix_upper));
+            return Some(format!("{code}.{suffix_upper}"));
         }
     }
     // Pure numeric: infer exchange
     if trimmed.len() == 6 && trimmed.chars().all(|c| c.is_ascii_digit()) {
         let suffix = infer_a_share_exchange(trimmed)?;
-        return Some(format!("{}.{}", trimmed, suffix));
+        return Some(format!("{trimmed}.{suffix}"));
     }
     // Tencent format: sh600000, sz000001
     let lower = trimmed.to_lowercase();
     if lower.starts_with("sh") && lower.len() == 8 {
         let code = &lower[2..];
         if code.chars().all(|c| c.is_ascii_digit()) && code.len() == 6 {
-            return Some(format!("{}.SH", code));
+            return Some(format!("{code}.SH"));
         }
     }
     if lower.starts_with("sz") && lower.len() == 8 {
         let code = &lower[2..];
         if code.chars().all(|c| c.is_ascii_digit()) && code.len() == 6 {
-            return Some(format!("{}.SZ", code));
+            return Some(format!("{code}.SZ"));
         }
     }
     None
@@ -66,7 +66,7 @@ pub fn normalize_hk_symbol(symbol: &str) -> Option<String> {
     let trimmed = symbol.trim().trim_start_matches('0').to_string();
     // HK stocks are 1-5 digit numeric codes
     if !trimmed.is_empty() && trimmed.len() <= 5 && trimmed.chars().all(|c| c.is_ascii_digit()) {
-        return Some(format!("{:0>5}", trimmed));
+        return Some(format!("{trimmed:0>5}"));
     }
     // Check for explicit .HK suffix
     if let Some((code, suffix)) = symbol.trim().split_once('.')
@@ -77,7 +77,7 @@ pub fn normalize_hk_symbol(symbol: &str) -> Option<String> {
             && code_trimmed.len() <= 5
             && code_trimmed.chars().all(|c| c.is_ascii_digit())
         {
-            return Some(format!("{:0>5}", code_trimmed));
+            return Some(format!("{code_trimmed:0>5}"));
         }
     }
     None

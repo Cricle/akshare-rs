@@ -113,10 +113,10 @@ impl AkShareClient {
         // For Chinese names, we need the market code; for codes, try direct
         let sec_id = if symbol.chars().any(|c| c > '\u{4e00}') {
             // Chinese symbol - need to look up market code
-            format!("113.{}", symbol) // default to SHFE
+            format!("113.{symbol}") // default to SHFE
         } else {
             // English code
-            let variety = RE_ALPHA.find(symbol).map(|m| m.as_str()).unwrap_or("");
+            let variety = RE_ALPHA.find(symbol).map_or("", |m| m.as_str());
             let market = match variety.to_uppercase().as_str() {
                 "IF" | "IC" | "IH" | "IM" | "T" | "TF" | "TS" => "8",
                 "rb" | "cu" | "al" | "zn" | "au" | "ag" | "fu" | "ru" | "bu" | "hc" | "ni"
@@ -128,7 +128,7 @@ impl AkShareClient {
                 "si" | "lc" => "225",
                 _ => "113",
             };
-            format!("{}.{}", market, symbol)
+            format!("{market}.{symbol}")
         };
 
         let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";

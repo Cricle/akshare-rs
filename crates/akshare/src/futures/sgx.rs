@@ -45,10 +45,7 @@ impl AkShareClient {
         }
 
         let num = klines.len() + 791;
-        let zip_url = format!(
-            "https://links.sgx.com/1.0.0/derivatives-daily/{}/FUTURE.zip",
-            num
-        );
+        let zip_url = format!("https://links.sgx.com/1.0.0/derivatives-daily/{num}/FUTURE.zip");
 
         let _zip_body = self.get(&zip_url).send().await?.bytes().await?;
 

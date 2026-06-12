@@ -89,11 +89,7 @@ impl AkShareClient {
     /// `symbol` is in Sina format (e.g. "sh010107").
     pub async fn bond_zh_hs_daily(&self, symbol: &str) -> Result<Vec<BondSnapshot>> {
         let now = chrono::Utc::now().format("%Y_%m_%d").to_string();
-        let url = format!(
-            "https://hq.sinajs.cn/lb/{sym}_{date}",
-            sym = symbol,
-            date = now
-        );
+        let url = format!("https://hq.sinajs.cn/lb/{symbol}_{now}");
         let resp = self
             .get(&url)
             .send()

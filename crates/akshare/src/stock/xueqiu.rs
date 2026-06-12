@@ -184,10 +184,8 @@ impl AkShareClient {
     /// The client does not automatically provide one — you may need to
     /// set cookies manually via a custom reqwest client.
     pub async fn stock_individual_spot_xq(&self, symbol: &str) -> Result<XqStockSpot> {
-        let url = format!(
-            "https://stock.xueqiu.com/v5/stock/quote.json?symbol={}&extend=detail",
-            symbol
-        );
+        let url =
+            format!("https://stock.xueqiu.com/v5/stock/quote.json?symbol={symbol}&extend=detail");
 
         let response = self
                         .get(&url)

@@ -4,8 +4,8 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::*;
-use crate::util::*;
+use crate::types::CandlePoint;
+use crate::util::{amplitude_pct, apply_change_metrics};
 
 // ---------------------------------------------------------------------------
 // Wire types

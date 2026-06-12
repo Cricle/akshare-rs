@@ -60,13 +60,16 @@ impl AkShareClient {
         for v in &data {
             let market = v.get("market").and_then(|x| x.as_str()).unwrap_or("");
             let symbol = v.get("symbol").and_then(|x| x.as_str()).unwrap_or("");
-            let price = v.get("price").and_then(|x| x.as_f64()).unwrap_or(0.0);
+            let price = v
+                .get("price")
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(0.0);
             let updated = v.get("reported_at").and_then(|x| x.as_str()).unwrap_or("");
 
             items.push(MacroDataPoint {
                 date: updated.get(..10).unwrap_or(updated).to_string(),
                 value: price,
-                name: format!("{} {}", market, symbol),
+                name: format!("{market} {symbol}"),
             });
         }
         Ok(items)
@@ -114,7 +117,7 @@ impl AkShareClient {
                             items.push(MacroDataPoint {
                                 date: date.clone(),
                                 value: v,
-                                name: format!("FX Sentiment {}", pair),
+                                name: format!("FX Sentiment {pair}"),
                             });
                         }
                     }
@@ -145,10 +148,13 @@ impl AkShareClient {
         {
             for item in &macro_items {
                 let title = item.get("title").and_then(|v| v.as_str()).unwrap_or("");
-                let actual = item.get("actual").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let actual = item
+                    .get("actual")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 let pub_date = item
                     .get("public_date")
-                    .and_then(|v| v.as_i64())
+                    .and_then(serde_json::Value::as_i64)
                     .unwrap_or(0);
 
                 // Convert unix timestamp to date string
@@ -189,7 +195,7 @@ impl AkShareClient {
             if cells.len() >= 3 {
                 let date_cell = extract_html_text_other(cells[1]);
                 let val_cell = extract_html_text_other(cells[2]);
-                if (date_cell.contains("-") || date_cell.contains("/"))
+                if (date_cell.contains('-') || date_cell.contains('/'))
                     && let Ok(val) = val_cell.replace(',', "").parse::<f64>()
                 {
                     items.push(MacroDataPoint {

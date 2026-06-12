@@ -30,8 +30,8 @@ impl AkShareClient {
             .error_for_status().map_err(Error::from)?;
 
         let text = resp.text().await.map_err(Error::from)?;
-        let json_start = text.find("({").map(|i| i + 1).unwrap_or(0);
-        let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+        let json_start = text.find("({").map_or(0, |i| i + 1);
+        let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_str)
@@ -47,8 +47,14 @@ impl AkShareClient {
             .filter_map(|item| {
                 let code = item.get("symbol")?.as_str()?.to_string();
                 let name = item.get("sname")?.as_str()?.to_string();
-                let nav = item.get("dwjz").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                let scale = item.get("zmjgm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let nav = item
+                    .get("dwjz")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
+                let scale = item
+                    .get("zmjgm")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 let date = item
                     .get("jzrq")
                     .and_then(|v| v.as_str())
@@ -81,8 +87,8 @@ impl AkShareClient {
             .error_for_status().map_err(Error::from)?;
 
         let text = resp.text().await.map_err(Error::from)?;
-        let json_start = text.find("({").map(|i| i + 1).unwrap_or(0);
-        let json_end = text.rfind('}').map(|i| i + 1).unwrap_or(text.len());
+        let json_start = text.find("({").map_or(0, |i| i + 1);
+        let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
         let root: serde_json::Value = serde_json::from_str(json_str)
@@ -98,8 +104,14 @@ impl AkShareClient {
             .filter_map(|item| {
                 let code = item.get("symbol")?.as_str()?.to_string();
                 let name = item.get("sname")?.as_str()?.to_string();
-                let nav = item.get("dwjz").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                let scale = item.get("zmjgm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let nav = item
+                    .get("dwjz")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
+                let scale = item
+                    .get("zmjgm")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(0.0);
                 let date = item
                     .get("jzrq")
                     .and_then(|v| v.as_str())

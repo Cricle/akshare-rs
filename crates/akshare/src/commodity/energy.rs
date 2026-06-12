@@ -54,7 +54,7 @@ impl AkShareClient {
                 .or_else(|| v.get("VALUE"))
                 .or_else(|| v.get("BRENT_PRICE"))
                 .or_else(|| v.get("WTI_PRICE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
@@ -99,7 +99,7 @@ impl AkShareClient {
             let value = v
                 .get("CLOSE_PRICE")
                 .or_else(|| v.get("PRICE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),

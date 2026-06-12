@@ -72,13 +72,15 @@ impl AkShareClient {
                     .unwrap_or(symbol);
                 let close = v
                     .get("CURRENT_BOND_PRICE")
-                    .and_then(|x| x.as_f64())
+                    .and_then(serde_json::Value::as_f64)
                     .unwrap_or(100.0);
-                let premium = v.get("TRANSFER_PREMIUM_RATIO").and_then(|x| x.as_f64());
+                let premium = v
+                    .get("TRANSFER_PREMIUM_RATIO")
+                    .and_then(serde_json::Value::as_f64);
                 let credit_rating = v
                     .get("RATING")
                     .and_then(|x| x.as_str())
-                    .map(|s| s.to_string());
+                    .map(std::string::ToString::to_string);
                 Some(BondSnapshot {
                     symbol: symbol.to_string(),
                     name: name.to_string(),
@@ -194,7 +196,7 @@ impl AkShareClient {
     /// `symbol` is a convertible bond code, e.g. "127018".
     /// Returns daily OHLCV data for the bond.
     pub async fn bond_zh_hs_cov_daily(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        let secid = format!("1.{}", symbol);
+        let secid = format!("1.{symbol}");
         let resp: serde_json::Value = self
             .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
@@ -245,7 +247,7 @@ impl AkShareClient {
         symbol: &str,
         period: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let secid = format!("1.{}", symbol);
+        let secid = format!("1.{symbol}");
         let resp: serde_json::Value = self
             .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
             .query(&[
@@ -291,7 +293,7 @@ impl AkShareClient {
     ///
     /// `symbol` is a convertible bond code, e.g. "127018".
     pub async fn bond_zh_hs_cov_pre_min(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        let secid = format!("1.{}", symbol);
+        let secid = format!("1.{symbol}");
         let resp: serde_json::Value = self
             .get("https://push2.eastmoney.com/api/qt/stock/trends2/get")
             .query(&[
@@ -334,7 +336,7 @@ impl AkShareClient {
     ///
     /// `symbol` is a convertible bond code, e.g. "127018".
     pub async fn bond_zh_hs_cov_spot(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        let secid = format!("1.{}", symbol);
+        let secid = format!("1.{symbol}");
         let resp: serde_json::Value = self
                         .get("https://push2.eastmoney.com/api/qt/stock/get")
             .query(&[

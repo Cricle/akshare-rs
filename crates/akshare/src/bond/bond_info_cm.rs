@@ -77,7 +77,7 @@ pub async fn bond_info_cm(
                 ("bondCode", bond_code.to_string()),
                 ("issueEnty", bond_issue.to_string()),
                 ("bondType", bond_type.to_string()),
-                ("bondSpclPrjctVrty", "".to_string()),
+                ("bondSpclPrjctVrty", String::new()),
                 ("couponType", coupon_type.to_string()),
                 ("issueYear", issue_year.to_string()),
                 ("entyDefinedCode", underwriter.to_string()),

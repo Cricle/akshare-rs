@@ -102,7 +102,7 @@ impl AkShareClient {
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
             .chars()
-            .filter(|c| c.is_ascii_digit())
+            .filter(char::is_ascii_digit)
             .collect::<String>()
             .parse()
             .unwrap_or(0);
@@ -336,9 +336,12 @@ impl AkShareClient {
                     .as_ref()
                     .and_then(|c| c.first())
                     .and_then(|c| c.column_name.as_deref())
-                    .map(|s| s.to_string());
+                    .map(std::string::ToString::to_string);
                 let date = item.notice_date.as_deref().unwrap_or("").to_string();
-                let art_code = item.art_code.as_deref().map(|s| s.to_string());
+                let art_code = item
+                    .art_code
+                    .as_deref()
+                    .map(std::string::ToString::to_string);
 
                 all_reports.push(KcbReport {
                     code,

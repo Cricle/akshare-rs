@@ -21,8 +21,7 @@ impl AkShareClient {
         let year = &date[..4];
         let ext = if date > "20251101" { "xlsx" } else { "xls" };
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/{}/FutureDataWhsheet.{}",
-            year, date, ext
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataWhsheet.{ext}"
         );
         let _body = self
             .get(&url)
@@ -106,10 +105,8 @@ impl AkShareClient {
 
     /// SHFE warehouse receipt data.
     pub async fn futures_shfe_warehouse_receipt(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://www.shfe.com.cn/data/tradedata/future/dailydata/{}dailystock.dat",
-            date
-        );
+        let url =
+            format!("https://www.shfe.com.cn/data/tradedata/future/dailydata/{date}dailystock.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")

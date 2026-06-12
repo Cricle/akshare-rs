@@ -1,7 +1,7 @@
 //! Analyst rankings from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
+use super::types::{AnalystDetail, AnalystRank};
 use crate::client::AkShareClient;
 use crate::error::Result;
 

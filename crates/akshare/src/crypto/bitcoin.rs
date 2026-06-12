@@ -86,7 +86,7 @@ impl AkShareClient {
                 items.push(MacroDataPoint {
                     date: formatted_date.clone(),
                     value,
-                    name: format!("CME BTC {}", key),
+                    name: format!("CME BTC {key}"),
                 });
             }
         }

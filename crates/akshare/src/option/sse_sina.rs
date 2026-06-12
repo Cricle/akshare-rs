@@ -263,8 +263,7 @@ impl AkShareClient {
         let data = body
             .split_once('"')
             .and_then(|(_, r)| r.split_once('"'))
-            .map(|(s, _)| s)
-            .unwrap_or("");
+            .map_or("", |(s, _)| s);
 
         let codes: Vec<OptionSseCodeEntry> = data
             .split(',')
@@ -310,8 +309,7 @@ impl AkShareClient {
         let data = body
             .split_once('"')
             .and_then(|(_, r)| r.split_once('"'))
-            .map(|(s, _)| s)
-            .unwrap_or("");
+            .map_or("", |(s, _)| s);
 
         let values: Vec<&str> = data.split(',').collect();
         let field_list = [
@@ -399,8 +397,7 @@ impl AkShareClient {
         let data = body
             .split_once('"')
             .and_then(|(_, r)| r.split_once('"'))
-            .map(|(s, _)| s)
-            .unwrap_or("");
+            .map_or("", |(s, _)| s);
 
         let values: Vec<&str> = data.split(',').collect();
         let field_list = [
@@ -475,8 +472,7 @@ impl AkShareClient {
         let data = body
             .split_once('"')
             .and_then(|(_, r)| r.split_once('"'))
-            .map(|(s, _)| s)
-            .unwrap_or("");
+            .map_or("", |(s, _)| s);
 
         let values: Vec<&str> = data.split(',').collect();
         let field_list = [
@@ -603,7 +599,7 @@ impl AkShareClient {
 
         // Extract JSON array from JSONP: ...([...])
         let json_start = body.find('[').unwrap_or(0);
-        let json_end = body.rfind(']').map(|i| i + 1).unwrap_or(body.len());
+        let json_end = body.rfind(']').map_or(body.len(), |i| i + 1);
         if json_start >= json_end {
             return Err(Error::decode("sina daily: no JSON array found"));
         }

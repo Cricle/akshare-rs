@@ -122,12 +122,12 @@ impl AkShareClient {
             {
                 entries.push(HsgtFlowEntry {
                     date: arr[0].as_str().unwrap_or("").to_string(),
-                    north_net_flow: arr.get(1).and_then(|v| v.as_f64()),
-                    south_net_flow: arr.get(2).and_then(|v| v.as_f64()),
+                    north_net_flow: arr.get(1).and_then(serde_json::Value::as_f64),
+                    south_net_flow: arr.get(2).and_then(serde_json::Value::as_f64),
                     north_acc_flow: None,
                     south_acc_flow: None,
-                    sh_index: arr.get(3).and_then(|v| v.as_f64()),
-                    sh_change_pct: arr.get(4).and_then(|v| v.as_f64()),
+                    sh_index: arr.get(3).and_then(serde_json::Value::as_f64),
+                    sh_change_pct: arr.get(4).and_then(serde_json::Value::as_f64),
                 });
             }
         }

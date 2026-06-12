@@ -18,10 +18,7 @@ fn f64_val(v: &serde_json::Value) -> f64 {
 impl AkShareClient {
     /// SHFE futures-to-spot (期转现) data.
     pub async fn futures_to_spot_shfe(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://tsite.shfe.com.cn/data/instrument/ExchangeDelivery{}.dat",
-            date
-        );
+        let url = format!("https://tsite.shfe.com.cn/data/instrument/ExchangeDelivery{date}.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -62,10 +59,8 @@ impl AkShareClient {
 
     /// SHFE delivery statistics by month.
     pub async fn futures_delivery_shfe(&self, date: &str) -> Result<Vec<Row>> {
-        let url = format!(
-            "https://tsite.shfe.com.cn/data/dailydata/{}monthvarietystatistics.dat",
-            date
-        );
+        let url =
+            format!("https://tsite.shfe.com.cn/data/dailydata/{date}monthvarietystatistics.dat");
         let body = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
@@ -166,8 +161,7 @@ impl AkShareClient {
     pub async fn futures_delivery_match_czce(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..4];
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/{}/FutureDataDelsettle.xls",
-            year, date
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataDelsettle.xls"
         );
         let _body = self
             .get(&url)
@@ -194,8 +188,7 @@ impl AkShareClient {
     pub async fn futures_delivery_czce(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..4];
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/{}/FutureDataSettlematched.xls",
-            year, date
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataSettlematched.xls"
         );
         let _body = self
             .get(&url)
@@ -253,8 +246,7 @@ impl AkShareClient {
     pub async fn futures_to_spot_czce(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..4];
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{}/{}/FutureDataTrdtrades.xls",
-            year, date
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataTrdtrades.xls"
         );
         let _body = self
             .get(&url)

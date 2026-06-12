@@ -84,9 +84,9 @@ impl AkShareClient {
         &self,
         symbols: &[&str],
     ) -> Result<Vec<ForeignCommodityQuote>> {
-        let subscribe_list: Vec<String> = symbols.iter().map(|s| format!("hf_{}", s)).collect();
+        let subscribe_list: Vec<String> = symbols.iter().map(|s| format!("hf_{s}")).collect();
         let list_param = subscribe_list.join(",");
-        let url = format!("https://hq.sinajs.cn/?list={}", list_param);
+        let url = format!("https://hq.sinajs.cn/?list={list_param}");
 
         let body = self
             .get(&url)
@@ -130,7 +130,7 @@ impl AkShareClient {
             let open = parse_f64(fields[8]);
             let hold = parse_f64(fields[9]);
             let date = fields.get(12).unwrap_or(&"").to_string();
-            let current_price_rmb = fields.get(14).map(|s| parse_f64(s)).unwrap_or(0.0);
+            let current_price_rmb = fields.get(14).map_or(0.0, |s| parse_f64(s));
 
             let change_amount = current_price - last_settle;
             let change_pct = if last_settle > 0.0 {

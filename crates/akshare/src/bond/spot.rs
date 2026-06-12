@@ -127,7 +127,7 @@ impl AkShareClient {
             let date_short = date.get(..10).unwrap_or(date).to_string();
 
             for (field, tenor_label) in &tenors {
-                let yield_rate = v.get(*field).and_then(|x| x.as_f64());
+                let yield_rate = v.get(*field).and_then(serde_json::Value::as_f64);
                 if let Some(rate) = yield_rate {
                     items.push(BondSnapshot {
                         symbol: format!("CNBD{tenor_label}"),
@@ -177,7 +177,7 @@ mod tests {
         ];
 
         for (field, label) in &tenors {
-            let rate = row.get(*field).and_then(|x| x.as_f64());
+            let rate = row.get(*field).and_then(serde_json::Value::as_f64);
             assert!(rate.is_some(), "missing yield for {label}");
             assert!(rate.unwrap() > 0.0);
         }

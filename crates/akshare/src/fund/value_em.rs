@@ -26,8 +26,7 @@ impl AkShareClient {
         let type_id = symbol_map
             .iter()
             .find(|(n, _)| *n == symbol)
-            .map(|(_, c)| *c)
-            .unwrap_or("1");
+            .map_or("1", |(_, c)| *c);
 
         let ts = chrono::Utc::now().timestamp_millis().to_string();
         let response = self

@@ -164,19 +164,19 @@ impl AkShareClient {
                 Some(IndexSpotEm {
                     code,
                     name,
-                    latest_price: item.get("f2").and_then(|v| v.as_f64()),
-                    change_pct: item.get("f3").and_then(|v| v.as_f64()),
-                    change_amount: item.get("f4").and_then(|v| v.as_f64()),
-                    volume: item.get("f5").and_then(|v| v.as_f64()),
-                    amount: item.get("f6").and_then(|v| v.as_f64()),
-                    high: item.get("f15").and_then(|v| v.as_f64()),
-                    low: item.get("f16").and_then(|v| v.as_f64()),
-                    open: item.get("f17").and_then(|v| v.as_f64()),
-                    prev_close: item.get("f18").and_then(|v| v.as_f64()),
+                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
+                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
+                    change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
+                    volume: item.get("f5").and_then(serde_json::Value::as_f64),
+                    amount: item.get("f6").and_then(serde_json::Value::as_f64),
+                    high: item.get("f15").and_then(serde_json::Value::as_f64),
+                    low: item.get("f16").and_then(serde_json::Value::as_f64),
+                    open: item.get("f17").and_then(serde_json::Value::as_f64),
+                    prev_close: item.get("f18").and_then(serde_json::Value::as_f64),
                     internal_id: item
                         .get("f13")
                         .and_then(|v| v.as_str())
-                        .map(|s| s.to_string()),
+                        .map(std::string::ToString::to_string),
                 })
             })
             .collect();
@@ -204,7 +204,7 @@ impl AkShareClient {
         } else {
             "0"
         };
-        let secid = format!("{}.{}", market, symbol);
+        let secid = format!("{market}.{symbol}");
 
         let response = self
             .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
@@ -279,14 +279,13 @@ impl AkShareClient {
         let tx_symbol = if symbol.starts_with("sh") || symbol.starts_with("sz") {
             symbol.to_string()
         } else if symbol.starts_with('0') {
-            format!("sh{}", symbol)
+            format!("sh{symbol}")
         } else {
-            format!("sz{}", symbol)
+            format!("sz{symbol}")
         };
 
         let url = format!(
-            "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={},day,{},{},640,",
-            tx_symbol, start_date, end_date
+            "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={tx_symbol},day,{start_date},{end_date},640,"
         );
 
         #[derive(Deserialize)]
@@ -320,7 +319,7 @@ impl AkShareClient {
                     close: arr[2].as_f64().unwrap_or(0.0),
                     high: arr[3].as_f64().unwrap_or(0.0),
                     low: arr[4].as_f64().unwrap_or(0.0),
-                    volume: arr.get(5).and_then(|v| v.as_f64()),
+                    volume: arr.get(5).and_then(serde_json::Value::as_f64),
                     amount: None,
                 })
             })
@@ -349,7 +348,7 @@ impl AkShareClient {
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
             .chars()
-            .filter(|c| c.is_ascii_digit())
+            .filter(char::is_ascii_digit)
             .collect::<String>()
             .parse()
             .unwrap_or(0);
@@ -452,18 +451,24 @@ impl AkShareClient {
                 let date = item.get(0)?.as_str()?.to_string();
                 Some(CsIndexValue {
                     date,
-                    index_code: item.get(1).and_then(|v| v.as_str()).map(|s| s.to_string()),
-                    index_name: item.get(3).and_then(|v| v.as_str()).map(|s| s.to_string()),
-                    open: item.get(6).and_then(|v| v.as_f64()),
-                    high: item.get(7).and_then(|v| v.as_f64()),
-                    low: item.get(8).and_then(|v| v.as_f64()),
-                    close: item.get(9).and_then(|v| v.as_f64()),
-                    change: item.get(10).and_then(|v| v.as_f64()),
-                    change_pct: item.get(11).and_then(|v| v.as_f64()),
-                    volume: item.get(12).and_then(|v| v.as_f64()),
-                    amount: item.get(13).and_then(|v| v.as_f64()),
-                    sample_count: item.get(14).and_then(|v| v.as_f64()),
-                    pe_ttm: item.get(15).and_then(|v| v.as_f64()),
+                    index_code: item
+                        .get(1)
+                        .and_then(|v| v.as_str())
+                        .map(std::string::ToString::to_string),
+                    index_name: item
+                        .get(3)
+                        .and_then(|v| v.as_str())
+                        .map(std::string::ToString::to_string),
+                    open: item.get(6).and_then(serde_json::Value::as_f64),
+                    high: item.get(7).and_then(serde_json::Value::as_f64),
+                    low: item.get(8).and_then(serde_json::Value::as_f64),
+                    close: item.get(9).and_then(serde_json::Value::as_f64),
+                    change: item.get(10).and_then(serde_json::Value::as_f64),
+                    change_pct: item.get(11).and_then(serde_json::Value::as_f64),
+                    volume: item.get(12).and_then(serde_json::Value::as_f64),
+                    amount: item.get(13).and_then(serde_json::Value::as_f64),
+                    sample_count: item.get(14).and_then(serde_json::Value::as_f64),
+                    pe_ttm: item.get(15).and_then(serde_json::Value::as_f64),
                 })
             })
             .collect();

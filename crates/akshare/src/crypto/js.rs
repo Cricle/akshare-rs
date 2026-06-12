@@ -95,24 +95,27 @@ impl AkShareClient {
             let price_usd = v
                 .get("price")
                 .or_else(|| v.get("price_usd"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let price_cny = v
                 .get("cny_price")
                 .or_else(|| v.get("price_cny"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let change_24h_pct = v
                 .get("change")
                 .or_else(|| v.get("change_24h"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             let volume_24h = v
                 .get("volume")
                 .or_else(|| v.get("volume_24h"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
-            let market_cap = v.get("market_cap").and_then(|x| x.as_f64()).unwrap_or(0.0);
+            let market_cap = v
+                .get("market_cap")
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(0.0);
 
             items.push(CryptoSpot {
                 symbol,

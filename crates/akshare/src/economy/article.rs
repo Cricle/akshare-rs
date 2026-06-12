@@ -45,8 +45,7 @@ impl AkShareClient {
         };
 
         let url = format!(
-            "http://www.policyuncertainty.com/media/{}_Policy_Uncertainty_Data.csv",
-            file_name
+            "http://www.policyuncertainty.com/media/{file_name}_Policy_Uncertainty_Data.csv"
         );
 
         let body = self.get(&url).send().await?.text().await?;
@@ -70,7 +69,7 @@ impl AkShareClient {
             items.push(MacroDataPoint {
                 date,
                 value,
-                name: format!("EPU - {}", symbol),
+                name: format!("EPU - {symbol}"),
             });
         }
         Ok(items)
@@ -82,11 +81,10 @@ impl AkShareClient {
     /// Returns raw CSV rows as `MacroDataPoint` values.
     pub async fn fred_md(&self, date: &str) -> Result<Vec<MacroDataPoint>> {
         let url = format!(
-            "https://s3.amazonaws.com/files.fred.stlouisfed.org/fred-md/monthly/{}.csv",
-            date
+            "https://s3.amazonaws.com/files.fred.stlouisfed.org/fred-md/monthly/{date}.csv"
         );
         let body = self.get(&url).send().await?.text().await?;
-        parse_fred_csv(&body, &format!("FRED-MD {}", date))
+        parse_fred_csv(&body, &format!("FRED-MD {date}"))
     }
 
     /// FRED-QD quarterly macroeconomic dataset.
@@ -94,11 +92,10 @@ impl AkShareClient {
     /// Downloads from the FRED-QD S3 bucket for the given date (e.g., "2023-03").
     pub async fn fred_qd(&self, date: &str) -> Result<Vec<MacroDataPoint>> {
         let url = format!(
-            "https://s3.amazonaws.com/files.fred.stlouisfed.org/fred-md/quarterly/{}.csv",
-            date
+            "https://s3.amazonaws.com/files.fred.stlouisfed.org/fred-md/quarterly/{date}.csv"
         );
         let body = self.get(&url).send().await?.text().await?;
-        parse_fred_csv(&body, &format!("FRED-QD {}", date))
+        parse_fred_csv(&body, &format!("FRED-QD {date}"))
     }
 
     /// Oxford-Man Institute Realized Library - full realized volatility data.
@@ -125,19 +122,19 @@ impl AkShareClient {
         let data: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("oman rv JSON: {e}")))?;
 
-        let key = format!(".{}", symbol);
+        let key = format!(".{symbol}");
         let dates = data
             .get(&key)
             .and_then(|v| v.get("dates"))
             .and_then(|v| v.as_array())
-            .ok_or_else(|| Error::not_found(format!("oman rv: symbol {} not found", symbol)))?;
+            .ok_or_else(|| Error::not_found(format!("oman rv: symbol {symbol} not found")))?;
 
         let values = data
             .get(&key)
             .and_then(|v| v.get(index))
             .and_then(|v| v.get("data"))
             .and_then(|v| v.as_array())
-            .ok_or_else(|| Error::not_found(format!("oman rv: index {} not found", index)))?;
+            .ok_or_else(|| Error::not_found(format!("oman rv: index {index} not found")))?;
 
         let mut items = Vec::new();
         for (d, v) in dates.iter().zip(values.iter()) {
@@ -149,7 +146,7 @@ impl AkShareClient {
             items.push(MacroDataPoint {
                 date,
                 value,
-                name: format!("{}-{}", symbol, index),
+                name: format!("{symbol}-{index}"),
             });
         }
         Ok(items)
@@ -177,14 +174,12 @@ impl AkShareClient {
         let data: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("oman rv short JSON: {e}")))?;
 
-        let key = format!(".{}", symbol);
+        let key = format!(".{symbol}");
         let data_arr = data
             .get(&key)
             .and_then(|v| v.get("data"))
             .and_then(|v| v.as_array())
-            .ok_or_else(|| {
-                Error::not_found(format!("oman rv short: symbol {} not found", symbol))
-            })?;
+            .ok_or_else(|| Error::not_found(format!("oman rv short: symbol {symbol} not found")))?;
 
         let mut items = Vec::new();
         for entry in data_arr {
@@ -283,7 +278,7 @@ impl AkShareClient {
             if parts.len() >= 2
                 && let (Ok(date_val), Ok(rv_val)) =
                     (parts[0].parse::<i64>(), parts[1].parse::<f64>())
-                && date_val > 19000000
+                && date_val > 19_000_000
             {
                 in_data = true;
                 let date_str =
@@ -291,7 +286,7 @@ impl AkShareClient {
                 items.push(MacroDataPoint {
                     date: date_str,
                     value: rv_val,
-                    name: format!("RLab RV - {}", symbol),
+                    name: format!("RLab RV - {symbol}"),
                 });
             }
         }

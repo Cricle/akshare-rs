@@ -3,7 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 
-use super::types::*;
+use super::types::DisclosureReport;
 
 impl AkShareClient {
     /// 巨潮资讯-公告查询-信息披露
@@ -17,7 +17,7 @@ impl AkShareClient {
         let mut all = Vec::new();
         for page in 1..=5 {
             let pn = page.to_string();
-            let se_date = format!("{}~{}", start_date, end_date);
+            let se_date = format!("{start_date}~{end_date}");
             let resp = self
                 .post("https://www.cninfo.com.cn/new/hisAnnouncement/query")
                 .form(&[
@@ -25,15 +25,15 @@ impl AkShareClient {
                     ("pageSize", "30".to_string()),
                     ("column", "szse".to_string()),
                     ("tabName", "fulltext".to_string()),
-                    ("plate", "".to_string()),
+                    ("plate", String::new()),
                     ("stock", symbol.to_string()),
-                    ("searchkey", "".to_string()),
-                    ("secid", "".to_string()),
+                    ("searchkey", String::new()),
+                    ("secid", String::new()),
                     ("category", category.to_string()),
-                    ("trade", "".to_string()),
+                    ("trade", String::new()),
                     ("seDate", se_date),
-                    ("sortName", "".to_string()),
-                    ("sortType", "".to_string()),
+                    ("sortName", String::new()),
+                    ("sortType", String::new()),
                     ("isHLtitle", "true".to_string()),
                 ])
                 .send()
@@ -76,11 +76,11 @@ impl AkShareClient {
                     url: v
                         .get("adjunctUrl")
                         .and_then(|x| x.as_str())
-                        .map(|u| format!("https://static.cninfo.com.cn/{}", u)),
+                        .map(|u| format!("https://static.cninfo.com.cn/{u}")),
                     category: v
                         .get("announcementType")
                         .and_then(|x| x.as_str())
-                        .map(|s| s.to_string()),
+                        .map(std::string::ToString::to_string),
                 });
             }
         }
@@ -134,11 +134,11 @@ impl AkShareClient {
                     url: v
                         .get("adjunctUrl")
                         .and_then(|x| x.as_str())
-                        .map(|u| format!("https://static.cninfo.com.cn/{}", u)),
+                        .map(|u| format!("https://static.cninfo.com.cn/{u}")),
                     category: v
                         .get("announcementType")
                         .and_then(|x| x.as_str())
-                        .map(|s| s.to_string()),
+                        .map(std::string::ToString::to_string),
                 }
             })
             .collect())

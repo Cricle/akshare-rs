@@ -40,7 +40,8 @@ impl AkShareClient {
         let mut items = Vec::new();
         for row in &rows {
             let mut r = crate::types::Row::new();
-            for (k, v) in row.as_object().unwrap_or(&serde_json::Map::new()) {
+            let empty = serde_json::Map::new();
+            for (k, v) in row.as_object().unwrap_or(&empty) {
                 r.insert(k.clone(), v.clone());
             }
             if !r.is_empty() {

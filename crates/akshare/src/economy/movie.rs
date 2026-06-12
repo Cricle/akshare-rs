@@ -40,7 +40,7 @@ impl AkShareClient {
                 ("sortColumns", "BOX_OFFICE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", format!("(TRADE_DATE='{}')", date_fmt).as_str()),
+                ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
             ])
             .send()
             .await?
@@ -67,7 +67,7 @@ impl AkShareClient {
                 ("sortColumns", "BOX_OFFICE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", format!("(TRADE_DATE='{}')", date_fmt).as_str()),
+                ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
             ])
             .send()
             .await?
@@ -94,7 +94,7 @@ impl AkShareClient {
                 ("sortColumns", "BOX_OFFICE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", format!("(TRADE_DATE='{}')", date_fmt).as_str()),
+                ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
             ])
             .send()
             .await?
@@ -124,7 +124,7 @@ impl AkShareClient {
                 ("client", "WEB"),
                 (
                     "filter",
-                    format!("(YEAR='{}')(MONTH='{}')", year, month).as_str(),
+                    format!("(YEAR='{year}')(MONTH='{month}')").as_str(),
                 ),
             ])
             .send()
@@ -175,7 +175,7 @@ impl AkShareClient {
                 ("sortColumns", "BOX_OFFICE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", format!("(TRADE_DATE='{}')", date_fmt).as_str()),
+                ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
             ])
             .send()
             .await?
@@ -201,7 +201,7 @@ impl AkShareClient {
                 ("sortColumns", "BOX_OFFICE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", format!("(YEAR='{}')", year).as_str()),
+                ("filter", format!("(YEAR='{year}')").as_str()),
             ])
             .send()
             .await?
@@ -230,7 +230,7 @@ impl AkShareClient {
                 ("sortColumns", "BOX_OFFICE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-                ("filter", format!("(YEAR='{}')", year).as_str()),
+                ("filter", format!("(YEAR='{year}')").as_str()),
             ])
             .send()
             .await?
@@ -281,7 +281,7 @@ impl AkShareClient {
                 .or_else(|| v.get("INDICATOR_VALUE"))
                 .or_else(|| v.get("VALUE"))
                 .or_else(|| v.get("TOTAL_BOX_OFFICE"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
@@ -309,7 +309,7 @@ fn parse_movie_response(resp: EmDatacenterResp, label: &str) -> Vec<MacroDataPoi
             .get("BOX_OFFICE")
             .or_else(|| v.get("INDICATOR_VALUE"))
             .or_else(|| v.get("VALUE"))
-            .and_then(|x| x.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
         let name = v
             .get("MOVIE_NAME")
@@ -344,7 +344,9 @@ mod tests {
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
         assert_eq!(
-            data[0].get("BOX_OFFICE").and_then(|v| v.as_f64()),
+            data[0]
+                .get("BOX_OFFICE")
+                .and_then(serde_json::Value::as_f64),
             Some(12580.5)
         );
     }

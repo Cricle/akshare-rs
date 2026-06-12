@@ -1,6 +1,6 @@
 //! Order book changes (盘口异动) from Eastmoney.
 
-use super::types::*;
+use super::types::PankouChange;
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -38,7 +38,7 @@ impl AkShareClient {
                         code: parts[1].to_string(),
                         name: parts[2].to_string(),
                         board: parts[3].to_string(),
-                        info: parts.get(4).map(|s| s.to_string()),
+                        info: parts.get(4).map(std::string::ToString::to_string),
                     })
                 } else {
                     None

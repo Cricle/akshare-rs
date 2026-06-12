@@ -1,7 +1,7 @@
 //! Shareholder changes (高管持股/股东增减持) from Eastmoney.
 
-use super::helpers::*;
-use super::types::*;
+use super::helpers::{json_f64, json_f64_opt, json_str};
+use super::types::Ggcg;
 use crate::client::AkShareClient;
 use crate::error::Result;
 

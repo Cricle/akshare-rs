@@ -50,7 +50,8 @@ fn amac_rows_to_rows(data: &[serde_json::Value]) -> Vec<Row> {
     data.iter()
         .map(|v| {
             let mut row = Row::new();
-            for (k, val) in v.as_object().unwrap_or(&serde_json::Map::new()) {
+            let empty = serde_json::Map::new();
+            for (k, val) in v.as_object().unwrap_or(&empty) {
                 row.insert(k.clone(), val.clone());
             }
             row
@@ -82,7 +83,7 @@ impl AkShareClient {
                 .or_else(|| v.get("VALUE"))
                 .or_else(|| v.get("AUM"))
                 .or_else(|| v.get("TOTAL_AUM"))
-                .and_then(|x| x.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
@@ -198,8 +199,10 @@ mod tests {
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
         assert_eq!(
-            data[0].get("INDICATOR_VALUE").and_then(|v| v.as_f64()),
-            Some(275800.0)
+            data[0]
+                .get("INDICATOR_VALUE")
+                .and_then(serde_json::Value::as_f64),
+            Some(275_800.0)
         );
     }
 
