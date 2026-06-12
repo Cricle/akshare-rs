@@ -9,7 +9,7 @@ use crate::util::{
 
 impl AkShareClient {
     /// Fetch daily candles from Stooq CSV.
-    pub(crate) async fn stooq_candles(
+    pub async fn stooq_candles(
         &self,
         symbol: &str,
         limit: usize,
