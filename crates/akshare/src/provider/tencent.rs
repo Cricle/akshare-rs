@@ -74,9 +74,8 @@ impl AkShareClient {
 
         let mut items = Vec::with_capacity(klines.len());
         for entry in &klines {
-            let arr = match entry.as_array() {
-                Some(a) => a,
-                None => continue,
+            let Some(arr) = entry.as_array() else {
+                continue;
             };
             if arr.len() < 6 {
                 continue;
@@ -166,9 +165,8 @@ impl AkShareClient {
 
         let mut items = Vec::with_capacity(klines.len());
         for entry in &klines {
-            let arr = match entry.as_array() {
-                Some(a) => a,
-                None => continue,
+            let Some(arr) = entry.as_array() else {
+                continue;
             };
             if arr.len() < 6 {
                 continue;

@@ -654,9 +654,8 @@ impl AkShareClient {
         let mut items = Vec::new();
 
         for sym_entry in &symbols {
-            let node = match sym_entry.get("mark").and_then(|v| v.as_str()) {
-                Some(n) => n,
-                None => continue,
+            let Some(node) = sym_entry.get("mark").and_then(|v| v.as_str()) else {
+                continue;
             };
 
             let url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQFuturesData";

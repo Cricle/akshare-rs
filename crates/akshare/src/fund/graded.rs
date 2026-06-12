@@ -114,10 +114,7 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for item in datas {
-            let row = match item.as_str() {
-                Some(s) => s,
-                None => continue,
-            };
+            let Some(row) = item.as_str() else { continue };
             let fields: Vec<&str> = row.split(',').map(str::trim).collect();
             if fields.len() < 11 {
                 continue;

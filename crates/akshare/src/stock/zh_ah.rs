@@ -194,14 +194,12 @@ impl AkShareClient {
                 .send()
                 .await;
 
-            let response = match response {
-                Ok(r) => r,
-                Err(_) => continue,
+            let Ok(response) = response else {
+                continue;
             };
 
-            let text = match response.text().await {
-                Ok(t) => t,
-                Err(_) => continue,
+            let Ok(text) = response.text().await else {
+                continue;
             };
 
             // Parse response
@@ -226,15 +224,13 @@ impl AkShareClient {
                 .and_then(|v| v.get(kline_key))
                 .and_then(|v| v.as_array());
 
-            let klines = match klines {
-                Some(arr) => arr,
-                None => continue,
+            let Some(klines) = klines else {
+                continue;
             };
 
             for entry in klines {
-                let arr = match entry.as_array() {
-                    Some(a) => a,
-                    None => continue,
+                let Some(arr) = entry.as_array() else {
+                    continue;
                 };
                 if arr.len() < 6 {
                     continue;

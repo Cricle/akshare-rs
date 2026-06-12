@@ -38,10 +38,7 @@ impl AkShareClient {
 
         let mut result = Vec::new();
         for (i, item) in data.iter().enumerate() {
-            let arr = match item.as_array() {
-                Some(a) => a,
-                None => continue,
-            };
+            let Some(arr) = item.as_array() else { continue };
             if arr.len() < 7 {
                 continue;
             }

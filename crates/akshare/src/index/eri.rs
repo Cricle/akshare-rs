@@ -64,9 +64,8 @@ impl AkShareClient {
         let mut dates = Vec::new();
         let mut values = Vec::new();
         for item in &data1 {
-            let obj = match item.as_object() {
-                Some(o) => o,
-                None => continue,
+            let Some(obj) = item.as_object() else {
+                continue;
             };
             let val = obj
                 .get("indexValue")
@@ -100,9 +99,8 @@ impl AkShareClient {
         let mut volumes = Vec::new();
         let mut amounts = Vec::new();
         for item in &data2 {
-            let obj = match item.as_object() {
-                Some(o) => o,
-                None => continue,
+            let Some(obj) = item.as_object() else {
+                continue;
             };
             volumes.push(
                 obj.get("totalQuantity")

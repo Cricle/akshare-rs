@@ -470,9 +470,8 @@ impl AkShareClient {
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
 
-            let index_list = match report.get("index_list") {
-                Some(serde_json::Value::Object(map)) => map,
-                _ => continue,
+            let Some(serde_json::Value::Object(index_list)) = report.get("index_list") else {
+                continue;
             };
 
             for (metric_name, metric_values) in index_list {
@@ -619,9 +618,8 @@ impl AkShareClient {
             .or_else(|| RE_TABLE_M_TABLE.captures(&html))
             .map(|c| c[1].to_string());
 
-        let content = match table_content {
-            Some(c) => c,
-            None => return Ok(vec![]),
+        let Some(content) = table_content else {
+            return Ok(vec![]);
         };
 
         let tables = parse_html_tables(&format!("<table>{content}</table>"));
@@ -650,9 +648,8 @@ impl AkShareClient {
             .or_else(|| RE_TABLE_M_TABLE.captures(&html))
             .map(|c| c[1].to_string());
 
-        let content = match table_content {
-            Some(c) => c,
-            None => return Ok(vec![]),
+        let Some(content) = table_content else {
+            return Ok(vec![]);
         };
 
         let tables = parse_html_tables(&format!("<table>{content}</table>"));

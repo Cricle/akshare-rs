@@ -806,20 +806,17 @@ impl AkShareClient {
                 .send()
                 .await;
 
-            let response = match response {
-                Ok(r) => r,
-                Err(_) => break,
+            let Ok(response) = response else {
+                break;
             };
 
-            let text = match response.text().await {
-                Ok(t) => t,
-                Err(_) => break,
+            let Ok(text) = response.text().await else {
+                break;
             };
 
             // Parse the response: find the array portion
-            let array_start = match text.find('[') {
-                Some(pos) => pos,
-                None => break,
+            let Some(array_start) = text.find('[') else {
+                break;
             };
 
             // Try to parse the tick data

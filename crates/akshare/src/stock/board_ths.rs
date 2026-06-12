@@ -326,37 +326,30 @@ impl AkShareClient {
         for year in start_year..=end_year {
             let url = format!("https://d.10jqka.com.cn/v4/line/bk_{board_code}/01/{year}.js");
 
-            let response = match self
-                                .get(&url)
+            let Ok(response) = self
+                .get(&url)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                 .header("Referer", "http://q.10jqka.com.cn")
                 .send()
                 .await
-            {
-                Ok(r) => r,
-                Err(_) => continue,
-            };
+            else { continue; };
 
-            let text = match response.text().await {
-                Ok(t) => t,
-                Err(_) => continue,
+            let Ok(text) = response.text().await else {
+                continue;
             };
 
             // Parse JS response: find JSON object
-            let json_start = match text.find('{') {
-                Some(pos) => pos,
-                None => continue,
+            let Some(json_start) = text.find('{') else {
+                continue;
             };
             let json_text = &text[json_start..text.len().saturating_sub(1)];
 
-            let data: serde_json::Value = match serde_json::from_str(json_text) {
-                Ok(v) => v,
-                Err(_) => continue,
+            let Ok(data) = serde_json::from_str::<serde_json::Value>(json_text) else {
+                continue;
             };
 
-            let data_str = match data.get("data").and_then(|v| v.as_str()) {
-                Some(s) => s,
-                None => continue,
+            let Some(data_str) = data.get("data").and_then(|v| v.as_str()) else {
+                continue;
             };
 
             // Each record is semicolon-separated, fields are comma-separated

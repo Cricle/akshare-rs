@@ -443,9 +443,8 @@ fn get_string(val: &serde_json::Value, key: &str) -> Option<String> {
 }
 
 fn parse_spot_rows(diff: &serde_json::Value, limit: usize) -> Vec<SpotRow> {
-    let arr = match diff.as_array() {
-        Some(a) => a,
-        None => return vec![],
+    let Some(arr) = diff.as_array() else {
+        return vec![];
     };
 
     arr.iter()
@@ -480,9 +479,8 @@ fn parse_spot_rows(diff: &serde_json::Value, limit: usize) -> Vec<SpotRow> {
 }
 
 fn parse_board_rows(diff: &serde_json::Value, limit: usize) -> Vec<BoardRow> {
-    let arr = match diff.as_array() {
-        Some(a) => a,
-        None => return vec![],
+    let Some(arr) = diff.as_array() else {
+        return vec![];
     };
 
     arr.iter()
@@ -508,9 +506,8 @@ fn parse_board_rows(diff: &serde_json::Value, limit: usize) -> Vec<BoardRow> {
 }
 
 fn parse_ah_rows(diff: &serde_json::Value, limit: usize) -> Vec<AhComparisonRow> {
-    let arr = match diff.as_array() {
-        Some(a) => a,
-        None => return vec![],
+    let Some(arr) = diff.as_array() else {
+        return vec![];
     };
 
     arr.iter()
@@ -535,9 +532,8 @@ fn parse_ah_rows(diff: &serde_json::Value, limit: usize) -> Vec<AhComparisonRow>
 }
 
 fn parse_hsgt_rows(diff: &serde_json::Value, limit: usize) -> Vec<HsgtStockRow> {
-    let arr = match diff.as_array() {
-        Some(a) => a,
-        None => return vec![],
+    let Some(arr) = diff.as_array() else {
+        return vec![];
     };
 
     arr.iter()

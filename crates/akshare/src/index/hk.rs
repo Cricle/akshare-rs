@@ -48,9 +48,8 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for line in body.lines() {
-            let data = match line.split_once('"').and_then(|(_, r)| r.rsplit_once('"')) {
-                Some((d, _)) => d,
-                None => continue,
+            let Some((data, _)) = line.split_once('"').and_then(|(_, r)| r.rsplit_once('"')) else {
+                continue;
             };
             let p: Vec<&str> = data.split(',').collect();
             if p.len() < 9 {

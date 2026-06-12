@@ -322,9 +322,8 @@ impl AkShareClient {
         };
 
         // Get the item titles from the first report
-        let first_key = match keys.first() {
-            Some(k) => k,
-            None => return Ok(vec![]),
+        let Some(first_key) = keys.first() else {
+            return Ok(vec![]);
         };
 
         let first_items = report_list
@@ -767,9 +766,8 @@ impl AkShareClient {
         let payload: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("failed to parse institute detail JSON: {e}")))?;
 
-        let data = match payload.get("data") {
-            Some(serde_json::Value::Object(map)) => map,
-            _ => return Ok(vec![]),
+        let Some(serde_json::Value::Object(data)) = payload.get("data") else {
+            return Ok(vec![]);
         };
 
         let mut all_records = Vec::new();
@@ -841,13 +839,10 @@ impl AkShareClient {
             }
         }
 
-        let url = match target_url {
-            Some(u) => u,
-            None => {
-                return Err(Error::not_found(format!(
-                    "recommendation type not found: {symbol}"
-                )));
-            }
+        let Some(url) = target_url else {
+            return Err(Error::not_found(format!(
+                "recommendation type not found: {symbol}"
+            )));
         };
 
         let html = self

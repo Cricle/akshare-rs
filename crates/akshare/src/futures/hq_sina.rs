@@ -106,9 +106,8 @@ impl AkShareClient {
             if line.is_empty() {
                 continue;
             }
-            let eq_pos = match line.find('=') {
-                Some(p) => p,
-                None => continue,
+            let Some(eq_pos) = line.find('=') else {
+                continue;
             };
             let var_part = &line[..eq_pos];
             let code = var_part.split('_').next_back().unwrap_or("");
