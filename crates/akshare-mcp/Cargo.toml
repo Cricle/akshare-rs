@@ -1,6 +1,6 @@
 [package]
 name = "akshare-mcp"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -8,7 +8,7 @@ repository.workspace = true
 description = "MCP server for akshare-rs — financial market data via Model Context Protocol"
 
 [dependencies]
-akshare = { path = "../akshare", version = "0.1.0" }
+akshare = { path = "../akshare", version = "0.1.1" }
 rmcp = { version = "1.7", features = [
     "server",
     "client",
