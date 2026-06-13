@@ -61,9 +61,10 @@ fn parse_baidu_block(html: &str) -> Option<NewsItem> {
     if title.trim().is_empty() {
         return None;
     }
-    let summary = extract_baidu_text_between(html, &["c-abstract", "c-span-last", "content-right_8Zs40"])
-        .or_else(|| extract_baidu_plain_text(html))
-        .unwrap_or_default();
+    let summary =
+        extract_baidu_text_between(html, &["c-abstract", "c-span-last", "content-right_8Zs40"])
+            .or_else(|| extract_baidu_plain_text(html))
+            .unwrap_or_default();
     let (source, published_at) =
         extract_baidu_source(html).unwrap_or_else(|| ("Baidu".to_string(), String::new()));
     Some(NewsItem {

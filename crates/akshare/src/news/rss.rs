@@ -41,11 +41,8 @@ fn parse_rss_items(body: &str, source: &str, exclude_title_substrings: &[&str]) 
     for item_xml in body.split("<item>").skip(1) {
         let end = item_xml.find("</item>").unwrap_or(item_xml.len());
         let xml = &item_xml[..end];
-        let title = extract_rss_tag(xml, "title").filter(|t| {
-            !exclude_title_substrings
-                .iter()
-                .any(|sub| t.contains(sub))
-        });
+        let title = extract_rss_tag(xml, "title")
+            .filter(|t| !exclude_title_substrings.iter().any(|sub| t.contains(sub)));
         let link = extract_rss_tag(xml, "link");
         let desc = extract_rss_tag(xml, "description");
         let date = extract_rss_tag(xml, "pubDate")

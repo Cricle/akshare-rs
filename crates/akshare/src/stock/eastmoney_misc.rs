@@ -814,7 +814,9 @@ impl AkShareClient {
             .ok_or_else(|| Error::upstream("A-share financial indicators missing data"))?;
 
         if data.is_empty() {
-            return Err(Error::not_found("A-share financial indicators returned no data"));
+            return Err(Error::not_found(
+                "A-share financial indicators returned no data",
+            ));
         }
         Ok(data)
     }

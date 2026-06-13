@@ -42,12 +42,13 @@ impl AkShareClient {
             request = request.query(&[("timespan", "1month")]);
         }
 
-        let response = tokio::time::timeout(std::time::Duration::from_secs(timeout_secs), request.send())
-            .await
-            .map_err(|_| {
-                Error::upstream(format!("GDELT request timed out after {timeout_secs}s"))
-            })?
-            .map_err(Error::from)?;
+        let response =
+            tokio::time::timeout(std::time::Duration::from_secs(timeout_secs), request.send())
+                .await
+                .map_err(|_| {
+                    Error::upstream(format!("GDELT request timed out after {timeout_secs}s"))
+                })?
+                .map_err(Error::from)?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let items = payload
@@ -60,10 +61,7 @@ impl AkShareClient {
                 if title.is_empty() {
                     return None;
                 }
-                let url = item
-                    .get("url")
-                    .and_then(|v| v.as_str())
-                    .map(str::to_string);
+                let url = item.get("url").and_then(|v| v.as_str()).map(str::to_string);
                 let source = item
                     .get("sourceCommonName")
                     .and_then(|v| v.as_str())

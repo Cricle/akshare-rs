@@ -606,20 +606,39 @@ impl AkShareClient {
         Ok(data
             .iter()
             .map(|m| crate::stock::feature::HkMainIndicator {
-                report_date: m.get("REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                std_report_date: m.get("STD_REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                currency: m.get("CURRENCY").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                report_date: m
+                    .get("REPORT_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(std::string::ToString::to_string),
+                std_report_date: m
+                    .get("STD_REPORT_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(std::string::ToString::to_string),
+                currency: m
+                    .get("CURRENCY")
+                    .and_then(|v| v.as_str())
+                    .map(std::string::ToString::to_string),
                 operate_income: m.get("OPERATE_INCOME").and_then(serde_json::Value::as_f64),
                 holder_profit: m.get("HOLDER_PROFIT").and_then(serde_json::Value::as_f64),
                 gross_profit: m.get("GROSS_PROFIT").and_then(serde_json::Value::as_f64),
                 total_assets: m.get("TOTAL_ASSETS").and_then(serde_json::Value::as_f64),
-                total_liabilities: m.get("TOTAL_LIABILITIES").and_then(serde_json::Value::as_f64),
-                total_parent_equity: m.get("TOTAL_PARENT_EQUITY").and_then(serde_json::Value::as_f64),
+                total_liabilities: m
+                    .get("TOTAL_LIABILITIES")
+                    .and_then(serde_json::Value::as_f64),
+                total_parent_equity: m
+                    .get("TOTAL_PARENT_EQUITY")
+                    .and_then(serde_json::Value::as_f64),
                 netcash_operate: m.get("NETCASH_OPERATE").and_then(serde_json::Value::as_f64),
-                capital_expenditure: m.get("CAPITAL_EXPENDITURE").and_then(serde_json::Value::as_f64),
+                capital_expenditure: m
+                    .get("CAPITAL_EXPENDITURE")
+                    .and_then(serde_json::Value::as_f64),
                 total_share: m.get("TOTAL_SHARE").and_then(serde_json::Value::as_f64),
-                current_liability: m.get("CURRENT_LIABILITY").and_then(serde_json::Value::as_f64),
-                noncurrent_liab_1year: m.get("NONCURRENT_LIAB_1YEAR").and_then(serde_json::Value::as_f64),
+                current_liability: m
+                    .get("CURRENT_LIABILITY")
+                    .and_then(serde_json::Value::as_f64),
+                noncurrent_liab_1year: m
+                    .get("NONCURRENT_LIAB_1YEAR")
+                    .and_then(serde_json::Value::as_f64),
             })
             .collect())
     }
@@ -672,11 +691,22 @@ impl AkShareClient {
         Ok(data
             .iter()
             .map(|m| crate::stock::feature::UsMainIndicator {
-                report_date: m.get("REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                std_report_date: m.get("STD_REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
-                currency: m.get("CURRENCY").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                report_date: m
+                    .get("REPORT_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(std::string::ToString::to_string),
+                std_report_date: m
+                    .get("STD_REPORT_DATE")
+                    .and_then(|v| v.as_str())
+                    .map(std::string::ToString::to_string),
+                currency: m
+                    .get("CURRENCY")
+                    .and_then(|v| v.as_str())
+                    .map(std::string::ToString::to_string),
                 operate_income: m.get("OPERATE_INCOME").and_then(serde_json::Value::as_f64),
-                total_operate_reve: m.get("TOTALOPERATEREVE").and_then(serde_json::Value::as_f64),
+                total_operate_reve: m
+                    .get("TOTALOPERATEREVE")
+                    .and_then(serde_json::Value::as_f64),
                 gross_profit: m.get("GROSS_PROFIT").and_then(serde_json::Value::as_f64),
                 mlr: m.get("MLR").and_then(serde_json::Value::as_f64),
                 holder_profit: m.get("HOLDER_PROFIT").and_then(serde_json::Value::as_f64),
@@ -685,11 +715,17 @@ impl AkShareClient {
                 mgjyxjje: m.get("MGJYXJJE").and_then(serde_json::Value::as_f64),
                 bps: m.get("BPS").and_then(serde_json::Value::as_f64),
                 zcfzl: m.get("ZCFZL").and_then(serde_json::Value::as_f64),
-                current_liability: m.get("CURRENT_LIABILITY").and_then(serde_json::Value::as_f64),
+                current_liability: m
+                    .get("CURRENT_LIABILITY")
+                    .and_then(serde_json::Value::as_f64),
                 current_liab: m.get("CURRENT_LIAB").and_then(serde_json::Value::as_f64),
-                noncurrent_liab_1year: m.get("NONCURRENT_LIAB_1YEAR").and_then(serde_json::Value::as_f64),
+                noncurrent_liab_1year: m
+                    .get("NONCURRENT_LIAB_1YEAR")
+                    .and_then(serde_json::Value::as_f64),
                 totalnoncliab: m.get("TOTALNONCLIAB").and_then(serde_json::Value::as_f64),
-                capital_expenditure: m.get("CAPITAL_EXPENDITURE").and_then(serde_json::Value::as_f64),
+                capital_expenditure: m
+                    .get("CAPITAL_EXPENDITURE")
+                    .and_then(serde_json::Value::as_f64),
                 total_share: m.get("TOTAL_SHARE").and_then(serde_json::Value::as_f64),
             })
             .collect())
@@ -1323,7 +1359,7 @@ impl AkShareClient {
 // HK/US report pivoting helpers
 // ---------------------------------------------------------------------------
 
-use crate::stock::feature::{BalanceSheet, ProfitSheet, CashFlowSheet};
+use crate::stock::feature::{BalanceSheet, CashFlowSheet, ProfitSheet};
 
 /// Group row-oriented report data by REPORT_DATE.
 fn group_by_report_date(
@@ -1344,10 +1380,7 @@ fn group_by_report_date(
 }
 
 /// Find an amount by item name in a group of rows.
-fn pivot_amount(
-    rows: &[&HashMap<String, serde_json::Value>],
-    names: &[&str],
-) -> Option<f64> {
+fn pivot_amount(rows: &[&HashMap<String, serde_json::Value>], names: &[&str]) -> Option<f64> {
     for name in names {
         for row in rows {
             if let Some(item_name) = row.get("STD_ITEM_NAME").and_then(|v| v.as_str())
@@ -1392,7 +1425,15 @@ fn pivot_hk_report_to_balance_sheet(
             notice_date: Some(date),
             total_assets: pivot_amount(&group, &["资产总计", "总资产"]),
             total_liabilities: pivot_amount(&group, &["负债合计", "总负债"]),
-            equity: pivot_amount(&group, &["所有者权益合计", "股东权益合计", "归属母公司股东权益", "TOTAL_PARENT_EQUITY"]),
+            equity: pivot_amount(
+                &group,
+                &[
+                    "所有者权益合计",
+                    "股东权益合计",
+                    "归属母公司股东权益",
+                    "TOTAL_PARENT_EQUITY",
+                ],
+            ),
             cash: pivot_amount(&group, &["现金及等价物", "现金及现金等价物", "货币资金"]),
             accounts_receivable: pivot_amount(&group, &["应收账款"]),
             inventory: pivot_amount(&group, &["存货"]),
@@ -1402,7 +1443,10 @@ fn pivot_hk_report_to_balance_sheet(
             total_liabilities_yoy: None,
             debt_ratio: None,
             long_term_debt: pivot_amount(&group, &["长期借款", "长期贷款"]),
-            short_term_debt: pivot_amount(&group, &["短期借款", "短期贷款", "一年内到期的非流动负债"]),
+            short_term_debt: pivot_amount(
+                &group,
+                &["短期借款", "短期贷款", "一年内到期的非流动负债"],
+            ),
         })
         .collect()
 }
@@ -1458,15 +1502,24 @@ fn pivot_hk_report_to_cashflow_sheet(
             code: group_code(&group),
             name: group_name(&group),
             notice_date: Some(date),
-            operating_cash_flow: pivot_amount(&group, &["经营活动产生的现金流量净额", "经营业务现金流量净额"]),
+            operating_cash_flow: pivot_amount(
+                &group,
+                &["经营活动产生的现金流量净额", "经营业务现金流量净额"],
+            ),
             investing_cash_flow: pivot_amount(&group, &["投资活动产生的现金流量净额"]),
-            financing_cash_flow: pivot_amount(&group, &["融资活动产生的现金流量净额", "筹资活动产生的现金流量净额"]),
+            financing_cash_flow: pivot_amount(
+                &group,
+                &["融资活动产生的现金流量净额", "筹资活动产生的现金流量净额"],
+            ),
             cash_increase: pivot_amount(&group, &["现金及等价物净增加额"]),
             operating_cash_flow_yoy: None,
-            capital_expenditure: pivot_amount(&group, &[
-                "购建固定资产、无形资产和其他长期资产支付的现金",
-                "购买固定资产、无形资产及其他长期资产的款项",
-            ]),
+            capital_expenditure: pivot_amount(
+                &group,
+                &[
+                    "购建固定资产、无形资产和其他长期资产支付的现金",
+                    "购买固定资产、无形资产及其他长期资产的款项",
+                ],
+            ),
         })
         .collect()
 }
@@ -1482,7 +1535,10 @@ fn pivot_us_report_to_balance_sheet(
             notice_date: Some(date),
             total_assets: pivot_amount(&group, &["资产总计", "总资产"]),
             total_liabilities: pivot_amount(&group, &["负债合计", "总负债"]),
-            equity: pivot_amount(&group, &["所有者权益合计", "股东权益合计", "归属母公司股东权益"]),
+            equity: pivot_amount(
+                &group,
+                &["所有者权益合计", "股东权益合计", "归属母公司股东权益"],
+            ),
             cash: pivot_amount(&group, &["货币资金"]),
             accounts_receivable: pivot_amount(&group, &["应收账款"]),
             inventory: pivot_amount(&group, &["存货"]),
@@ -1538,9 +1594,10 @@ fn pivot_us_report_to_cashflow_sheet(
             financing_cash_flow: pivot_amount(&group, &["筹资活动产生的现金流量净额"]),
             cash_increase: pivot_amount(&group, &["现金及等价物净增加额"]),
             operating_cash_flow_yoy: None,
-            capital_expenditure: pivot_amount(&group, &[
-                "购建固定资产、无形资产和其他长期资产支付的现金",
-            ]),
+            capital_expenditure: pivot_amount(
+                &group,
+                &["购建固定资产、无形资产和其他长期资产支付的现金"],
+            ),
         })
         .collect()
 }

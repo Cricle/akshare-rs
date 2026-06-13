@@ -9,11 +9,7 @@ use crate::util::{
 
 impl AkShareClient {
     /// Fetch daily candles from Stooq CSV.
-    pub async fn stooq_candles(
-        &self,
-        symbol: &str,
-        limit: usize,
-    ) -> Result<Vec<CandlePoint>> {
+    pub async fn stooq_candles(&self, symbol: &str, limit: usize) -> Result<Vec<CandlePoint>> {
         let stooq_sym = symbol.to_lowercase();
         let url = format!("https://stooq.com/q/d/l/?s={stooq_sym}&i=d");
 

@@ -20,7 +20,9 @@ impl AkShareClient {
         )
         .await
         .map_err(|_| {
-            crate::Error::upstream(format!("Sogou News request timed out after {timeout_secs}s"))
+            crate::Error::upstream(format!(
+                "Sogou News request timed out after {timeout_secs}s"
+            ))
         })?
         .map_err(crate::Error::from)?
         .text()
@@ -44,8 +46,7 @@ impl AkShareClient {
                             clean.trim().to_string()
                         })
                     });
-                    if let (Some(title), true) =
-                        (title, !url.is_empty() && url.starts_with("http"))
+                    if let (Some(title), true) = (title, !url.is_empty() && url.starts_with("http"))
                         && !title.is_empty()
                     {
                         items.push(NewsItem {
