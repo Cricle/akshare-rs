@@ -591,6 +591,147 @@ impl AkShareClient {
     }
 
     // -----------------------------------------------------------------------
+    // HK/US typed financial APIs
+    // -----------------------------------------------------------------------
+
+    /// HK main financial indicators (typed).
+    pub async fn stock_financial_hk_analysis_indicator_em_typed(
+        &self,
+        symbol: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::HkMainIndicator>> {
+        let data = self
+            .stock_financial_hk_analysis_indicator_em(symbol, indicator)
+            .await?;
+        Ok(data
+            .iter()
+            .map(|m| crate::stock::feature::HkMainIndicator {
+                report_date: m.get("REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                std_report_date: m.get("STD_REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                currency: m.get("CURRENCY").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                operate_income: m.get("OPERATE_INCOME").and_then(serde_json::Value::as_f64),
+                holder_profit: m.get("HOLDER_PROFIT").and_then(serde_json::Value::as_f64),
+                gross_profit: m.get("GROSS_PROFIT").and_then(serde_json::Value::as_f64),
+                total_assets: m.get("TOTAL_ASSETS").and_then(serde_json::Value::as_f64),
+                total_liabilities: m.get("TOTAL_LIABILITIES").and_then(serde_json::Value::as_f64),
+                total_parent_equity: m.get("TOTAL_PARENT_EQUITY").and_then(serde_json::Value::as_f64),
+                netcash_operate: m.get("NETCASH_OPERATE").and_then(serde_json::Value::as_f64),
+                capital_expenditure: m.get("CAPITAL_EXPENDITURE").and_then(serde_json::Value::as_f64),
+                total_share: m.get("TOTAL_SHARE").and_then(serde_json::Value::as_f64),
+                current_liability: m.get("CURRENT_LIABILITY").and_then(serde_json::Value::as_f64),
+                noncurrent_liab_1year: m.get("NONCURRENT_LIAB_1YEAR").and_then(serde_json::Value::as_f64),
+            })
+            .collect())
+    }
+
+    /// HK balance sheet (typed, pivoted from row-oriented data).
+    pub async fn stock_financial_hk_balance_sheet_typed(
+        &self,
+        stock: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::BalanceSheet>> {
+        let rows = self
+            .stock_financial_hk_report_em(stock, "资产负债表", indicator)
+            .await?;
+        Ok(pivot_hk_report_to_balance_sheet(&rows))
+    }
+
+    /// HK income statement (typed, pivoted from row-oriented data).
+    pub async fn stock_financial_hk_income_sheet_typed(
+        &self,
+        stock: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::ProfitSheet>> {
+        let rows = self
+            .stock_financial_hk_report_em(stock, "利润表", indicator)
+            .await?;
+        Ok(pivot_hk_report_to_profit_sheet(&rows))
+    }
+
+    /// HK cash flow statement (typed, pivoted from row-oriented data).
+    pub async fn stock_financial_hk_cashflow_sheet_typed(
+        &self,
+        stock: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::CashFlowSheet>> {
+        let rows = self
+            .stock_financial_hk_report_em(stock, "现金流量表", indicator)
+            .await?;
+        Ok(pivot_hk_report_to_cashflow_sheet(&rows))
+    }
+
+    /// US main financial indicators (typed).
+    pub async fn stock_financial_us_analysis_indicator_em_typed(
+        &self,
+        symbol: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::UsMainIndicator>> {
+        let data = self
+            .stock_financial_us_analysis_indicator_em(symbol, indicator)
+            .await?;
+        Ok(data
+            .iter()
+            .map(|m| crate::stock::feature::UsMainIndicator {
+                report_date: m.get("REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                std_report_date: m.get("STD_REPORT_DATE").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                currency: m.get("CURRENCY").and_then(|v| v.as_str()).map(std::string::ToString::to_string),
+                operate_income: m.get("OPERATE_INCOME").and_then(serde_json::Value::as_f64),
+                total_operate_reve: m.get("TOTALOPERATEREVE").and_then(serde_json::Value::as_f64),
+                gross_profit: m.get("GROSS_PROFIT").and_then(serde_json::Value::as_f64),
+                mlr: m.get("MLR").and_then(serde_json::Value::as_f64),
+                holder_profit: m.get("HOLDER_PROFIT").and_then(serde_json::Value::as_f64),
+                parent_net_profit: m.get("PARENTNETPROFIT").and_then(serde_json::Value::as_f64),
+                netcash_operate: m.get("NETCASH_OPERATE").and_then(serde_json::Value::as_f64),
+                mgjyxjje: m.get("MGJYXJJE").and_then(serde_json::Value::as_f64),
+                bps: m.get("BPS").and_then(serde_json::Value::as_f64),
+                zcfzl: m.get("ZCFZL").and_then(serde_json::Value::as_f64),
+                current_liability: m.get("CURRENT_LIABILITY").and_then(serde_json::Value::as_f64),
+                current_liab: m.get("CURRENT_LIAB").and_then(serde_json::Value::as_f64),
+                noncurrent_liab_1year: m.get("NONCURRENT_LIAB_1YEAR").and_then(serde_json::Value::as_f64),
+                totalnoncliab: m.get("TOTALNONCLIAB").and_then(serde_json::Value::as_f64),
+                capital_expenditure: m.get("CAPITAL_EXPENDITURE").and_then(serde_json::Value::as_f64),
+                total_share: m.get("TOTAL_SHARE").and_then(serde_json::Value::as_f64),
+            })
+            .collect())
+    }
+
+    /// US balance sheet (typed, pivoted from row-oriented data).
+    pub async fn stock_financial_us_balance_sheet_typed(
+        &self,
+        stock: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::BalanceSheet>> {
+        let rows = self
+            .stock_financial_us_report_em(stock, "资产负债表", indicator)
+            .await?;
+        Ok(pivot_us_report_to_balance_sheet(&rows))
+    }
+
+    /// US income statement (typed, pivoted from row-oriented data).
+    pub async fn stock_financial_us_income_sheet_typed(
+        &self,
+        stock: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::ProfitSheet>> {
+        let rows = self
+            .stock_financial_us_report_em(stock, "综合损益表", indicator)
+            .await?;
+        Ok(pivot_us_report_to_profit_sheet(&rows))
+    }
+
+    /// US cash flow statement (typed, pivoted from row-oriented data).
+    pub async fn stock_financial_us_cashflow_sheet_typed(
+        &self,
+        stock: &str,
+        indicator: &str,
+    ) -> Result<Vec<crate::stock::feature::CashFlowSheet>> {
+        let rows = self
+            .stock_financial_us_report_em(stock, "现金流量表", indicator)
+            .await?;
+        Ok(pivot_us_report_to_cashflow_sheet(&rows))
+    }
+
+    // -----------------------------------------------------------------------
     // IPO registration
     // -----------------------------------------------------------------------
 
@@ -1176,4 +1317,230 @@ impl AkShareClient {
 
         Ok(all_items)
     }
+}
+
+// ---------------------------------------------------------------------------
+// HK/US report pivoting helpers
+// ---------------------------------------------------------------------------
+
+use crate::stock::feature::{BalanceSheet, ProfitSheet, CashFlowSheet};
+
+/// Group row-oriented report data by REPORT_DATE.
+fn group_by_report_date(
+    rows: &[HashMap<String, serde_json::Value>],
+) -> Vec<(String, Vec<&HashMap<String, serde_json::Value>>)> {
+    let mut groups: HashMap<String, Vec<&HashMap<String, serde_json::Value>>> = HashMap::new();
+    for row in rows {
+        let date = row
+            .get("REPORT_DATE")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+        groups.entry(date).or_default().push(row);
+    }
+    let mut out: Vec<_> = groups.into_iter().collect();
+    out.sort_by(|a, b| b.0.cmp(&a.0)); // newest first
+    out
+}
+
+/// Find an amount by item name in a group of rows.
+fn pivot_amount(
+    rows: &[&HashMap<String, serde_json::Value>],
+    names: &[&str],
+) -> Option<f64> {
+    for name in names {
+        for row in rows {
+            if let Some(item_name) = row.get("STD_ITEM_NAME").and_then(|v| v.as_str())
+                && item_name.contains(name)
+            {
+                return row.get("AMOUNT").and_then(serde_json::Value::as_f64);
+            }
+            // US reports use ITEM_NAME instead of STD_ITEM_NAME
+            if let Some(item_name) = row.get("ITEM_NAME").and_then(|v| v.as_str())
+                && item_name.contains(name)
+            {
+                return row.get("AMOUNT").and_then(serde_json::Value::as_f64);
+            }
+        }
+    }
+    None
+}
+
+/// Get REPORT_DATE string from a group of rows.
+fn group_code(rows: &[&HashMap<String, serde_json::Value>]) -> String {
+    rows.first()
+        .and_then(|r| r.get("SECURITY_CODE").and_then(|v| v.as_str()))
+        .unwrap_or("")
+        .to_string()
+}
+
+fn group_name(rows: &[&HashMap<String, serde_json::Value>]) -> String {
+    rows.first()
+        .and_then(|r| r.get("SECURITY_NAME_ABBR").and_then(|v| v.as_str()))
+        .unwrap_or("")
+        .to_string()
+}
+
+fn pivot_hk_report_to_balance_sheet(
+    rows: &[HashMap<String, serde_json::Value>],
+) -> Vec<BalanceSheet> {
+    group_by_report_date(rows)
+        .into_iter()
+        .map(|(date, group)| BalanceSheet {
+            code: group_code(&group),
+            name: group_name(&group),
+            notice_date: Some(date),
+            total_assets: pivot_amount(&group, &["资产总计", "总资产"]),
+            total_liabilities: pivot_amount(&group, &["负债合计", "总负债"]),
+            equity: pivot_amount(&group, &["所有者权益合计", "股东权益合计", "归属母公司股东权益", "TOTAL_PARENT_EQUITY"]),
+            cash: pivot_amount(&group, &["现金及等价物", "现金及现金等价物", "货币资金"]),
+            accounts_receivable: pivot_amount(&group, &["应收账款"]),
+            inventory: pivot_amount(&group, &["存货"]),
+            accounts_payable: pivot_amount(&group, &["应付账款"]),
+            advance_receipts: pivot_amount(&group, &["预收款项"]),
+            total_assets_yoy: None,
+            total_liabilities_yoy: None,
+            debt_ratio: None,
+            long_term_debt: pivot_amount(&group, &["长期借款", "长期贷款"]),
+            short_term_debt: pivot_amount(&group, &["短期借款", "短期贷款", "一年内到期的非流动负债"]),
+        })
+        .collect()
+}
+
+fn pivot_hk_report_to_profit_sheet(
+    rows: &[HashMap<String, serde_json::Value>],
+) -> Vec<ProfitSheet> {
+    group_by_report_date(rows)
+        .into_iter()
+        .map(|(date, group)| {
+            let sales = pivot_amount(&group, &["销售及分销费用"]);
+            let rnd = pivot_amount(&group, &["研发费用"]);
+            let admin = pivot_amount(&group, &["管理费用", "行政费用"]);
+            let operating_expenses = match (sales, rnd, admin) {
+                (Some(s), Some(r), Some(a)) => Some(s + r + a),
+                (Some(s), Some(r), None) => Some(s + r),
+                (Some(s), None, Some(a)) => Some(s + a),
+                (None, Some(r), Some(a)) => Some(r + a),
+                (Some(s), None, None) => Some(s),
+                (None, Some(r), None) => Some(r),
+                (None, None, Some(a)) => Some(a),
+                (None, None, None) => None,
+            };
+            ProfitSheet {
+                code: group_code(&group),
+                name: group_name(&group),
+                notice_date: Some(date),
+                total_revenue: pivot_amount(&group, &["营业收入", "营业总收入"]),
+                operating_cost: pivot_amount(&group, &["营业成本", "营业总成本"]),
+                operating_profit: pivot_amount(&group, &["营业利润", "经营溢利"]),
+                total_profit: pivot_amount(&group, &["利润总额", "除税前溢利"]),
+                net_profit: pivot_amount(&group, &["净利润", "本公司拥有人应占溢利"]),
+                net_profit_deducted: None,
+                total_revenue_yoy: None,
+                net_profit_yoy: None,
+                gross_margin: None,
+                net_margin: None,
+                roe: None,
+                eps: None,
+                gross_profit: pivot_amount(&group, &["毛利", "营业毛利"]),
+                operating_expenses,
+            }
+        })
+        .collect()
+}
+
+fn pivot_hk_report_to_cashflow_sheet(
+    rows: &[HashMap<String, serde_json::Value>],
+) -> Vec<CashFlowSheet> {
+    group_by_report_date(rows)
+        .into_iter()
+        .map(|(date, group)| CashFlowSheet {
+            code: group_code(&group),
+            name: group_name(&group),
+            notice_date: Some(date),
+            operating_cash_flow: pivot_amount(&group, &["经营活动产生的现金流量净额", "经营业务现金流量净额"]),
+            investing_cash_flow: pivot_amount(&group, &["投资活动产生的现金流量净额"]),
+            financing_cash_flow: pivot_amount(&group, &["融资活动产生的现金流量净额", "筹资活动产生的现金流量净额"]),
+            cash_increase: pivot_amount(&group, &["现金及等价物净增加额"]),
+            operating_cash_flow_yoy: None,
+            capital_expenditure: pivot_amount(&group, &[
+                "购建固定资产、无形资产和其他长期资产支付的现金",
+                "购买固定资产、无形资产及其他长期资产的款项",
+            ]),
+        })
+        .collect()
+}
+
+fn pivot_us_report_to_balance_sheet(
+    rows: &[HashMap<String, serde_json::Value>],
+) -> Vec<BalanceSheet> {
+    group_by_report_date(rows)
+        .into_iter()
+        .map(|(date, group)| BalanceSheet {
+            code: group_code(&group),
+            name: group_name(&group),
+            notice_date: Some(date),
+            total_assets: pivot_amount(&group, &["资产总计", "总资产"]),
+            total_liabilities: pivot_amount(&group, &["负债合计", "总负债"]),
+            equity: pivot_amount(&group, &["所有者权益合计", "股东权益合计", "归属母公司股东权益"]),
+            cash: pivot_amount(&group, &["货币资金"]),
+            accounts_receivable: pivot_amount(&group, &["应收账款"]),
+            inventory: pivot_amount(&group, &["存货"]),
+            accounts_payable: pivot_amount(&group, &["应付账款"]),
+            advance_receipts: pivot_amount(&group, &["预收款项"]),
+            total_assets_yoy: None,
+            total_liabilities_yoy: None,
+            debt_ratio: None,
+            long_term_debt: pivot_amount(&group, &["长期借款"]),
+            short_term_debt: pivot_amount(&group, &["短期借款", "一年内到期的非流动负债"]),
+        })
+        .collect()
+}
+
+fn pivot_us_report_to_profit_sheet(
+    rows: &[HashMap<String, serde_json::Value>],
+) -> Vec<ProfitSheet> {
+    group_by_report_date(rows)
+        .into_iter()
+        .map(|(date, group)| ProfitSheet {
+            code: group_code(&group),
+            name: group_name(&group),
+            notice_date: Some(date),
+            total_revenue: pivot_amount(&group, &["营业收入", "营业总收入"]),
+            operating_cost: pivot_amount(&group, &["营业成本", "营业总成本"]),
+            operating_profit: pivot_amount(&group, &["营业利润"]),
+            total_profit: pivot_amount(&group, &["利润总额"]),
+            net_profit: pivot_amount(&group, &["净利润"]),
+            net_profit_deducted: None,
+            total_revenue_yoy: None,
+            net_profit_yoy: None,
+            gross_margin: None,
+            net_margin: None,
+            roe: None,
+            eps: None,
+            gross_profit: pivot_amount(&group, &["毛利", "营业毛利"]),
+            operating_expenses: pivot_amount(&group, &["营业总成本", "营业成本"]),
+        })
+        .collect()
+}
+
+fn pivot_us_report_to_cashflow_sheet(
+    rows: &[HashMap<String, serde_json::Value>],
+) -> Vec<CashFlowSheet> {
+    group_by_report_date(rows)
+        .into_iter()
+        .map(|(date, group)| CashFlowSheet {
+            code: group_code(&group),
+            name: group_name(&group),
+            notice_date: Some(date),
+            operating_cash_flow: pivot_amount(&group, &["经营活动产生的现金流量净额"]),
+            investing_cash_flow: pivot_amount(&group, &["投资活动产生的现金流量净额"]),
+            financing_cash_flow: pivot_amount(&group, &["筹资活动产生的现金流量净额"]),
+            cash_increase: pivot_amount(&group, &["现金及等价物净增加额"]),
+            operating_cash_flow_yoy: None,
+            capital_expenditure: pivot_amount(&group, &[
+                "购建固定资产、无形资产和其他长期资产支付的现金",
+            ]),
+        })
+        .collect()
 }

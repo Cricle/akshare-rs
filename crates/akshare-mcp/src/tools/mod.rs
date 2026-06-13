@@ -246,6 +246,29 @@ impl AkShareMcpService {
         )]))
     }
 
+    // ── A-share Minute K-line ─────────────────────────────────────
+
+    #[tool(description = "Get A-share minute-level K-line. Period: '1','5','15','30','60'")]
+    async fn stock_zh_a_hist_min(
+        &self,
+        Parameters(stock::StockHistParams {
+            symbol,
+            period,
+            start_date,
+            end_date,
+            adjust,
+        }): Parameters<stock::StockHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_a_hist_min_em(&symbol, &period, &adjust, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
     // ── HK/US Minute K-line ─────────────────────────────────────
 
     #[tool(description = "Get HK stock minute-level K-line. Period: '1','5','15','30','60'")]
@@ -283,6 +306,29 @@ impl AkShareMcpService {
         let data = self
             .client
             .stock_us_hist_min_em(&symbol, &period, &adjust, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    // ── A-share Daily K-line (Sina source) ──────────────────────
+
+    #[tool(description = "Get A-share daily K-line from Sina. Adjust: '','qfq','hfq'")]
+    async fn stock_zh_a_daily(
+        &self,
+        Parameters(stock::StockHistParams {
+            symbol,
+            start_date,
+            end_date,
+            adjust,
+            ..
+        }): Parameters<stock::StockHistParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_a_daily(&symbol, &start_date, &end_date, &adjust)
             .await
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
         Ok(CallToolResult::success(vec![Content::text(
@@ -663,6 +709,363 @@ impl AkShareMcpService {
         let data = self
             .client
             .stock_hk_indicator_eniu(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    // ── A-share Special Data ───────────────────────────────────────
+
+    #[tool(description = "Get A-share real-time hot rank from Eastmoney")]
+    async fn stock_zh_a_hot_rank_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hot_rank_em(100)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share latest hot rank detail")]
+    async fn stock_zh_a_hot_rank_latest_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hot_rank_latest_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share historical hot rank detail")]
+    async fn stock_zh_a_hot_rank_detail_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hot_rank_detail_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share realtime hot rank detail")]
+    async fn stock_zh_a_hot_rank_detail_realtime_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hot_rank_detail_realtime_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share index real-time spot data from Eastmoney")]
+    async fn stock_zh_a_index_spot_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_index_spot_em()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share index daily K-line from Eastmoney")]
+    async fn stock_zh_a_index_daily_em(
+        &self,
+        Parameters(stock::StockDailyParams {
+            symbol,
+            start_date,
+            end_date,
+        }): Parameters<stock::StockDailyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_index_daily_em(&symbol, &start_date, &end_date)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share index spot data from Sina")]
+    async fn stock_zh_a_index_spot_sina(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_index_spot_sina()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(
+        description = "Get A-share valuation from Baidu. Indicator: '总市值','市盈率(TTM)','市净率','市现率'. Period: '近一年','近三年','全部'"
+    )]
+    async fn stock_zh_a_valuation_baidu(
+        &self,
+        Parameters(stock::ValuationParams {
+            symbol,
+            indicator,
+            period,
+        }): Parameters<stock::ValuationParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_valuation_baidu(&symbol, &indicator, &period)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share scale comparison from Eastmoney")]
+    async fn stock_zh_a_scale_comparison_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_scale_comparison_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share growth comparison (peer comparison) from Eastmoney")]
+    async fn stock_zh_a_growth_comparison_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_growth_comparison_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share valuation comparison (peer comparison) from Eastmoney")]
+    async fn stock_zh_a_valuation_comparison_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_valuation_comparison_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share (CSI) dividend yield history from Legulegu")]
+    async fn stock_zh_a_gxl_lg(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_a_gxl_lg()
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share dividend detail from THS (同花顺)")]
+    async fn stock_zh_a_fhps_detail_ths(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_fhps_detail_ths(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share financial indicators from Eastmoney")]
+    async fn stock_zh_a_financial_indicator_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_a_financial_indicator_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share dividend payout history from Eastmoney")]
+    async fn stock_zh_a_dividend_payout_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_a_dividend_payout_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share company profile from cninfo (巨潮资讯)")]
+    async fn stock_zh_a_profile_cninfo(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_profile_cninfo(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share dividend data from cninfo (巨潮资讯)")]
+    async fn stock_zh_a_dividend_cninfo(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_dividend_cninfo(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share dividend detail from Eastmoney")]
+    async fn stock_zh_a_fhps_detail_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_fhps_detail_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share Dupont comparison from Eastmoney")]
+    async fn stock_zh_a_dupont_comparison_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_zh_dupont_comparison_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share related hot rank stocks from Eastmoney")]
+    async fn stock_zh_a_hot_rank_relate_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hot_rank_relate_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share hot keywords from Eastmoney")]
+    async fn stock_zh_a_hot_keyword_em(
+        &self,
+        Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hot_keyword_em(&symbol)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share hot rising stocks from Eastmoney")]
+    async fn stock_zh_a_hot_up_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_hot_up_em(100)
+            .await
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        Ok(CallToolResult::success(vec![Content::text(
+            serde_json::to_string_pretty(&data).unwrap(),
+        )]))
+    }
+
+    #[tool(description = "Get A-share global financial news from Eastmoney")]
+    async fn stock_zh_a_info_global_em(
+        &self,
+        Parameters(_): Parameters<stock::EmptyParams>,
+    ) -> Result<CallToolResult, McpError> {
+        let data = self
+            .client
+            .stock_info_global_em()
             .await
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
         Ok(CallToolResult::success(vec![Content::text(

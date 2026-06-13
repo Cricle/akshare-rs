@@ -762,6 +762,120 @@ impl AkShareClient {
             .await
     }
 
+    /// Get A-share financial indicators from Eastmoney.
+    ///
+    /// Python equivalent: `stock_zh_a_financial_indicator_em(symbol)`
+    ///
+    /// `symbol` uses the format "SZ000895" or "SH600000".
+    pub async fn stock_zh_a_financial_indicator_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
+        let filter = if symbol.len() >= 2 {
+            let (prefix, code) = symbol.split_at(2);
+            format!("(SECUCODE=\"{code}.{prefix}\")")
+        } else {
+            return Err(Error::invalid_input("symbol must be like SZ000895"));
+        };
+
+        let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
+        let response = self
+            .get(url)
+            .query(&[
+                ("reportName", "RPT_F10_FN_MAINFINADATA"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "REPORT_DATE"),
+                ("source", "HSF10"),
+                ("client", "PC"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let data = payload
+            .result
+            .and_then(|r| r.data)
+            .ok_or_else(|| Error::upstream("A-share financial indicators missing data"))?;
+
+        if data.is_empty() {
+            return Err(Error::not_found("A-share financial indicators returned no data"));
+        }
+        Ok(data)
+    }
+
+    /// Get A-share dividend payout from Eastmoney.
+    ///
+    /// Python equivalent: `stock_zh_a_dividend_payout_em(symbol)`
+    ///
+    /// `symbol` uses the format "SZ000895" or "SH600000".
+    pub async fn stock_zh_a_dividend_payout_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
+        let filter = if symbol.len() >= 2 {
+            let (prefix, code) = symbol.split_at(2);
+            format!("(SECUCODE=\"{code}.{prefix}\")")
+        } else {
+            return Err(Error::invalid_input("symbol must be like SZ000895"));
+        };
+
+        let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
+        let response = self
+            .get(url)
+            .query(&[
+                ("reportName", "RPT_F10_EH_DIVIDEND"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "EX_DIVIDEND_DATE"),
+                ("source", "HSF10"),
+                ("client", "PC"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let data = payload
+            .result
+            .and_then(|r| r.data)
+            .ok_or_else(|| Error::upstream("A-share dividend payout missing data"))?;
+
+        if data.is_empty() {
+            return Err(Error::not_found("A-share dividend payout returned no data"));
+        }
+        Ok(data)
+    }
+
     // -- Private helpers ----------------------------------------------------
 
     async fn fetch_peer_comparison(

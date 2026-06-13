@@ -546,6 +546,10 @@ pub struct BalanceSheet {
     pub total_assets_yoy: Option<f64>,
     pub total_liabilities_yoy: Option<f64>,
     pub debt_ratio: Option<f64>,
+    /// 长期借款 (HK/US)
+    pub long_term_debt: Option<f64>,
+    /// 短期借款 (HK/US)
+    pub short_term_debt: Option<f64>,
 }
 
 /// Profit sheet entry (利润表).
@@ -566,6 +570,10 @@ pub struct ProfitSheet {
     pub net_margin: Option<f64>,
     pub roe: Option<f64>,
     pub eps: Option<f64>,
+    /// 毛利 (HK/US)
+    pub gross_profit: Option<f64>,
+    /// 营业费用 (HK/US: selling + admin + R&D)
+    pub operating_expenses: Option<f64>,
 }
 
 /// Cash flow sheet entry (现金流量表).
@@ -579,6 +587,55 @@ pub struct CashFlowSheet {
     pub financing_cash_flow: Option<f64>,
     pub cash_increase: Option<f64>,
     pub operating_cash_flow_yoy: Option<f64>,
+    /// 购建固定资产、无形资产和其他长期资产支付的现金 (HK/US)
+    pub capital_expenditure: Option<f64>,
+}
+
+// ---------------------------------------------------------------------------
+// HK/US Main Financial Indicators
+// ---------------------------------------------------------------------------
+
+/// HK main financial indicator (港股主要指标).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HkMainIndicator {
+    pub report_date: Option<String>,
+    pub std_report_date: Option<String>,
+    pub currency: Option<String>,
+    pub operate_income: Option<f64>,
+    pub holder_profit: Option<f64>,
+    pub gross_profit: Option<f64>,
+    pub total_assets: Option<f64>,
+    pub total_liabilities: Option<f64>,
+    pub total_parent_equity: Option<f64>,
+    pub netcash_operate: Option<f64>,
+    pub capital_expenditure: Option<f64>,
+    pub total_share: Option<f64>,
+    pub current_liability: Option<f64>,
+    pub noncurrent_liab_1year: Option<f64>,
+}
+
+/// US main financial indicator (美股主要指标).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsMainIndicator {
+    pub report_date: Option<String>,
+    pub std_report_date: Option<String>,
+    pub currency: Option<String>,
+    pub operate_income: Option<f64>,
+    pub total_operate_reve: Option<f64>,
+    pub gross_profit: Option<f64>,
+    pub mlr: Option<f64>,
+    pub holder_profit: Option<f64>,
+    pub parent_net_profit: Option<f64>,
+    pub netcash_operate: Option<f64>,
+    pub mgjyxjje: Option<f64>,
+    pub bps: Option<f64>,
+    pub zcfzl: Option<f64>,
+    pub current_liability: Option<f64>,
+    pub current_liab: Option<f64>,
+    pub noncurrent_liab_1year: Option<f64>,
+    pub totalnoncliab: Option<f64>,
+    pub capital_expenditure: Option<f64>,
+    pub total_share: Option<f64>,
 }
 
 // ---------------------------------------------------------------------------

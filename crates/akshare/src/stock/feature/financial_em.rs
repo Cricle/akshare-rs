@@ -29,6 +29,8 @@ impl AkShareClient {
                 total_assets_yoy: json_f64_opt(v, "TOTAL_ASSETS_YOY"),
                 total_liabilities_yoy: json_f64_opt(v, "TOTAL_LIABILITIES_YOY"),
                 debt_ratio: json_f64_opt(v, "DEBT_ASSET_RATIO"),
+                long_term_debt: None,
+                short_term_debt: None,
             })
             .collect())
     }
@@ -57,6 +59,8 @@ impl AkShareClient {
                 net_margin: json_f64_opt(v, "NET_PROFIT_RATIO"),
                 roe: json_f64_opt(v, "ROE"),
                 eps: json_f64_opt(v, "BASIC_EPS"),
+                gross_profit: None,
+                operating_expenses: None,
             })
             .collect())
     }
@@ -78,6 +82,7 @@ impl AkShareClient {
                 financing_cash_flow: json_f64_opt(v, "ASSIGN_DIVIDEND_PORFIT"),
                 cash_increase: json_f64_opt(v, "CCE_ADD"),
                 operating_cash_flow_yoy: json_f64_opt(v, "SALES_SERVICES_YOY"),
+                capital_expenditure: None,
             })
             .collect())
     }
