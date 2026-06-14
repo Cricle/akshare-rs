@@ -200,7 +200,26 @@ impl AkShareClient {
             .unwrap_or_default();
         Ok(klines
             .iter()
-            .map(|v| MainFundFlow { data: v.clone() })
+            .filter_map(|v| {
+                let s = v.as_str()?;
+                let mut parts = s.split(',');
+                let date = parts.next()?.to_string();
+                let main_in: f64 = parts.next()?.parse().ok()?;
+                let main_out: f64 = parts.next()?.parse().ok()?;
+                let main_net: f64 = parts.next()?.parse().ok()?;
+                let super_large_net: f64 = parts.next()?.parse().ok()?;
+                let large_net: f64 = parts.next()?.parse().ok()?;
+                let net_ratio_pct: f64 = parts.next()?.parse().ok()?;
+                Some(MainFundFlow {
+                    date,
+                    main_in,
+                    main_out,
+                    main_net,
+                    super_large_net,
+                    large_net,
+                    net_ratio_pct,
+                })
+            })
             .collect())
     }
 

@@ -2199,9 +2199,23 @@ pub struct FundHoldDetail {
 // ---------------------------------------------------------------------------
 
 /// Main fund flow (主力资金流向).
+///
+/// Parsed from kline format: "date,main_in,main_out,main_net,super_large_net,large_net,ratio"
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MainFundFlow {
-    pub data: serde_json::Value,
+    pub date: String,
+    /// Main fund inflow (主力流入, 元)
+    pub main_in: f64,
+    /// Main fund outflow (主力流出, 元)
+    pub main_out: f64,
+    /// Main fund net flow (主力净流入, 元)
+    pub main_net: f64,
+    /// Super large order net flow (超大单净流入, 元)
+    pub super_large_net: f64,
+    /// Large order net flow (大单净流入, 元)
+    pub large_net: f64,
+    /// Main fund net flow as percentage of total volume (主力净占比, %)
+    pub net_ratio_pct: f64,
 }
 
 /// Market fund flow (市场资金流向).
