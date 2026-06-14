@@ -14,7 +14,7 @@ use crate::error::{Error, Result};
 impl AkShareClient {
     /// 同花顺-数据中心-资金流向-个股资金流
     /// Uses Eastmoney API as equivalent data source.
-    pub async fn stock_fund_flow_individual(&self, _symbol: &str) -> Result<Vec<FundFlowEntry>> {
+    pub async fn stock_fund_flow_individual(&self, symbol: &str) -> Result<Vec<FundFlowEntry>> {
         let sort_field = "f62";
         let data = self
             .cistock_fetch(
@@ -24,8 +24,10 @@ impl AkShareClient {
                 sort_field,
             )
             .await?;
+        let target = symbol.trim();
         Ok(data
             .iter()
+            .filter(|v| json_str(v, "f12") == target)
             .map(|v| FundFlowEntry {
                 code: json_str(v, "f12"),
                 name: json_str(v, "f14"),
@@ -36,6 +38,7 @@ impl AkShareClient {
                 outflow: None,
                 net_flow: json_f64_opt(v, "f62"),
                 amount: None,
+                net_flow_pct: json_f64_opt(v, "f184"),
             })
             .collect())
     }
@@ -78,6 +81,7 @@ impl AkShareClient {
                 outflow: None,
                 net_flow: json_f64_opt(v, "f62"),
                 amount: None,
+                net_flow_pct: json_f64_opt(v, "f184"),
             })
             .collect())
     }

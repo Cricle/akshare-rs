@@ -1715,6 +1715,8 @@ pub struct FundFlowEntry {
     pub outflow: Option<f64>,
     pub net_flow: Option<f64>,
     pub amount: Option<f64>,
+    /// Main fund net flow as percentage of total volume (f184, 主力净占比).
+    pub net_flow_pct: Option<f64>,
 }
 
 /// Sector fund flow rank (板块资金流向排名).
