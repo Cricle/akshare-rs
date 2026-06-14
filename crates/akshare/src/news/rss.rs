@@ -72,10 +72,30 @@ impl AkShareClient {
     /// Queries `cn.bing.com/search?q=...&format=rss` and parses the RSS response.
     /// Filters out items whose title contains "必应" or "Bing".
     pub async fn bing_news_rss(&self, query: &str, timeout_secs: u64) -> Result<Vec<NewsItem>> {
-        let rss_url = format!(
-            "https://cn.bing.com/search?q={}&format=rss",
-            query.replace(' ', "+")
-        );
+        self.bing_news_rss_with_lang(query, timeout_secs, None)
+            .await
+    }
+
+    /// Fetch news from Bing RSS search with explicit language.
+    ///
+    /// When `lang` is Some("en"), uses `www.bing.com` with `setlang=en` for English results.
+    /// When None, uses `cn.bing.com` (default Chinese behavior).
+    pub async fn bing_news_rss_with_lang(
+        &self,
+        query: &str,
+        timeout_secs: u64,
+        lang: Option<&str>,
+    ) -> Result<Vec<NewsItem>> {
+        let rss_url = match lang {
+            Some("en") => format!(
+                "https://www.bing.com/search?q={}&format=rss&setlang=en",
+                query.replace(' ', "+")
+            ),
+            _ => format!(
+                "https://cn.bing.com/search?q={}&format=rss",
+                query.replace(' ', "+")
+            ),
+        };
         let body = tokio::time::timeout(
             std::time::Duration::from_secs(timeout_secs),
             self.get(&rss_url).send(),

@@ -40,6 +40,7 @@ pub mod board_em;
 pub mod board_ths;
 pub mod hk_extra;
 pub mod us_extra;
+pub mod us_profile;
 pub mod zh_a;
 pub mod zh_ah;
 pub mod zh_b;

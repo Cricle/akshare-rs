@@ -38,6 +38,42 @@ impl AkShareClient {
         self.stooq_candles(symbol, limit).await
     }
 
+    /// Get market cap for a specific US stock from Sina Finance.
+    pub async fn us_market_cap_from_sina(&self, symbol: &str) -> Result<Option<f64>> {
+        let url = "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/callback/US_CategoryService.getList?page=1&num=200&sort=&asc=0&market=&id=";
+        let resp = self
+            .get(url)
+            .header("User-Agent", "Mozilla/5.0")
+            .send()
+            .await?
+            .text()
+            .await?;
+        // Parse JSONP response: callback({...});
+        if let Some(start) = resp.find("({")
+            && let Some(end) = resp.rfind("})")
+        {
+            let json_str = &resp[start + 1..=end];
+            if let Ok(data) = serde_json::from_str::<serde_json::Value>(json_str)
+                && let Some(arr) = data.get("data").and_then(|d| d.as_array())
+            {
+                for item in arr {
+                    if let Some(code) = item.get("symbol").and_then(|v| v.as_str())
+                        && code.eq_ignore_ascii_case(symbol)
+                    {
+                        // Try string first, then number
+                        let mktcap = item.get("mktcap").and_then(|v| {
+                            v.as_str()
+                                .and_then(|s| s.parse::<f64>().ok())
+                                .or_else(|| v.as_f64())
+                        });
+                        return Ok(mktcap);
+                    }
+                }
+            }
+        }
+        Ok(None)
+    }
+
     /// 获取美国股票名称列表 (Python: get_us_stock_name)
     ///
     /// Fetches US stock names from Sina Finance.

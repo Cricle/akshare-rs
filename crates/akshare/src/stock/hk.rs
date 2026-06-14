@@ -2,6 +2,42 @@ use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, QuoteSnapshot};
 
+impl AkShareClient {
+    /// Get market cap for an HK stock from Tencent API.
+    pub async fn hk_market_cap_from_tencent(&self, symbol: &str) -> Result<Option<f64>> {
+        // Normalize symbol to 5-digit format
+        let code = symbol.trim().trim_start_matches('0');
+        let code = if code.is_empty() { "0" } else { code };
+        let code = format!("{:0>5}", code);
+
+        let url = format!("https://qt.gtimg.cn/q=r_hk{}", code);
+        let resp = self
+            .get(&url)
+            .header("User-Agent", "Mozilla/5.0")
+            .send()
+            .await?
+            .text()
+            .await?;
+
+        // Parse Tencent response: v_r_hkXXXXX="field0~field1~...~fieldN";
+        if let Some(start) = resp.find('"')
+            && let Some(end) = resp.rfind('"')
+            && start < end
+        {
+            let data = &resp[start + 1..end];
+            let fields: Vec<&str> = data.split('~').collect();
+            // Field 44 is market cap in 亿 (100 million) HKD
+            if fields.len() > 44
+                && let Ok(cap_yi) = fields[44].parse::<f64>()
+                && cap_yi > 0.0
+            {
+                return Ok(Some(cap_yi * 100_000_000.0));
+            }
+        }
+        Ok(None)
+    }
+}
+
 /// Convert an HK stock symbol (e.g. "00593", "593") to Yahoo format ("00593.HK").
 fn hk_yahoo_symbol(symbol: &str) -> Result<String> {
     let trimmed = symbol.trim();

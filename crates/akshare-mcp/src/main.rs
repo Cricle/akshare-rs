@@ -14,13 +14,70 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Run as stdio MCP server
-    Stdio,
+    Stdio {
+        /// Comma-separated list of tool categories to enable (e.g. "stock,bond,index")
+        #[arg(long, value_delimiter = ',')]
+        categories: Vec<String>,
+        /// Additional categories to enable (keeps defaults)
+        #[arg(long, value_delimiter = ',')]
+        enable: Vec<String>,
+        /// Categories to disable
+        #[arg(long, value_delimiter = ',')]
+        disable: Vec<String>,
+    },
     /// Run as HTTP/SSE MCP server
     Http {
         /// Path to config file
         #[arg(long, default_value = "config.toml")]
         config: String,
+        /// Comma-separated list of tool categories to enable (overrides config file)
+        #[arg(long, value_delimiter = ',')]
+        categories: Vec<String>,
+        /// Additional categories to enable (keeps config defaults)
+        #[arg(long, value_delimiter = ',')]
+        enable: Vec<String>,
+        /// Categories to disable
+        #[arg(long, value_delimiter = ',')]
+        disable: Vec<String>,
     },
+}
+
+fn build_tools_config(
+    categories: &[String],
+    enable: &[String],
+    disable: &[String],
+    base: config::ToolsConfig,
+) -> config::ToolsConfig {
+    let mut cfg = if categories.is_empty() {
+        base
+    } else {
+        // --categories overrides everything: start with all disabled
+        let mut c = config::ToolsConfig {
+            stock: false,
+            bond: false,
+            index: false,
+            futures: false,
+            economy: false,
+            crypto: false,
+            forex: false,
+            option: false,
+            news: false,
+            macro_data: false,
+            fund: false,
+        };
+        for name in categories {
+            c.enable(name);
+        }
+        c
+    };
+
+    for name in enable {
+        cfg.enable(name);
+    }
+    for name in disable {
+        cfg.disable(name);
+    }
+    cfg
 }
 
 #[tokio::main]
@@ -35,9 +92,14 @@ async fn main() -> anyhow::Result<()> {
 
     let cli = Cli::parse();
     match cli.command {
-        Commands::Stdio => {
+        Commands::Stdio {
+            categories,
+            enable,
+            disable,
+        } => {
             tracing::info!("Starting akshare-mcp in stdio mode");
-            let service = AkShareMcpService::new()
+            let tools_cfg = build_tools_config(&categories, &enable, &disable, config::ToolsConfig::default());
+            let service = AkShareMcpService::new(tools_cfg)
                 .serve(rmcp::transport::stdio())
                 .await
                 .inspect_err(|e| {
@@ -45,15 +107,21 @@ async fn main() -> anyhow::Result<()> {
                 })?;
             service.waiting().await?;
         }
-        Commands::Http { config } => {
+        Commands::Http {
+            config,
+            categories,
+            enable,
+            disable,
+        } => {
             let cfg = config::Config::load(Path::new(&config))?;
             let mcp_key = cfg.http.mcp_key.clone();
+            let tools_cfg = build_tools_config(&categories, &enable, &disable, cfg.tools);
 
             let mcp_service: rmcp::transport::streamable_http_server::StreamableHttpService<
                 AkShareMcpService,
                 rmcp::transport::streamable_http_server::session::local::LocalSessionManager,
             > = rmcp::transport::streamable_http_server::StreamableHttpService::new(
-                || Ok(AkShareMcpService::new()),
+                move || Ok(AkShareMcpService::new(tools_cfg.clone())),
                 rmcp::transport::streamable_http_server::session::local::LocalSessionManager::default().into(),
                 rmcp::transport::streamable_http_server::StreamableHttpServerConfig::default(),
             );

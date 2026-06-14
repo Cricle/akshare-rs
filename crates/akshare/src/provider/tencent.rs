@@ -7,6 +7,13 @@ use crate::util::{
     amplitude_pct, apply_change_metrics, normalize_trade_date, parse_f64_safe, parse_i64_safe,
 };
 
+/// Parse a JSON Value to f64, handling both number and string types.
+fn value_to_f64(v: &serde_json::Value) -> f64 {
+    v.as_f64()
+        .or_else(|| v.as_str().and_then(|s| s.parse::<f64>().ok()))
+        .unwrap_or(0.0)
+}
+
 impl AkShareClient {
     /// Tencent A-share realtime quote.
     pub(crate) async fn tencent_a_share_quote(&self, symbol: &str) -> Result<QuoteSnapshot> {
@@ -81,11 +88,11 @@ impl AkShareClient {
                 continue;
             }
             let trade_date = arr[0].as_str().unwrap_or("").to_string();
-            let open = arr[1].as_f64().unwrap_or(0.0);
-            let close = arr[2].as_f64().unwrap_or(0.0);
-            let high = arr[3].as_f64().unwrap_or(0.0);
-            let low = arr[4].as_f64().unwrap_or(0.0);
-            let volume = arr[5].as_f64().unwrap_or(0.0) as i64;
+            let open = value_to_f64(&arr[1]);
+            let close = value_to_f64(&arr[2]);
+            let high = value_to_f64(&arr[3]);
+            let low = value_to_f64(&arr[4]);
+            let volume = value_to_f64(&arr[5]) as i64;
             items.push(CandlePoint {
                 trade_date,
                 open,
@@ -119,16 +126,18 @@ impl AkShareClient {
             .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
             .map_or("", |(s, _)| s);
         let p: Vec<&str> = data.split('~').collect();
-        if p.len() < 30 {
+        if p.len() < 35 {
             return Err(Error::decode("tencent HK quote: insufficient fields"));
         }
+        // Fields: 0:market, 1:name, 2:symbol, 3:current_price, 4:prev_close, 5:open,
+        //         6:volume, ..., 30:date, 31:change, 32:change_pct, 33:high, 34:low
         Ok(QuoteSnapshot {
             symbol: symbol.to_string(),
-            date: normalize_trade_date(p.get(17).unwrap_or(&"")),
-            open: parse_f64_safe(p.get(2).unwrap_or(&"")),
-            high: parse_f64_safe(p.get(3).unwrap_or(&"")),
-            low: parse_f64_safe(p.get(4).unwrap_or(&"")),
-            close: parse_f64_safe(p.get(1).unwrap_or(&"")),
+            date: normalize_trade_date(p.get(30).unwrap_or(&"")),
+            open: parse_f64_safe(p.get(5).unwrap_or(&"")),
+            high: parse_f64_safe(p.get(33).unwrap_or(&"")),
+            low: parse_f64_safe(p.get(34).unwrap_or(&"")),
+            close: parse_f64_safe(p.get(3).unwrap_or(&"")),
             volume: parse_i64_safe(p.get(6).unwrap_or(&"")),
         })
     }
@@ -146,12 +155,19 @@ impl AkShareClient {
 
         let code = crate::market::normalize_hk_symbol(symbol)
             .ok_or_else(|| Error::invalid_input(format!("invalid HK symbol: {symbol}")))?;
-        let hk_symbol = format!("r_hk{code}");
+        let hk_symbol = format!("hk{code}");
         let url = format!(
-            "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={hk_symbol},day,,,{limit},qfq"
+            "https://web.ifzq.gtimg.cn/appstock/app/hkfqkline/get?_var=kline_dayqfq&param={hk_symbol},day,,,{limit},qfq"
         );
 
-        let resp: Resp = self.get(&url).send().await?.json().await?;
+        let resp_text = self.get(&url).send().await?.text().await?;
+        // Parse JSONP response: kline_dayqfq={...}
+        let json_str = if let Some(start) = resp_text.find('{') {
+            &resp_text[start..]
+        } else {
+            return Err(Error::upstream("invalid tencent HK kline response"));
+        };
+        let resp: Resp = serde_json::from_str(json_str)?;
         let data = resp
             .data
             .ok_or_else(|| Error::upstream("empty tencent HK kline data"))?;
@@ -173,11 +189,11 @@ impl AkShareClient {
             }
             items.push(CandlePoint {
                 trade_date: arr[0].as_str().unwrap_or("").to_string(),
-                open: arr[1].as_f64().unwrap_or(0.0),
-                close: arr[2].as_f64().unwrap_or(0.0),
-                high: arr[3].as_f64().unwrap_or(0.0),
-                low: arr[4].as_f64().unwrap_or(0.0),
-                volume: arr[5].as_f64().unwrap_or(0.0) as i64,
+                open: value_to_f64(&arr[1]),
+                close: value_to_f64(&arr[2]),
+                high: value_to_f64(&arr[3]),
+                low: value_to_f64(&arr[4]),
+                volume: value_to_f64(&arr[5]) as i64,
                 amount: 0.0,
                 amplitude_pct: 0.0,
                 change_pct: 0.0,

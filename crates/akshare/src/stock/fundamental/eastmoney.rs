@@ -27,11 +27,6 @@ struct PagedResult {
     pages: u64,
 }
 
-#[derive(Debug, Deserialize)]
-struct SingleEnvelope {
-    result: Option<serde_json::Value>,
-}
-
 // ---------------------------------------------------------------------------
 // Generic helpers
 // ---------------------------------------------------------------------------
@@ -166,41 +161,6 @@ async fn fetch_securities_page(
     Ok(result.data.unwrap_or_default())
 }
 
-/// Fetch from the Eastmoney securities API with a `type` parameter (older format).
-async fn fetch_securities_type(
-    http: &reqwest::Client,
-    data_type: &str,
-    sty: &str,
-    filter: &str,
-) -> Result<Vec<serde_json::Value>> {
-    let params = vec![
-        ("type", data_type),
-        ("sty", sty),
-        ("quoteColumns", ""),
-        ("filter", filter),
-        ("p", "1"),
-        ("ps", "200"),
-        ("sr", "-1"),
-        ("st", "REPORT_DATE"),
-        ("source", "HSF10"),
-        ("client", "PC"),
-    ];
-
-    let resp = http
-        .get("https://datacenter.eastmoney.com/securities/api/data/get")
-        .query(&params)
-        .send()
-        .await?
-        .error_for_status()?;
-
-    let payload: SingleEnvelope = resp.json().await?;
-    match payload.result {
-        Some(serde_json::Value::Array(arr)) => Ok(arr),
-        Some(other) => Ok(vec![other]),
-        None => Ok(vec![]),
-    }
-}
-
 // ---------------------------------------------------------------------------
 // A-share financial analysis indicators
 // ---------------------------------------------------------------------------
@@ -216,13 +176,20 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let data = if indicator == "按报告期" {
-            fetch_securities_type(
+            // Use v1 endpoint with columns=ALL to include TOTAL_SHARE and other fields
+            let (rows, _) = fetch_datacenter_page(
                 &self.http,
                 "RPT_F10_FINANCE_MAINFINADATA",
-                "APP_F10_MAINFINADATA",
+                "ALL",
                 &format!(r#"(SECUCODE="{symbol}")"#),
+                1,
+                200,
+                "REPORT_DATE",
+                "-1",
+                "HSF10",
             )
-            .await?
+            .await?;
+            rows
         } else {
             fetch_securities_page(
                 &self.http,

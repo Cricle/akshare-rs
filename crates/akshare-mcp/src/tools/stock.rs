@@ -85,6 +85,173 @@ fn default_valuation_period() -> String {
     "近一年".to_string()
 }
 
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct DateParams {
+    pub date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SymbolDateParams {
+    pub symbol: String,
+    pub date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct DateRangeParams {
+    pub start_date: String,
+    pub end_date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SymbolDateRangeParams {
+    pub symbol: String,
+    #[serde(default)]
+    pub start_date: String,
+    #[serde(default)]
+    pub end_date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SymbolIndicatorParams {
+    pub symbol: String,
+    pub indicator: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct LimitParams {
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+// ── Additional param types for bulk tool wrappers ──────────────────────
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SearchParams {
+    pub query: String,
+    #[serde(default)]
+    pub market: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SectorRankParams {
+    pub sector_type: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SectorCodeParams {
+    pub sector_code: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct BillboardSeatsParams {
+    pub symbol: String,
+    pub side: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct TradeCalendarParams {
+    pub exchange: String,
+    pub start_date: String,
+    pub end_date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct BoardCodeParams {
+    pub board_code: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct BoardHistMinParams {
+    pub symbol: String,
+    #[serde(default = "default_board_hist_min_period")]
+    pub period: String,
+}
+
+fn default_board_hist_min_period() -> String {
+    "5".to_string()
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SymbolStartYearParams {
+    pub symbol: String,
+    #[serde(default = "default_start_year")]
+    pub start_year: String,
+}
+
+fn default_start_year() -> String {
+    "2020".to_string()
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct HkReportParams {
+    pub stock: String,
+    pub symbol: String,
+    pub indicator: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct StockSymbolParams {
+    pub stock: String,
+    pub symbol: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct GdfxDetailParams {
+    pub date: String,
+    pub indicator: String,
+    pub symbol: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct DzjyMrmxParams {
+    pub asset_type: String,
+    pub start_date: String,
+    pub end_date: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct XqInfoParams {
+    pub symbol: String,
+    pub token: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct CyqParams {
+    pub symbol: String,
+    #[serde(default)]
+    pub adjust: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct HistoryDividendDetailParams {
+    pub symbol: String,
+    pub indicator: String,
+    #[serde(default)]
+    pub date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct NoticeReportParams {
+    pub security: String,
+    pub report_type: String,
+    #[serde(default)]
+    pub begin_date: String,
+    #[serde(default)]
+    pub end_date: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -406,6 +406,9 @@ impl AkShareClient {
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 
+        // Fields are nested inside the "data" object
+        let data = payload.get("data").unwrap_or(&payload);
+
         let code_name_map = [
             ("f57", "股票代码"),
             ("f58", "股票简称"),
@@ -420,7 +423,7 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for (key, label) in &code_name_map {
-            if let Some(val) = payload.get(key)
+            if let Some(val) = data.get(key)
                 && !val.is_null()
             {
                 items.push(StockInfoItem {
@@ -431,6 +434,31 @@ impl AkShareClient {
         }
 
         Ok(items)
+    }
+
+    /// Get industry for any stock by raw Eastmoney secid (e.g. "105.AAPL", "116.00700").
+    pub async fn stock_info_by_secid(&self, secid: &str) -> Result<Option<String>> {
+        let response = self
+            .get("https://push2.eastmoney.com/api/qt/stock/get")
+            .query(&[
+                ("fltt", "2"),
+                ("invt", "2"),
+                ("fields", "f127"),
+                ("secid", secid),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+        let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
+        let industry = payload
+            .get("data")
+            .and_then(|d| d.get("f127"))
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.trim().is_empty())
+            .map(|s| s.to_string());
+        Ok(industry)
     }
 
     /// Get HK security profile from Eastmoney.
