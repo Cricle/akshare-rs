@@ -191,10 +191,10 @@ impl AkShareClient {
     /// falls back to static mapping for well-known stocks.
     pub async fn us_stock_industry(&self, symbol: &str) -> (Option<String>, Option<String>) {
         // Try Yahoo Finance first
-        if let Ok(profile) = self.us_stock_profile(symbol).await {
-            if profile.sector.is_some() || profile.industry.is_some() {
-                return (profile.sector, profile.industry);
-            }
+        if let Ok(profile) = self.us_stock_profile(symbol).await
+            && (profile.sector.is_some() || profile.industry.is_some())
+        {
+            return (profile.sector, profile.industry);
         }
 
         // Fallback to static mapping

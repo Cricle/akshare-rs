@@ -12987,6 +12987,70 @@ const CATEGORY_PREFIXES: &[(&str, &[&str])] = &[
     ("fund", &["fund_"]),
 ];
 
+/// Tool search result for `search_tools`.
+struct ToolSearchResult {
+    name: String,
+    description: String,
+}
+
+impl AkShareMcpService {
+    /// Returns the 2 meta-tools exposed via MCP `list_tools`.
+    fn list_tools_sync(&self) -> Vec<Tool> {
+        vec![
+            Tool::new_with_raw(
+                "tools/search",
+                Some("Search available tools by keyword and/or category. Returns matching tool names and descriptions. Use this before tools/call to discover the exact tool name.".into()),
+                schema_for_type::<ToolsSearchParams>(),
+            ),
+            Tool::new_with_raw(
+                "tools/call",
+                Some("Call any tool by name with JSON arguments. Use tools/search first to discover available tools and their parameter schemas.".into()),
+                schema_for_type::<ToolsCallParams>(),
+            ),
+        ]
+    }
+
+    /// Search registered tools by optional category prefix and/or keyword query.
+    fn search_tools(&self, category: Option<&str>, query: Option<&str>) -> Vec<ToolSearchResult> {
+        let query_lower = query.map(|q| q.to_lowercase());
+        let category_prefixes: Option<&[&str]> = category
+            .and_then(|cat| CATEGORY_PREFIXES.iter().find(|(name, _)| *name == cat))
+            .map(|(_, prefixes)| *prefixes);
+
+        self.tool_router
+            .map
+            .values()
+            .filter(|route| {
+                let name = route.attr.name.as_ref();
+                if name == "tools/search" || name == "tools/call" {
+                    return false;
+                }
+                if let Some(prefixes) = category_prefixes
+                    && !prefixes.iter().any(|p| name.starts_with(p))
+                {
+                    return false;
+                }
+                if let Some(ref q) = query_lower {
+                    let name_match = name.to_lowercase().contains(q);
+                    let desc_match = route
+                        .attr
+                        .description
+                        .as_ref()
+                        .is_some_and(|d| d.to_lowercase().contains(q));
+                    if !name_match && !desc_match {
+                        return false;
+                    }
+                }
+                true
+            })
+            .map(|route| ToolSearchResult {
+                name: route.attr.name.to_string(),
+                description: route.attr.description.as_deref().unwrap_or("").to_string(),
+            })
+            .collect()
+    }
+}
+
 impl ServerHandler for AkShareMcpService {
     async fn call_tool(
         &self,
@@ -13011,47 +13075,13 @@ impl ServerHandler for AkShareMcpService {
                         category: None,
                     });
 
-                let query_lower = args.query.map(|q| q.to_lowercase());
-                let category_prefixes: Option<&[&str]> = args
-                    .category
-                    .as_deref()
-                    .and_then(|cat| CATEGORY_PREFIXES.iter().find(|(name, _)| *name == cat))
-                    .map(|(_, prefixes)| *prefixes);
-
                 let results: Vec<serde_json::Value> = self
-                    .tool_router
-                    .map
-                    .values()
-                    .filter(|route| {
-                        let name = route.attr.name.as_ref();
-                        // Skip the meta-tools themselves
-                        if name == "tools/search" || name == "tools/call" {
-                            return false;
-                        }
-                        // Category filter
-                        if let Some(prefixes) = category_prefixes {
-                            if !prefixes.iter().any(|p| name.starts_with(p)) {
-                                return false;
-                            }
-                        }
-                        // Query filter
-                        if let Some(ref q) = query_lower {
-                            let name_match = name.to_lowercase().contains(q);
-                            let desc_match = route
-                                .attr
-                                .description
-                                .as_ref()
-                                .is_some_and(|d| d.to_lowercase().contains(q));
-                            if !name_match && !desc_match {
-                                return false;
-                            }
-                        }
-                        true
-                    })
-                    .map(|route| {
+                    .search_tools(args.category.as_deref(), args.query.as_deref())
+                    .into_iter()
+                    .map(|r| {
                         serde_json::json!({
-                            "name": route.attr.name.as_ref(),
-                            "description": route.attr.description.as_deref().unwrap_or(""),
+                            "name": r.name,
+                            "description": r.description,
                         })
                     })
                     .collect();
@@ -13091,40 +13121,17 @@ impl ServerHandler for AkShareMcpService {
         _request: Option<PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
     ) -> Result<rmcp::model::ListToolsResult, McpError> {
-        let tools = vec![
-            Tool::new_with_raw(
-                "tools/search",
-                Some("Search available tools by keyword and/or category. Returns matching tool names and descriptions. Use this before tools/call to discover the exact tool name.".into()),
-                schema_for_type::<ToolsSearchParams>(),
-            ),
-            Tool::new_with_raw(
-                "tools/call",
-                Some("Call any tool by name with JSON arguments. Use tools/search first to discover available tools and their parameter schemas.".into()),
-                schema_for_type::<ToolsCallParams>(),
-            ),
-        ];
-
         Ok(rmcp::model::ListToolsResult {
-            tools,
+            tools: self.list_tools_sync(),
             meta: None,
             next_cursor: None,
         })
     }
 
     fn get_tool(&self, name: &str) -> Option<Tool> {
-        match name {
-            "tools/search" => Some(Tool::new_with_raw(
-                "tools/search",
-                Some("Search available tools by keyword and/or category.".into()),
-                schema_for_type::<ToolsSearchParams>(),
-            )),
-            "tools/call" => Some(Tool::new_with_raw(
-                "tools/call",
-                Some("Call any tool by name with JSON arguments.".into()),
-                schema_for_type::<ToolsCallParams>(),
-            )),
-            _ => None,
-        }
+        self.list_tools_sync()
+            .into_iter()
+            .find(|t| t.name.as_ref() == name)
     }
 
     fn get_info(&self) -> ServerInfo {
@@ -13143,16 +13150,6 @@ impl ServerHandler for AkShareMcpService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rmcp::model::{NumberOrString, PaginatedRequestParams};
-    use rmcp::service::{AtomicU32RequestIdProvider, Peer};
-    use std::sync::Arc;
-
-    fn test_context() -> RequestContext<RoleServer> {
-        let id_provider: Arc<dyn rmcp::service::RequestIdProvider> =
-            Arc::new(AtomicU32RequestIdProvider::default());
-        let (peer, _rx) = Peer::<RoleServer>::new(id_provider, None);
-        RequestContext::new(NumberOrString::Number(1), peer)
-    }
 
     #[test]
     fn test_service_creates() {
@@ -13179,8 +13176,10 @@ mod tests {
 
     #[test]
     fn test_service_category_filter() {
-        let mut cfg = ToolsConfig::default();
-        cfg.bond = true;
+        let cfg = ToolsConfig {
+            bond: true,
+            ..ToolsConfig::default()
+        };
         let service = AkShareMcpService::new(cfg);
         let tools = service.tool_router.list_all();
         let has_bond = tools.iter().any(|t| t.name.starts_with("bond_"));
@@ -13189,13 +13188,12 @@ mod tests {
         assert!(!has_futures, "futures tools should be disabled");
     }
 
-    #[tokio::test]
-    async fn test_list_tools_returns_meta_tools_only() {
+    #[test]
+    fn test_list_tools_returns_meta_tools_only() {
         let service = AkShareMcpService::new(ToolsConfig::all());
-        let ctx = test_context();
-        let result = service.list_tools(None, ctx).await.unwrap();
-        assert_eq!(result.tools.len(), 2, "should return exactly 2 meta-tools");
-        let names: Vec<&str> = result.tools.iter().map(|t| t.name.as_ref()).collect();
+        let tools = service.list_tools_sync();
+        assert_eq!(tools.len(), 2, "should return exactly 2 meta-tools");
+        let names: Vec<&str> = tools.iter().map(|t| t.name.as_ref()).collect();
         assert!(names.contains(&"tools/search"));
         assert!(names.contains(&"tools/call"));
     }
@@ -13208,61 +13206,27 @@ mod tests {
         assert!(service.get_tool("bond_zh_us_rate").is_none());
     }
 
-    #[tokio::test]
-    async fn test_tools_search_by_category() {
+    #[test]
+    fn test_tools_search_by_category() {
         let service = AkShareMcpService::new(ToolsConfig::all());
-        let ctx = test_context();
-        let request = CallToolRequestParams {
-            meta: None,
-            name: std::borrow::Cow::Borrowed("tools/search"),
-            arguments: Some({
-                let mut map = serde_json::Map::new();
-                map.insert(
-                    "category".to_string(),
-                    serde_json::Value::String("bond".to_string()),
-                );
-                map
-            }),
-            task: None,
-        };
-        let result = service.call_tool(request, ctx).await.unwrap();
-        assert!(!result.is_error.unwrap_or(true));
-        let text = result.content[0].as_text().unwrap().text.clone();
-        let items: Vec<serde_json::Value> = serde_json::from_str(&text).unwrap();
-        assert!(!items.is_empty(), "bond category should have tools");
-        for item in &items {
-            let name = item["name"].as_str().unwrap();
+        let results = service.search_tools(Some("bond"), None);
+        assert!(!results.is_empty(), "bond category should have tools");
+        for item in &results {
             assert!(
-                name.starts_with("bond_"),
-                "all results should be bond tools, got: {name}"
+                item.name.starts_with("bond_"),
+                "all results should be bond tools, got: {}",
+                item.name
             );
         }
     }
 
-    #[tokio::test]
-    async fn test_tools_search_excludes_meta_tools() {
+    #[test]
+    fn test_tools_search_excludes_meta_tools() {
         let service = AkShareMcpService::new(ToolsConfig::all());
-        let ctx = test_context();
-        let request = CallToolRequestParams {
-            meta: None,
-            name: std::borrow::Cow::Borrowed("tools/search"),
-            arguments: Some({
-                let mut map = serde_json::Map::new();
-                map.insert(
-                    "query".to_string(),
-                    serde_json::Value::String("tools".to_string()),
-                );
-                map
-            }),
-            task: None,
-        };
-        let result = service.call_tool(request, ctx).await.unwrap();
-        let text = result.content[0].as_text().unwrap().text.clone();
-        let items: Vec<serde_json::Value> = serde_json::from_str(&text).unwrap();
-        for item in &items {
-            let name = item["name"].as_str().unwrap();
-            assert_ne!(name, "tools/search");
-            assert_ne!(name, "tools/call");
+        let results = service.search_tools(None, Some("tools"));
+        for item in &results {
+            assert_ne!(item.name.as_str(), "tools/search");
+            assert_ne!(item.name.as_str(), "tools/call");
         }
     }
 }
