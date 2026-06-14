@@ -1366,6 +1366,20 @@ fn pivot_amount(rows: &[&HashMap<String, serde_json::Value>], names: &[&str]) ->
     None
 }
 
+/// Extract YOY_RATIO for items matching the given names (HK/US row-oriented reports).
+fn pivot_yoy(rows: &[&HashMap<String, serde_json::Value>], names: &[&str]) -> Option<f64> {
+    for name in names {
+        for row in rows {
+            if let Some(item_name) = row.get("ITEM_NAME").and_then(|v| v.as_str())
+                && item_name.contains(name)
+            {
+                return row.get("YOY_RATIO").and_then(serde_json::Value::as_f64);
+            }
+        }
+    }
+    None
+}
+
 /// Get REPORT_DATE string from a group of rows.
 fn group_code(rows: &[&HashMap<String, serde_json::Value>]) -> String {
     rows.first()
@@ -1437,23 +1451,31 @@ fn pivot_hk_report_to_profit_sheet(
                 (None, None, Some(a)) => Some(a),
                 (None, None, None) => None,
             };
+            let total_revenue = pivot_amount(&group, &["营业收入", "营业总收入", "营运收入", "营业额"]);
+            let gross_profit = pivot_amount(&group, &["毛利", "营业毛利"]);
+            let net_profit = pivot_amount(&group, &["净利润", "本公司拥有人应占溢利", "股东应占溢利"]);
+            // Calculate gross margin from gross_profit / revenue
+            let gross_margin = match (gross_profit, total_revenue) {
+                (Some(gp), Some(rev)) if rev > 0.0 => Some(gp / rev * 100.0),
+                _ => None,
+            };
             ProfitSheet {
                 code: group_code(&group),
                 name: group_name(&group),
                 notice_date: Some(date),
-                total_revenue: pivot_amount(&group, &["营业收入", "营业总收入"]),
+                total_revenue,
                 operating_cost: pivot_amount(&group, &["营业成本", "营业总成本"]),
                 operating_profit: pivot_amount(&group, &["营业利润", "经营溢利"]),
                 total_profit: pivot_amount(&group, &["利润总额", "除税前溢利"]),
-                net_profit: pivot_amount(&group, &["净利润", "本公司拥有人应占溢利"]),
+                net_profit,
                 net_profit_deducted: None,
-                total_revenue_yoy: None,
-                net_profit_yoy: None,
-                gross_margin: None,
+                total_revenue_yoy: pivot_yoy(&group, &["营业收入", "营业总收入", "营运收入", "营业额"]),
+                net_profit_yoy: pivot_yoy(&group, &["净利润", "本公司拥有人应占溢利", "股东应占溢利"]),
+                gross_margin,
                 net_margin: None,
                 roe: None,
                 eps: None,
-                gross_profit: pivot_amount(&group, &["毛利", "营业毛利"]),
+                gross_profit,
                 operating_expenses,
             }
         })
@@ -1525,24 +1547,34 @@ fn pivot_us_report_to_profit_sheet(
 ) -> Vec<ProfitSheet> {
     group_by_report_date(rows)
         .into_iter()
-        .map(|(date, group)| ProfitSheet {
-            code: group_code(&group),
-            name: group_name(&group),
-            notice_date: Some(date),
-            total_revenue: pivot_amount(&group, &["营业收入", "营业总收入"]),
-            operating_cost: pivot_amount(&group, &["营业成本", "营业总成本"]),
-            operating_profit: pivot_amount(&group, &["营业利润"]),
-            total_profit: pivot_amount(&group, &["利润总额"]),
-            net_profit: pivot_amount(&group, &["净利润"]),
-            net_profit_deducted: None,
-            total_revenue_yoy: None,
-            net_profit_yoy: None,
-            gross_margin: None,
-            net_margin: None,
-            roe: None,
-            eps: None,
-            gross_profit: pivot_amount(&group, &["毛利", "营业毛利"]),
-            operating_expenses: pivot_amount(&group, &["营业总成本", "营业成本"]),
+        .map(|(date, group)| {
+            let total_revenue = pivot_amount(&group, &["营业收入", "营业总收入", "主营收入"]);
+            let gross_profit = pivot_amount(&group, &["毛利", "营业毛利"]);
+            let net_profit = pivot_amount(&group, &["净利润", "持续经营净利润"]);
+            // Calculate gross margin from gross_profit / revenue
+            let gross_margin = match (gross_profit, total_revenue) {
+                (Some(gp), Some(rev)) if rev > 0.0 => Some(gp / rev * 100.0),
+                _ => None,
+            };
+            ProfitSheet {
+                code: group_code(&group),
+                name: group_name(&group),
+                notice_date: Some(date),
+                total_revenue,
+                operating_cost: pivot_amount(&group, &["营业成本", "营业总成本", "主营成本"]),
+                operating_profit: pivot_amount(&group, &["营业利润"]),
+                total_profit: pivot_amount(&group, &["利润总额"]),
+                net_profit,
+                net_profit_deducted: None,
+                total_revenue_yoy: pivot_yoy(&group, &["营业收入", "营业总收入", "主营收入"]),
+                net_profit_yoy: pivot_yoy(&group, &["净利润", "持续经营净利润"]),
+                gross_margin,
+                net_margin: None,
+                roe: None,
+                eps: None,
+                gross_profit,
+                operating_expenses: pivot_amount(&group, &["营业总成本", "营业成本", "营业费用"]),
+            }
         })
         .collect()
 }
