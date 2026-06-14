@@ -22,33 +22,27 @@ static RE_TD: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"(?is)<td[^>]*>(.*?)</td>").unwrap());
 static RE_JSON_P: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r#"(?s)<p\s+id="main"[^>]*>(.*?)</p>"#).unwrap());
-#[allow(dead_code)]
 static RE_TABLE_DATA_HL: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(
         r#"(?is)<table[^>]*class="[^"]*data_table_1\s+m_table\s+m_hl[^"]*"[^>]*>(.*?)</table>"#,
     )
     .unwrap()
 });
-#[allow(dead_code)]
 static RE_TABLE_M_DATA_HL: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(
         r#"(?is)<table[^>]*class="[^"]*m_table\s+data_table_1\s+m_hl[^"]*"[^>]*>(.*?)</table>"#,
     )
     .unwrap()
 });
-#[allow(dead_code)]
 static RE_TABLE_MAINTABLE: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"(?is)<table[^>]*id="maintable"[^>]*>(.*?)</table>"#).unwrap()
 });
-#[allow(dead_code)]
 static RE_TABLE_M_TABLE: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"(?is)<table[^>]*class="[^"]*m_table[^"]*"[^>]*>(.*?)</table>"#).unwrap()
 });
-#[allow(dead_code)]
 static RE_UL_MAIN_INTRO: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"(?is)<ul[^>]*class="[^"]*main_intro_list[^"]*"[^>]*>(.*?)</ul>"#).unwrap()
 });
-#[allow(dead_code)]
 static RE_LI: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"(?is)<li[^>]*>(.*?)</li>").unwrap());
 

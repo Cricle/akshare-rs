@@ -1,47 +1,8 @@
 //! Crypto spot prices from Jin10 (金十数据).
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::CryptoSpot;
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-#[allow(dead_code)]
-struct Jin10CryptoItem {
-    #[serde(default)]
-    symbol: String,
-    #[serde(default)]
-    name: String,
-    #[serde(default, deserialize_with = "de_f64_from_any")]
-    price: f64,
-    #[serde(default, deserialize_with = "de_f64_from_any")]
-    cny_price: f64,
-    #[serde(default, deserialize_with = "de_f64_from_any")]
-    change: f64,
-    #[serde(default, deserialize_with = "de_f64_from_any")]
-    volume: f64,
-    #[serde(default, deserialize_with = "de_f64_from_any")]
-    market_cap: f64,
-}
-
-/// Deserialize f64 from either a number or a string.
-#[allow(dead_code)]
-fn de_f64_from_any<'de, D>(deserializer: D) -> std::result::Result<f64, D::Error>
-where
-    D: serde::Deserializer<'de>,
-{
-    let v = serde_json::Value::deserialize(deserializer)?;
-    match v {
-        serde_json::Value::Number(n) => Ok(n.as_f64().unwrap_or(0.0)),
-        serde_json::Value::String(s) => Ok(s.parse::<f64>().unwrap_or(0.0)),
-        _ => Ok(0.0),
-    }
-}
 
 impl AkShareClient {
     /// Fetch crypto spot prices from JS (金十数据) — Python-compatible name.

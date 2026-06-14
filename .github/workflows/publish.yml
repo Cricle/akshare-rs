@@ -16,11 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set version from tag
+        shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           echo "Setting version to $VERSION"
-          find . -name 'Cargo.toml' -exec sed -i "s/^version = \".*\"/version = \"$VERSION\"/" {} +
-          sed -i "s/akshare = { path = \"..\/akshare\", version = \".*\" }/akshare = { path = \"..\/akshare\", version = \"$VERSION\" }/" crates/akshare-mcp/Cargo.toml
+          find . -mindepth 2 -name 'Cargo.toml' -exec sed -i '' "s|^version = \".*\"|version = \"$VERSION\"|" {} +
+          sed -i '' "s|akshare = { path = \"../akshare\", version = \".*\" }|akshare = { path = \"../akshare\", version = \"$VERSION\" }|" crates/akshare-mcp/Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -38,10 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set version from tag
+        shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          find . -name 'Cargo.toml' -exec sed -i "s/^version = \".*\"/version = \"$VERSION\"/" {} +
-          sed -i "s/akshare = { path = \"..\/akshare\", version = \".*\" }/akshare = { path = \"..\/akshare\", version = \"$VERSION\" }/" crates/akshare-mcp/Cargo.toml
+          find . -mindepth 2 -name 'Cargo.toml' -exec sed -i '' "s|^version = \".*\"|version = \"$VERSION\"|" {} +
+          sed -i '' "s|akshare = { path = \"../akshare\", version = \".*\" }|akshare = { path = \"../akshare\", version = \"$VERSION\" }|" crates/akshare-mcp/Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo publish --allow-dirty
         env:
@@ -76,10 +78,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set version from tag
+        shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          find . -name 'Cargo.toml' -exec sed -i "s/^version = \".*\"/version = \"$VERSION\"/" {} +
-          sed -i "s/akshare = { path = \"..\/akshare\", version = \".*\" }/akshare = { path = \"..\/akshare\", version = \"$VERSION\" }/" crates/akshare-mcp/Cargo.toml
+          find . -mindepth 2 -name 'Cargo.toml' -exec sed -i '' "s|^version = \".*\"|version = \"$VERSION\"|" {} +
+          sed -i '' "s|akshare = { path = \"../akshare\", version = \".*\" }|akshare = { path = \"../akshare\", version = \"$VERSION\" }|" crates/akshare-mcp/Cargo.toml
 
       - uses: dtolnay/rust-toolchain@stable
         with:

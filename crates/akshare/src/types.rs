@@ -39,34 +39,6 @@ pub struct CandlePoint {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FundamentalsSnapshot {
-    pub symbol: String,
-    pub company_name: String,
-    pub cik: String,
-    pub industry: Option<String>,
-    pub currency: String,
-    pub fiscal_year_end: Option<String>,
-    pub shares_outstanding: Option<i64>,
-    pub market_cap: Option<f64>,
-    pub net_income_usd: Option<f64>,
-    pub revenues_usd: Option<f64>,
-    pub assets_usd: Option<f64>,
-    pub liabilities_usd: Option<f64>,
-    pub stockholders_equity_usd: Option<f64>,
-    pub cash_and_equivalents_usd: Option<f64>,
-    pub gross_profit_usd: Option<f64>,
-    pub operating_income_usd: Option<f64>,
-    pub operating_expenses_usd: Option<f64>,
-    pub operating_cash_flow_usd: Option<f64>,
-    pub capital_expenditure_usd: Option<f64>,
-    pub free_cash_flow_usd: Option<f64>,
-    pub long_term_debt_usd: Option<f64>,
-    pub current_debt_usd: Option<f64>,
-    pub total_debt_usd: Option<f64>,
-    pub diluted_shares_outstanding: Option<i64>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewsItem {
     pub published_at: String,
     pub title: String,
