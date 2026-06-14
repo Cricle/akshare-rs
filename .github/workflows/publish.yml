@@ -51,9 +51,12 @@ jobs:
           done
           sed "s|akshare = { path = \"../akshare\", version = \".*\" }|akshare = { path = \"../akshare\", version = \"$VERSION\" }|" crates/akshare-mcp/Cargo.toml > crates/akshare-mcp/Cargo.toml.tmp && mv crates/akshare-mcp/Cargo.toml.tmp crates/akshare-mcp/Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
-      - run: |
-          cargo publish -p akshare --allow-dirty
-          cargo publish -p akshare-mcp --allow-dirty
+      - name: Publish akshare
+        run: cargo publish -p akshare --allow-dirty
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO }}
+      - name: Publish akshare-mcp
+        run: cargo publish -p akshare-mcp --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO }}
 
