@@ -1,6 +1,6 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::{CandlePoint, QuoteSnapshot};
+use crate::types::{CandlePoint, HkFinancialSnapshot, QuoteSnapshot};
 
 impl AkShareClient {
     /// Get market cap for an HK stock from Tencent API.
@@ -98,6 +98,11 @@ impl AkShareClient {
         // Fallback to Yahoo
         let yahoo_symbol = hk_yahoo_symbol(symbol)?;
         self.yahoo_candles(&yahoo_symbol, limit).await
+    }
+
+    /// Get HK stock financial snapshot (PE, PB, EPS, BVPS, market cap) from Tencent API.
+    pub async fn hk_financial(&self, symbol: &str) -> Result<HkFinancialSnapshot> {
+        self.tencent_hk_financial(symbol).await
     }
 }
 

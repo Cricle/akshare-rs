@@ -2,7 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::{CandlePoint, QuoteSnapshot};
+use crate::types::{CandlePoint, HkFinancialSnapshot, QuoteSnapshot};
 use crate::util::{
     amplitude_pct, apply_change_metrics, normalize_trade_date, parse_f64_safe, parse_i64_safe,
 };
@@ -139,6 +139,43 @@ impl AkShareClient {
             low: parse_f64_safe(p.get(34).unwrap_or(&"")),
             close: parse_f64_safe(p.get(3).unwrap_or(&"")),
             volume: parse_i64_safe(p.get(6).unwrap_or(&"")),
+        })
+    }
+
+    /// Tencent HK financial data (PE, PB, EPS, BVPS, market cap).
+    ///
+    /// Fields from `qt.gtimg.cn`:
+    /// - [1] name, [3] price, [39] PE_TTM, [44] market_cap (亿),
+    /// - [57] EPS, [58] BVPS, [72] PB
+    pub(crate) async fn tencent_hk_financial(&self, symbol: &str) -> Result<HkFinancialSnapshot> {
+        let code = crate::market::normalize_hk_symbol(symbol)
+            .ok_or_else(|| Error::invalid_input(format!("invalid HK symbol: {symbol}")))?;
+        let url = format!("https://qt.gtimg.cn/q=r_hk{code}");
+        let body = self.get(&url).send().await?.text().await?;
+        let line = body
+            .lines()
+            .find(|l| l.contains("v_"))
+            .ok_or_else(|| Error::upstream("empty tencent HK response"))?;
+        let data = line
+            .split_once('=')
+            .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
+            .map_or("", |(s, _)| s);
+        let p: Vec<&str> = data.split('~').collect();
+        if p.len() < 60 {
+            return Err(Error::decode("tencent HK financial: insufficient fields"));
+        }
+        let parse = |i: usize| -> Option<f64> {
+            p.get(i).and_then(|s| s.trim().parse::<f64>().ok()).filter(|v| *v != 0.0)
+        };
+        Ok(HkFinancialSnapshot {
+            symbol: symbol.to_string(),
+            name: p.get(1).unwrap_or(&"").to_string(),
+            pe_ttm: parse(39),
+            pb: parse(72),
+            eps: parse(57),
+            bvps: parse(58),
+            market_cap_hkd: parse(44).map(|v| v * 100_000_000.0), // 亿 → 元
+            amount_hkd: parse(37),
         })
     }
 

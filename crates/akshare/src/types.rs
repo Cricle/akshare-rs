@@ -93,6 +93,22 @@ pub struct FundamentalsSnapshot {
     pub diluted_shares_outstanding: Option<i64>,
 }
 
+/// HK stock financial data from Tencent Finance API.
+///
+/// Fields are parsed from the `qt.gtimg.cn` real-time quote API.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct HkFinancialSnapshot {
+    pub symbol: String,
+    pub name: String,
+    pub pe_ttm: Option<f64>,
+    pub pb: Option<f64>,
+    pub eps: Option<f64>,
+    pub bvps: Option<f64>,
+    pub market_cap_hkd: Option<f64>,
+    /// Total trading amount in HKD.
+    pub amount_hkd: Option<f64>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SectorSnapshot {
     pub sector_code: String,
