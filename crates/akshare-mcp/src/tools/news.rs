@@ -137,7 +137,10 @@ mod tests {
         let json = r#"{"query": "economy"}"#;
         let params: GdeltNewsSearchParams = serde_json::from_str(json).unwrap();
         assert_eq!(params.query, "economy");
-        assert_eq!(params.base_url, "https://api.gdeltproject.org/api/v2/doc/doc");
+        assert_eq!(
+            params.base_url,
+            "https://api.gdeltproject.org/api/v2/doc/doc"
+        );
         assert_eq!(params.language_hint, None);
         assert_eq!(params.time_range, "month");
         assert_eq!(params.timeout_secs, 30);

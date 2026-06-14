@@ -67,7 +67,44 @@ impl AkShareMcpService {
             ("bond", &["bond_"]),
             ("index", &["index_"]),
             ("futures", &["futures_"]),
-            ("economy", &["economy_", "movie_", "nlp_", "amac_", "car_", "sw_", "fx_", "article_", "air_", "qdii_", "video_", "sunrise_", "repo_", "migration_", "fred_", "xincaifu_", "spot_", "sogou_", "rate_", "online_", "match_", "hurun_", "hf_", "google_", "gdelt_", "game_", "forbes_", "drewry_", "business_", "bing_", "baidu_", "qhkc_", "methods_in_"]),
+            (
+                "economy",
+                &[
+                    "economy_",
+                    "movie_",
+                    "nlp_",
+                    "amac_",
+                    "car_",
+                    "sw_",
+                    "fx_",
+                    "article_",
+                    "air_",
+                    "qdii_",
+                    "video_",
+                    "sunrise_",
+                    "repo_",
+                    "migration_",
+                    "fred_",
+                    "xincaifu_",
+                    "spot_",
+                    "sogou_",
+                    "rate_",
+                    "online_",
+                    "match_",
+                    "hurun_",
+                    "hf_",
+                    "google_",
+                    "gdelt_",
+                    "game_",
+                    "forbes_",
+                    "drewry_",
+                    "business_",
+                    "bing_",
+                    "baidu_",
+                    "qhkc_",
+                    "methods_in_",
+                ],
+            ),
             ("crypto", &["crypto_"]),
             ("forex", &["forex_", "currency_"]),
             ("option", &["option_"]),
@@ -2039,7 +2076,7 @@ impl AkShareMcpService {
     }
 
     // ── Auto-generated from agent_bond_tools.rs ──
-// ── Bond: Buyback ──────────────────────────────────────────────
+    // ── Bond: Buyback ──────────────────────────────────────────────
 
     #[tool(description = "Get Shanghai exchange bond buyback list")]
     async fn bond_sh_buy_back_em(
@@ -2074,7 +2111,9 @@ impl AkShareMcpService {
     #[tool(description = "Get bond buyback historical daily candles from Eastmoney")]
     async fn bond_buy_back_hist_em(
         &self,
-        Parameters(bond::BondSymbolLimitParams { symbol, limit }): Parameters<bond::BondSymbolLimitParams>,
+        Parameters(bond::BondSymbolLimitParams { symbol, limit }): Parameters<
+            bond::BondSymbolLimitParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2140,7 +2179,9 @@ impl AkShareMcpService {
     #[tool(description = "Get CBond general index data by indicator and period")]
     async fn bond_index_general_cbond(
         &self,
-        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<bond::BondIndicatorPeriodParams>,
+        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<
+            bond::BondIndicatorPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2155,7 +2196,9 @@ impl AkShareMcpService {
     #[tool(description = "Get CBond treasury index data by indicator and period")]
     async fn bond_treasury_index_cbond(
         &self,
-        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<bond::BondIndicatorPeriodParams>,
+        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<
+            bond::BondIndicatorPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2170,7 +2213,9 @@ impl AkShareMcpService {
     #[tool(description = "Get CBond new composite index data by indicator and period")]
     async fn bond_new_composite_index_cbond(
         &self,
-        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<bond::BondIndicatorPeriodParams>,
+        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<
+            bond::BondIndicatorPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2200,7 +2245,9 @@ impl AkShareMcpService {
     #[tool(description = "Get CBond composite index data by indicator and period")]
     async fn bond_composite_index_cbond(
         &self,
-        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<bond::BondIndicatorPeriodParams>,
+        Parameters(bond::BondIndicatorPeriodParams { indicator, period }): Parameters<
+            bond::BondIndicatorPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2217,7 +2264,12 @@ impl AkShareMcpService {
     #[tool(description = "Get ChinaMoney close yield curve historical data")]
     async fn bond_china_close_return(
         &self,
-        Parameters(bond::BondCloseReturnParams { symbol, period, start_date, end_date }): Parameters<bond::BondCloseReturnParams>,
+        Parameters(bond::BondCloseReturnParams {
+            symbol,
+            period,
+            start_date,
+            end_date,
+        }): Parameters<bond::BondCloseReturnParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2232,7 +2284,10 @@ impl AkShareMcpService {
     #[tool(description = "Get FR007 interest rate swap curve historical data from ChinaMoney")]
     async fn macro_china_swap_rate(
         &self,
-        Parameters(bond::BondYieldParams { start_date, end_date }): Parameters<bond::BondYieldParams>,
+        Parameters(bond::BondYieldParams {
+            start_date,
+            end_date,
+        }): Parameters<bond::BondYieldParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2279,7 +2334,9 @@ impl AkShareMcpService {
     #[tool(description = "Get convertible bond historical daily klines from Eastmoney")]
     async fn bond_convertible_hist(
         &self,
-        Parameters(bond::BondSymbolLimitParams { symbol, limit }): Parameters<bond::BondSymbolLimitParams>,
+        Parameters(bond::BondSymbolLimitParams { symbol, limit }): Parameters<
+            bond::BondSymbolLimitParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2328,7 +2385,10 @@ impl AkShareMcpService {
     #[tool(description = "Get government bond issuance data from CNINFO")]
     async fn bond_treasure_issue_cninfo(
         &self,
-        Parameters(bond::BondYieldParams { start_date, end_date }): Parameters<bond::BondYieldParams>,
+        Parameters(bond::BondYieldParams {
+            start_date,
+            end_date,
+        }): Parameters<bond::BondYieldParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2343,7 +2403,10 @@ impl AkShareMcpService {
     #[tool(description = "Get local government bond issuance data from CNINFO")]
     async fn bond_local_gov_issue_cninfo(
         &self,
-        Parameters(bond::BondYieldParams { start_date, end_date }): Parameters<bond::BondYieldParams>,
+        Parameters(bond::BondYieldParams {
+            start_date,
+            end_date,
+        }): Parameters<bond::BondYieldParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2358,7 +2421,10 @@ impl AkShareMcpService {
     #[tool(description = "Get corporate bond issuance data from CNINFO")]
     async fn bond_corporate_issue_cninfo(
         &self,
-        Parameters(bond::BondYieldParams { start_date, end_date }): Parameters<bond::BondYieldParams>,
+        Parameters(bond::BondYieldParams {
+            start_date,
+            end_date,
+        }): Parameters<bond::BondYieldParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2373,7 +2439,10 @@ impl AkShareMcpService {
     #[tool(description = "Get convertible bond issuance data from CNINFO")]
     async fn bond_cov_issue_cninfo(
         &self,
-        Parameters(bond::BondYieldParams { start_date, end_date }): Parameters<bond::BondYieldParams>,
+        Parameters(bond::BondYieldParams {
+            start_date,
+            end_date,
+        }): Parameters<bond::BondYieldParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2388,7 +2457,10 @@ impl AkShareMcpService {
     #[tool(description = "Get local government bond issuance data from CNINFO (Python alias)")]
     async fn bond_local_government_issue_cninfo(
         &self,
-        Parameters(bond::BondYieldParams { start_date, end_date }): Parameters<bond::BondYieldParams>,
+        Parameters(bond::BondYieldParams {
+            start_date,
+            end_date,
+        }): Parameters<bond::BondYieldParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2575,10 +2647,14 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get convertible bond detail info by symbol and indicator (basic/ballot/usage/dates)")]
+    #[tool(
+        description = "Get convertible bond detail info by symbol and indicator (basic/ballot/usage/dates)"
+    )]
     async fn bond_zh_cov_info(
         &self,
-        Parameters(bond::BondSymbolIndicatorParams { symbol, indicator }): Parameters<bond::BondSymbolIndicatorParams>,
+        Parameters(bond::BondSymbolIndicatorParams { symbol, indicator }): Parameters<
+            bond::BondSymbolIndicatorParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2608,7 +2684,9 @@ impl AkShareMcpService {
     #[tool(description = "Get convertible bond minute-level data from Eastmoney")]
     async fn bond_zh_hs_cov_min(
         &self,
-        Parameters(bond::BondSymbolPeriodParams { symbol, period }): Parameters<bond::BondSymbolPeriodParams>,
+        Parameters(bond::BondSymbolPeriodParams { symbol, period }): Parameters<
+            bond::BondSymbolPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -2650,7 +2728,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get convertible bond value analysis (premium ratio history) from Eastmoney")]
+    #[tool(
+        description = "Get convertible bond value analysis (premium ratio history) from Eastmoney"
+    )]
     async fn bond_zh_cov_value_analysis(
         &self,
         Parameters(bond::BondSymbolParams { symbol }): Parameters<bond::BondSymbolParams>,
@@ -3165,7 +3245,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get Fama-French 3-factor data from Chicago Booth Risk Research Laboratory")]
+    #[tool(
+        description = "Get Fama-French 3-factor data from Chicago Booth Risk Research Laboratory"
+    )]
     async fn article_ff_crr(
         &self,
         Parameters(_): Parameters<stock::EmptyParams>,
@@ -3298,9 +3380,7 @@ impl AkShareMcpService {
     #[tool(description = "Get Gasgoo auto sales ranking by symbol and date")]
     async fn car_sale_rank_gasgoo(
         &self,
-        Parameters(economy::SymbolDateParam { symbol, date }): Parameters<
-            economy::SymbolDateParam,
-        >,
+        Parameters(economy::SymbolDateParam { symbol, date }): Parameters<economy::SymbolDateParam>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -3648,7 +3728,9 @@ impl AkShareMcpService {
     // ── Auto-generated from agent_forex_tools.rs ──
     // ── Forex (additional) ────────────────────────────────────────
 
-    #[tool(description = "Get Sina Finance realtime forex rates for major currency pairs against CNY")]
+    #[tool(
+        description = "Get Sina Finance realtime forex rates for major currency pairs against CNY"
+    )]
     async fn forex_sina_rates(
         &self,
         Parameters(_): Parameters<stock::EmptyParams>,
@@ -3663,7 +3745,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get historical forex kline data from Eastmoney with full parameter support")]
+    #[tool(
+        description = "Get historical forex kline data from Eastmoney with full parameter support"
+    )]
     async fn forex_hist_em(
         &self,
         Parameters(forex::ForexHistEmParams {
@@ -3687,7 +3771,9 @@ impl AkShareMcpService {
     #[tool(description = "Get recent forex kline data from Eastmoney by symbol and limit")]
     async fn forex_em_hist(
         &self,
-        Parameters(forex::ForexEmHistParams { symbol, limit }): Parameters<forex::ForexEmHistParams>,
+        Parameters(forex::ForexEmHistParams { symbol, limit }): Parameters<
+            forex::ForexEmHistParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -3798,7 +3884,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get SAFE (State Administration of Foreign Exchange) RMB central parity rates")]
+    #[tool(
+        description = "Get SAFE (State Administration of Foreign Exchange) RMB central parity rates"
+    )]
     async fn currency_boc_safe(
         &self,
         Parameters(_): Parameters<stock::EmptyParams>,
@@ -3845,7 +3933,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get FX spot/forward quotes for a specific currency pair from China Money")]
+    #[tool(
+        description = "Get FX spot/forward quotes for a specific currency pair from China Money"
+    )]
     async fn fx_pair_quote(
         &self,
         Parameters(forex::CurrencyPairParams { pair }): Parameters<forex::CurrencyPairParams>,
@@ -3913,7 +4003,9 @@ impl AkShareMcpService {
 
     // ── Announcement ────────────────────────────────────────────────
 
-    #[tool(description = "Get fund dividend announcements from Eastmoney (fund code e.g. '000001')")]
+    #[tool(
+        description = "Get fund dividend announcements from Eastmoney (fund code e.g. '000001')"
+    )]
     async fn fund_announcement_dividend_em(
         &self,
         Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
@@ -3943,7 +4035,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get fund personnel announcements from Eastmoney (fund code e.g. '000001')")]
+    #[tool(
+        description = "Get fund personnel announcements from Eastmoney (fund code e.g. '000001')"
+    )]
     async fn fund_announcement_personnel_em(
         &self,
         Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
@@ -4054,7 +4148,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get index fund info from Eastmoney. Symbol: '全部','沪深指数','行业主题','大盘指数','中盘指数','小盘指数'. Indicator: '全部','被动指数型','增强指数型'")]
+    #[tool(
+        description = "Get index fund info from Eastmoney. Symbol: '全部','沪深指数','行业主题','大盘指数','中盘指数','小盘指数'. Indicator: '全部','被动指数型','增强指数型'"
+    )]
     async fn fund_info_index_em(
         &self,
         Parameters(fund::FundInfoIndexParams {
@@ -4090,7 +4186,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get ETF historical K-line candles from Eastmoney with full parameters. Period: 'daily','weekly','monthly'. Adjust: 'qfq','hfq',''")]
+    #[tool(
+        description = "Get ETF historical K-line candles from Eastmoney with full parameters. Period: 'daily','weekly','monthly'. Adjust: 'qfq','hfq',''"
+    )]
     async fn fund_etf_hist_em(
         &self,
         Parameters(fund::FundEtfHistFullParams {
@@ -4111,7 +4209,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get ETF minute-level historical data from Eastmoney. Period: '1','5','15','30','60'. Adjust: '','qfq','hfq'")]
+    #[tool(
+        description = "Get ETF minute-level historical data from Eastmoney. Period: '1','5','15','30','60'. Adjust: '','qfq','hfq'"
+    )]
     async fn fund_etf_hist_min_em(
         &self,
         Parameters(fund::FundEtfHistFullParams {
@@ -4132,7 +4232,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get ETF fund info (historical NAV) from Eastmoney. Date format: YYYYMMDD")]
+    #[tool(
+        description = "Get ETF fund info (historical NAV) from Eastmoney. Date format: YYYYMMDD"
+    )]
     async fn fund_etf_fund_info_em(
         &self,
         Parameters(stock::SymbolDateRangeParams {
@@ -4181,7 +4283,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get THS fund category data. Symbol: 'ETF','LOF','股票型','债券型','混合型','QDII','保本型','指数型',''. Date format: YYYYMMDD or empty for latest")]
+    #[tool(
+        description = "Get THS fund category data. Symbol: 'ETF','LOF','股票型','债券型','混合型','QDII','保本型','指数型',''. Date format: YYYYMMDD or empty for latest"
+    )]
     async fn fund_etf_category_ths(
         &self,
         Parameters(fund::FundEtfCategoryThsParams { symbol, date }): Parameters<
@@ -4213,7 +4317,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get ETF dividend data from Sina Finance (symbol with exchange prefix e.g. 'sh510050')")]
+    #[tool(
+        description = "Get ETF dividend data from Sina Finance (symbol with exchange prefix e.g. 'sh510050')"
+    )]
     async fn fund_etf_dividend_sina(
         &self,
         Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
@@ -4230,7 +4336,9 @@ impl AkShareMcpService {
 
     // ── ETF (Sina) ──────────────────────────────────────────────────
 
-    #[tool(description = "Get ETF/LOF/closed fund category list from Sina Finance. Symbol: '封闭式基金','ETF基金','LOF基金'")]
+    #[tool(
+        description = "Get ETF/LOF/closed fund category list from Sina Finance. Symbol: '封闭式基金','ETF基金','LOF基金'"
+    )]
     async fn fund_etf_category_sina(
         &self,
         Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
@@ -4503,7 +4611,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get LOF historical K-line candles from Eastmoney with full parameters. Period: 'daily','weekly','monthly'. Adjust: 'qfq','hfq',''")]
+    #[tool(
+        description = "Get LOF historical K-line candles from Eastmoney with full parameters. Period: 'daily','weekly','monthly'. Adjust: 'qfq','hfq',''"
+    )]
     async fn fund_lof_hist_em(
         &self,
         Parameters(fund::FundEtfHistFullParams {
@@ -4524,7 +4634,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get LOF minute-level historical data from Eastmoney. Period: '1','5','15','30','60'. Adjust: '','qfq','hfq'")]
+    #[tool(
+        description = "Get LOF minute-level historical data from Eastmoney. Period: '1','5','15','30','60'. Adjust: '','qfq','hfq'"
+    )]
     async fn fund_lof_hist_min_em(
         &self,
         Parameters(fund::FundEtfHistFullParams {
@@ -4671,7 +4783,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get open fund info (NAV history) from Eastmoney. Indicator: '单位净值走势','累计净值走势',etc.")]
+    #[tool(
+        description = "Get open fund info (NAV history) from Eastmoney. Indicator: '单位净值走势','累计净值走势',etc."
+    )]
     async fn fund_open_fund_info_em(
         &self,
         Parameters(fund::FundOpenFundInfoParams {
@@ -4881,7 +4995,9 @@ impl AkShareMcpService {
 
     // ── QDII (Jisilu) ───────────────────────────────────────────────
 
-    #[tool(description = "Get Jisilu T+0 QDII Asian market index funds. Cookie is optional for authenticated access")]
+    #[tool(
+        description = "Get Jisilu T+0 QDII Asian market index funds. Cookie is optional for authenticated access"
+    )]
     async fn qdii_a_index_jsl(
         &self,
         Parameters(fund::FundQdiiCookieParams { cookie }): Parameters<fund::FundQdiiCookieParams>,
@@ -4896,7 +5012,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get Jisilu T+0 QDII European/American market index funds. Cookie is optional for authenticated access")]
+    #[tool(
+        description = "Get Jisilu T+0 QDII European/American market index funds. Cookie is optional for authenticated access"
+    )]
     async fn qdii_e_index_jsl(
         &self,
         Parameters(fund::FundQdiiCookieParams { cookie }): Parameters<fund::FundQdiiCookieParams>,
@@ -4911,7 +5029,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get Jisilu T+0 QDII European/American commodity funds. Cookie is optional for authenticated access")]
+    #[tool(
+        description = "Get Jisilu T+0 QDII European/American commodity funds. Cookie is optional for authenticated access"
+    )]
     async fn qdii_e_comm_jsl(
         &self,
         Parameters(fund::FundQdiiCookieParams { cookie }): Parameters<fund::FundQdiiCookieParams>,
@@ -5159,7 +5279,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get open-end fund scale data from Sina Finance. Symbol: '股票型基金','混合型基金','债券型基金','货币型基金','QDII基金'")]
+    #[tool(
+        description = "Get open-end fund scale data from Sina Finance. Symbol: '股票型基金','混合型基金','债券型基金','货币型基金','QDII基金'"
+    )]
     async fn fund_scale_open_sina(
         &self,
         Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
@@ -5219,7 +5341,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get SZSE fund scale daily data. Symbol: 'ETF','LOF','REITS'. Date format: YYYYMMDD")]
+    #[tool(
+        description = "Get SZSE fund scale daily data. Symbol: 'ETF','LOF','REITS'. Date format: YYYYMMDD"
+    )]
     async fn fund_scale_daily_szse(
         &self,
         Parameters(stock::SymbolDateRangeParams {
@@ -5240,7 +5364,9 @@ impl AkShareMcpService {
 
     // ── Value estimation ────────────────────────────────────────────
 
-    #[tool(description = "Get fund value estimation from Eastmoney. Symbol: '全部','股票型','混合型','债券型','指数型','QDII','ETF联接','LOF','场内交易基金'")]
+    #[tool(
+        description = "Get fund value estimation from Eastmoney. Symbol: '全部','股票型','混合型','债券型','指数型','QDII','ETF联接','LOF','场内交易基金'"
+    )]
     async fn fund_value_estimation_em(
         &self,
         Parameters(stock::SymbolParams { symbol }): Parameters<stock::SymbolParams>,
@@ -5362,7 +5488,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get fund detail holdings (asset allocation) from Xueqiu/Danjuan. Date format: YYYYMMDD")]
+    #[tool(
+        description = "Get fund detail holdings (asset allocation) from Xueqiu/Danjuan. Date format: YYYYMMDD"
+    )]
     async fn fund_individual_detail_hold_xq(
         &self,
         Parameters(stock::SymbolDateParams { symbol, date }): Parameters<stock::SymbolDateParams>,
@@ -5398,9 +5526,10 @@ impl AkShareMcpService {
     #[tool(description = "Get futures spot price daily range basis data from 100ppi.com")]
     async fn futures_spot_price_daily(
         &self,
-        Parameters(futures::FuturesDateRangeParams { start_date, end_date }): Parameters<
-            futures::FuturesDateRangeParams,
-        >,
+        Parameters(futures::FuturesDateRangeParams {
+            start_date,
+            end_date,
+        }): Parameters<futures::FuturesDateRangeParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -5650,9 +5779,11 @@ impl AkShareMcpService {
     #[tool(description = "Get Sina futures position data for a single contract")]
     async fn futures_hold_pos_sina(
         &self,
-        Parameters(futures::FuturesHoldPosParams { data_type, contract, date }): Parameters<
-            futures::FuturesHoldPosParams,
-        >,
+        Parameters(futures::FuturesHoldPosParams {
+            data_type,
+            contract,
+            date,
+        }): Parameters<futures::FuturesHoldPosParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -7029,11 +7160,11 @@ impl AkShareMcpService {
     }
 
     // ── Auto-generated from agent_index_tools.rs ──
-// ── Index MCP Tool Wrappers ─────────────────────────────────────────
-// Generated for all unwrapped pub async fn methods in
-// crates/akshare/src/index/
+    // ── Index MCP Tool Wrappers ─────────────────────────────────────────
+    // Generated for all unwrapped pub async fn methods in
+    // crates/akshare/src/index/
 
-// ── a_share.rs ──────────────────────────────────────────────────────
+    // ── a_share.rs ──────────────────────────────────────────────────────
 
     #[tool(description = "Get A-share index candles from Eastmoney")]
     async fn index_a_share_candles(
@@ -7082,7 +7213,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get A-share index daily K-line from Sina (requires JS decoding, may return error)")]
+    #[tool(
+        description = "Get A-share index daily K-line from Sina (requires JS decoding, may return error)"
+    )]
     async fn stock_zh_index_daily(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -7097,9 +7230,11 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── cflp.rs ─────────────────────────────────────────────────────────
+    // ── cflp.rs ─────────────────────────────────────────────────────────
 
-    #[tool(description = "Get CFLP road logistics price index. Symbol: '周指数','月指数','季度指数','年度指数'")]
+    #[tool(
+        description = "Get CFLP road logistics price index. Symbol: '周指数','月指数','季度指数','年度指数'"
+    )]
     async fn index_price_cflp(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -7114,7 +7249,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get CFLP road logistics volume index. Symbol: '月指数','季度指数','年度指数'")]
+    #[tool(
+        description = "Get CFLP road logistics volume index. Symbol: '月指数','季度指数','年度指数'"
+    )]
     async fn index_volume_cflp(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -7129,7 +7266,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── cni.rs ──────────────────────────────────────────────────────────
+    // ── cni.rs ──────────────────────────────────────────────────────────
 
     #[tool(description = "Get all CNIndex (国证指数) indices for the latest trading day")]
     async fn index_all_cni(
@@ -7165,7 +7302,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get CNIndex sample detail (constituents). Returns XLS error for most indices")]
+    #[tool(
+        description = "Get CNIndex sample detail (constituents). Returns XLS error for most indices"
+    )]
     async fn index_detail_cni(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -7199,7 +7338,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get CNIndex historical adjustment records. Returns XLS error for most indices")]
+    #[tool(
+        description = "Get CNIndex historical adjustment records. Returns XLS error for most indices"
+    )]
     async fn index_detail_hist_adjust_cni(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -7214,7 +7355,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── cons.rs ─────────────────────────────────────────────────────────
+    // ── cons.rs ─────────────────────────────────────────────────────────
 
     #[tool(description = "Get index constituent stocks from Sina (new API)")]
     async fn index_stock_cons_sina(
@@ -7261,7 +7402,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── csindex.rs ──────────────────────────────────────────────────────
+    // ── csindex.rs ──────────────────────────────────────────────────────
 
     #[tool(description = "Get list of all CSIndex (中证指数) indices")]
     async fn index_csindex_all(
@@ -7278,7 +7419,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── cx.rs (19 Caixin innovation indices) ────────────────────────────
+    // ── cx.rs (19 Caixin innovation indices) ────────────────────────────
 
     #[tool(description = "Get Caixin composite PMI index")]
     async fn index_pmi_com_cx(
@@ -7565,7 +7706,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── drewry.rs ───────────────────────────────────────────────────────
+    // ── drewry.rs ───────────────────────────────────────────────────────
 
     #[tool(description = "Get Drewry World Container Index (stub, requires HTML scraping)")]
     async fn drewry_wci_index(
@@ -7582,7 +7723,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── eri.rs ──────────────────────────────────────────────────────────
+    // ── eri.rs ──────────────────────────────────────────────────────────
 
     #[tool(description = "Get Zhejiang emission rights trading index. Symbol: '月度' or '季度'")]
     async fn index_eri(
@@ -7599,7 +7740,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── global.rs ───────────────────────────────────────────────────────
+    // ── global.rs ───────────────────────────────────────────────────────
 
     #[tool(description = "Get global index name-to-symbol mapping from Yahoo Finance")]
     async fn index_global_name_table_yahoo(
@@ -7616,7 +7757,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── global_em.rs ────────────────────────────────────────────────────
+    // ── global_em.rs ────────────────────────────────────────────────────
 
     #[tool(description = "Get global index real-time spot from Eastmoney")]
     async fn index_global_spot_em(
@@ -7652,16 +7793,14 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── global_sina.rs ──────────────────────────────────────────────────
+    // ── global_sina.rs ──────────────────────────────────────────────────
 
     #[tool(description = "Get global index name-to-code mapping from Sina")]
     async fn index_global_name_table(
         &self,
         Parameters(_): Parameters<stock::EmptyParams>,
     ) -> Result<CallToolResult, McpError> {
-        let data = self
-            .client
-            .index_global_name_table();
+        let data = self.client.index_global_name_table();
         Ok(CallToolResult::success(vec![Content::text(
             serde_json::to_string_pretty(&data).unwrap(),
         )]))
@@ -7682,7 +7821,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── hf.rs ───────────────────────────────────────────────────────────
+    // ── hf.rs ───────────────────────────────────────────────────────────
 
     #[tool(description = "Get high-frequency S&P 500 minute data for a given year (2012-2018)")]
     async fn hf_sp_500(
@@ -7699,7 +7838,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── hog.rs ──────────────────────────────────────────────────────────
+    // ── hog.rs ──────────────────────────────────────────────────────────
 
     #[tool(description = "Get hog (生猪) spot price index")]
     async fn index_hog_spot_price(
@@ -7716,7 +7855,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── kq_fz.rs ────────────────────────────────────────────────────────
+    // ── kq_fz.rs ────────────────────────────────────────────────────────
 
     #[tool(description = "Get Keqiao textile index. Symbol: '价格指数','景气指数','外贸指数'")]
     async fn index_kq_fz(
@@ -7733,7 +7872,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── kq_ss.rs ────────────────────────────────────────────────────────
+    // ── kq_ss.rs ────────────────────────────────────────────────────────
 
     #[tool(description = "Get Keqiao fashion index and sub-indices")]
     async fn index_kq_fashion(
@@ -7750,7 +7889,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── qvix.rs (18 option volatility indices) ──────────────────────────
+    // ── qvix.rs (18 option volatility indices) ──────────────────────────
 
     #[tool(description = "Get 50ETF option QVIX volatility index (daily)")]
     async fn index_option_50etf_qvix(
@@ -8022,7 +8161,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── scope.rs ────────────────────────────────────────────────────────
+    // ── scope.rs ────────────────────────────────────────────────────────
 
     #[tool(description = "Get Chinascope A-share news sentiment index")]
     async fn index_news_sentiment_scope(
@@ -8039,9 +8178,11 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── spot.rs ─────────────────────────────────────────────────────────
+    // ── spot.rs ─────────────────────────────────────────────────────────
 
-    #[tool(description = "Get spot goods price index from Sina. Symbol: '波罗的海干散货指数','钢坯价格指数','澳大利亚粉矿价格'")]
+    #[tool(
+        description = "Get spot goods price index from Sina. Symbol: '波罗的海干散货指数','钢坯价格指数','澳大利亚粉矿价格'"
+    )]
     async fn spot_goods(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -8056,7 +8197,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── sugar.rs ────────────────────────────────────────────────────────
+    // ── sugar.rs ────────────────────────────────────────────────────────
 
     #[tool(description = "Get Msweet China sugar composite price index")]
     async fn index_sugar_msweet(
@@ -8103,7 +8244,7 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── sw.rs ───────────────────────────────────────────────────────────
+    // ── sw.rs ───────────────────────────────────────────────────────────
 
     #[tool(description = "Get Shenwan industry index daily candles")]
     async fn sw_index_candles(
@@ -8197,9 +8338,11 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── sw_fund.rs ──────────────────────────────────────────────────────
+    // ── sw_fund.rs ──────────────────────────────────────────────────────
 
-    #[tool(description = "Get Shenwan fund index real-time data. Symbol: '基础一级','基础二级','基础三级','特色指数'")]
+    #[tool(
+        description = "Get Shenwan fund index real-time data. Symbol: '基础一级','基础二级','基础三级','特色指数'"
+    )]
     async fn index_realtime_fund_sw(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -8217,7 +8360,9 @@ impl AkShareMcpService {
     #[tool(description = "Get Shenwan fund index historical data. Period: 'day','week','month'")]
     async fn index_hist_fund_sw(
         &self,
-        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<index::IndexPeriodParams>,
+        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<
+            index::IndexPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -8229,12 +8374,16 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── sw_research.rs ──────────────────────────────────────────────────
+    // ── sw_research.rs ──────────────────────────────────────────────────
 
-    #[tool(description = "Get Shenwan research index historical data. Period: 'day','week','month'")]
+    #[tool(
+        description = "Get Shenwan research index historical data. Period: 'day','week','month'"
+    )]
     async fn index_hist_sw(
         &self,
-        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<index::IndexPeriodParams>,
+        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<
+            index::IndexPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -8276,7 +8425,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get Shenwan research index real-time data. Symbol: '市场表征','一级行业','二级行业','风格指数'")]
+    #[tool(
+        description = "Get Shenwan research index real-time data. Symbol: '市场表征','一级行业','二级行业','风格指数'"
+    )]
     async fn index_realtime_sw(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -8310,7 +8461,9 @@ impl AkShareMcpService {
         )]))
     }
 
-    #[tool(description = "Get Shenwan research week/month report date series. Symbol: 'WEEK' or 'MONTH'")]
+    #[tool(
+        description = "Get Shenwan research week/month report date series. Symbol: 'WEEK' or 'MONTH'"
+    )]
     async fn index_analysis_week_month_sw(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -8359,9 +8512,11 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── yw.rs ───────────────────────────────────────────────────────────
+    // ── yw.rs ───────────────────────────────────────────────────────────
 
-    #[tool(description = "Get Yiwu small commodity index. Symbol: '周价格指数','月价格指数','月景气指数'")]
+    #[tool(
+        description = "Get Yiwu small commodity index. Symbol: '周价格指数','月价格指数','月景气指数'"
+    )]
     async fn index_yw(
         &self,
         Parameters(index::IndexSymbolParams { symbol }): Parameters<index::IndexSymbolParams>,
@@ -8376,12 +8531,16 @@ impl AkShareMcpService {
         )]))
     }
 
-// ── zh_em.rs ────────────────────────────────────────────────────────
+    // ── zh_em.rs ────────────────────────────────────────────────────────
 
-    #[tool(description = "Get A-share index historical data from Eastmoney. Period: 'daily','weekly','monthly'")]
+    #[tool(
+        description = "Get A-share index historical data from Eastmoney. Period: 'daily','weekly','monthly'"
+    )]
     async fn index_zh_a_hist(
         &self,
-        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<index::IndexPeriodParams>,
+        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<
+            index::IndexPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -8417,7 +8576,9 @@ impl AkShareMcpService {
     #[tool(description = "Get A-share index intraday data from Eastmoney")]
     async fn index_zh_a_hist_min(
         &self,
-        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<index::IndexPeriodParams>,
+        Parameters(index::IndexPeriodParams { symbol, period }): Parameters<
+            index::IndexPeriodParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -9550,7 +9711,9 @@ impl AkShareMcpService {
     #[tool(description = "Get China NBS national data (National Bureau of Statistics)")]
     async fn macro_china_nbs_nation(
         &self,
-        Parameters(macro_data::MacroNbsNationParams { kind, path, period }): Parameters<macro_data::MacroNbsNationParams>,
+        Parameters(macro_data::MacroNbsNationParams { kind, path, period }): Parameters<
+            macro_data::MacroNbsNationParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -9565,7 +9728,12 @@ impl AkShareMcpService {
     #[tool(description = "Get China NBS regional data (National Bureau of Statistics)")]
     async fn macro_china_nbs_region(
         &self,
-        Parameters(macro_data::MacroNbsRegionParams { kind, path, indicator, period }): Parameters<macro_data::MacroNbsRegionParams>,
+        Parameters(macro_data::MacroNbsRegionParams {
+            kind,
+            path,
+            indicator,
+            period,
+        }): Parameters<macro_data::MacroNbsRegionParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11767,7 +11935,10 @@ impl AkShareMcpService {
     #[tool(description = "Get FX sentiment report from Jin10")]
     async fn macro_fx_sentiment(
         &self,
-        Parameters(macro_data::MacroDateRangeParams { start_date, end_date }): Parameters<macro_data::MacroDateRangeParams>,
+        Parameters(macro_data::MacroDateRangeParams {
+            start_date,
+            end_date,
+        }): Parameters<macro_data::MacroDateRangeParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11799,7 +11970,9 @@ impl AkShareMcpService {
     #[tool(description = "Get China Money repo fixing rate query data")]
     async fn repo_rate_query(
         &self,
-        Parameters(macro_data::MacroSymbolParams { symbol }): Parameters<macro_data::MacroSymbolParams>,
+        Parameters(macro_data::MacroSymbolParams { symbol }): Parameters<
+            macro_data::MacroSymbolParams,
+        >,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11814,7 +11987,10 @@ impl AkShareMcpService {
     #[tool(description = "Get historical repo fixing rates for a date range")]
     async fn repo_rate_hist(
         &self,
-        Parameters(macro_data::MacroDateRangeParams { start_date, end_date }): Parameters<macro_data::MacroDateRangeParams>,
+        Parameters(macro_data::MacroDateRangeParams {
+            start_date,
+            end_date,
+        }): Parameters<macro_data::MacroDateRangeParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11829,7 +12005,11 @@ impl AkShareMcpService {
     #[tool(description = "Get interbank lending rate data from Eastmoney")]
     async fn rate_interbank(
         &self,
-        Parameters(macro_data::MacroInterbankParams { market, symbol, indicator }): Parameters<macro_data::MacroInterbankParams>,
+        Parameters(macro_data::MacroInterbankParams {
+            market,
+            symbol,
+            indicator,
+        }): Parameters<macro_data::MacroInterbankParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11861,7 +12041,9 @@ impl AkShareMcpService {
 
     // ── News: Baidu suspension notifications ─────────────────────────────
 
-    #[tool(description = "Get stock suspension trade notifications from Baidu for a given date (YYYYMMDD)")]
+    #[tool(
+        description = "Get stock suspension trade notifications from Baidu for a given date (YYYYMMDD)"
+    )]
     async fn news_trade_notify_suspend_baidu(
         &self,
         Parameters(news::NewsDateParams { date }): Parameters<news::NewsDateParams>,
@@ -11878,12 +12060,16 @@ impl AkShareMcpService {
 
     // ── News: Eastmoney search with scope ────────────────────────────────
 
-    #[tool(description = "Search financial news from Eastmoney with a specific scope. Use 'default' for A-share focused news, 'global' for broader HK/US coverage")]
+    #[tool(
+        description = "Search financial news from Eastmoney with a specific scope. Use 'default' for A-share focused news, 'global' for broader HK/US coverage"
+    )]
     async fn news_search_with_scope(
         &self,
-        Parameters(news::NewsSearchWithScopeParams { query, limit, scope }): Parameters<
-            news::NewsSearchWithScopeParams,
-        >,
+        Parameters(news::NewsSearchWithScopeParams {
+            query,
+            limit,
+            scope,
+        }): Parameters<news::NewsSearchWithScopeParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11900,9 +12086,10 @@ impl AkShareMcpService {
     #[tool(description = "Search news from Baidu News by keyword")]
     async fn baidu_news_search(
         &self,
-        Parameters(news::NewsQueryTimeoutParams { query, timeout_secs }): Parameters<
-            news::NewsQueryTimeoutParams,
-        >,
+        Parameters(news::NewsQueryTimeoutParams {
+            query,
+            timeout_secs,
+        }): Parameters<news::NewsQueryTimeoutParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11916,7 +12103,9 @@ impl AkShareMcpService {
 
     // ── News: GDELT global news search ───────────────────────────────────
 
-    #[tool(description = "Search global news via GDELT API. Supports language filtering (zh-CN/en-US) and time ranges (day/week/month)")]
+    #[tool(
+        description = "Search global news via GDELT API. Supports language filtering (zh-CN/en-US) and time ranges (day/week/month)"
+    )]
     async fn gdelt_news_search(
         &self,
         Parameters(news::GdeltNewsSearchParams {
@@ -11948,9 +12137,10 @@ impl AkShareMcpService {
     #[tool(description = "Search news from Sogou News by keyword")]
     async fn sogou_news_search(
         &self,
-        Parameters(news::NewsQueryTimeoutParams { query, timeout_secs }): Parameters<
-            news::NewsQueryTimeoutParams,
-        >,
+        Parameters(news::NewsQueryTimeoutParams {
+            query,
+            timeout_secs,
+        }): Parameters<news::NewsQueryTimeoutParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11964,12 +12154,16 @@ impl AkShareMcpService {
 
     // ── News: Bing RSS news search ───────────────────────────────────────
 
-    #[tool(description = "Search news via Bing RSS feed. Set lang to 'en' for English results, omit for Chinese (default)")]
+    #[tool(
+        description = "Search news via Bing RSS feed. Set lang to 'en' for English results, omit for Chinese (default)"
+    )]
     async fn bing_news_rss(
         &self,
-        Parameters(news::BingNewsRssParams { query, timeout_secs, lang }): Parameters<
-            news::BingNewsRssParams,
-        >,
+        Parameters(news::BingNewsRssParams {
+            query,
+            timeout_secs,
+            lang,
+        }): Parameters<news::BingNewsRssParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -11986,9 +12180,10 @@ impl AkShareMcpService {
     #[tool(description = "Search news from Google News RSS feed (English, US edition)")]
     async fn google_news_rss(
         &self,
-        Parameters(news::NewsQueryTimeoutParams { query, timeout_secs }): Parameters<
-            news::NewsQueryTimeoutParams,
-        >,
+        Parameters(news::NewsQueryTimeoutParams {
+            query,
+            timeout_secs,
+        }): Parameters<news::NewsQueryTimeoutParams>,
     ) -> Result<CallToolResult, McpError> {
         let data = self
             .client
@@ -12694,7 +12889,6 @@ impl AkShareMcpService {
             serde_json::to_string_pretty(&data).unwrap(),
         )]))
     }
-
 }
 
 /// Auto-detect market code for fund flow from symbol.
@@ -12750,10 +12944,38 @@ const CATEGORY_PREFIXES: &[(&str, &[&str])] = &[
     (
         "economy",
         &[
-            "economy_", "movie_", "nlp_", "amac_", "car_", "sw_", "fx_", "article_", "air_",
-            "qdii_", "video_", "sunrise_", "repo_", "migration_", "fred_", "xincaifu_", "spot_",
-            "sogou_", "rate_", "online_", "match_", "hurun_", "hf_", "google_", "gdelt_",
-            "game_", "forbes_", "drewry_", "business_", "bing_", "baidu_", "qhkc_",
+            "economy_",
+            "movie_",
+            "nlp_",
+            "amac_",
+            "car_",
+            "sw_",
+            "fx_",
+            "article_",
+            "air_",
+            "qdii_",
+            "video_",
+            "sunrise_",
+            "repo_",
+            "migration_",
+            "fred_",
+            "xincaifu_",
+            "spot_",
+            "sogou_",
+            "rate_",
+            "online_",
+            "match_",
+            "hurun_",
+            "hf_",
+            "google_",
+            "gdelt_",
+            "game_",
+            "forbes_",
+            "drewry_",
+            "business_",
+            "bing_",
+            "baidu_",
+            "qhkc_",
             "methods_in_",
         ],
     ),
@@ -13010,7 +13232,10 @@ mod tests {
         assert!(!items.is_empty(), "bond category should have tools");
         for item in &items {
             let name = item["name"].as_str().unwrap();
-            assert!(name.starts_with("bond_"), "all results should be bond tools, got: {name}");
+            assert!(
+                name.starts_with("bond_"),
+                "all results should be bond tools, got: {name}"
+            );
         }
     }
 

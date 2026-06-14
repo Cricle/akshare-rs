@@ -15,7 +15,8 @@ fn make_init_request() -> rmcp::model::ClientRequest {
 
 #[tokio::test]
 async fn test_stdio_roundtrip_server_info() {
-    let server = akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
+    let server =
+        akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
     let client = TestClient;
 
     let (server_transport, client_transport) = tokio::io::duplex(4096);
@@ -53,7 +54,8 @@ async fn test_stdio_roundtrip_server_info() {
 
 #[tokio::test]
 async fn test_stdio_list_all_tools() {
-    let server = akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
+    let server =
+        akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
     let client = TestClient;
 
     let (server_transport, client_transport) = tokio::io::duplex(4096);
@@ -169,7 +171,8 @@ async fn test_stdio_list_all_tools() {
 
 #[tokio::test]
 async fn test_stdio_tool_has_description() {
-    let server = akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
+    let server =
+        akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
     let client = TestClient;
 
     let (server_transport, client_transport) = tokio::io::duplex(4096);

@@ -108,17 +108,50 @@ impl ToolsConfig {
     /// Enable a category by name.
     pub fn enable(&mut self, name: &str) -> bool {
         match name {
-            "stock" => { self.stock = true; true }
-            "bond" => { self.bond = true; true }
-            "index" => { self.index = true; true }
-            "futures" => { self.futures = true; true }
-            "economy" => { self.economy = true; true }
-            "crypto" => { self.crypto = true; true }
-            "forex" => { self.forex = true; true }
-            "option" => { self.option = true; true }
-            "news" => { self.news = true; true }
-            "macro_data" => { self.macro_data = true; true }
-            "fund" => { self.fund = true; true }
+            "stock" => {
+                self.stock = true;
+                true
+            }
+            "bond" => {
+                self.bond = true;
+                true
+            }
+            "index" => {
+                self.index = true;
+                true
+            }
+            "futures" => {
+                self.futures = true;
+                true
+            }
+            "economy" => {
+                self.economy = true;
+                true
+            }
+            "crypto" => {
+                self.crypto = true;
+                true
+            }
+            "forex" => {
+                self.forex = true;
+                true
+            }
+            "option" => {
+                self.option = true;
+                true
+            }
+            "news" => {
+                self.news = true;
+                true
+            }
+            "macro_data" => {
+                self.macro_data = true;
+                true
+            }
+            "fund" => {
+                self.fund = true;
+                true
+            }
             _ => false,
         }
     }
@@ -126,17 +159,50 @@ impl ToolsConfig {
     /// Disable a category by name.
     pub fn disable(&mut self, name: &str) -> bool {
         match name {
-            "stock" => { self.stock = false; true }
-            "bond" => { self.bond = false; true }
-            "index" => { self.index = false; true }
-            "futures" => { self.futures = false; true }
-            "economy" => { self.economy = false; true }
-            "crypto" => { self.crypto = false; true }
-            "forex" => { self.forex = false; true }
-            "option" => { self.option = false; true }
-            "news" => { self.news = false; true }
-            "macro_data" => { self.macro_data = false; true }
-            "fund" => { self.fund = false; true }
+            "stock" => {
+                self.stock = false;
+                true
+            }
+            "bond" => {
+                self.bond = false;
+                true
+            }
+            "index" => {
+                self.index = false;
+                true
+            }
+            "futures" => {
+                self.futures = false;
+                true
+            }
+            "economy" => {
+                self.economy = false;
+                true
+            }
+            "crypto" => {
+                self.crypto = false;
+                true
+            }
+            "forex" => {
+                self.forex = false;
+                true
+            }
+            "option" => {
+                self.option = false;
+                true
+            }
+            "news" => {
+                self.news = false;
+                true
+            }
+            "macro_data" => {
+                self.macro_data = false;
+                true
+            }
+            "fund" => {
+                self.fund = false;
+                true
+            }
             _ => false,
         }
     }

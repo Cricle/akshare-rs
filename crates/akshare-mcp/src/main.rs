@@ -98,7 +98,12 @@ async fn main() -> anyhow::Result<()> {
             disable,
         } => {
             tracing::info!("Starting akshare-mcp in stdio mode");
-            let tools_cfg = build_tools_config(&categories, &enable, &disable, config::ToolsConfig::default());
+            let tools_cfg = build_tools_config(
+                &categories,
+                &enable,
+                &disable,
+                config::ToolsConfig::default(),
+            );
             let service = AkShareMcpService::new(tools_cfg)
                 .serve(rmcp::transport::stdio())
                 .await
