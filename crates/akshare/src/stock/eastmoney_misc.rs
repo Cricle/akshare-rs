@@ -762,6 +762,27 @@ impl AkShareClient {
             .await
     }
 
+    /// Get US growth comparison from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_growth_comparison_em(symbol)`
+    pub async fn stock_us_growth_comparison_em(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
+        let filter = format!("(SECUCODE=\"{symbol}.OQ\")(CORRE_SECUCODE=\"{symbol}.OQ\")");
+        self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_USGROWTH", &filter, "F10")
+            .await
+    }
+
+    /// Get US valuation comparison from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_valuation_comparison_em(symbol)`
+    pub async fn stock_us_valuation_comparison_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<PeerComparison>> {
+        let filter = format!("(SECUCODE=\"{symbol}.OQ\")(CORRE_SECUCODE=\"{symbol}.OQ\")");
+        self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_USCVALUE", &filter, "F10")
+            .await
+    }
+
     /// Get A-share financial indicators from Eastmoney.
     ///
     /// Python equivalent: `stock_zh_a_financial_indicator_em(symbol)`

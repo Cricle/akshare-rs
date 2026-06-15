@@ -1,4 +1,4 @@
-//! US stock extra data — daily, spot, famous, pink, valuation.
+//! US stock extra data — daily, spot, famous, pink, valuation, hot rank, index, financial, dividend.
 //!
 //! Covers Python functions:
 //! - `stock_us_daily` — US daily candles (Sina)
@@ -6,6 +6,19 @@
 //! - `stock_us_famous_spot_em` — Famous US stocks (Eastmoney)
 //! - `stock_us_pink_spot_em` — Pink sheet stocks (Eastmoney)
 //! - `stock_us_valuation_baidu` — US valuation (Baidu)
+//! - `stock_us_hot_rank_em` — US hot rank (Eastmoney)
+//! - `stock_us_hot_rank_latest_em` — US latest hot rank (Eastmoney)
+//! - `stock_us_hot_rank_detail_em` — US hot rank detail (Eastmoney)
+//! - `stock_us_hot_rank_detail_realtime_em` — US realtime hot rank (Eastmoney)
+//! - `stock_us_index_spot_em` — US index spot (Eastmoney)
+//! - `stock_us_index_daily_em` — US index daily (Eastmoney)
+//! - `stock_us_index_spot_sina` — US index spot (Sina)
+//! - `stock_us_index_daily_sina` — US index daily (Sina)
+//! - `stock_us_financial_indicator_em` — US financial indicators (Eastmoney)
+//! - `stock_us_dividend_payout_em` — US dividend payout (Eastmoney)
+//! - `stock_us_gxl_lg` — US dividend yield (Legulegu)
+//! - `stock_us_scale_comparison_em` — US scale comparison (Eastmoney)
+//! - `stock_us_hot_keyword_em` — US hot keywords (Eastmoney)
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -117,6 +130,92 @@ pub struct UsPinkStock {
 pub struct UsValuationBaidu {
     pub date: String,
     pub value: f64,
+}
+
+/// US hot rank entry from Eastmoney.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsHotRank {
+    #[serde(default)]
+    pub rank: Option<i64>,
+    pub code: String,
+    pub name: String,
+    #[serde(default)]
+    pub latest_price: Option<f64>,
+    #[serde(default)]
+    pub change_pct: Option<f64>,
+}
+
+/// US hot rank detail entry from Eastmoney.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsHotRankDetail {
+    pub time: String,
+    pub rank: i64,
+    #[serde(default)]
+    pub code: Option<String>,
+}
+
+/// US index spot from Eastmoney.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsIndexSpotEm {
+    pub code: String,
+    pub internal_id: String,
+    pub name: String,
+    #[serde(default)]
+    pub latest_price: Option<f64>,
+    #[serde(default)]
+    pub change_pct: Option<f64>,
+    #[serde(default)]
+    pub change_amount: Option<f64>,
+    #[serde(default)]
+    pub open: Option<f64>,
+    #[serde(default)]
+    pub high: Option<f64>,
+    #[serde(default)]
+    pub low: Option<f64>,
+    #[serde(default)]
+    pub prev_close: Option<f64>,
+    #[serde(default)]
+    pub volume: Option<f64>,
+    #[serde(default)]
+    pub amount: Option<f64>,
+}
+
+/// US index daily candle.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsIndexDailyCandle {
+    pub date: String,
+    pub open: f64,
+    pub high: f64,
+    pub low: f64,
+    pub close: f64,
+}
+
+/// US index spot from Sina.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsIndexSpotSina {
+    pub code: String,
+    pub name: String,
+    #[serde(default)]
+    pub latest_price: Option<f64>,
+    #[serde(default)]
+    pub change_amount: Option<f64>,
+    #[serde(default)]
+    pub change_pct: Option<f64>,
+    #[serde(default)]
+    pub prev_close: Option<f64>,
+    #[serde(default)]
+    pub open: Option<f64>,
+    #[serde(default)]
+    pub high: Option<f64>,
+    #[serde(default)]
+    pub low: Option<f64>,
+}
+
+/// US dividend yield from Legulegu.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UsGxlLg {
+    pub date: String,
+    pub dividend_yield: f64,
 }
 
 // ---------------------------------------------------------------------------
@@ -520,5 +619,722 @@ impl AkShareClient {
             return Err(Error::not_found("baidu US valuation returned no data"));
         }
         Ok(items)
+    }
+
+    // -----------------------------------------------------------------------
+    // US hot rank
+    // -----------------------------------------------------------------------
+
+    /// Get US stock hot rank from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_hot_rank_em()`
+    pub async fn stock_us_hot_rank_em(&self) -> Result<Vec<UsHotRank>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<Vec<RankItem>>,
+        }
+        #[derive(Deserialize)]
+        struct RankItem {
+            sc: Option<String>,
+            rk: Option<i64>,
+        }
+        let url = "https://emappdata.eastmoney.com/stockrank/getAllCurrHkUsList";
+        let payload = serde_json::json!({
+            "appId": "appId01",
+            "globalId": "786e4c21-70dc-435a-93bb-38",
+            "marketType": "000001",
+            "pageNo": 1,
+            "pageSize": 100,
+        });
+
+        let response = self
+            .post(url)
+            .json(&payload)
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let env: Env = response.json().await.map_err(Error::from)?;
+        let rank_data = env
+            .data
+            .ok_or_else(|| Error::upstream("US hot rank missing data"))?;
+
+        let mut items = Vec::new();
+        for item in &rank_data {
+            let sc = item.sc.as_deref().unwrap_or("");
+            let parts: Vec<&str> = sc.split('|').collect();
+            let code = parts.get(1).unwrap_or(&"").to_string();
+
+            items.push(UsHotRank {
+                rank: item.rk,
+                code,
+                name: String::new(),
+                latest_price: None,
+                change_pct: None,
+            });
+        }
+
+        if items.is_empty() {
+            return Err(Error::not_found("US hot rank returned no data"));
+        }
+        Ok(items)
+    }
+
+    /// Get US latest hot rank from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_hot_rank_latest_em(symbol)`
+    pub async fn stock_us_hot_rank_latest_em(&self, symbol: &str) -> Result<Vec<UsHotRankDetail>> {
+        let url = "https://emappdata.eastmoney.com/stockrank/getCurrentHkUsLatest";
+        let payload = serde_json::json!({
+            "appId": "appId01",
+            "globalId": "786e4c21-70dc-435a-93bb-38",
+            "marketType": "000001",
+            "srcSecurityCode": format!("US|{}", symbol),
+        });
+
+        let response = self
+            .post(url)
+            .json(&payload)
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let data: serde_json::Value = response.json().await.map_err(Error::from)?;
+        let obj = data
+            .get("data")
+            .and_then(|d| d.as_object())
+            .ok_or_else(|| Error::upstream("US hot rank latest missing data"))?;
+
+        let mut items = Vec::new();
+        for (key, val) in obj {
+            let rank = val.as_i64().unwrap_or(0);
+            items.push(UsHotRankDetail {
+                time: key.clone(),
+                rank,
+                code: Some(symbol.to_string()),
+            });
+        }
+
+        if items.is_empty() {
+            return Err(Error::not_found("US hot rank latest returned no data"));
+        }
+        Ok(items)
+    }
+
+    /// Get US hot rank detail from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_hot_rank_detail_em(symbol)`
+    pub async fn stock_us_hot_rank_detail_em(&self, symbol: &str) -> Result<Vec<UsHotRankDetail>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<Vec<RankDetailItem>>,
+        }
+        #[derive(Deserialize)]
+        struct RankDetailItem {
+            dt: Option<String>,
+            rk: Option<i64>,
+        }
+        let url = "https://emappdata.eastmoney.com/stockrank/getHisHkUsList";
+        let payload = serde_json::json!({
+            "appId": "appId01",
+            "globalId": "786e4c21-70dc-435a-93bb-38",
+            "marketType": "000001",
+            "srcSecurityCode": format!("US|{}", symbol),
+        });
+
+        let response = self
+            .post(url)
+            .json(&payload)
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let env: Env = response.json().await.map_err(Error::from)?;
+        let data = env
+            .data
+            .ok_or_else(|| Error::upstream("US hot rank detail missing data"))?;
+
+        let items: Vec<UsHotRankDetail> = data
+            .iter()
+            .map(|item| UsHotRankDetail {
+                time: item.dt.clone().unwrap_or_default(),
+                rank: item.rk.unwrap_or(0),
+                code: Some(symbol.to_string()),
+            })
+            .collect();
+
+        if items.is_empty() {
+            return Err(Error::not_found("US hot rank detail returned no data"));
+        }
+        Ok(items)
+    }
+
+    /// Get US realtime hot rank from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_hot_rank_detail_realtime_em(symbol)`
+    pub async fn stock_us_hot_rank_detail_realtime_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<UsHotRankDetail>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<Vec<RankDetailItem>>,
+        }
+        #[derive(Deserialize)]
+        struct RankDetailItem {
+            dt: Option<String>,
+            rk: Option<i64>,
+        }
+        let url = "https://emappdata.eastmoney.com/stockrank/getCurrentHkUsList";
+        let payload = serde_json::json!({
+            "appId": "appId01",
+            "globalId": "786e4c21-70dc-435a-93bb-38",
+            "marketType": "000001",
+            "srcSecurityCode": format!("US|{}", symbol),
+        });
+
+        let response = self
+            .post(url)
+            .json(&payload)
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let env: Env = response.json().await.map_err(Error::from)?;
+        let data = env
+            .data
+            .ok_or_else(|| Error::upstream("US realtime hot rank missing data"))?;
+
+        let items: Vec<UsHotRankDetail> = data
+            .iter()
+            .map(|item| UsHotRankDetail {
+                time: item.dt.clone().unwrap_or_default(),
+                rank: item.rk.unwrap_or(0),
+                code: Some(symbol.to_string()),
+            })
+            .collect();
+
+        if items.is_empty() {
+            return Err(Error::not_found("US realtime hot rank returned no data"));
+        }
+        Ok(items)
+    }
+
+    // -----------------------------------------------------------------------
+    // US index
+    // -----------------------------------------------------------------------
+
+    /// Get US index spot data from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_index_spot_em()`
+    pub async fn stock_us_index_spot_em(&self) -> Result<Vec<UsIndexSpotEm>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
+        let response = self
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .query(&[
+                ("pn", "1"),
+                ("pz", "5000"),
+                ("po", "1"),
+                ("np", "1"),
+                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
+                ("fltt", "2"),
+                ("invt", "2"),
+                ("fid", "f3"),
+                ("fs", "i:100.NDX,i:100.DJIA,i:100.SPX"),
+                ("fields", "f1,f2,f3,f4,f5,f6,f7,f8,f12,f13,f14"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let diff = payload
+            .data
+            .and_then(|d| d.diff)
+            .ok_or_else(|| Error::upstream("US index spot missing data"))?;
+
+        let mut items = Vec::new();
+        for item in &diff {
+            let code = item
+                .get("f12")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("")
+                .to_string();
+            let internal_id = item
+                .get("f13")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("")
+                .to_string();
+            let name = item
+                .get("f14")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("")
+                .to_string();
+            if code.is_empty() {
+                continue;
+            }
+            items.push(UsIndexSpotEm {
+                code,
+                internal_id,
+                name,
+                latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
+                change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
+                change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
+                open: item.get("f17").and_then(serde_json::Value::as_f64),
+                high: item.get("f15").and_then(serde_json::Value::as_f64),
+                low: item.get("f16").and_then(serde_json::Value::as_f64),
+                prev_close: item.get("f18").and_then(serde_json::Value::as_f64),
+                volume: item.get("f5").and_then(serde_json::Value::as_f64),
+                amount: item.get("f6").and_then(serde_json::Value::as_f64),
+            });
+        }
+
+        if items.is_empty() {
+            return Err(Error::not_found("US index spot returned no data"));
+        }
+        Ok(items)
+    }
+
+    /// Get US index daily K-line from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_index_daily_em(symbol)`
+    ///
+    /// - `symbol`: US index code like "NDX", "DJIA", "SPX"
+    pub async fn stock_us_index_daily_em(&self, symbol: &str) -> Result<Vec<UsIndexDailyCandle>> {
+        #[derive(Deserialize)]
+        struct Env {
+            data: Option<EnvData>,
+        }
+        #[derive(Deserialize)]
+        struct EnvData {
+            klines: Option<Vec<String>>,
+        }
+        let secid = format!("100.{symbol}");
+
+        let response = self
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .query(&[
+                ("secid", secid.as_str()),
+                ("klt", "101"),
+                ("fqt", "1"),
+                ("lmt", "10000"),
+                ("end", "20500000"),
+                ("iscca", "1"),
+                ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
+                ),
+                ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
+                ("forcect", "1"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let klines = payload
+            .data
+            .and_then(|d| d.klines)
+            .ok_or_else(|| Error::upstream("US index daily missing data"))?;
+
+        let items: Vec<UsIndexDailyCandle> = klines
+            .iter()
+            .filter_map(|line| {
+                let parts: Vec<&str> = line.split(',').collect();
+                if parts.len() < 5 {
+                    return None;
+                }
+                Some(UsIndexDailyCandle {
+                    date: parts[0].to_string(),
+                    open: parts[1].parse().unwrap_or(0.0),
+                    high: parts[3].parse().unwrap_or(0.0),
+                    low: parts[4].parse().unwrap_or(0.0),
+                    close: parts[2].parse().unwrap_or(0.0),
+                })
+            })
+            .collect();
+
+        if items.is_empty() {
+            return Err(Error::not_found("US index daily returned no data"));
+        }
+        Ok(items)
+    }
+
+    /// Get US index spot data from Sina.
+    ///
+    /// Python equivalent: `stock_us_index_spot_sina()`
+    pub async fn stock_us_index_spot_sina(&self) -> Result<Vec<UsIndexSpotSina>> {
+        let url = "https://hq.sinajs.cn/list=int_dji,int_nasdaq,int_sp500";
+        let response = self
+            .get(url)
+            .header("Referer", "https://finance.sina.com.cn")
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let text = response.text().await.map_err(Error::from)?;
+        let mut items = Vec::new();
+
+        for line in text.lines() {
+            let line = line.trim();
+            if line.is_empty() || !line.contains('=') {
+                continue;
+            }
+            let eq_pos = line.find('=').unwrap_or(0);
+            let var_part = &line[..eq_pos];
+            let val_part = &line[eq_pos + 2..]
+                .trim_end_matches(';')
+                .trim_end_matches('"');
+
+            let code = var_part.split('_').next_back().unwrap_or("").to_string();
+            let parts: Vec<&str> = val_part.split(',').collect();
+            if parts.len() < 5 {
+                continue;
+            }
+            let name = parts.first().unwrap_or(&"").to_string();
+            let latest_price = parts.get(1).and_then(|s| s.parse::<f64>().ok());
+            let change_amount = parts.get(2).and_then(|s| s.parse::<f64>().ok());
+            let change_pct = parts.get(3).and_then(|s| s.parse::<f64>().ok());
+
+            items.push(UsIndexSpotSina {
+                code,
+                name,
+                latest_price,
+                change_amount,
+                change_pct,
+                prev_close: None,
+                open: None,
+                high: None,
+                low: None,
+            });
+        }
+
+        if items.is_empty() {
+            return Err(Error::not_found("US index spot sina returned no data"));
+        }
+        Ok(items)
+    }
+
+    /// Get US index daily data from Sina.
+    ///
+    /// Python equivalent: `stock_us_index_daily_sina(symbol)`
+    ///
+    /// - `symbol`: Sina index code like "int_dji", "int_nasdaq", "int_sp500"
+    pub async fn stock_us_index_daily_sina(&self, symbol: &str) -> Result<Vec<UsIndexDailyCandle>> {
+        let url = format!("https://finance.sina.com.cn/stock/usstock/{symbol}/klc_kl.js");
+
+        let response = self
+            .get(&url)
+            .query(&[("d", "2023_5_01")])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let text = response.text().await.map_err(Error::from)?;
+
+        let json_start = text
+            .find("=(")
+            .ok_or_else(|| Error::decode("invalid JS response"))?
+            + 2;
+        let json_end = text
+            .find(");")
+            .ok_or_else(|| Error::decode("invalid JS response"))?;
+        let json_text = &text[json_start..json_end];
+
+        let data: Vec<serde_json::Value> = serde_json::from_str(json_text)
+            .map_err(|e| Error::decode(format!("JSON parse error: {e}")))?;
+
+        let items: Vec<UsIndexDailyCandle> = data
+            .iter()
+            .filter_map(|v| {
+                let arr = v.as_array()?;
+                if arr.len() < 5 {
+                    return None;
+                }
+                Some(UsIndexDailyCandle {
+                    date: arr[0].as_str().unwrap_or("").to_string(),
+                    open: arr[1].as_str().unwrap_or("0").parse().unwrap_or(0.0),
+                    high: arr[3].as_str().unwrap_or("0").parse().unwrap_or(0.0),
+                    low: arr[4].as_str().unwrap_or("0").parse().unwrap_or(0.0),
+                    close: arr[2].as_str().unwrap_or("0").parse().unwrap_or(0.0),
+                })
+            })
+            .collect();
+
+        if items.is_empty() {
+            return Err(Error::not_found("US index daily sina returned no data"));
+        }
+        Ok(items)
+    }
+
+    // -----------------------------------------------------------------------
+    // US financial indicator & dividend
+    // -----------------------------------------------------------------------
+
+    /// Get US financial indicators from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_financial_indicator_em(symbol)`
+    pub async fn stock_us_financial_indicator_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
+
+        let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
+        let response = self
+            .get(url)
+            .query(&[
+                ("reportName", "RPT_USF10_FN_GMAININDICATOR"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "REPORT_DATE"),
+                ("source", "F10"),
+                ("client", "PC"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let data = payload
+            .result
+            .and_then(|r| r.data)
+            .ok_or_else(|| Error::upstream("US financial indicators missing data"))?;
+
+        if data.is_empty() {
+            return Err(Error::not_found("US financial indicators returned no data"));
+        }
+        Ok(data)
+    }
+
+    /// Get US dividend payout from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_dividend_payout_em(symbol)`
+    pub async fn stock_us_dividend_payout_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
+
+        let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
+        let response = self
+            .get(url)
+            .query(&[
+                ("reportName", "RPT_USF10_FN_DIVIDEND"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "EX_DIVIDEND_DATE"),
+                ("source", "F10"),
+                ("client", "PC"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let data = payload
+            .result
+            .and_then(|r| r.data)
+            .ok_or_else(|| Error::upstream("US dividend payout missing data"))?;
+
+        if data.is_empty() {
+            return Err(Error::not_found("US dividend payout returned no data"));
+        }
+        Ok(data)
+    }
+
+    /// Get US dividend yield from Legulegu.
+    ///
+    /// Python equivalent: `stock_us_gxl_lg()`
+    ///
+    /// Returns S&P 500 dividend yield data.
+    pub async fn stock_us_gxl_lg(&self) -> Result<Vec<UsGxlLg>> {
+        let url = "https://legulegu.com/api/stockdata/s-and-p-500";
+        let response = self
+            .get(url)
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let data: serde_json::Value = response.json().await.map_err(Error::from)?;
+        let arr = data
+            .as_array()
+            .ok_or_else(|| Error::decode("legulegu response is not an array"))?;
+
+        let items: Vec<UsGxlLg> = arr
+            .iter()
+            .filter_map(|item| {
+                let date = item.get("date")?.as_str()?.to_string();
+                let dv_ratio = item.get("dvRatio")?.as_f64()?;
+                Some(UsGxlLg {
+                    date,
+                    dividend_yield: dv_ratio,
+                })
+            })
+            .collect();
+
+        if items.is_empty() {
+            return Err(Error::not_found("US dividend yield returned no data"));
+        }
+        Ok(items)
+    }
+
+    // -----------------------------------------------------------------------
+    // US scale comparison
+    // -----------------------------------------------------------------------
+
+    /// Get US scale comparison from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_scale_comparison_em(symbol)`
+    pub async fn stock_us_scale_comparison_em(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
+
+        let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
+        let response = self
+            .get(url)
+            .query(&[
+                ("reportName", "RPT_PCF10_INDUSTRY_USSCALE"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", ""),
+                ("pageSize", ""),
+                ("sortTypes", "1"),
+                ("sortColumns", "PAIMING"),
+                ("source", "F10"),
+                ("client", "PC"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let data = payload
+            .result
+            .and_then(|r| r.data)
+            .ok_or_else(|| Error::upstream("US scale comparison missing data"))?;
+
+        if data.is_empty() {
+            return Err(Error::not_found("US scale comparison returned no data"));
+        }
+        Ok(data)
+    }
+
+    // -----------------------------------------------------------------------
+    // US hot keyword
+    // -----------------------------------------------------------------------
+
+    /// Get US hot keyword from Eastmoney.
+    ///
+    /// Python equivalent: `stock_us_hot_keyword_em(symbol)`
+    pub async fn stock_us_hot_keyword_em(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
+        #[derive(Deserialize)]
+        struct Env {
+            result: Option<EnvResult>,
+        }
+        #[derive(Deserialize)]
+        struct EnvResult {
+            data: Option<Vec<serde_json::Value>>,
+        }
+        let filter = format!("(SECURITY_CODE=\"{symbol}\")");
+
+        let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
+        let response = self
+            .get(url)
+            .query(&[
+                ("reportName", "RPT_USF10_HOT_KEYWORD"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "TRADE_DATE"),
+                ("source", "F10"),
+                ("client", "PC"),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: Env = response.json().await.map_err(Error::from)?;
+        let data = payload
+            .result
+            .and_then(|r| r.data)
+            .ok_or_else(|| Error::upstream("US hot keyword missing data"))?;
+
+        if data.is_empty() {
+            return Err(Error::not_found("US hot keyword returned no data"));
+        }
+        Ok(data)
     }
 }

@@ -1451,9 +1451,11 @@ fn pivot_hk_report_to_profit_sheet(
                 (None, None, Some(a)) => Some(a),
                 (None, None, None) => None,
             };
-            let total_revenue = pivot_amount(&group, &["营业收入", "营业总收入", "营运收入", "营业额"]);
+            let total_revenue =
+                pivot_amount(&group, &["营业收入", "营业总收入", "营运收入", "营业额"]);
             let gross_profit = pivot_amount(&group, &["毛利", "营业毛利"]);
-            let net_profit = pivot_amount(&group, &["净利润", "本公司拥有人应占溢利", "股东应占溢利"]);
+            let net_profit =
+                pivot_amount(&group, &["净利润", "本公司拥有人应占溢利", "股东应占溢利"]);
             // Calculate gross margin from gross_profit / revenue
             let gross_margin = match (gross_profit, total_revenue) {
                 (Some(gp), Some(rev)) if rev > 0.0 => Some(gp / rev * 100.0),
@@ -1469,8 +1471,14 @@ fn pivot_hk_report_to_profit_sheet(
                 total_profit: pivot_amount(&group, &["利润总额", "除税前溢利"]),
                 net_profit,
                 net_profit_deducted: None,
-                total_revenue_yoy: pivot_yoy(&group, &["营业收入", "营业总收入", "营运收入", "营业额"]),
-                net_profit_yoy: pivot_yoy(&group, &["净利润", "本公司拥有人应占溢利", "股东应占溢利"]),
+                total_revenue_yoy: pivot_yoy(
+                    &group,
+                    &["营业收入", "营业总收入", "营运收入", "营业额"],
+                ),
+                net_profit_yoy: pivot_yoy(
+                    &group,
+                    &["净利润", "本公司拥有人应占溢利", "股东应占溢利"],
+                ),
                 gross_margin,
                 net_margin: None,
                 roe: None,

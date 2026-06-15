@@ -165,7 +165,9 @@ impl AkShareClient {
             return Err(Error::decode("tencent HK financial: insufficient fields"));
         }
         let parse = |i: usize| -> Option<f64> {
-            p.get(i).and_then(|s| s.trim().parse::<f64>().ok()).filter(|v| *v != 0.0)
+            p.get(i)
+                .and_then(|s| s.trim().parse::<f64>().ok())
+                .filter(|v| *v != 0.0)
         };
         Ok(HkFinancialSnapshot {
             symbol: symbol.to_string(),
