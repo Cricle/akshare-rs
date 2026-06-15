@@ -20,8 +20,8 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           echo "Setting version to $VERSION"
-          sed -i "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml
-          sed -i "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml
+          sed "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
+          sed "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -42,8 +42,8 @@ jobs:
         shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          sed -i "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml
-          sed -i "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml
+          sed "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
+          sed "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
       - name: Publish akshare
         run: cargo publish -p akshare --allow-dirty
@@ -86,8 +86,8 @@ jobs:
         shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          sed -i "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml
-          sed -i "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml
+          sed "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
+          sed "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
 
       - uses: dtolnay/rust-toolchain@stable
         with:
