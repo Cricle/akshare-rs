@@ -252,6 +252,63 @@ pub struct NoticeReportParams {
     pub end_date: String,
 }
 
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct DisclosureParams {
+    pub symbol: String,
+    pub category: String,
+    #[serde(default)]
+    pub start_date: String,
+    #[serde(default)]
+    pub end_date: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SymbolYearParams {
+    pub symbol: String,
+    #[serde(default = "default_year")]
+    pub year: String,
+}
+
+fn default_year() -> String {
+    "2024".to_string()
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct DateIndicatorParams {
+    pub date: String,
+    pub indicator: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct DateMarketParams {
+    pub date: String,
+    #[serde(default)]
+    pub market: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct DateRangeLimitParams {
+    pub start_date: String,
+    pub end_date: String,
+    #[serde(default = "default_limit")]
+    pub limit: usize,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct SymbolSectorParams {
+    pub symbol: String,
+    #[serde(default)]
+    pub sector: String,
+}
+
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct KeywordDateParams {
+    #[serde(default)]
+    pub keyword: String,
+    #[serde(default)]
+    pub date: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -83,10 +83,10 @@ async fn test_stdio_list_meta_tools() {
         rmcp::model::ServerResult::ListToolsResult(result) => {
             let tool_names: Vec<&str> = result.tools.iter().map(|t| t.name.as_ref()).collect();
 
-            // Search + Call pattern: only 2 meta-tools exposed via MCP protocol
-            assert_eq!(tool_names.len(), 2, "should expose exactly 2 meta-tools");
-            assert!(tool_names.contains(&"tools/search"));
-            assert!(tool_names.contains(&"tools/call"));
+            // Search + Call meta-tools plus all registry tools
+            assert!(tool_names.contains(&"tools/search"), "should have tools/search");
+            assert!(tool_names.contains(&"tools/call"), "should have tools/call");
+            assert!(tool_names.len() > 2, "should have registry tools beyond the 2 meta-tools");
 
             // Both tools must have descriptions
             for tool in &result.tools {
