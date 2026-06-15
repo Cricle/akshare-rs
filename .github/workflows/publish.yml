@@ -31,7 +31,6 @@ jobs:
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
       - run: cargo publish -p akshare --dry-run --allow-dirty
-      - run: cargo publish -p akshare-mcp --dry-run --allow-dirty --no-verify
 
   publish:
     name: Publish to crates.io
