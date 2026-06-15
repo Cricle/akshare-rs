@@ -110,7 +110,12 @@ fn generate_handler(t: &ToolDef) -> String {
         fields
             .iter()
             .map(|f| {
-                if call.contains(f) {
+                // Check if field is used as &field (reference) or as bare variable (e.g. limit)
+                let as_ref = format!("&{}", f);
+                let as_sp = format!(" {}", f);
+                let as_comma = format!(",{}", f);
+                let as_paren = format!("({}", f);
+                if call.contains(&as_ref) || call.contains(&as_sp) || call.contains(&as_comma) || call.contains(&as_paren) {
                     f.to_string()
                 } else {
                     format!("{}: _", f)
