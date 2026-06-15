@@ -46,10 +46,12 @@ jobs:
           sed "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
       - name: Publish akshare
+        continue-on-error: true
         run: cargo publish -p akshare --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO }}
       - name: Publish akshare-mcp
+        continue-on-error: true
         run: cargo publish -p akshare-mcp --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO }}
@@ -127,7 +129,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: [publish, build-release]
+    needs: build-release
     runs-on: ubuntu-latest
     permissions:
       contents: write
