@@ -34,7 +34,12 @@ use crate::config::ToolsConfig;
 
 // ── Tool registry types ──────────────────────────────────────────────
 
-type Handler = fn(&AkShareClient, serde_json::Value) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<serde_json::Value, String>> + Send>>;
+type Handler = fn(
+    &AkShareClient,
+    serde_json::Value,
+) -> std::pin::Pin<
+    Box<dyn std::future::Future<Output = Result<serde_json::Value, String>> + Send>,
+>;
 
 pub(crate) struct ToolEntry {
     pub description: &'static str,
@@ -88,10 +93,39 @@ const CATEGORY_PREFIXES: &[(&str, &[&str])] = &[
     (
         "economy",
         &[
-            "economy_", "movie_", "nlp_", "amac_", "car_", "sw_", "fx_", "article_", "air_",
-            "qdii_", "video_", "sunrise_", "repo_", "migration_", "fred_", "xincaifu_", "spot_",
-            "sogou_", "rate_", "online_", "match_", "hurun_", "hf_", "google_", "gdelt_", "game_",
-            "forbes_", "drewry_", "business_", "bing_", "baidu_", "qhkc_", "methods_in_",
+            "economy_",
+            "movie_",
+            "nlp_",
+            "amac_",
+            "car_",
+            "sw_",
+            "fx_",
+            "article_",
+            "air_",
+            "qdii_",
+            "video_",
+            "sunrise_",
+            "repo_",
+            "migration_",
+            "fred_",
+            "xincaifu_",
+            "spot_",
+            "sogou_",
+            "rate_",
+            "online_",
+            "match_",
+            "hurun_",
+            "hf_",
+            "google_",
+            "gdelt_",
+            "game_",
+            "forbes_",
+            "drewry_",
+            "business_",
+            "bing_",
+            "baidu_",
+            "qhkc_",
+            "methods_in_",
         ],
     ),
     ("crypto", &["crypto_"]),
@@ -167,7 +201,11 @@ impl AkShareMcpService {
     }
 
     /// Search the tool registry by optional category and/or keyword.
-    fn search_registry(&self, category: Option<&str>, query: Option<&str>) -> Vec<(String, String)> {
+    fn search_registry(
+        &self,
+        category: Option<&str>,
+        query: Option<&str>,
+    ) -> Vec<(String, String)> {
         let query_lower = query.map(|q| q.to_lowercase());
         let category_prefixes: Option<&[&str]> = category
             .and_then(|cat| CATEGORY_PREFIXES.iter().find(|(name, _)| *name == cat))
@@ -248,9 +286,9 @@ impl ServerHandler for AkShareMcpService {
                     .transpose()?
                     .ok_or_else(|| McpError::invalid_params("missing arguments", None))?;
 
-                let entry = TOOL_REGISTRY
-                    .get(args.name.as_str())
-                    .ok_or_else(|| McpError::invalid_params(format!("unknown tool: {}", args.name), None))?;
+                let entry = TOOL_REGISTRY.get(args.name.as_str()).ok_or_else(|| {
+                    McpError::invalid_params(format!("unknown tool: {}", args.name), None)
+                })?;
 
                 if !self.is_category_enabled(entry.category) {
                     return Err(McpError::invalid_params(
@@ -265,7 +303,8 @@ impl ServerHandler for AkShareMcpService {
                     .unwrap_or(serde_json::Value::Null);
 
                 let handler = entry.handler;
-                let result = handler(&self.client, args_value).await
+                let result = handler(&self.client, args_value)
+                    .await
                     .map_err(|e| McpError::internal_error(e, None))?;
 
                 Ok(CallToolResult::success(vec![Content::text(
@@ -273,7 +312,10 @@ impl ServerHandler for AkShareMcpService {
                 )]))
             }
             _ => Err(McpError::invalid_params(
-                format!("unknown tool: {}. Use tools/search to discover available tools.", request.name),
+                format!(
+                    "unknown tool: {}. Use tools/search to discover available tools.",
+                    request.name
+                ),
                 None,
             )),
         }
@@ -306,7 +348,9 @@ impl ServerHandler for AkShareMcpService {
 
     fn get_tool(&self, name: &str) -> Option<Tool> {
         if name == "tools/search" || name == "tools/call" {
-            return Self::meta_tools().into_iter().find(|t| t.name.as_ref() == name);
+            return Self::meta_tools()
+                .into_iter()
+                .find(|t| t.name.as_ref() == name);
         }
         TOOL_REGISTRY.get(name).and_then(|entry| {
             if self.is_category_enabled(entry.category) {

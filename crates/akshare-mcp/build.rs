@@ -115,7 +115,11 @@ fn generate_handler(t: &ToolDef) -> String {
                 let as_sp = format!(" {}", f);
                 let as_comma = format!(",{}", f);
                 let as_paren = format!("({}", f);
-                if call.contains(&as_ref) || call.contains(&as_sp) || call.contains(&as_comma) || call.contains(&as_paren) {
+                if call.contains(&as_ref)
+                    || call.contains(&as_sp)
+                    || call.contains(&as_comma)
+                    || call.contains(&as_paren)
+                {
                     f.to_string()
                 } else {
                     format!("{}: _", f)
@@ -209,7 +213,9 @@ fn param_fields(ptype: &str) -> Vec<&'static str> {
         "forex::ForexEmHistParams" => vec!["symbol", "limit"],
         "forex::CurrencyLatestParams" => vec!["base", "symbols", "api_key"],
         "forex::CurrencyHistoryParams" => vec!["base", "date", "symbols", "api_key"],
-        "forex::CurrencyTimeSeriesParams" => vec!["base", "start_date", "end_date", "symbols", "api_key"],
+        "forex::CurrencyTimeSeriesParams" => {
+            vec!["base", "start_date", "end_date", "symbols", "api_key"]
+        }
         "forex::CurrencyCurrenciesParams" => vec!["c_type", "api_key"],
         "forex::CurrencyConvertParams" => vec!["from", "to", "amount", "api_key"],
         "forex::CurrencyPairParams" => vec!["pair"],
@@ -240,7 +246,9 @@ fn param_fields(ptype: &str) -> Vec<&'static str> {
         "index::IndexHistParams" => vec!["symbol", "start_date", "end_date"],
         "index::IndexPeriodParams" => vec!["symbol", "period"],
         "index::IndexHkDailyParams" => vec!["symbol", "internal_id", "limit"],
-        "index::IndexZhAHistMinEmParams" => vec!["symbol", "period", "start_date", "end_date", "adjust"],
+        "index::IndexZhAHistMinEmParams" => {
+            vec!["symbol", "period", "start_date", "end_date", "adjust"]
+        }
         "index::SwAnalysisDateParams" => vec!["symbol", "date"],
 
         // macro_data
