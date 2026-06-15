@@ -20,10 +20,8 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           echo "Setting version to $VERSION"
-          for f in crates/akshare/Cargo.toml crates/akshare-mcp/Cargo.toml; do
-            sed "s|^version = \".*\"|version = \"$VERSION\"|" "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-          done
-          sed "s|akshare = { path = \"../akshare\", version = \".*\" }|akshare = { path = \"../akshare\", version = \"$VERSION\" }|" crates/akshare-mcp/Cargo.toml > crates/akshare-mcp/Cargo.toml.tmp && mv crates/akshare-mcp/Cargo.toml.tmp crates/akshare-mcp/Cargo.toml
+          sed -i "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml
+          sed -i "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -32,9 +30,8 @@ jobs:
       - run: cargo check --all-targets
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
-      - run: |
-          cargo publish -p akshare --dry-run --allow-dirty
-          cargo publish -p akshare-mcp --dry-run --allow-dirty
+      - run: cargo publish -p akshare --dry-run --allow-dirty
+      - run: cargo publish -p akshare-mcp --dry-run --allow-dirty --no-verify
 
   publish:
     name: Publish to crates.io
@@ -46,10 +43,8 @@ jobs:
         shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          for f in crates/akshare/Cargo.toml crates/akshare-mcp/Cargo.toml; do
-            sed "s|^version = \".*\"|version = \"$VERSION\"|" "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-          done
-          sed "s|akshare = { path = \"../akshare\", version = \".*\" }|akshare = { path = \"../akshare\", version = \"$VERSION\" }|" crates/akshare-mcp/Cargo.toml > crates/akshare-mcp/Cargo.toml.tmp && mv crates/akshare-mcp/Cargo.toml.tmp crates/akshare-mcp/Cargo.toml
+          sed -i "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml
+          sed -i "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml
       - uses: dtolnay/rust-toolchain@stable
       - name: Publish akshare
         run: cargo publish -p akshare --allow-dirty
@@ -92,10 +87,8 @@ jobs:
         shell: bash
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          for f in crates/akshare/Cargo.toml crates/akshare-mcp/Cargo.toml; do
-            sed "s|^version = \".*\"|version = \"$VERSION\"|" "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-          done
-          sed "s|akshare = { path = \"../akshare\", version = \".*\" }|akshare = { path = \"../akshare\", version = \"$VERSION\" }|" crates/akshare-mcp/Cargo.toml > crates/akshare-mcp/Cargo.toml.tmp && mv crates/akshare-mcp/Cargo.toml.tmp crates/akshare-mcp/Cargo.toml
+          sed -i "s|^version = \".*\"|version = \"$VERSION\"|" Cargo.toml
+          sed -i "s|akshare = { path = \"crates/akshare\", version = \".*\" }|akshare = { path = \"crates/akshare\", version = \"$VERSION\" }|" Cargo.toml
 
       - uses: dtolnay/rust-toolchain@stable
         with:

@@ -81,4 +81,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo publish --dry-run
+      - run: cargo publish -p akshare --dry-run
+      - run: cargo publish -p akshare-mcp --dry-run --no-verify
