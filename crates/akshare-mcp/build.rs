@@ -280,6 +280,10 @@ fn param_fields(ptype: &str) -> Vec<&'static str> {
         "news::StockNewsSearchParams" => vec!["symbol", "limit"],
         "news::FinnhubNewsParams" => vec!["symbol", "from", "to", "api_key"],
         "news::MarketauxNewsParams" => vec!["symbol", "api_key", "limit"],
+        "news::GdeltNewsSearchParams" => vec!["query", "base_url", "language_hint", "time_range", "timeout_secs"],
+
+        // futures (additional)
+        "futures::FuturesForeignCommodityParams" => vec!["symbols"],
 
         _ => vec![],
     }

@@ -160,4 +160,16 @@ impl AkShareClient {
         }
         Ok(items)
     }
+
+    /// Foreign commodity realtime quotes from Sina (comma-separated symbols).
+    ///
+    /// Convenience wrapper for MCP dispatch. `symbols` is a comma-separated
+    /// string of Sina codes (e.g., `"CL,GC,XAU"`).
+    pub async fn futures_foreign_commodity_realtime_str(
+        &self,
+        symbols: &str,
+    ) -> Result<Vec<ForeignCommodityQuote>> {
+        let refs: Vec<&str> = symbols.split(',').map(str::trim).filter(|s| !s.is_empty()).collect();
+        self.futures_foreign_commodity_realtime(&refs).await
+    }
 }

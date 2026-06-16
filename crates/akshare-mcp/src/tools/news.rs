@@ -66,7 +66,7 @@ pub struct GdeltNewsSearchParams {
     /// Optional time range: "day", "week", "month", or raw timespan.
     /// Default: "month"
     #[serde(default = "default_time_range")]
-    pub time_range: String,
+    pub time_range: Option<String>,
     /// Timeout in seconds for the upstream request.
     #[serde(default = "default_timeout")]
     pub timeout_secs: u64,
@@ -132,8 +132,8 @@ fn default_gdelt_base_url() -> String {
     "https://api.gdeltproject.org/api/v2/doc/doc".to_string()
 }
 
-fn default_time_range() -> String {
-    "month".to_string()
+fn default_time_range() -> Option<String> {
+    Some("month".to_string())
 }
 
 #[cfg(test)]
@@ -175,7 +175,7 @@ mod tests {
             "https://api.gdeltproject.org/api/v2/doc/doc"
         );
         assert_eq!(params.language_hint, None);
-        assert_eq!(params.time_range, "month");
+        assert_eq!(params.time_range, Some("month".to_string()));
         assert_eq!(params.timeout_secs, 30);
     }
 

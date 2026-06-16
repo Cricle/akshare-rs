@@ -17,7 +17,26 @@ impl AkShareClient {
         time_range: Option<&str>,
         timeout_secs: u64,
     ) -> Result<Vec<NewsItem>> {
-        let final_query = match language_hint {
+        self.gdelt_news_search_owned(
+            query,
+            base_url,
+            language_hint.map(str::to_string),
+            time_range.map(str::to_string),
+            timeout_secs,
+        )
+        .await
+    }
+
+    /// Search news from GDELT API (owned-string variant for MCP dispatch).
+    pub async fn gdelt_news_search_owned(
+        &self,
+        query: &str,
+        base_url: &str,
+        language_hint: Option<String>,
+        time_range: Option<String>,
+        timeout_secs: u64,
+    ) -> Result<Vec<NewsItem>> {
+        let final_query = match language_hint.as_deref() {
             Some("zh-CN") => format!("{query} sourceLang:Chinese"),
             Some("en-US") => format!("{query} sourceLang:English"),
             _ => query.to_string(),
@@ -30,8 +49,8 @@ impl AkShareClient {
             ("maxrecords", &max_records.to_string()),
             ("sort", "DateDesc"),
         ]);
-        if let Some(range) = time_range {
-            let timespan = match range {
+        if let Some(range) = &time_range {
+            let timespan = match range.as_str() {
                 "day" => "1day",
                 "week" => "7days",
                 "month" => "1month",

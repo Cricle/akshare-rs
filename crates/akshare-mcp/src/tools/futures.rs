@@ -106,6 +106,12 @@ pub struct FuturesHoldPosParams {
     pub date: String,
 }
 
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct FuturesForeignCommodityParams {
+    /// Comma-separated Sina codes (e.g., "CL,GC,XAU").
+    pub symbols: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
