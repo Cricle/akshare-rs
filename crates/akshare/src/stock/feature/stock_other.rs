@@ -593,27 +593,42 @@ impl AkShareClient {
             .collect())
     }
 
-    /// 东方财富-个股新闻 (A股)
+    /// 东方财富-个股新闻 (A股, by stock code)
     pub async fn stock_news_em(&self, symbol: &str) -> Result<Vec<StockNews>> {
-        self.stock_news_em_inner(symbol, "default").await
+        self.stock_news_em_inner(symbol, "default", "default", 20)
+            .await
+    }
+
+    /// 东方财富-个股新闻 (by company name, much better coverage)
+    pub async fn stock_news_em_by_name(&self, name: &str) -> Result<Vec<StockNews>> {
+        self.stock_news_em_inner(name, "default", "relevance", 50)
+            .await
     }
 
     /// 东方财富-港股个股新闻
     pub async fn stock_news_em_hk(&self, symbol: &str) -> Result<Vec<StockNews>> {
-        self.stock_news_em_inner(symbol, "default").await
+        self.stock_news_em_inner(symbol, "default", "default", 20)
+            .await
     }
 
     /// 东方财富-美股个股新闻
     pub async fn stock_news_em_us(&self, symbol: &str) -> Result<Vec<StockNews>> {
-        self.stock_news_em_inner(symbol, "default").await
+        self.stock_news_em_inner(symbol, "default", "default", 20)
+            .await
     }
 
-    async fn stock_news_em_inner(&self, symbol: &str, scope: &str) -> Result<Vec<StockNews>> {
+    async fn stock_news_em_inner(
+        &self,
+        keyword: &str,
+        scope: &str,
+        sort: &str,
+        page_size: u32,
+    ) -> Result<Vec<StockNews>> {
         use crate::news::search::{parse_search_entries, strip_jsonp};
 
         let inner_param = serde_json::json!({
             "uid": "",
-            "keyword": symbol,
+            "keyword": keyword,
             "type": ["cmsArticleWebOld"],
             "client": "web",
             "clientType": "web",
@@ -621,16 +636,16 @@ impl AkShareClient {
             "param": {
                 "cmsArticleWebOld": {
                     "searchScope": scope,
-                    "sort": "default",
+                    "sort": sort,
                     "pageIndex": 1,
-                    "pageSize": 20,
+                    "pageSize": page_size,
                     "preTag": "",
                     "postTag": "",
                 }
             }
         });
 
-        let referer = format!("https://so.eastmoney.com/news/s?keyword={symbol}");
+        let referer = format!("https://so.eastmoney.com/news/s?keyword={keyword}");
 
         let raw_text = self
             .get("https://search-api-web.eastmoney.com/search/jsonp")
@@ -654,7 +669,7 @@ impl AkShareClient {
             .cloned()
             .unwrap_or_default();
 
-        let news_items = parse_search_entries(&list, 20);
+        let news_items = parse_search_entries(&list, page_size as usize);
 
         Ok(news_items
             .into_iter()

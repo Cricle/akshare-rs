@@ -671,29 +671,55 @@ impl AkShareClient {
                     .and_then(|v| v.as_str())
                     .map(std::string::ToString::to_string),
                 operate_income: m.get("OPERATE_INCOME").and_then(serde_json::Value::as_f64),
-                total_operate_reve: m
-                    .get("TOTALOPERATEREVE")
+                operate_income_yoy: m
+                    .get("OPERATE_INCOME_YOY")
                     .and_then(serde_json::Value::as_f64),
                 gross_profit: m.get("GROSS_PROFIT").and_then(serde_json::Value::as_f64),
-                mlr: m.get("MLR").and_then(serde_json::Value::as_f64),
-                holder_profit: m.get("HOLDER_PROFIT").and_then(serde_json::Value::as_f64),
-                parent_net_profit: m.get("PARENTNETPROFIT").and_then(serde_json::Value::as_f64),
-                netcash_operate: m.get("NETCASH_OPERATE").and_then(serde_json::Value::as_f64),
-                mgjyxjje: m.get("MGJYXJJE").and_then(serde_json::Value::as_f64),
-                bps: m.get("BPS").and_then(serde_json::Value::as_f64),
-                zcfzl: m.get("ZCFZL").and_then(serde_json::Value::as_f64),
-                current_liability: m
-                    .get("CURRENT_LIABILITY")
+                gross_profit_yoy: m
+                    .get("GROSS_PROFIT_YOY")
                     .and_then(serde_json::Value::as_f64),
-                current_liab: m.get("CURRENT_LIAB").and_then(serde_json::Value::as_f64),
-                noncurrent_liab_1year: m
-                    .get("NONCURRENT_LIAB_1YEAR")
+                gross_profit_ratio: m
+                    .get("GROSS_PROFIT_RATIO")
                     .and_then(serde_json::Value::as_f64),
-                totalnoncliab: m.get("TOTALNONCLIAB").and_then(serde_json::Value::as_f64),
-                capital_expenditure: m
-                    .get("CAPITAL_EXPENDITURE")
+                net_profit_ratio: m
+                    .get("NET_PROFIT_RATIO")
                     .and_then(serde_json::Value::as_f64),
-                total_share: m.get("TOTAL_SHARE").and_then(serde_json::Value::as_f64),
+                // US API uses PARENT_HOLDER_NETPROFIT (not HOLDER_PROFIT / PARENTNETPROFIT)
+                holder_profit: m
+                    .get("PARENT_HOLDER_NETPROFIT")
+                    .and_then(serde_json::Value::as_f64),
+                holder_profit_yoy: m
+                    .get("PARENT_HOLDER_NETPROFIT_YOY")
+                    .and_then(serde_json::Value::as_f64),
+                basic_eps: m.get("BASIC_EPS").and_then(serde_json::Value::as_f64),
+                basic_eps_yoy: m.get("BASIC_EPS_YOY").and_then(serde_json::Value::as_f64),
+                diluted_eps: m.get("DILUTED_EPS").and_then(serde_json::Value::as_f64),
+                roe_avg: m.get("ROE_AVG").and_then(serde_json::Value::as_f64),
+                roe_avg_yoy: m.get("ROE_AVG_YOY").and_then(serde_json::Value::as_f64),
+                roa: m.get("ROA").and_then(serde_json::Value::as_f64),
+                roa_yoy: m.get("ROA_YOY").and_then(serde_json::Value::as_f64),
+                debt_asset_ratio: m
+                    .get("DEBT_ASSET_RATIO")
+                    .and_then(serde_json::Value::as_f64),
+                debt_asset_ratio_yoy: m
+                    .get("DEBT_ASSET_RATIO_YOY")
+                    .and_then(serde_json::Value::as_f64),
+                current_ratio: m.get("CURRENT_RATIO").and_then(serde_json::Value::as_f64),
+                current_ratio_yoy: m
+                    .get("CURRENT_RATIO_YOY")
+                    .and_then(serde_json::Value::as_f64),
+                speed_ratio: m.get("SPEED_RATIO").and_then(serde_json::Value::as_f64),
+                equity_ratio: m.get("EQUITY_RATIO").and_then(serde_json::Value::as_f64),
+                total_assets_tr: m
+                    .get("TOTAL_ASSETS_TR")
+                    .and_then(serde_json::Value::as_f64),
+                inventory_tr: m.get("INVENTORY_TR").and_then(serde_json::Value::as_f64),
+                accounts_rece_tr: m
+                    .get("ACCOUNTS_RECE_TR")
+                    .and_then(serde_json::Value::as_f64),
+                // Not available in US main indicator API
+                total_share: None,
+                bps: None,
             })
             .collect())
     }

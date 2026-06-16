@@ -436,6 +436,59 @@ impl AkShareClient {
         Ok(items)
     }
 
+    /// Get individual stock info from Eastmoney using a raw secid.
+    ///
+    /// Unlike `stock_individual_info_em`, this accepts a pre-formatted secid
+    /// (e.g. "105.AAPL" for NASDAQ, "106.AAPL" for NYSE, "116.00700" for HK).
+    pub async fn stock_individual_info_em_by_secid(
+        &self,
+        secid: &str,
+    ) -> Result<Vec<StockInfoItem>> {
+        let response = self
+            .get("https://push2.eastmoney.com/api/qt/stock/get")
+            .query(&[
+                ("fltt", "2"),
+                ("invt", "2"),
+                ("fields", "f57,f58,f84,f85,f127,f116,f117,f189,f43"),
+                ("secid", secid),
+            ])
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
+
+        let data = payload.get("data").unwrap_or(&payload);
+
+        let code_name_map = [
+            ("f57", "股票代码"),
+            ("f58", "股票简称"),
+            ("f84", "总股本"),
+            ("f85", "流通股"),
+            ("f127", "行业"),
+            ("f116", "总市值"),
+            ("f117", "流通市值"),
+            ("f189", "上市时间"),
+            ("f43", "最新价"),
+        ];
+
+        let mut items = Vec::new();
+        for (key, label) in &code_name_map {
+            if let Some(val) = data.get(key)
+                && !val.is_null()
+            {
+                items.push(StockInfoItem {
+                    item: label.to_string(),
+                    value: val.clone(),
+                });
+            }
+        }
+
+        Ok(items)
+    }
+
     /// Get industry for any stock by raw Eastmoney secid (e.g. "105.AAPL", "116.00700").
     pub async fn stock_info_by_secid(&self, secid: &str) -> Result<Option<String>> {
         let response = self
