@@ -84,6 +84,39 @@ pub struct BingNewsRssParams {
     pub lang: Option<String>,
 }
 
+// ── Finnhub / Marketaux param types ─────────────────────────────────────────
+
+/// Parameters for Finnhub company news search.
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct FinnhubNewsParams {
+    /// Stock ticker symbol, e.g. "AAPL"
+    pub symbol: String,
+    /// Start date in YYYY-MM-DD format
+    pub from: String,
+    /// End date in YYYY-MM-DD format
+    pub to: String,
+    /// Finnhub API key (free tier: 60 requests/minute)
+    #[serde(default)]
+    pub api_key: String,
+}
+
+/// Parameters for Marketaux global/HK news search.
+#[derive(serde::Deserialize, schemars::JsonSchema)]
+pub struct MarketauxNewsParams {
+    /// Stock ticker symbol, e.g. "AAPL" or "0700.HK"
+    pub symbol: String,
+    /// Marketaux API key (free tier: 100 requests/day)
+    #[serde(default)]
+    pub api_key: String,
+    /// Max number of articles (API max: 3 on free tier)
+    #[serde(default = "default_marketaux_limit")]
+    pub limit: usize,
+}
+
+fn default_marketaux_limit() -> usize {
+    3
+}
+
 // ── Default value functions ─────────────────────────────────────────────────
 // NOTE: default_limit() already exists in news.rs (value: 20). Do not re-define.
 

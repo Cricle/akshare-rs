@@ -137,6 +137,24 @@ impl AkShareClient {
 
         Ok(parse_rss_items(&body, "google_news_rss", &[]))
     }
+
+    /// Fetch stock-specific news from Seeking Alpha RSS.
+    ///
+    /// `symbol` is the stock ticker (e.g. "AAPL", "TCEHY" for HK ADRs).
+    /// Returns up to 30 recent articles with title, link, and date.
+    /// No API key required.
+    pub async fn seeking_alpha_news(&self, symbol: &str) -> Result<Vec<NewsItem>> {
+        let url = format!("https://seekingalpha.com/api/sa/combined/{}.xml", symbol);
+        let body = self
+            .get(&url)
+            .send()
+            .await?
+            .text()
+            .await
+            .map_err(crate::Error::from)?;
+
+        Ok(parse_rss_items(&body, "seeking_alpha", &[]))
+    }
 }
 
 #[cfg(test)]
