@@ -710,9 +710,7 @@ impl AkShareClient {
                     .and_then(serde_json::Value::as_f64),
                 speed_ratio: m.get("SPEED_RATIO").and_then(serde_json::Value::as_f64),
                 equity_ratio: m.get("EQUITY_RATIO").and_then(serde_json::Value::as_f64),
-                total_assets_tr: m
-                    .get("TOTAL_ASSETS_TR")
-                    .and_then(serde_json::Value::as_f64),
+                total_assets_tr: m.get("TOTAL_ASSETS_TR").and_then(serde_json::Value::as_f64),
                 inventory_tr: m.get("INVENTORY_TR").and_then(serde_json::Value::as_f64),
                 accounts_rece_tr: m
                     .get("ACCOUNTS_RECE_TR")
