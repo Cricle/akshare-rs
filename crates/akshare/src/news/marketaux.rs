@@ -81,8 +81,6 @@ impl AkShareClient {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_published_at_truncation() {
         // Marketaux returns ISO 8601 like "2026-06-15T12:00:00+00:00"
