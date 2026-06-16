@@ -169,7 +169,11 @@ impl AkShareClient {
         &self,
         symbols: &str,
     ) -> Result<Vec<ForeignCommodityQuote>> {
-        let refs: Vec<&str> = symbols.split(',').map(str::trim).filter(|s| !s.is_empty()).collect();
+        let refs: Vec<&str> = symbols
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .collect();
         self.futures_foreign_commodity_realtime(&refs).await
     }
 }
