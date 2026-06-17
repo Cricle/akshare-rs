@@ -49,7 +49,9 @@ impl AkShareClient {
     fn apply_push2_override(url: &str) -> String {
         static OVERRIDE: std::sync::OnceLock<Option<String>> = std::sync::OnceLock::new();
         let override_url = OVERRIDE.get_or_init(|| {
-            std::env::var("PUSH2_BASE_URL").ok().map(|v| v.trim().trim_end_matches('/').to_string())
+            std::env::var("PUSH2_BASE_URL")
+                .ok()
+                .map(|v| v.trim().trim_end_matches('/').to_string())
         });
         if let Some(base) = override_url
             && (url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com"))
@@ -78,7 +80,10 @@ impl AkShareClient {
     fn apply_push2_ip_override(url: &str) -> String {
         static IP_OVERRIDE: std::sync::OnceLock<Option<String>> = std::sync::OnceLock::new();
         let ip = IP_OVERRIDE.get_or_init(|| {
-            std::env::var("PUSH2_IP").ok().map(|v| v.trim().to_string()).filter(|v| !v.is_empty())
+            std::env::var("PUSH2_IP")
+                .ok()
+                .map(|v| v.trim().to_string())
+                .filter(|v| !v.is_empty())
         });
         if let Some(ip_addr) = ip
             && (url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com"))
