@@ -29,6 +29,8 @@ impl AkShareClient {
     }
 
     /// Redirect a URL to the mock server if mock_uri is set.
+    /// Also supports PUSH2_BASE_URL env var to override push2.eastmoney.com
+    /// (useful when the server IP is blocked by Eastmoney).
     pub(crate) fn redirect_url(&self, url: &str) -> String {
         if let Some(mock) = &self.mock_uri {
             if let Some(proto_end) = url.find("//")
@@ -39,18 +41,52 @@ impl AkShareClient {
             }
             mock.clone()
         } else {
-            url.to_string()
+            Self::apply_push2_override(url)
         }
+    }
+
+    /// Replace push2.eastmoney.com host if PUSH2_BASE_URL env var is set.
+    fn apply_push2_override(url: &str) -> String {
+        static OVERRIDE: std::sync::OnceLock<Option<String>> = std::sync::OnceLock::new();
+        let override_url = OVERRIDE.get_or_init(|| {
+            std::env::var("PUSH2_BASE_URL").ok().map(|v| v.trim().trim_end_matches('/').to_string())
+        });
+        if let Some(base) = override_url {
+            if url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com") {
+                return url.replace("https://push2.eastmoney.com", base);
+            }
+        }
+        url.to_string()
     }
 
     /// HTTP GET with automatic mock URL redirection.
     pub(crate) fn get(&self, url: &str) -> reqwest::RequestBuilder {
-        self.http.get(self.redirect_url(url))
+        let url = self.redirect_url(url);
+        let url = Self::apply_push2_ip_override(&url);
+        self.http.get(url)
     }
 
     /// HTTP POST with automatic mock URL redirection.
     pub(crate) fn post(&self, url: &str) -> reqwest::RequestBuilder {
-        self.http.post(self.redirect_url(url))
+        let url = self.redirect_url(url);
+        let url = Self::apply_push2_ip_override(&url);
+        self.http.post(url)
+    }
+
+    /// When PUSH2_IP env var is set, add a Host header + rewrite URL for push2.eastmoney.com
+    /// to work around DNS-based IP blocking.
+    fn apply_push2_ip_override(url: &str) -> String {
+        static IP_OVERRIDE: std::sync::OnceLock<Option<String>> = std::sync::OnceLock::new();
+        let ip = IP_OVERRIDE.get_or_init(|| {
+            std::env::var("PUSH2_IP").ok().map(|v| v.trim().to_string()).filter(|v| !v.is_empty())
+        });
+        if let Some(ip_addr) = ip {
+            if url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com") {
+                let result = url.replace("push2his.eastmoney.com", &ip_addr);
+                return result.replace("push2.eastmoney.com", &ip_addr);
+            }
+        }
+        url.to_string()
     }
 
     #[must_use]
