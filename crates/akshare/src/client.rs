@@ -51,10 +51,10 @@ impl AkShareClient {
         let override_url = OVERRIDE.get_or_init(|| {
             std::env::var("PUSH2_BASE_URL").ok().map(|v| v.trim().trim_end_matches('/').to_string())
         });
-        if let Some(base) = override_url {
-            if url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com") {
-                return url.replace("https://push2.eastmoney.com", base);
-            }
+        if let Some(base) = override_url
+            && (url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com"))
+        {
+            return url.replace("https://push2.eastmoney.com", base);
         }
         url.to_string()
     }
@@ -80,11 +80,11 @@ impl AkShareClient {
         let ip = IP_OVERRIDE.get_or_init(|| {
             std::env::var("PUSH2_IP").ok().map(|v| v.trim().to_string()).filter(|v| !v.is_empty())
         });
-        if let Some(ip_addr) = ip {
-            if url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com") {
-                let result = url.replace("push2his.eastmoney.com", &ip_addr);
-                return result.replace("push2.eastmoney.com", &ip_addr);
-            }
+        if let Some(ip_addr) = ip
+            && (url.contains("push2.eastmoney.com") || url.contains("push2his.eastmoney.com"))
+        {
+            let result = url.replace("push2his.eastmoney.com", ip_addr);
+            return result.replace("push2.eastmoney.com", ip_addr);
         }
         url.to_string()
     }
