@@ -974,6 +974,14 @@ async fn test_index_yw_invalid() {
 // ============================================================================
 
 #[tokio::test]
+async fn test_index_code_id_map_em() {
+    let server = MockServer::start().await;
+    let client = mock_client(&server);
+    let result = client.index_code_id_map_em().await;
+    let _ = result;
+}
+
+#[tokio::test]
 async fn test_index_zh_a_hist() {
     let server = MockServer::start().await;
     let client = mock_client(&server);

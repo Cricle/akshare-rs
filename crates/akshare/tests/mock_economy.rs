@@ -1,7 +1,6 @@
 mod common;
 
-use wiremock::matchers::{method, path_regex};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::MockServer;
 
 async fn mount_em_mocks(server: &MockServer) {
     common::mount_em_mocks(server).await;
