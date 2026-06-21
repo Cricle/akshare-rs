@@ -424,7 +424,7 @@ async fn test_futures_inventory_em() {
     let result = client.futures_inventory_em("铜").await;
     // The method may fail on step2 if mock doesn't return inventory data,
     // but it compiles and runs
-    let _ = result;
+    result.unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -617,7 +617,7 @@ async fn test_get_token() {
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.get_token("user@test.com", "password123").await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -901,7 +901,7 @@ async fn test_futures_sgx_daily() {
     // futures_sgx_daily maps to futures_settlement_price_sgx
     let result = client.futures_settlement_price_sgx("20240102").await;
     // May succeed or fail depending on ZIP download; verifies compilation
-    let _ = result;
+    result.unwrap();
 }
 
 // ===========================================================================
@@ -1180,7 +1180,7 @@ async fn test_option_daily_stats() {
     let client = mock_client(&server);
     // option_daily_stats -> option_daily_stats_sse
     let result = client.option_daily_stats_sse("20240102").await;
-    let _ = result;
+    result.unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -1270,7 +1270,7 @@ async fn test_option_risk_indicator() {
     let client = mock_client(&server);
     // option_risk_indicator -> option_risk_indicator_sse
     let result = client.option_risk_indicator_sse("20240102").await;
-    let _ = result;
+    result.unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -1287,7 +1287,7 @@ async fn test_option_czce() {
     let client = mock_client(&server);
     // option_czce -> option_hist_yearly_czce
     let result = client.option_hist_yearly_czce("SR", "2024").await;
-    let _ = result;
+    result.unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -1319,7 +1319,7 @@ async fn test_option_current_sse() {
     let client = mock_client(&server);
     // option_current_sse -> option_current_day_sse
     let result = client.option_current_day_sse().await;
-    let _ = result;
+    result.unwrap();
 }
 
 // ---------------------------------------------------------------------------

@@ -203,7 +203,14 @@ macro_test_arg1!(
     us_market_cap_from_sina,
     "AAPL"
 );
-macro_test_arg1!(test_mock_us_stock_industry, us_stock_industry, "AAPL");
+// us_stock_industry returns a tuple, not a Result
+#[tokio::test]
+async fn test_mock_us_stock_industry() {
+    let server = wiremock::MockServer::start().await;
+    mount_mocks(&server).await;
+    let client = common::mock_client(&server);
+    let _result = client.us_stock_industry("AAPL").await;
+}
 macro_test_arg1!(test_mock_us_stock_key_stats, us_stock_key_stats, "AAPL");
 macro_test_arg1!(test_mock_us_stock_profile, us_stock_profile, "AAPL");
 
@@ -216,7 +223,7 @@ async fn test_mock_stock_zh_a_hist() {
     let result = client
         .stock_zh_a_hist("600000", "daily", "qfq", "2024-01-01", "2024-01-31")
         .await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -227,5 +234,5 @@ async fn test_mock_stock_zh_a_hist_min_em() {
     let result = client
         .stock_zh_a_hist_min_em("600000", "1", "qfq", "2024-01-01", "2024-01-31")
         .await;
-    let _ = result;
+    result.unwrap();
 }

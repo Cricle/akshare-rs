@@ -105,6 +105,12 @@ pub fn sample_macro_row(date: &str, value: f64, name: &str) -> serde_json::Value
 
 /// Mount catch-all GET + POST mocks returning Eastmoney datacenter response shape.
 pub async fn mount_em_mocks(server: &MockServer) {
+    // Path-specific mocks (must be mounted before catch-all)
+    mount_em_datacenter(server).await;
+    mount_em_push2(server).await;
+    mount_em_kline(server).await;
+
+    // Catch-all for anything else (Sina, Tencent, etc.)
     let body = em_datacenter_response(vec![sample_macro_row("2024-01-01", 123.45, "GDP")]);
     Mock::given(method("GET"))
         .and(path_regex(".*"))
@@ -113,6 +119,39 @@ pub async fn mount_em_mocks(server: &MockServer) {
         .await;
     Mock::given(method("POST"))
         .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(body))
+        .mount(server)
+        .await;
+}
+
+/// Mount mock for Eastmoney datacenter API (datacenter-web.eastmoney.com).
+pub async fn mount_em_datacenter(server: &MockServer) {
+    let row = sample_macro_row("2024-01-01", 123.45, "GDP");
+    let body = em_datacenter_response(vec![row]);
+    Mock::given(method("GET"))
+        .and(path_regex("/api/data/v1/get"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(body))
+        .mount(server)
+        .await;
+}
+
+/// Mount mock for Eastmoney push2 clist API (push2.eastmoney.com).
+pub async fn mount_em_push2(server: &MockServer) {
+    let row = sample_em_stock_row("000001", "平安银行");
+    let body = em_push2_response(vec![row]);
+    Mock::given(method("GET"))
+        .and(path_regex("/api/qt/clist/get"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(body))
+        .mount(server)
+        .await;
+}
+
+/// Mount mock for Eastmoney push2his kline API (push2his.eastmoney.com).
+pub async fn mount_em_kline(server: &MockServer) {
+    let kline = sample_kline_str("2024-01-02");
+    let body = em_kline_response(vec![&kline]);
+    Mock::given(method("GET"))
+        .and(path_regex("/api/qt/stock/kline/get"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body))
         .mount(server)
         .await;

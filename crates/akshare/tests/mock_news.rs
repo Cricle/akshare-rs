@@ -14,7 +14,7 @@ macro_rules! macro_test_arg1 {
             mount_mocks(&server).await;
             let client = common::mock_client(&server);
             let result = client.$method($arg).await;
-            let _ = result;
+            result.unwrap();
         }
     };
 }
@@ -27,7 +27,7 @@ macro_rules! macro_test_arg2 {
             mount_mocks(&server).await;
             let client = common::mock_client(&server);
             let result = client.$method($arg1, $arg2).await;
-            let _ = result;
+            result.unwrap();
         }
     };
 }
@@ -43,7 +43,7 @@ async fn test_mock_bing_news_rss_with_lang() {
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.bing_news_rss_with_lang("rust", 10, Some("en")).await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -71,7 +71,7 @@ async fn test_mock_gdelt_news_search() {
             10,
         )
         .await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -88,7 +88,7 @@ async fn test_mock_gdelt_news_search_owned() {
             10,
         )
         .await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -97,7 +97,7 @@ async fn test_mock_google_news_rss() {
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.google_news_rss("rust", 10).await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]

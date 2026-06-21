@@ -38,7 +38,7 @@ async fn test_mock_eastmoney_klines() {
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.eastmoney_klines("1.600000", "qfq", 100).await;
-    let _ = result;
+    result.unwrap();
 }
 macro_test_arg2!(
     test_mock_eastmoney_sector_rankings,
@@ -97,7 +97,7 @@ async fn test_mock_eastmoney_search() {
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.eastmoney_search("浦发银行", Some("沪A"), 10).await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -106,5 +106,5 @@ async fn test_mock_eastmoney_billboard_seats() {
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.eastmoney_billboard_seats("600000", "buy", 10).await;
-    let _ = result;
+    result.unwrap();
 }

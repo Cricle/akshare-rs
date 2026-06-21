@@ -34,7 +34,7 @@ macro_rules! macro_test {
             mount_em_mocks(&server).await;
             let client = common::mock_client(&server);
             let result = client.$method().await;
-            let _ = result;
+            result.unwrap();
         }
     };
 }
@@ -334,7 +334,7 @@ async fn test_macro_china_nbs_nation() {
     let result = client
         .macro_china_nbs_nation("月度数据", "A010101", "202401")
         .await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -345,7 +345,7 @@ async fn test_macro_china_nbs_region() {
     let result = client
         .macro_china_nbs_region("分省月度数据", "A010101", "110000", "202401")
         .await;
-    let _ = result;
+    result.unwrap();
 }
 
 // ===========================================================================
@@ -839,7 +839,7 @@ async fn test_repo_rate_query_fr() {
     mount_em_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.repo_rate_query("回购定盘利率").await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -848,7 +848,7 @@ async fn test_repo_rate_query_fdr() {
     mount_em_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.repo_rate_query("银银间回购定盘利率").await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -857,7 +857,7 @@ async fn test_repo_rate_hist() {
     mount_em_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.repo_rate_hist("20240101", "20240131").await;
-    let _ = result;
+    result.unwrap();
 }
 
 // Interbank lending rate
@@ -869,7 +869,7 @@ async fn test_rate_interbank() {
     let result = client
         .rate_interbank("上海银行同业拆借市场", "Shibor人民币", "隔夜")
         .await;
-    let _ = result;
+    result.unwrap();
 }
 
 // ===========================================================================
@@ -978,7 +978,7 @@ async fn test_macro_fx_sentiment() {
     mount_em_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.macro_fx_sentiment("20240101", "20240131").await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -987,7 +987,7 @@ async fn test_macro_info_ws() {
     mount_em_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client.macro_info_ws("20240101").await;
-    let _ = result;
+    result.unwrap();
 }
 
 // ===========================================================================
@@ -1008,7 +1008,7 @@ async fn test_macro_china_bond_public() {
         .await;
     let client = common::mock_client(&server);
     let result = client.macro_china_bond_public(1).await;
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]
@@ -1025,5 +1025,5 @@ async fn test_macro_china_swap_rate() {
         .await;
     let client = common::mock_client(&server);
     let result = client.macro_china_swap_rate("20240101", "20240131").await;
-    let _ = result;
+    result.unwrap();
 }

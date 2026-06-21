@@ -1536,7 +1536,7 @@ async fn test_stock_financial_analysis_indicator_em() {
         .await;
     // This may fail at runtime since the mock doesn't intercept all requests
     // but it compiles correctly for --no-run verification
-    let _ = result;
+    result.unwrap();
 }
 
 #[tokio::test]

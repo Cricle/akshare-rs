@@ -108,7 +108,7 @@ async fn test_mock_error_sina_text_malformed() {
         .await;
     let client = common::mock_client(&server);
     let result = client.stock_zh_a_spot().await;
-    let _ = result;
+    assert!(result.is_err());
 }
 
 #[tokio::test]
