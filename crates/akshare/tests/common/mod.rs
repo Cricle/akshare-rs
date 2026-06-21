@@ -102,3 +102,42 @@ pub fn sample_macro_row(date: &str, value: f64, name: &str) -> serde_json::Value
         "INDICATOR_NAME": name
     })
 }
+
+/// Mount catch-all GET + POST mocks returning Eastmoney datacenter response shape.
+pub async fn mount_em_mocks(server: &MockServer) {
+    let body = em_datacenter_response(vec![sample_macro_row("2024-01-01", 123.45, "GDP")]);
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(body.clone()))
+        .mount(server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(body))
+        .mount(server)
+        .await;
+}
+
+/// Mount catch-all mock returning Sina-style text response.
+pub async fn mount_sina_mocks(server: &MockServer) {
+    let body = r#"var hq_str_sh600000="浦发银行,10.00,10.50,10.80,9.90,100000,10500000.0";"#;
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(body))
+        .mount(server)
+        .await;
+}
+
+/// Mount catch-all mock returning a generic JSON array response.
+pub async fn mount_json_mocks(server: &MockServer, data: serde_json::Value) {
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(data.clone()))
+        .mount(server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(data))
+        .mount(server)
+        .await;
+}
