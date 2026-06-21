@@ -93,8 +93,9 @@ async fn test_mock_error_sina_text_empty() {
         .await;
     let client = common::mock_client(&server);
     let result = client.stock_zh_a_spot().await;
-    // stock_zh_a_spot returns not_found when all_quotes is empty
+    // Empty response returns NotFound because all_quotes is empty
     assert!(result.is_err());
+    assert_eq!(result.unwrap_err().kind(), ErrorKind::NotFound);
 }
 
 #[tokio::test]
@@ -134,6 +135,7 @@ async fn test_mock_error_push2_empty_diff() {
         .await;
     let client = common::mock_client(&server);
     let result = client.stock_zh_a_spot_em().await;
-    // clist_spot_fetch returns not_found when diff is empty
+    // Empty diff returns NotFound because items is empty
     assert!(result.is_err());
+    assert_eq!(result.unwrap_err().kind(), ErrorKind::NotFound);
 }
