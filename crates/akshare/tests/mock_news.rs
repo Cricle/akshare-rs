@@ -51,7 +51,9 @@ async fn test_mock_finnhub_company_news() {
     let server = MockServer::start().await;
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
-    let result = client.finnhub_company_news("AAPL", "2024-01-01", "2024-01-31", "test_key").await;
+    let result = client
+        .finnhub_company_news("AAPL", "2024-01-01", "2024-01-31", "test_key")
+        .await;
     let _ = result;
 }
 
@@ -60,7 +62,15 @@ async fn test_mock_gdelt_news_search() {
     let server = MockServer::start().await;
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
-    let result = client.gdelt_news_search("rust", "https://api.gdeltproject.org/api/v2/doc/doc", Some("English"), None, 10).await;
+    let result = client
+        .gdelt_news_search(
+            "rust",
+            "https://api.gdeltproject.org/api/v2/doc/doc",
+            Some("English"),
+            None,
+            10,
+        )
+        .await;
     let _ = result;
 }
 
@@ -69,7 +79,15 @@ async fn test_mock_gdelt_news_search_owned() {
     let server = MockServer::start().await;
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
-    let result = client.gdelt_news_search_owned("rust", "https://api.gdeltproject.org/api/v2/doc/doc", Some("English".to_string()), None, 10).await;
+    let result = client
+        .gdelt_news_search_owned(
+            "rust",
+            "https://api.gdeltproject.org/api/v2/doc/doc",
+            Some("English".to_string()),
+            None,
+            10,
+        )
+        .await;
     let _ = result;
 }
 

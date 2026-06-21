@@ -17,14 +17,24 @@ macro_rules! macro_test_arg1 {
     };
 }
 
-macro_test_arg1!(test_mock_futures_contract_detail_em, futures_contract_detail_em, "rb2401");
-macro_test_arg1!(test_mock_futures_foreign_commodity_realtime_str, futures_foreign_commodity_realtime_str, "CL");
+macro_test_arg1!(
+    test_mock_futures_contract_detail_em,
+    futures_contract_detail_em,
+    "rb2401"
+);
+macro_test_arg1!(
+    test_mock_futures_foreign_commodity_realtime_str,
+    futures_foreign_commodity_realtime_str,
+    "CL"
+);
 
 #[tokio::test]
 async fn test_mock_futures_main_sina_derivative() {
     let server = wiremock::MockServer::start().await;
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
-    let result = client.futures_main_sina_derivative("rb0", "20240101", "20240131").await;
+    let result = client
+        .futures_main_sina_derivative("rb0", "20240101", "20240131")
+        .await;
     let _ = result;
 }

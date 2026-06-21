@@ -40,17 +40,55 @@ async fn test_mock_eastmoney_klines() {
     let result = client.eastmoney_klines("1.600000", "qfq", 100).await;
     let _ = result;
 }
-macro_test_arg2!(test_mock_eastmoney_sector_rankings, eastmoney_sector_rankings, "industry", 10);
-macro_test_arg2!(test_mock_eastmoney_sector_constituents, eastmoney_sector_constituents, "BK0475", 10);
-macro_test_arg2!(test_mock_eastmoney_sector_capital_flow, eastmoney_sector_capital_flow, "BK0475", 10);
-macro_test_arg2!(test_mock_eastmoney_capital_flow, eastmoney_capital_flow, "1.600000", 10);
-macro_test_arg2!(test_mock_eastmoney_billboard, eastmoney_billboard, "600000", 10);
-macro_test_arg2!(test_mock_eastmoney_announcements, eastmoney_announcements, "600000", 10);
+macro_test_arg2!(
+    test_mock_eastmoney_sector_rankings,
+    eastmoney_sector_rankings,
+    "industry",
+    10
+);
+macro_test_arg2!(
+    test_mock_eastmoney_sector_constituents,
+    eastmoney_sector_constituents,
+    "BK0475",
+    10
+);
+macro_test_arg2!(
+    test_mock_eastmoney_sector_capital_flow,
+    eastmoney_sector_capital_flow,
+    "BK0475",
+    10
+);
+macro_test_arg2!(
+    test_mock_eastmoney_capital_flow,
+    eastmoney_capital_flow,
+    "1.600000",
+    10
+);
+macro_test_arg2!(
+    test_mock_eastmoney_billboard,
+    eastmoney_billboard,
+    "600000",
+    10
+);
+macro_test_arg2!(
+    test_mock_eastmoney_announcements,
+    eastmoney_announcements,
+    "600000",
+    10
+);
 macro_test_arg2!(test_mock_sina_us_daily, sina_us_daily, "AAPL", 100);
 
 // 1-arg functions
-macro_test_arg1!(test_mock_eastmoney_announcement_detail, eastmoney_announcement_detail, "test_art_code");
-macro_test_arg1!(test_mock_sina_a_share_realtime, sina_a_share_realtime, "sh600000");
+macro_test_arg1!(
+    test_mock_eastmoney_announcement_detail,
+    eastmoney_announcement_detail,
+    "test_art_code"
+);
+macro_test_arg1!(
+    test_mock_sina_a_share_realtime,
+    sina_a_share_realtime,
+    "sh600000"
+);
 
 // 3-arg functions
 #[tokio::test]
