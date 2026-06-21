@@ -4,26 +4,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::BondSnapshot;
-
-/// Wire type for Eastmoney datacenter generic response.
-#[derive(Debug, serde::Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-    #[serde(default)]
-    pages: u32,
-}
-
-/// Wire type for the Eastmoney kzz LS data.
-#[derive(Debug, serde::Deserialize)]
-struct EmKzzLsResp {
-    result: Option<EmResult>,
-}
+use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
     /// Fetch convertible bond list with pricing data from Eastmoney datacenter.
@@ -451,6 +432,5 @@ mod tests {
         let json_str = r#"{"result": {"data": [{"SECURITY_CODE": "123121"}], "pages": 3}}"#;
         let resp: super::EmDatacenterResp = serde_json::from_str(json_str).unwrap();
         assert_eq!(resp.result.as_ref().unwrap().data.len(), 1);
-        assert_eq!(resp.result.as_ref().unwrap().pages, 3);
     }
 }

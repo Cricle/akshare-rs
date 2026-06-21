@@ -235,14 +235,6 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<UsDailyCandle>> {
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
         // Normalize to Eastmoney secid format for US stocks
         let secid = if symbol.contains('.') {
             symbol.to_string()
@@ -250,29 +242,15 @@ impl AkShareClient {
             format!("105.{}", symbol.to_uppercase())
         };
 
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                ("klt", "101"),
-                ("fqt", "1"),
-                ("beg", start_date),
-                ("end", end_date),
-                ("lmt", "1000000"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: Env = response.json().await.map_err(Error::from)?;
-        let klines = payload
-            .data
-            .and_then(|d| d.klines)
-            .ok_or_else(|| Error::upstream("US daily kline missing data"))?;
+        let klines = self
+            .kline_fetch(
+                &secid,
+                "101",
+                "1",
+                1_000_000,
+                &[("beg", start_date), ("end", end_date)],
+            )
+            .await?;
 
         let items: Vec<UsDailyCandle> = klines
             .iter()
@@ -918,44 +896,11 @@ impl AkShareClient {
     ///
     /// - `symbol`: US index code like "NDX", "DJIA", "SPX"
     pub async fn stock_us_index_daily_em(&self, symbol: &str) -> Result<Vec<UsIndexDailyCandle>> {
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
         let secid = format!("100.{symbol}");
 
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("klt", "101"),
-                ("fqt", "1"),
-                ("lmt", "10000"),
-                ("end", "20500000"),
-                ("iscca", "1"),
-                ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
-                (
-                    "fields2",
-                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
-                ),
-                ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
-                ("forcect", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: Env = response.json().await.map_err(Error::from)?;
-        let klines = payload
-            .data
-            .and_then(|d| d.klines)
-            .ok_or_else(|| Error::upstream("US index daily missing data"))?;
+        let klines = self
+            .kline_fetch(&secid, "101", "1", 10_000, &[("iscca", "1")])
+            .await?;
 
         let items: Vec<UsIndexDailyCandle> = klines
             .iter()

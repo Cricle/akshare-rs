@@ -93,42 +93,14 @@ impl AkShareClient {
             }
         };
 
-        let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
         let secid = format!("{market_code}.{symbol}");
-        let response = self
-            .get(url)
-            .query(&[
-                ("secid", secid.as_str()),
-                ("klt", "101"),
-                ("fqt", "1"),
-                ("lmt", "6600"),
-                ("end", "20500000"),
-                ("iscca", "1"),
-                ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
-                (
-                    "fields2",
-                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
-                ),
-                ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
-                ("forcect", "1"),
-            ])
-            .send()
+        let klines = self
+            .kline_fetch(&secid, "101", "1", 6600, &[("iscca", "1")])
             .await
-            .map_err(Error::from)?;
-
-        let body = response.text().await.map_err(Error::from)?;
-        let data: serde_json::Value = serde_json::from_str(&body)?;
-
-        let klines = data["data"]["klines"]
-            .as_array()
-            .cloned()
             .unwrap_or_default();
-        let code = data["data"]["code"].as_str().unwrap_or(symbol);
-        let name = data["data"]["name"].as_str().unwrap_or("");
 
         let mut items = Vec::new();
-        for kline in &klines {
-            let line = kline.as_str().unwrap_or("");
+        for line in &klines {
             let fields: Vec<&str> = line.split(',').collect();
             if fields.len() < 14 {
                 continue;
@@ -145,8 +117,8 @@ impl AkShareClient {
 
             items.push(GlobalFuturesKline {
                 date: fields[0].to_string(),
-                code: code.to_string(),
-                name: name.to_string(),
+                code: symbol.to_string(),
+                name: String::new(),
                 open: parse_f64(fields[1]),
                 latest_price: parse_f64(fields[2]),
                 high: parse_f64(fields[3]),

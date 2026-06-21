@@ -1,21 +1,9 @@
 //! Forex rates from Bank of China (BOC).
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::ForexRate;
-
-#[derive(Debug, Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-}
+use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
     /// Fetch forex rates from Bank of China via Eastmoney datacenter.

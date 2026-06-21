@@ -11,22 +11,13 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::wire::KlineResp;
 
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
 // Wire types
 // ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct KlineEnvelope {
-    data: Option<KlineData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct KlineData {
-    klines: Option<Vec<String>>,
-}
 
 #[derive(Debug, Deserialize)]
 struct StockGetEnvelope {
@@ -399,7 +390,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: KlineResp = response.json().await.map_err(Error::from)?;
         let klines = payload
             .data
             .and_then(|d| d.klines)
@@ -505,7 +496,7 @@ impl AkShareClient {
                 .error_for_status()
                 .map_err(Error::from)?;
 
-            let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
+            let payload: KlineResp = response.json().await.map_err(Error::from)?;
             let klines = payload
                 .data
                 .and_then(|d| d.klines)

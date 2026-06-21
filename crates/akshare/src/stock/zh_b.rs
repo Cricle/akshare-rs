@@ -171,14 +171,6 @@ impl AkShareClient {
         end_date: &str,
         adjust: &str,
     ) -> Result<Vec<ZhBDailyCandle>> {
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            klines: Option<Vec<String>>,
-        }
         let secid = eastmoney_secid(symbol)?;
         let fqt = match adjust {
             "" => "0",
@@ -187,29 +179,15 @@ impl AkShareClient {
             _ => return Err(Error::invalid_input(format!("invalid adjust: {adjust}"))),
         };
 
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                ("klt", "101"),
-                ("fqt", fqt),
-                ("beg", start_date),
-                ("end", end_date),
-                ("lmt", "1000000"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: Env = response.json().await.map_err(Error::from)?;
-        let klines = payload
-            .data
-            .and_then(|d| d.klines)
-            .ok_or_else(|| Error::upstream("B-share daily kline missing data"))?;
+        let klines = self
+            .kline_fetch(
+                &secid,
+                "101",
+                fqt,
+                1_000_000,
+                &[("beg", start_date), ("end", end_date)],
+            )
+            .await?;
 
         let items: Vec<ZhBDailyCandle> = klines
             .iter()

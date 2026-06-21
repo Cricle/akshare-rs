@@ -98,7 +98,7 @@ pub fn sample_kline_str(date: &str) -> String {
 pub fn sample_macro_row(date: &str, value: f64, name: &str) -> serde_json::Value {
     serde_json::json!({
         "REPORT_DATE": date,
-        "DATA_VALUE": value,
+        "INDICATOR_VALUE": value,
         "INDICATOR_NAME": name
     })
 }

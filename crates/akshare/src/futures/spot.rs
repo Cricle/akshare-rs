@@ -11,21 +11,8 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::FuturesSnapshot;
+use crate::types::wire::ClistResp;
 use crate::util::today_iso;
-
-// ---------------------------------------------------------------------------
-// Wire types (private to this module)
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct ClistEnvelope {
-    data: Option<ClistData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ClistData {
-    diff: Option<Vec<ClistItem>>,
-}
 
 #[derive(Debug, Deserialize)]
 struct ClistItem {
@@ -90,7 +77,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let today = today_iso();
 
         let items = payload
@@ -98,7 +85,8 @@ impl AkShareClient {
             .and_then(|d| d.diff)
             .unwrap_or_default()
             .into_iter()
-            .filter_map(|item| {
+            .filter_map(|v| {
+                let item: ClistItem = serde_json::from_value(v).ok()?;
                 let code = item.code?;
                 if code.is_empty() {
                     return None;

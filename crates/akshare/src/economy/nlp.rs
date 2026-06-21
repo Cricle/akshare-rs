@@ -10,6 +10,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::wire::EmDatacenterResp;
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -41,17 +42,6 @@ struct BotData {
 #[derive(Debug, Deserialize)]
 struct BotInfo {
     text: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
 }
 
 impl AkShareClient {

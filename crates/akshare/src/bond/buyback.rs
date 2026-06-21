@@ -2,21 +2,10 @@
 //!
 //! Shanghai and Shenzhen exchange buyback lists and historical data.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::BondSnapshot;
-
-#[derive(Debug, Deserialize)]
-struct ClistEnvelope {
-    data: Option<ClistData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ClistData {
-    diff: Option<Vec<serde_json::Value>>,
-}
+use crate::types::wire::ClistResp;
 
 impl AkShareClient {
     /// Fetch Shanghai exchange bond buyback (质押式回购) list.
@@ -72,7 +61,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: ClistEnvelope = resp.json().await.map_err(Error::from)?;
+        let payload: ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
         if items.is_empty() {
             return Err(Error::not_found("eastmoney returned no buyback items"));

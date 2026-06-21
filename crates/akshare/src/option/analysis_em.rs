@@ -1,25 +1,8 @@
 //! Option analysis data from Eastmoney (premium, value, risk).
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct ClistEnvelope {
-    data: Option<ClistData>,
-}
-
-#[derive(Debug, Default, Deserialize)]
-struct ClistData {
-    total: Option<usize>,
-    #[serde(default)]
-    diff: Vec<serde_json::Value>,
-}
+use crate::types::wire::ClistResp;
 
 // ---------------------------------------------------------------------------
 // Return types
@@ -242,7 +225,7 @@ impl AkShareClient {
             let pz = page_size.to_string();
             let pn = page.to_string();
 
-            let resp: ClistEnvelope = self
+            let resp: ClistResp = self
                 .get("https://push2.eastmoney.com/api/qt/clist/get")
                 .query(&[
                     ("fid", fid),
@@ -263,9 +246,11 @@ impl AkShareClient {
                 .await
                 .map_err(Error::from)?;
 
-            let data = resp.data.unwrap_or_default();
-            let total = data.total.unwrap_or(0);
-            let diff = data.diff;
+            let Some(data) = resp.data else {
+                break;
+            };
+            let total = data.total.unwrap_or(0) as usize;
+            let diff = data.diff.unwrap_or_default();
 
             if diff.is_empty() {
                 break;

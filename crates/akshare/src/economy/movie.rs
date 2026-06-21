@@ -5,22 +5,10 @@
 //! decryption; this Rust implementation uses the Eastmoney datacenter as a
 //! publicly accessible fallback.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
-
-#[derive(Debug, Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-}
+use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
     /// Movie box office — cinema daily data (影院票房日榜).

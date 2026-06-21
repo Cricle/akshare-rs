@@ -3,6 +3,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::wire::{ClistResp, KlineResp};
 use crate::types::{
     AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail, CandlePoint,
     CapitalFlowPoint, SectorConstituent, SectorSnapshot, StockSearchResult,
@@ -41,29 +42,7 @@ struct SearchItem {
     security_type_name: Option<String>,
 }
 
-// 2. Klines (also used for capital flow)
-
-#[derive(Debug, Deserialize)]
-struct KlineEnvelope {
-    data: Option<KlineData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct KlineData {
-    klines: Option<Vec<String>>,
-}
-
-// 3. Sector rankings / Sector constituents (clist API)
-
-#[derive(Debug, Deserialize)]
-struct ClistEnvelope {
-    data: Option<ClistData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ClistData {
-    diff: Option<Vec<ClistItem>>,
-}
+// 2. Sector rankings / Sector constituents (clist API)
 
 #[derive(Debug, Deserialize)]
 struct ClistItem {
@@ -263,33 +242,7 @@ impl AkShareClient {
                 )));
             }
         };
-        let lmt = limit.max(5).to_string();
-
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", "101"),
-                ("fqt", fqt),
-                ("lmt", lmt.as_str()),
-                ("end", "20500000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
-        let data = payload
-            .data
-            .ok_or_else(|| Error::upstream("eastmoney kline response missing data"))?;
-        let klines = data
-            .klines
-            .ok_or_else(|| Error::upstream("eastmoney kline response missing klines"))?;
+        let klines = self.kline_fetch(secid, "101", fqt, limit, &[]).await?;
 
         let mut items: Vec<CandlePoint> = klines
             .iter()
@@ -346,12 +299,13 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let items = payload
             .data
             .and_then(|d| d.diff)
             .unwrap_or_default()
             .into_iter()
+            .filter_map(|v| serde_json::from_value::<ClistItem>(v).ok())
             .map(|item| SectorSnapshot {
                 sector_code: item.code.unwrap_or_default(),
                 sector_name: item.name.unwrap_or_else(|| "未知板块".to_string()),
@@ -397,12 +351,13 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let items = payload
             .data
             .and_then(|d| d.diff)
             .unwrap_or_default()
             .into_iter()
+            .filter_map(|v| serde_json::from_value::<ClistItem>(v).ok())
             .map(|item| SectorConstituent {
                 symbol: item.code.unwrap_or_default(),
                 name: item.name.unwrap_or_else(|| "未知成分股".to_string()),
@@ -679,7 +634,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: KlineResp = response.json().await.map_err(Error::from)?;
         let data = payload
             .data
             .ok_or_else(|| Error::upstream("eastmoney capital flow response missing data"))?;

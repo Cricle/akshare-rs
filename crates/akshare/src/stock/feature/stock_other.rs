@@ -296,40 +296,15 @@ impl AkShareClient {
         };
         let market_code = i32::from(symbol.starts_with('6'));
         let secid = format!("{market_code}.{symbol}");
-        let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
-        let resp = self
-            .get(url)
-            .query(&[
-                ("secid", secid.as_str()),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                ("klt", "101"),
-                ("fqt", adjust_code),
-                ("end", "20500101"),
-                ("lmt", "210"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-        let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let klines = json
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .cloned()
-            .unwrap_or_default();
+        let klines = self
+            .kline_fetch(&secid, "101", adjust_code, 210, &[])
+            .await?;
         // Return simplified chip data based on kline data
         // Full CYQ calculation requires JavaScript execution
         Ok(klines
             .iter()
-            .map(|v| CyqData {
-                date: v
-                    .as_str()
-                    .and_then(|s| s.split(',').next())
-                    .unwrap_or("")
-                    .to_string(),
+            .map(|s| CyqData {
+                date: s.split(',').next().unwrap_or("").to_string(),
                 benefit_part: 0.0,
                 avg_cost: 0.0,
                 pct_90_low: 0.0,

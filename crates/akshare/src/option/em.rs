@@ -22,16 +22,6 @@ struct DatacenterResult {
     data: Vec<serde_json::Value>,
 }
 
-#[derive(Debug, Deserialize)]
-struct KlineEnvelope {
-    data: Option<KlineData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct KlineData {
-    klines: Option<Vec<String>>,
-}
-
 // ---------------------------------------------------------------------------
 // Implementation
 // ---------------------------------------------------------------------------
@@ -166,33 +156,7 @@ impl AkShareClient {
     ) -> Result<Vec<OptionSnapshot>> {
         // Try secid format for Eastmoney option contracts
         let secid = format!("1.{contract_code}");
-        let lmt = limit.max(5).to_string();
-
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", "101"),
-                ("fqt", "1"),
-                ("lmt", lmt.as_str()),
-                ("end", "20500000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
-        let data = payload
-            .data
-            .ok_or_else(|| Error::upstream("eastmoney option kline response missing data"))?;
-        let klines = data
-            .klines
-            .ok_or_else(|| Error::upstream("eastmoney option kline response missing klines"))?;
+        let klines = self.kline_fetch(&secid, "101", "1", limit, &[]).await?;
 
         let mut items = Vec::with_capacity(klines.len());
         for line in &klines {
@@ -281,17 +245,7 @@ pub struct OptionCurrentEmRow {
 // Wire types for clist API
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Deserialize)]
-struct ClistEnvelope {
-    data: Option<ClistData>,
-}
-
-#[derive(Debug, Default, Deserialize)]
-struct ClistData {
-    total: Option<usize>,
-    #[serde(default)]
-    diff: Vec<serde_json::Value>,
-}
+use crate::types::wire::ClistResp;
 
 #[derive(Debug, Deserialize)]
 struct FutsseapiEnvelope {
@@ -464,7 +418,7 @@ impl AkShareClient {
             let pz = page_size.to_string();
             let pn = page.to_string();
 
-            let resp: ClistEnvelope = self
+            let resp: ClistResp = self
                                 .get("https://23.push2.eastmoney.com/api/qt/clist/get")
                 .query(&[
                     ("pn", pn.as_str()),
@@ -488,9 +442,11 @@ impl AkShareClient {
                 .await
                 .map_err(Error::from)?;
 
-            let data = resp.data.unwrap_or_default();
-            let total = data.total.unwrap_or(0);
-            let diff = data.diff;
+            let Some(data) = resp.data else {
+                break;
+            };
+            let total = data.total.unwrap_or(0) as usize;
+            let diff = data.diff.unwrap_or_default();
 
             if diff.is_empty() {
                 break;

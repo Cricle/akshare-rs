@@ -8,23 +8,11 @@ use std::sync::LazyLock;
 use serde::Deserialize;
 
 use crate::client::AkShareClient;
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::types::{FuturesHistKline, Row};
 
 static RE_ALPHA: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z]+").unwrap());
-
-#[derive(Debug, Deserialize)]
-struct EmKlineResponse {
-    data: Option<EmKlineData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmKlineData {
-    klines: Option<Vec<String>>,
-    code: Option<String>,
-    name: Option<String>,
-}
 
 #[derive(Debug, Deserialize)]
 struct EmRedisEntry {
@@ -128,39 +116,13 @@ impl AkShareClient {
             format!("{market}.{symbol}")
         };
 
-        let url = "https://push2his.eastmoney.com/api/qt/stock/kline/get";
-        let response = self
-            .get(url)
-            .query(&[
-                ("secid", sec_id.as_str()),
-                ("klt", period_code),
-                ("fqt", "1"),
-                ("lmt", "10000"),
-                ("end", "20500000"),
-                ("iscca", "1"),
-                ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8"),
-                (
-                    "fields2",
-                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
-                ),
-                ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
-                ("forcect", "1"),
-            ])
-            .send()
+        let klines = self
+            .kline_fetch(&sec_id, period_code, "1", 10000, &[("iscca", "1")])
             .await
-            .map_err(Error::from)?;
-
-        let body = response.text().await.map_err(Error::from)?;
-        let data: serde_json::Value = serde_json::from_str(&body)?;
-
-        let klines = data["data"]["klines"]
-            .as_array()
-            .cloned()
             .unwrap_or_default();
 
         let mut items = Vec::new();
-        for kline in &klines {
-            let line = kline.as_str().unwrap_or("");
+        for line in &klines {
             let fields: Vec<&str> = line.split(',').collect();
             if fields.len() < 14 {
                 continue;

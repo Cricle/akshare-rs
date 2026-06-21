@@ -38,50 +38,23 @@ impl AkShareClient {
             }
         };
         let secid = eastmoney_secid(symbol)?;
-        let resp = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", klt),
-                ("fqt", fqt),
-                (
-                    "beg",
-                    if start_date.is_empty() {
-                        "0"
-                    } else {
-                        start_date
-                    },
-                ),
-                (
-                    "end",
-                    if end_date.is_empty() {
-                        "20500000"
-                    } else {
-                        end_date
-                    },
-                ),
-                ("lmt", "1000000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let klines = json
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .ok_or_else(|| Error::upstream("missing klines data"))?;
+        let beg = if start_date.is_empty() {
+            "0"
+        } else {
+            start_date
+        };
+        let end = if end_date.is_empty() {
+            "20500000"
+        } else {
+            end_date
+        };
+        let klines = self
+            .kline_fetch(&secid, klt, fqt, 1_000_000, &[("beg", beg), ("end", end)])
+            .await?;
 
         Ok(klines
             .iter()
-            .filter_map(|k| {
-                let s = k.as_str()?;
+            .filter_map(|s| {
                 let f = parse_csv_line(s);
                 if f.len() < 11 {
                     return None;
@@ -130,50 +103,23 @@ impl AkShareClient {
             _ => "0",
         };
         let secid = eastmoney_secid(symbol)?;
-        let resp = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", klt),
-                ("fqt", fqt),
-                (
-                    "beg",
-                    if start_date.is_empty() {
-                        "0"
-                    } else {
-                        start_date
-                    },
-                ),
-                (
-                    "end",
-                    if end_date.is_empty() {
-                        "20500000"
-                    } else {
-                        end_date
-                    },
-                ),
-                ("lmt", "1000000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let klines = json
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .ok_or_else(|| Error::upstream("missing klines data"))?;
+        let beg = if start_date.is_empty() {
+            "0"
+        } else {
+            start_date
+        };
+        let end = if end_date.is_empty() {
+            "20500000"
+        } else {
+            end_date
+        };
+        let klines = self
+            .kline_fetch(&secid, klt, fqt, 1_000_000, &[("beg", beg), ("end", end)])
+            .await?;
 
         Ok(klines
             .iter()
-            .filter_map(|k| {
-                let s = k.as_str()?;
+            .filter_map(|s| {
                 let f = parse_csv_line(s);
                 if f.len() < 11 {
                     return None;
@@ -220,50 +166,23 @@ impl AkShareClient {
             _ => "0",
         };
         let secid = format!("116.{}", symbol.trim());
-        let resp = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", klt),
-                ("fqt", fqt),
-                (
-                    "beg",
-                    if start_date.is_empty() {
-                        "0"
-                    } else {
-                        start_date
-                    },
-                ),
-                (
-                    "end",
-                    if end_date.is_empty() {
-                        "20500000"
-                    } else {
-                        end_date
-                    },
-                ),
-                ("lmt", "1000000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let klines = json
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .ok_or_else(|| Error::upstream("missing klines data"))?;
+        let beg = if start_date.is_empty() {
+            "0"
+        } else {
+            start_date
+        };
+        let end = if end_date.is_empty() {
+            "20500000"
+        } else {
+            end_date
+        };
+        let klines = self
+            .kline_fetch(&secid, klt, fqt, 1_000_000, &[("beg", beg), ("end", end)])
+            .await?;
 
         Ok(klines
             .iter()
-            .filter_map(|k| {
-                let s = k.as_str()?;
+            .filter_map(|s| {
                 let f = parse_csv_line(s);
                 if f.len() < 11 {
                     return None;
@@ -312,50 +231,23 @@ impl AkShareClient {
             _ => "0",
         };
         let secid = format!("116.{}", symbol.trim());
-        let resp = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", klt),
-                ("fqt", fqt),
-                (
-                    "beg",
-                    if start_date.is_empty() {
-                        "0"
-                    } else {
-                        start_date
-                    },
-                ),
-                (
-                    "end",
-                    if end_date.is_empty() {
-                        "20500000"
-                    } else {
-                        end_date
-                    },
-                ),
-                ("lmt", "1000000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let klines = json
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .ok_or_else(|| Error::upstream("missing klines data"))?;
+        let beg = if start_date.is_empty() {
+            "0"
+        } else {
+            start_date
+        };
+        let end = if end_date.is_empty() {
+            "20500000"
+        } else {
+            end_date
+        };
+        let klines = self
+            .kline_fetch(&secid, klt, fqt, 1_000_000, &[("beg", beg), ("end", end)])
+            .await?;
 
         Ok(klines
             .iter()
-            .filter_map(|k| {
-                let s = k.as_str()?;
+            .filter_map(|s| {
                 let f = parse_csv_line(s);
                 if f.len() < 11 {
                     return None;
@@ -419,50 +311,23 @@ impl AkShareClient {
             format!("105.{symbol}")
         };
 
-        let resp = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", klt),
-                ("fqt", fqt),
-                (
-                    "beg",
-                    if start_date.is_empty() {
-                        "0"
-                    } else {
-                        start_date
-                    },
-                ),
-                (
-                    "end",
-                    if end_date.is_empty() {
-                        "20500000"
-                    } else {
-                        end_date
-                    },
-                ),
-                ("lmt", "1000000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let klines = json
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .ok_or_else(|| Error::upstream("missing klines data"))?;
+        let beg = if start_date.is_empty() {
+            "0"
+        } else {
+            start_date
+        };
+        let end = if end_date.is_empty() {
+            "20500000"
+        } else {
+            end_date
+        };
+        let klines = self
+            .kline_fetch(&secid, klt, fqt, 1_000_000, &[("beg", beg), ("end", end)])
+            .await?;
 
         Ok(klines
             .iter()
-            .filter_map(|k| {
-                let s = k.as_str()?;
+            .filter_map(|s| {
                 let f = parse_csv_line(s);
                 if f.len() < 11 {
                     return None;
@@ -511,50 +376,23 @@ impl AkShareClient {
             _ => "0",
         };
         let secid = format!("105.{symbol}");
-        let resp = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", klt),
-                ("fqt", fqt),
-                (
-                    "beg",
-                    if start_date.is_empty() {
-                        "0"
-                    } else {
-                        start_date
-                    },
-                ),
-                (
-                    "end",
-                    if end_date.is_empty() {
-                        "20500000"
-                    } else {
-                        end_date
-                    },
-                ),
-                ("lmt", "1000000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
-        let klines = json
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .ok_or_else(|| Error::upstream("missing klines data"))?;
+        let beg = if start_date.is_empty() {
+            "0"
+        } else {
+            start_date
+        };
+        let end = if end_date.is_empty() {
+            "20500000"
+        } else {
+            end_date
+        };
+        let klines = self
+            .kline_fetch(&secid, klt, fqt, 1_000_000, &[("beg", beg), ("end", end)])
+            .await?;
 
         Ok(klines
             .iter()
-            .filter_map(|k| {
-                let s = k.as_str()?;
+            .filter_map(|s| {
                 let f = parse_csv_line(s);
                 if f.len() < 11 {
                     return None;

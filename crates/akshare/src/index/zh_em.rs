@@ -7,22 +7,6 @@ use crate::error::{Error, Result};
 use crate::util::{parse_csv_line, parse_f64_safe};
 
 // ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct EmKlineEnvelope {
-    data: Option<EmKlineData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmKlineData {
-    klines: Option<Vec<String>>,
-    #[allow(dead_code)]
-    trends: Option<Vec<String>>,
-}
-
-// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -50,35 +34,15 @@ impl AkShareClient {
         // Try market prefixes in order: 1 (SH), 0 (SZ), 2 (CSI), 47
         for market in &["1", "0", "2", "47"] {
             let secid = format!("{market}.{symbol}");
-            let response = self
-                .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-                .query(&[
-                    ("secid", secid.as_str()),
-                    ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
-                    ("fields1", "f1,f2,f3,f4,f5,f6"),
-                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                    ("klt", klt),
-                    ("fqt", "0"),
-                    ("beg", "0"),
-                    ("end", "20500000"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
-
-            let payload: EmKlineEnvelope = response.json().await.map_err(Error::from)?;
-            if let Some(data) = payload.data
-                && let Some(klines) = data.klines
-                && !klines.is_empty()
-            {
-                let points: Vec<IndexZhAHistPoint> = klines
-                    .iter()
-                    .map(|line| parse_zh_a_hist_line(line))
-                    .collect::<Result<Vec<_>>>()?;
-                return Ok(points);
-            }
+            let klines = match self.kline_fetch(&secid, klt, "0", usize::MAX, &[]).await {
+                Ok(k) => k,
+                Err(_) => continue,
+            };
+            let points: Vec<IndexZhAHistPoint> = klines
+                .iter()
+                .map(|line| parse_zh_a_hist_line(line))
+                .collect::<Result<Vec<_>>>()?;
+            return Ok(points);
         }
 
         Err(Error::not_found(format!(
@@ -117,26 +81,10 @@ impl AkShareClient {
             return self.index_zh_a_hist_trends(symbol).await;
         }
 
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", &format!("1.{symbol}")[..]),
-                ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                ("klt", period),
-                ("fqt", "1"),
-                ("beg", "0"),
-                ("end", "20500000"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: EmKlineEnvelope = response.json().await.map_err(Error::from)?;
-        let klines = payload.data.and_then(|d| d.klines).unwrap_or_default();
+        let secid = format!("1.{symbol}");
+        let klines = self
+            .kline_fetch(&secid, period, "1", usize::MAX, &[])
+            .await?;
 
         let points: Vec<IndexZhAHistMinPoint> = klines
             .iter()

@@ -1,28 +1,10 @@
 #![allow(dead_code)]
 //! Interbank lending rate data from Eastmoney.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-    #[serde(default)]
-    pages: u32,
-}
+use crate::types::wire::EmDatacenterResp;
 
 // ---------------------------------------------------------------------------
 // Implementation

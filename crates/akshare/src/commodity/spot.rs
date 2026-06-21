@@ -3,18 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
-
-/// Eastmoney datacenter response envelope.
-#[derive(Debug, serde::Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-}
+use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
     /// Fetch commodity spot prices from Eastmoney datacenter.

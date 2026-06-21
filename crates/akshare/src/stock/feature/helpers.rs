@@ -3,6 +3,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::wire::KlineResp;
 use serde::Deserialize;
 
 /// Generic Eastmoney datacenter response envelope.
@@ -203,6 +204,59 @@ impl AkShareClient {
             return Err(Error::not_found("eastmoney clist returned no data"));
         }
         Ok(items)
+    }
+
+    /// Generic Eastmoney kline fetch from push2his.
+    ///
+    /// Returns raw kline strings (comma-separated OHLCV etc.) from the Eastmoney
+    /// kline API. Each string needs to be parsed by the caller with `parse_csv_line`.
+    ///
+    /// # Parameters
+    /// - `secid`: Eastmoney security id (e.g. `"1.600000"`, `"133.USDCNY"`)
+    /// - `klt`: Kline period (1=1min, 5=5min, 15=15min, 30=30min, 60=60min, 101=daily, 102=weekly, 103=monthly)
+    /// - `fqt`: Forward adjust (0=none, 1=forward, 2=backwards)
+    /// - `limit`: Number of bars to return
+    /// - `extra`: Additional query parameters (e.g. `[("iscca", "1")]`)
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) async fn kline_fetch(
+        &self,
+        secid: &str,
+        klt: &str,
+        fqt: &str,
+        limit: usize,
+        extra: &[(&str, &str)],
+    ) -> Result<Vec<String>> {
+        let lmt = limit.max(1).to_string();
+        let mut builder = self
+            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+            .query(&[
+                ("secid", secid),
+                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
+                ("klt", klt),
+                ("fqt", fqt),
+                ("lmt", lmt.as_str()),
+                ("end", "20500000"),
+                ("fields1", "f1,f2,f3,f4,f5,f6"),
+                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
+            ]);
+        for &(k, v) in extra {
+            builder = builder.query(&[(k, v)]);
+        }
+
+        let resp = builder
+            .send()
+            .await
+            .map_err(Error::from)?
+            .error_for_status()
+            .map_err(Error::from)?;
+
+        let payload: KlineResp = resp.json().await.map_err(Error::from)?;
+        let klines = payload.data.and_then(|d| d.klines).unwrap_or_default();
+
+        if klines.is_empty() {
+            return Err(Error::not_found("eastmoney kline returned no data"));
+        }
+        Ok(klines)
     }
 
     /// Generic Eastmoney emweb financial report fetch.

@@ -8,22 +8,10 @@
 //! The original Python implementation uses zhenqi.com with JS-encrypted
 //! payloads; this Rust implementation uses publicly accessible fallbacks.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
-
-#[derive(Debug, Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-}
+use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
     /// Air quality index data for a given Chinese city.

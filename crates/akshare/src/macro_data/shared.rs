@@ -5,21 +5,11 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::wire::EmDatacenterResp;
 
 // ---------------------------------------------------------------------------
 // Wire types
 // ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct EmDatacenterResp {
-    pub result: Option<EmResult>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct EmResult {
-    #[serde(default)]
-    pub data: Vec<serde_json::Value>,
-}
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct Jin10Resp {

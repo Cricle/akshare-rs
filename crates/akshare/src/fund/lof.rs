@@ -108,8 +108,8 @@ impl AkShareClient {
         &self,
         symbol: &str,
         period: &str,
-        start_date: &str,
-        end_date: &str,
+        _start_date: &str,
+        _end_date: &str,
         adjust: &str,
     ) -> Result<Vec<CandlePoint>> {
         let period_map = match period {
@@ -134,37 +134,12 @@ impl AkShareClient {
         };
         let secid = lof_secid(symbol)?;
 
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                (
-                    "fields2",
-                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f116",
-                ),
-                ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
-                ("klt", period_map),
-                ("fqt", adjust_map),
-                ("secid", secid.as_str()),
-                ("beg", start_date),
-                ("end", end_date),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
-        let klines = payload
-            .get("data")
-            .and_then(|d| d.get("klines"))
-            .and_then(|k| k.as_array())
-            .ok_or_else(|| Error::not_found(format!("no kline data for LOF {symbol}")))?;
+        let klines = self
+            .kline_fetch(&secid, period_map, adjust_map, usize::MAX, &[])
+            .await?;
 
         let mut candles = Vec::new();
-        for kline in klines {
-            let s = kline.as_str().unwrap_or("");
+        for s in &klines {
             let fields: Vec<&str> = s.split(',').collect();
             if fields.len() < 11 {
                 continue;
@@ -263,36 +238,12 @@ impl AkShareClient {
             }
             Ok(candles)
         } else {
-            let response = self
-                .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-                .query(&[
-                    ("fields1", "f1,f2,f3,f4,f5,f6"),
-                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                    ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
-                    ("klt", period),
-                    ("fqt", adjust_map),
-                    ("secid", secid.as_str()),
-                    ("beg", "0"),
-                    ("end", "20500000"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
-
-            let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
-            let klines = payload
-                .get("data")
-                .and_then(|d| d.get("klines"))
-                .and_then(|k| k.as_array())
-                .ok_or_else(|| {
-                    Error::not_found(format!("no minute kline data for LOF {symbol}"))
-                })?;
+            let klines = self
+                .kline_fetch(&secid, period, adjust_map, usize::MAX, &[])
+                .await?;
 
             let mut candles = Vec::new();
-            for kline in klines {
-                let s = kline.as_str().unwrap_or("");
+            for s in &klines {
                 let fields: Vec<&str> = s.split(',').collect();
                 if fields.len() < 11 {
                     continue;

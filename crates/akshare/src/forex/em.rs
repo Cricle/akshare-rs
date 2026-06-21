@@ -5,22 +5,9 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::wire::ClistResp;
 use crate::types::{CandlePoint, ForexRate};
 use crate::util::{parse_csv_line, parse_f64_safe, today_iso};
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct ClistEnvelope {
-    data: Option<ClistData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ClistData {
-    diff: Option<Vec<ClistItem>>,
-}
 
 #[derive(Debug, Deserialize)]
 struct ClistItem {
@@ -32,16 +19,6 @@ struct ClistItem {
     price: Option<f64>,
     #[serde(rename = "f3")]
     change_pct: Option<f64>,
-}
-
-#[derive(Debug, Deserialize)]
-struct KlineEnvelope {
-    data: Option<KlineData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct KlineData {
-    klines: Option<Vec<String>>,
 }
 
 // ---------------------------------------------------------------------------
@@ -73,14 +50,15 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let today = today_iso();
         let items = payload
             .data
             .and_then(|d| d.diff)
             .unwrap_or_default()
             .into_iter()
-            .filter_map(|item| {
+            .filter_map(|v| {
+                let item: ClistItem = serde_json::from_value(v).ok()?;
                 let code = item.code?;
                 if code.is_empty() {
                     return None;
@@ -135,31 +113,7 @@ impl AkShareClient {
             _ => "101",
         };
 
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", symbol),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", klt),
-                ("fqt", "1"),
-                ("lmt", "500"),
-                ("end", "20500000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
-        let data = payload
-            .data
-            .ok_or_else(|| Error::upstream("eastmoney forex kline response missing data"))?;
-        let klines = data
-            .klines
-            .ok_or_else(|| Error::upstream("eastmoney forex kline response missing klines"))?;
+        let klines = self.kline_fetch(symbol, klt, "1", 500, &[]).await?;
 
         let items: Vec<CandlePoint> = klines
             .iter()
@@ -180,33 +134,7 @@ impl AkShareClient {
         if symbol.trim().is_empty() {
             return Err(Error::invalid_input("forex symbol is empty"));
         }
-        let lmt = limit.max(5).to_string();
-
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", symbol),
-                ("ut", "fa5fd1943c7b386f172d6893dbfba10b"),
-                ("klt", "101"),
-                ("fqt", "1"),
-                ("lmt", lmt.as_str()),
-                ("end", "20500000"),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
-
-        let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
-        let data = payload
-            .data
-            .ok_or_else(|| Error::upstream("eastmoney forex kline response missing data"))?;
-        let klines = data
-            .klines
-            .ok_or_else(|| Error::upstream("eastmoney forex kline response missing klines"))?;
+        let klines = self.kline_fetch(symbol, "101", "1", limit, &[]).await?;
 
         let mut items: Vec<CandlePoint> = klines
             .iter()

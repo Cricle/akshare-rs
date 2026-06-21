@@ -8,33 +8,10 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::CapitalFlowPoint;
+use crate::types::wire::{ClistResp, KlineResp};
 use crate::util::{parse_csv_line, parse_f64_safe};
 
 use serde::{Deserialize, Serialize};
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct KlineEnvelope {
-    data: Option<KlineData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct KlineData {
-    klines: Option<Vec<String>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ClistEnvelope {
-    data: Option<ClistData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ClistData {
-    diff: Option<Vec<serde_json::Value>>,
-}
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -123,7 +100,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: KlineEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: KlineResp = response.json().await.map_err(Error::from)?;
         let data = payload
             .data
             .ok_or_else(|| Error::upstream("eastmoney fund flow response missing data"))?;
@@ -198,7 +175,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
+        let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let diff = payload
             .data
             .and_then(|d| d.diff)

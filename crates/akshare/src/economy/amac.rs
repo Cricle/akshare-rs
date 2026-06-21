@@ -2,22 +2,10 @@
 //!
 //! Fetches fund industry AUM and statistics from the Eastmoney datacenter.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::Result;
+use crate::types::wire::EmDatacenterResp;
 use crate::types::{MacroDataPoint, Row};
-
-#[derive(Debug, Deserialize)]
-struct EmDatacenterResp {
-    result: Option<EmResult>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmResult {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-}
 
 /// Helper to fetch AMAC data from Eastmoney datacenter.
 async fn fetch_amac_data(

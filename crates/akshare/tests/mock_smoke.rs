@@ -93,6 +93,6 @@ async fn test_sample_kline_str() {
 async fn test_sample_macro_row() {
     let row = common::sample_macro_row("2024-01-01", 123.45, "GDP");
     assert_eq!(row["REPORT_DATE"], "2024-01-01");
-    assert_eq!(row["DATA_VALUE"], 123.45);
+    assert_eq!(row["INDICATOR_VALUE"], 123.45);
     assert_eq!(row["INDICATOR_NAME"], "GDP");
 }
