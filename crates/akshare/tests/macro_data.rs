@@ -39,6 +39,32 @@ macro_rules! macro_test {
     };
 }
 
+macro_rules! macro_test_arg1 {
+    ($test_name:ident, $method:ident, $arg:expr) => {
+        #[tokio::test]
+        async fn $test_name() {
+            let server = MockServer::start().await;
+            mount_em_mocks(&server).await;
+            let client = common::mock_client(&server);
+            let result = client.$method($arg).await;
+            let _ = result;
+        }
+    };
+}
+
+macro_rules! macro_test_arg2 {
+    ($test_name:ident, $method:ident, $arg1:expr, $arg2:expr) => {
+        #[tokio::test]
+        async fn $test_name() {
+            let server = MockServer::start().await;
+            mount_em_mocks(&server).await;
+            let client = common::mock_client(&server);
+            let result = client.$method($arg1, $arg2).await;
+            let _ = result;
+        }
+    };
+}
+
 // ===========================================================================
 // China — Eastmoney datacenter report methods
 // ===========================================================================
