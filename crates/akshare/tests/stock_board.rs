@@ -2755,12 +2755,12 @@ async fn test_stock_hk_dividend_payout() {
 
 /// THS HTML with bonus/dividend table rows (7+ columns per row).
 fn hk_fhpx_html() -> String {
-    r#"<!DOCTYPE html><html><body>
+    r"<!DOCTYPE html><html><body>
 <table>
 <tr><td>2024-01-15</td><td>派息1.5元</td><td>2024-01-20</td><td>2024-02-01</td><td>2024-01-20</td><td>2024-01-19</td><td>现金</td><td>已实施</td></tr>
 <tr><td>2023-06-10</td><td>派息1.0元</td><td>2023-06-15</td><td>2023-07-01</td><td>2023-06-15</td><td>2023-06-14</td><td>现金</td><td>已实施</td></tr>
 </table>
-</body></html>"#
+</body></html>"
         .to_string()
 }
 

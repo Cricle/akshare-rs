@@ -1958,7 +1958,7 @@ async fn test_stock_us_valuation() {
     let items = result.unwrap();
     assert!(!items.is_empty());
     assert_eq!(items[0].date, "2024-01-01");
-    assert_eq!(items[0].value, 100.0);
+    assert!((items[0].value - 100.0).abs() < f64::EPSILON);
     assert_eq!(items[1].date, "2024-02-01");
-    assert_eq!(items[1].value, 105.0);
+    assert!((items[1].value - 105.0).abs() < f64::EPSILON);
 }
