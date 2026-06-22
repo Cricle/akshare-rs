@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! China/US treasury bond yield comparison from Eastmoney.
 
 use serde::Deserialize;
@@ -17,8 +16,6 @@ struct EmRateResp {
 struct EmRateResult {
     #[serde(default)]
     data: Vec<serde_json::Value>,
-    #[serde(default)]
-    pages: u32,
 }
 
 impl AkShareClient {

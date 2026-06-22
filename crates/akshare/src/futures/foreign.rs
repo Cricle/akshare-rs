@@ -1,13 +1,8 @@
-#![allow(dead_code)]
 //! Foreign futures historical data from Sina Finance.
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{FuturesKlinePoint, Row};
-
-fn parse_f64(s: &str) -> f64 {
-    s.trim().parse::<f64>().unwrap_or(0.0)
-}
 
 impl AkShareClient {
     /// Foreign futures historical daily kline from Sina.

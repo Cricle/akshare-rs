@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Eastmoney miscellaneous stock data — block trades, repurchase, company events,
 //! fund holdings, shareholder changes, summaries, industry, forecasts, comparisons.
 //!
@@ -37,18 +36,6 @@ struct DatacenterEnvelope {
 #[derive(Debug, Deserialize)]
 struct DatacenterResult {
     data: Option<Vec<serde_json::Value>>,
-    pages: Option<i64>,
-}
-
-#[derive(Debug, Deserialize)]
-struct DatacenterEnvelopeGeneric<T> {
-    result: Option<DatacenterResultGeneric<T>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct DatacenterResultGeneric<T> {
-    data: Option<Vec<T>>,
-    pages: Option<i64>,
 }
 
 // ---------------------------------------------------------------------------

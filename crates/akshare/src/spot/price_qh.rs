@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Spot price data from 99 QH (99期货).
 
 use serde::Deserialize;
@@ -20,7 +19,6 @@ struct QhTrendData {
 #[derive(Debug, Deserialize)]
 struct QhTrendItem {
     date: Option<String>,
-    fp: Option<String>,
     sp: Option<String>,
 }
 

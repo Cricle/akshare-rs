@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Other macro-economic data — crypto spot, FX sentiment from Jin10.
 
 use serde::Deserialize;
@@ -14,16 +13,6 @@ use crate::types::MacroDataPoint;
 #[derive(Debug, Deserialize)]
 struct CryptoResp {
     data: Option<Vec<serde_json::Value>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct SentimentResp {
-    data: Option<SentimentData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct SentimentData {
-    values: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize)]

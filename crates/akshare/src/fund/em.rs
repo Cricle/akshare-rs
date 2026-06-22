@@ -1,22 +1,8 @@
-#![allow(dead_code)]
 //! Open-end fund data from Eastmoney: purchase status, fund names, index info.
-
-use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::FundSnapshot;
-
-/// Wire type for fund search data (var r = [...] pattern).
-#[derive(Debug, Deserialize)]
-struct FundSearchItem {
-    #[serde(rename = "0")]
-    code: String,
-    #[serde(rename = "2")]
-    name: String,
-    #[serde(rename = "3")]
-    fund_type: String,
-}
 
 impl AkShareClient {
     /// Fetch fund purchase/redemption status from Eastmoney.

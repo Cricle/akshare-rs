@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Hog spot price data from Soozhu (搜猪).
 
 use serde::Deserialize;
@@ -19,16 +18,6 @@ struct SoozhuValueItem {
     name: Option<String>,
     value: Option<Vec<serde_json::Value>>,
 }
-
-/// Indicator ID mapping for different hog/soybean products.
-const SOOZHU_INDICATORS: &[(&str, &str)] = &[
-    ("hog_lean", ""),     // 全国瘦肉型肉猪
-    ("three_way", "4"),   // 全国三元仔猪
-    ("crossbred", "6"),   // 全国后备二元母猪
-    ("corn", "8"),        // 全国玉米价格
-    ("soybean", "9"),     // 全国豆粕价格
-    ("mixed_feed", "11"), // 全国育肥猪合料
-];
 
 impl AkShareClient {
     /// Fetch hog spot prices by province from Soozhu.
@@ -216,12 +205,6 @@ fn extract_csrf_token(html: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_soozhu_indicators() {
-        assert_eq!(SOOZHU_INDICATORS.len(), 6);
-        assert_eq!(SOOZHU_INDICATORS[0].0, "hog_lean");
-    }
 
     #[test]
     fn test_extract_csrf_token() {

@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Interbank lending rate data from Eastmoney.
 
 use crate::client::AkShareClient;

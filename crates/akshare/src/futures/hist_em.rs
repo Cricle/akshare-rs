@@ -1,11 +1,8 @@
-#![allow(dead_code)]
 //! Futures historical data from Eastmoney (东方财富网).
 //!
 //! Provides kline data for Chinese and international futures.
 
 use std::sync::LazyLock;
-
-use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::Result;
@@ -13,16 +10,6 @@ use crate::types::{FuturesHistKline, Row};
 
 static RE_ALPHA: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z]+").unwrap());
-
-#[derive(Debug, Deserialize)]
-struct EmRedisEntry {
-    name: Option<String>,
-    code: Option<String>,
-    vcode: Option<String>,
-    vname: Option<String>,
-    mktid: Option<i64>,
-    mktname: Option<String>,
-}
 
 fn parse_f64(s: &str) -> f64 {
     s.trim().parse::<f64>().unwrap_or(0.0)

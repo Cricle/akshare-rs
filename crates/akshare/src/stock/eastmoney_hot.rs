@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Eastmoney hot rankings — stock popularity, keywords, rising stocks.
 //!
 //! Covers Python functions:
@@ -140,8 +139,6 @@ struct KeywordItem {
     concept_code: Option<String>,
     #[serde(rename = "hotNum")]
     hot_num: Option<f64>,
-    #[serde(default)]
-    flag: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize)]

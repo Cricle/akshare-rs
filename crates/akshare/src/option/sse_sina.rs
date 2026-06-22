@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! SSE stock options from Sina Finance.
 
 use serde::Deserialize;
@@ -53,11 +52,6 @@ struct SinaMinuteResponse {
 #[derive(Debug, Deserialize)]
 struct SinaMinuteResult {
     data: Option<Vec<serde_json::Value>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct SinaDailyJsonpResponse {
-    // The response is a JSONP that wraps a JSON array
 }
 
 // ---------------------------------------------------------------------------

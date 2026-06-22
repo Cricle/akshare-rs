@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Euro area macro-economic data from Jin10 datacenter.
 
 use crate::client::AkShareClient;
@@ -92,7 +91,6 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 struct Jin10CdnResp {
     values: Option<serde_json::Value>,
-    keys: Option<Vec<serde_json::Value>>,
 }
 
 impl AkShareClient {

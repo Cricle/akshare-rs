@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Eastmoney HSGT (沪深港通) data — northbound/southbound flows, quota.
 //!
 //! Covers Python functions:
@@ -16,11 +15,6 @@ use serde::{Deserialize, Serialize};
 // ---------------------------------------------------------------------------
 // Wire types
 // ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct FundFlowEnvelope {
-    data: Option<serde_json::Value>,
-}
 
 // ---------------------------------------------------------------------------
 // Public types

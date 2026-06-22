@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! ChinaMoney (chinamoney.com.cn) bond data.
 //!
 //! Close yield curves, swap rates, and bond issuance info.
@@ -18,13 +17,6 @@ struct ChinaMoneyResp {
 #[derive(Debug, Deserialize)]
 struct ChinaMoneyPagedResp {
     records: Option<Vec<serde_json::Value>>,
-    data: Option<ChinaMoneyPageData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ChinaMoneyPageData {
-    #[serde(rename = "pageTotalSize")]
-    page_total_size: Option<u32>,
 }
 
 /// Symbol code mappings for bond yield curve types.

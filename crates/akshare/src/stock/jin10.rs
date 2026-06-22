@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Jin10 data center — Weibo NLP sentiment report.
 //!
 //! Covers Python functions:
@@ -41,8 +40,6 @@ struct WeiboItem {
     change_px: Option<f64>,
     #[serde(rename = "changeRate")]
     change_rate: Option<f64>,
-    #[serde(rename = "sxcode")]
-    sx_code: Option<String>,
 }
 
 // ---------------------------------------------------------------------------

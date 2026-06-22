@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Chinese bond spot and daily data from Sina Finance.
 
 use serde::Deserialize;
@@ -12,16 +11,7 @@ struct SinaBondQuote {
     symbol: Option<String>,
     name: Option<String>,
     trade: Option<String>,
-    change: Option<String>,
     change_pct: Option<String>,
-    buy: Option<String>,
-    sell: Option<String>,
-    settlement: Option<String>,
-    open: Option<String>,
-    high: Option<String>,
-    low: Option<String>,
-    volume: Option<String>,
-    amount: Option<String>,
 }
 
 impl AkShareClient {

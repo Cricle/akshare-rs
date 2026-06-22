@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Option finance board data from SSE, SZSE, and CFFEX.
 
 use serde::Deserialize;
@@ -36,11 +35,6 @@ struct SseListResponse {
     time: Option<String>,
     total: Option<usize>,
     list: Option<Vec<Vec<serde_json::Value>>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct SzseReportEnvelope {
-    // Returns an array of pages
 }
 
 // ---------------------------------------------------------------------------

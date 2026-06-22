@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! HK stock extra data — spot, daily, famous, index, hot rank, financial, valuation, etc.
 //!
 //! Covers Python functions:
@@ -1172,45 +1171,4 @@ fn parse_hk_f64(item: &serde_json::Value, key: &str) -> Option<f64> {
             None
         }
     })
-}
-
-async fn parse_em_stock_list<T: serde::de::DeserializeOwned>(
-    response: reqwest::Response,
-    context: &str,
-) -> Result<Vec<T>> {
-    #[derive(Deserialize)]
-    struct Env {
-        data: Option<EnvData>,
-    }
-    #[derive(Deserialize)]
-    struct EnvData {
-        diff: Option<serde_json::Value>,
-    }
-
-    let payload: Env = response.json().await.map_err(Error::from)?;
-    let diff = payload
-        .data
-        .and_then(|d| d.diff)
-        .ok_or_else(|| Error::upstream(format!("{context} missing data")))?;
-
-    let mut items = Vec::new();
-
-    if let Some(arr) = diff.as_array() {
-        for val in arr {
-            if let Ok(item) = serde_json::from_value::<T>(val.clone()) {
-                items.push(item);
-            }
-        }
-    } else if let Some(obj) = diff.as_object() {
-        for (_, val) in obj {
-            if let Ok(item) = serde_json::from_value::<T>(val.clone()) {
-                items.push(item);
-            }
-        }
-    }
-
-    if items.is_empty() {
-        return Err(Error::not_found(format!("{context} returned no data")));
-    }
-    Ok(items)
 }

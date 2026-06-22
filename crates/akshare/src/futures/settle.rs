@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Futures settlement parameters from Chinese exchanges.
 //!
 //! Covers CFFEX, CZCE, SHFE, INE, and GFEX settlement data.
@@ -14,21 +13,6 @@ use crate::types::value_ext::ValueExt;
 
 static RE_ALPHA: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z]+").unwrap());
-
-fn f64_val(v: &serde_json::Value) -> f64 {
-    match v {
-        serde_json::Value::Number(n) => n.as_f64().unwrap_or(0.0),
-        serde_json::Value::String(s) => s.replace(',', "").parse::<f64>().unwrap_or(0.0),
-        _ => 0.0,
-    }
-}
-
-fn str_val(v: &serde_json::Value) -> String {
-    match v {
-        serde_json::Value::String(s) => s.clone(),
-        other => other.to_string(),
-    }
-}
 
 fn extract_variety(sym: &str) -> String {
     RE_ALPHA

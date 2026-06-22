@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Convertible bond list, comparison, info and value analysis from Eastmoney.
 
 use crate::client::AkShareClient;

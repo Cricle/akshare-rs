@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! SSE and SZSE option daily statistics.
 
 use serde::Deserialize;
@@ -13,11 +12,6 @@ use crate::error::{Error, Result};
 #[derive(Debug, Deserialize)]
 struct SseQueryEnvelope {
     result: Option<Vec<serde_json::Value>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct SzseReportEnvelope {
-    // SZSE returns a JSON array with metadata and data
 }
 
 // ---------------------------------------------------------------------------

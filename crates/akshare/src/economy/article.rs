@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Academic article and research data: EPU index, FRED-MD/QD, FF factors, realized volatility.
 //!
 //! Sources:
@@ -7,22 +6,9 @@
 //! - FF: Fama-French Data Library
 //! - RV: Oxford-Man Realized Library; Risk Lab (dachxiu.chicagobooth.edu)
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct OxfordManData {
-    dates: Option<Vec<i64>>,
-    #[serde(flatten)]
-    indices: std::collections::HashMap<String, serde_json::Value>,
-}
 
 // ---------------------------------------------------------------------------
 // Implementation

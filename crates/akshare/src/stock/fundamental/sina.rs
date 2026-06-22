@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Sina Finance fundamental data APIs.
 //!
 //! Covers: financial reports (balance/income/cash flow), financial abstracts,
@@ -57,11 +56,6 @@ struct SinaFinanceReportData {
 #[derive(Debug, Deserialize)]
 struct ReportDateItem {
     date_value: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct SinaInstituteDetailEnvelope {
-    data: Option<serde_json::Value>,
 }
 
 // ---------------------------------------------------------------------------

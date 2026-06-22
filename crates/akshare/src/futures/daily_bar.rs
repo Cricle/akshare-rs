@@ -1,9 +1,6 @@
-#![allow(dead_code)]
 //! Futures daily bar data from Chinese exchanges (CFFEX, CZCE, SHFE, DCE, INE, GFEX).
 
 use std::sync::LazyLock;
-
-use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -13,26 +10,6 @@ static RE_ALPHA: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z_]+").unwrap());
 static RE_ALPHA_ONLY: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z]+").unwrap());
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct ShfeResponse {
-    #[serde(rename = "o_curinstrument")]
-    instruments: Option<Vec<serde_json::Value>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct DceResponse {
-    data: Option<Vec<serde_json::Value>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct GfexResponse {
-    data: Option<Vec<serde_json::Value>>,
-}
 
 // ---------------------------------------------------------------------------
 // Helpers

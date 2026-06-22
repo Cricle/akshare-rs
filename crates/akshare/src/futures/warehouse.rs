@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Futures warehouse receipt (仓单) data from Chinese exchanges.
 //!
 //! Covers CZCE, DCE, SHFE, and GFEX warehouse receipt daily data.
@@ -6,14 +5,6 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::Row;
-
-fn parse_f64(v: &serde_json::Value) -> f64 {
-    match v {
-        serde_json::Value::Number(n) => n.as_f64().unwrap_or(0.0),
-        serde_json::Value::String(s) => s.replace(',', "").parse::<f64>().unwrap_or(0.0),
-        _ => 0.0,
-    }
-}
 
 impl AkShareClient {
     /// CZCE warehouse receipt data.

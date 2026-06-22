@@ -1,17 +1,8 @@
-#![allow(dead_code)]
 //! CCTV news (央视新闻) and Baidu economic news data.
-
-use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::Row;
-
-#[derive(Debug, Deserialize)]
-struct CctvNewsResponse {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-}
 
 impl AkShareClient {
     /// CCTV news for a given date.

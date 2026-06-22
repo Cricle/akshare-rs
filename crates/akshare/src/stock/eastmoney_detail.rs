@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Eastmoney detailed stock data — bid/ask, intraday, individual info, profiles.
 //!
 //! Covers Python functions:
@@ -17,21 +16,6 @@ use serde::{Deserialize, Serialize};
 // ---------------------------------------------------------------------------
 // Wire types
 // ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct StockGetEnvelope {
-    data: Option<serde_json::Value>,
-}
-
-#[derive(Debug, Deserialize)]
-struct IntradayEnvelope {
-    data: Option<IntradayData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct IntradayData {
-    details: Option<Vec<String>>,
-}
 
 #[derive(Debug, Deserialize)]
 struct DatacenterProfileEnvelope<T> {

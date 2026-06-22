@@ -1,17 +1,8 @@
-#![allow(dead_code)]
 //! Convertible bond data from JSL (集思录).
-
-use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::Row;
-
-#[derive(Debug, Deserialize)]
-struct JslCbResponse {
-    #[serde(default)]
-    data: Vec<serde_json::Value>,
-}
 
 impl AkShareClient {
     /// JSL convertible bond list with pricing and premium data.

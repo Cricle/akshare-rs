@@ -1,22 +1,9 @@
-#![allow(dead_code)]
 //! FX data: FX swap rates, pair quotes, Baidu FX quotes.
-
-use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
 use crate::types::value_ext::ValueExt;
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct BaiduFxResponse {
-    #[serde(default)]
-    data: Option<serde_json::Value>,
-}
 
 // ---------------------------------------------------------------------------
 // Implementation

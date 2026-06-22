@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Shanghai Gold Exchange (上海黄金交易所) spot data.
 
 use serde::Deserialize;
@@ -16,10 +15,8 @@ const SGE_SYMBOLS: &[&str] = &[
 
 #[derive(Debug, Deserialize)]
 struct SgeQuotationResp {
-    heyue: Option<Vec<String>>,
     times: Option<Vec<String>>,
     data: Option<Vec<serde_json::Value>>,
-    delaystr: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

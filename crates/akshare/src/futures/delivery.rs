@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Futures delivery (交割) and futures-to-spot (期转现) data.
 //!
 //! Covers SHFE, DCE, and CZCE delivery statistics.
@@ -6,14 +5,6 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::Row;
-
-fn f64_val(v: &serde_json::Value) -> f64 {
-    match v {
-        serde_json::Value::Number(n) => n.as_f64().unwrap_or(0.0),
-        serde_json::Value::String(s) => s.replace(',', "").parse::<f64>().unwrap_or(0.0),
-        _ => 0.0,
-    }
-}
 
 impl AkShareClient {
     /// SHFE futures-to-spot (期转现) data.

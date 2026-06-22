@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! US macro-economic data from Eastmoney datacenter and Jin10.
 
 use crate::client::AkShareClient;
@@ -537,7 +536,6 @@ impl AkShareClient {
 #[derive(Debug, Deserialize)]
 struct Jin10CftcResp {
     values: Option<serde_json::Value>,
-    keys: Option<Vec<serde_json::Value>>,
 }
 
 /// Helper to fetch CFTC holding data from Jin10 CDN.

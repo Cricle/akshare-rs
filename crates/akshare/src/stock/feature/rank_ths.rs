@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Ranking data (排名数据) from THS/10jqka.
 //!
 //! Note: THS APIs require a `hexin-v` token computed via JavaScript.
@@ -10,39 +9,7 @@ use super::types::{ForecastCninfo, RankThsEntry};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
-/// THS hexin-v token - used as a static default.
-/// In production, this should be computed dynamically via JS execution.
-const DEFAULT_HEXIN_V: &str = "D3GBCzofiVFQJGEFaqWKYPGlGIFsVoWqYoWP0fQNQFJYlY0G4JdlVYoGNl8C";
-
 impl AkShareClient {
-    /// Fetch a THS rank page (generic helper).
-    async fn ths_rank_fetch(
-        &self,
-        url_template: &str,
-        page: i64,
-        hexin_v: &str,
-    ) -> Result<Vec<serde_json::Value>> {
-        let url = url_template.replace("{}", &page.to_string());
-        let resp = self.get(&url)
-            .header("Accept", "text/html, */*; q=0.01")
-            .header("Accept-Encoding", "gzip, deflate")
-            .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
-            .header("Cache-Control", "no-cache")
-            .header("Connection", "keep-alive")
-            .header("hexin-v", hexin_v)
-            .header("Host", "data.10jqka.com.cn")
-            .header("Pragma", "no-cache")
-            .header("Referer", "http://data.10jqka.com.cn/funds/hyzjl/")
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36")
-            .header("X-Requested-With", "XMLHttpRequest")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
-        let text = resp.text().await.map_err(Error::from)?;
-        // Parse HTML table - for THS data we return raw JSON-like data
-        // since HTML parsing requires external crate
-        Ok(vec![serde_json::json!({"html": text})])
-    }
-
     /// 同花顺-创新低-持续创新低
     /// <https://data.10jqka.com.cn/rank/cxd/>
     pub async fn stock_rank_cxd(&self) -> Result<Vec<RankThsEntry>> {

@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Forex rates from Eastmoney.
 
 use serde::Deserialize;
@@ -13,8 +12,6 @@ use crate::util::{parse_csv_line, parse_f64_safe, today_iso};
 struct ClistItem {
     #[serde(rename = "f12")]
     code: Option<String>,
-    #[serde(rename = "f14")]
-    name: Option<String>,
     #[serde(rename = "f2")]
     price: Option<f64>,
     #[serde(rename = "f3")]

@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! Generic helpers for Eastmoney datacenter and other API patterns.
 
 use crate::client::AkShareClient;
@@ -16,13 +15,6 @@ pub(crate) struct DcEnvelope {
 pub(crate) struct DcResult {
     pub data: Option<Vec<serde_json::Value>>,
     pub pages: Option<i64>,
-    pub count: Option<i64>,
-}
-
-/// Generic Eastmoney push2ex response envelope.
-#[derive(Debug, Deserialize)]
-pub(crate) struct Push2exEnvelope {
-    pub data: Option<serde_json::Value>,
 }
 
 /// Generic Eastmoney clist response for spot data.
@@ -34,7 +26,6 @@ pub(crate) struct ClistSpotEnvelope {
 #[derive(Debug, Deserialize)]
 pub(crate) struct ClistSpotData {
     pub diff: Option<Vec<serde_json::Value>>,
-    pub total: Option<i64>,
 }
 
 /// Format a date string from "YYYYMMDD" to "YYYY-MM-DD".
