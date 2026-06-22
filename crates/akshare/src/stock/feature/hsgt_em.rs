@@ -1,6 +1,7 @@
 //! HSGT (沪深港通) data from Eastmoney.
 
-use super::helpers::{fmt_date, json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
+use super::helpers::{json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
+use crate::util::fmt_date;
 use super::types::{
     HsgtBoardRank, HsgtFundFlowSummary, HsgtHist, HsgtHoldStock, HsgtIndividualDetail,
     HsgtInstitutionStatistic, HsgtStockStatistic, SpotQuote,

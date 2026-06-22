@@ -297,6 +297,153 @@ pub struct ReitSnapshot {
     pub nav: Option<f64>,
 }
 
+// ---------------------------------------------------------------------------
+// MarketSnapshot trait
+// ---------------------------------------------------------------------------
+
+/// Common interface for market snapshot structs across asset classes.
+pub trait MarketSnapshot {
+    fn symbol(&self) -> &str;
+    fn date(&self) -> &str;
+    fn close(&self) -> f64;
+    fn change_pct(&self) -> Option<f64>;
+}
+
+impl MarketSnapshot for QuoteSnapshot {
+    fn symbol(&self) -> &str { &self.symbol }
+    fn date(&self) -> &str { &self.date }
+    fn close(&self) -> f64 { self.close }
+    fn change_pct(&self) -> Option<f64> { None }
+}
+
+impl MarketSnapshot for IndexSnapshot {
+    fn symbol(&self) -> &str { &self.symbol }
+    fn date(&self) -> &str { &self.date }
+    fn close(&self) -> f64 { self.close }
+    fn change_pct(&self) -> Option<f64> { Some(self.change_pct) }
+}
+
+impl MarketSnapshot for FundSnapshot {
+    fn symbol(&self) -> &str { &self.symbol }
+    fn date(&self) -> &str { &self.date }
+    fn close(&self) -> f64 { self.nav }
+    fn change_pct(&self) -> Option<f64> { Some(self.change_pct) }
+}
+
+impl MarketSnapshot for BondSnapshot {
+    fn symbol(&self) -> &str { &self.symbol }
+    fn date(&self) -> &str { &self.date }
+    fn close(&self) -> f64 { self.close }
+    fn change_pct(&self) -> Option<f64> { Some(self.change_pct) }
+}
+
+impl MarketSnapshot for FuturesSnapshot {
+    fn symbol(&self) -> &str { &self.symbol }
+    fn date(&self) -> &str { &self.date }
+    fn close(&self) -> f64 { self.close }
+    fn change_pct(&self) -> Option<f64> { Some(self.change_pct) }
+}
+
+impl MarketSnapshot for OptionSnapshot {
+    fn symbol(&self) -> &str { &self.symbol }
+    fn date(&self) -> &str { &self.date }
+    fn close(&self) -> f64 { self.close }
+    fn change_pct(&self) -> Option<f64> { Some(self.change_pct) }
+}
+
+impl MarketSnapshot for ReitSnapshot {
+    fn symbol(&self) -> &str { &self.symbol }
+    fn date(&self) -> &str { &self.date }
+    fn close(&self) -> f64 { self.close }
+    fn change_pct(&self) -> Option<f64> { Some(self.change_pct) }
+}
+
+// ---------------------------------------------------------------------------
+// Ohlcv trait
+// ---------------------------------------------------------------------------
+
+/// Common interface for OHLCV (open/high/low/close/volume) data points.
+pub trait Ohlcv {
+    fn trade_date(&self) -> &str;
+    fn open(&self) -> f64;
+    fn close(&self) -> f64;
+    fn high(&self) -> f64;
+    fn low(&self) -> f64;
+    fn volume(&self) -> f64;
+}
+
+impl Ohlcv for CandlePoint {
+    fn trade_date(&self) -> &str { &self.trade_date }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { self.volume as f64 }
+}
+
+impl Ohlcv for FuturesKlinePoint {
+    fn trade_date(&self) -> &str { &self.datetime }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { self.volume }
+}
+
+impl Ohlcv for FuturesHistKline {
+    fn trade_date(&self) -> &str { &self.date }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { self.volume }
+}
+
+impl Ohlcv for CniHistPoint {
+    fn trade_date(&self) -> &str { &self.date }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { self.volume }
+}
+
+impl Ohlcv for CsindexHistPoint {
+    fn trade_date(&self) -> &str { &self.date }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { self.volume }
+}
+
+impl Ohlcv for SwResearchHistPoint {
+    fn trade_date(&self) -> &str { &self.date }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { self.volume }
+}
+
+impl Ohlcv for SwFundHistPoint {
+    fn trade_date(&self) -> &str { &self.date }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { 0.0 }
+}
+
+impl Ohlcv for QvixDailyPoint {
+    fn trade_date(&self) -> &str { &self.date }
+    fn open(&self) -> f64 { self.open }
+    fn close(&self) -> f64 { self.close }
+    fn high(&self) -> f64 { self.high }
+    fn low(&self) -> f64 { self.low }
+    fn volume(&self) -> f64 { 0.0 }
+}
+
 /// Generic row type for flexible tabular data returned by many APIs.
 pub type Row = std::collections::HashMap<String, serde_json::Value>;
 

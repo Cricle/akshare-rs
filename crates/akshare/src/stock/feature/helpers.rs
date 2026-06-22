@@ -2,40 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::wire::KlineResp;
-use serde::Deserialize;
-
-/// Generic Eastmoney datacenter response envelope.
-#[derive(Debug, Deserialize)]
-pub(crate) struct DcEnvelope {
-    pub result: Option<DcResult>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct DcResult {
-    pub data: Option<Vec<serde_json::Value>>,
-    pub pages: Option<i64>,
-}
-
-/// Generic Eastmoney clist response for spot data.
-#[derive(Debug, Deserialize)]
-pub(crate) struct ClistSpotEnvelope {
-    pub data: Option<ClistSpotData>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct ClistSpotData {
-    pub diff: Option<Vec<serde_json::Value>>,
-}
-
-/// Format a date string from "YYYYMMDD" to "YYYY-MM-DD".
-pub(crate) fn fmt_date(date: &str) -> String {
-    if date.len() >= 8 {
-        format!("{}-{}-{}", &date[0..4], &date[4..6], &date[6..8])
-    } else {
-        date.to_string()
-    }
-}
+use crate::types::wire::{ClistResp, EmDatacenterResp, KlineResp};
 
 /// Get a string field from a JSON value, returning default if missing.
 pub(crate) fn json_str(v: &serde_json::Value, key: &str) -> String {
@@ -119,14 +86,12 @@ impl AkShareClient {
                 .map_err(Error::from)?
                 .error_for_status()
                 .map_err(Error::from)?;
-            let payload: DcEnvelope = resp.json().await.map_err(Error::from)?;
+            let payload: EmDatacenterResp = resp.json().await.map_err(Error::from)?;
             let result = payload
                 .result
                 .ok_or_else(|| Error::upstream("eastmoney datacenter missing result"))?;
 
-            if let Some(data) = result.data {
-                all_data.extend(data);
-            }
+            all_data.extend(result.data);
 
             let total_pages = result.pages.unwrap_or(1);
             if page >= total_pages || page >= max_pages {
@@ -188,7 +153,7 @@ impl AkShareClient {
             .error_for_status()
             .map_err(Error::from)?;
 
-        let payload: ClistSpotEnvelope = resp.json().await.map_err(Error::from)?;
+        let payload: ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
 
         if items.is_empty() {

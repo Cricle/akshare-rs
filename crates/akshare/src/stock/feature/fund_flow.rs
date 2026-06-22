@@ -334,7 +334,7 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-        let payload: super::helpers::ClistSpotEnvelope = resp.json().await.map_err(Error::from)?;
+        let payload: crate::types::wire::ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
         if items.is_empty() {
             return Err(Error::not_found("eastmoney clist returned no data"));

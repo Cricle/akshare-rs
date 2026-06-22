@@ -1,6 +1,7 @@
 //! Shareholder count (股东户数) from Eastmoney.
 
-use super::helpers::{fmt_date, json_f64, json_f64_opt, json_str};
+use super::helpers::{json_f64, json_f64_opt, json_str};
+use crate::util::fmt_date;
 use super::types::{Gdhs, GdhsDetail};
 use crate::client::AkShareClient;
 use crate::error::Result;

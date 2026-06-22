@@ -75,6 +75,47 @@ impl AkShareClient {
         self.http.post(url)
     }
 
+    /// Send GET request with query params and deserialize JSON response.
+    pub(crate) async fn get_json<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+        params: &[(&str, &str)],
+    ) -> crate::error::Result<T> {
+        Ok(self
+            .get(url)
+            .query(params)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?)
+    }
+
+    /// Send GET request and return raw `serde_json::Value`.
+    pub(crate) async fn get_json_value(
+        &self,
+        url: &str,
+        params: &[(&str, &str)],
+    ) -> crate::error::Result<serde_json::Value> {
+        self.get_json(url, params).await
+    }
+
+    /// Send POST request with form params and deserialize JSON response.
+    pub(crate) async fn post_json<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+        params: &[(&str, &str)],
+    ) -> crate::error::Result<T> {
+        Ok(self
+            .post(url)
+            .form(params)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?)
+    }
+
     /// When PUSH2_IP env var is set, add a Host header + rewrite URL for push2.eastmoney.com
     /// to work around DNS-based IP blocking.
     fn apply_push2_ip_override(url: &str) -> String {

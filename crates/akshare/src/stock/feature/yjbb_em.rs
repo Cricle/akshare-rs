@@ -1,6 +1,7 @@
 //! Earnings report (业绩报表) from Eastmoney.
 
-use super::helpers::{fmt_date, json_f64, json_str, json_str_opt};
+use super::helpers::{json_f64, json_str, json_str_opt};
+use crate::util::fmt_date;
 use super::types::EarningsReport;
 use crate::client::AkShareClient;
 use crate::error::Result;

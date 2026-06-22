@@ -21,6 +21,30 @@ struct TushareData {
     items: Vec<Vec<serde_json::Value>>,
 }
 
+struct TushareRowAccessor<'a> {
+    fields: &'a [String],
+    row: &'a [serde_json::Value],
+}
+
+impl TushareRowAccessor<'_> {
+    fn get(&self, name: &str) -> &serde_json::Value {
+        self.fields
+            .iter()
+            .position(|f| f == name)
+            .and_then(|i| self.row.get(i))
+            .unwrap_or(&serde_json::Value::Null)
+    }
+    fn str(&self, name: &str) -> String {
+        self.get(name).as_str().unwrap_or("").to_string()
+    }
+    fn f64(&self, name: &str) -> f64 {
+        self.get(name).as_f64().unwrap_or(0.0)
+    }
+    fn i64(&self, name: &str) -> i64 {
+        self.get(name).as_i64().unwrap_or(0)
+    }
+}
+
 impl AkShareClient {
     /// Generic Tushare API call.
     async fn tushare_call(
@@ -83,25 +107,19 @@ impl AkShareClient {
         let fields = &data.fields;
         let mut items = Vec::with_capacity(data.items.len());
         for row in &data.items {
-            let get = |name: &str| -> &serde_json::Value {
-                fields
-                    .iter()
-                    .position(|f| f == name)
-                    .and_then(|i| row.get(i))
-                    .unwrap_or(&serde_json::Value::Null)
-            };
+            let a = TushareRowAccessor { fields, row };
             items.push(CandlePoint {
-                trade_date: get("trade_date").as_str().unwrap_or("").to_string(),
-                open: get("open").as_f64().unwrap_or(0.0),
-                close: get("close").as_f64().unwrap_or(0.0),
-                high: get("high").as_f64().unwrap_or(0.0),
-                low: get("low").as_f64().unwrap_or(0.0),
-                volume: get("vol").as_f64().unwrap_or(0.0) as i64,
-                amount: get("amount").as_f64().unwrap_or(0.0),
+                trade_date: a.str("trade_date"),
+                open: a.f64("open"),
+                close: a.f64("close"),
+                high: a.f64("high"),
+                low: a.f64("low"),
+                volume: a.f64("vol") as i64,
+                amount: a.f64("amount"),
                 amplitude_pct: 0.0,
-                change_pct: get("pct_chg").as_f64().unwrap_or(0.0),
-                change_amount: get("change").as_f64().unwrap_or(0.0),
-                turnover_pct: get("turnover_rate").as_f64().unwrap_or(0.0),
+                change_pct: a.f64("pct_chg"),
+                change_amount: a.f64("change"),
+                turnover_pct: a.f64("turnover_rate"),
             });
         }
         Ok(items)
@@ -130,20 +148,12 @@ impl AkShareClient {
         let fields = &data.fields;
         let mut items = Vec::with_capacity(data.items.len());
         for row in &data.items {
-            let get = |name: &str| -> &serde_json::Value {
-                fields
-                    .iter()
-                    .position(|f| f == name)
-                    .and_then(|i| row.get(i))
-                    .unwrap_or(&serde_json::Value::Null)
-            };
+            let a = TushareRowAccessor { fields, row };
             items.push(TradeCalendarItem {
-                exchange: get("exchange").as_str().unwrap_or("").to_string(),
-                calendar_date: get("cal_date").as_str().unwrap_or("").to_string(),
-                is_open: get("is_open").as_i64().unwrap_or(0) == 1,
-                previous_trade_date: get("pretrade_date")
-                    .as_str()
-                    .map(std::string::ToString::to_string),
+                exchange: a.str("exchange"),
+                calendar_date: a.str("cal_date"),
+                is_open: a.i64("is_open") == 1,
+                previous_trade_date: a.get("pretrade_date").as_str().map(std::string::ToString::to_string),
             });
         }
         Ok(items)

@@ -1,5 +1,18 @@
+/// Format a date string from "YYYYMMDD" to "YYYY-MM-DD".
+pub fn fmt_date(date: &str) -> String {
+    if date.len() >= 8 {
+        format!("{}-{}-{}", &date[0..4], &date[4..6], &date[6..8])
+    } else {
+        date.to_string()
+    }
+}
+
 pub fn normalize_trade_date(value: &str) -> String {
-    value.get(0..10).unwrap_or(value).to_string()
+    if value.len() >= 8 {
+        fmt_date(value)
+    } else {
+        value.get(0..10).unwrap_or(value).to_string()
+    }
 }
 
 pub fn parse_f64_safe(value: &str) -> f64 {

@@ -21,6 +21,7 @@ pub struct EmDatacenterResp {
 pub struct EmDatacenterResult {
     #[serde(default)]
     pub data: Vec<serde_json::Value>,
+    pub pages: Option<i64>,
 }
 
 // ---------------------------------------------------------------------------

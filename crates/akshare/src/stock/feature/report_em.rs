@@ -1,6 +1,7 @@
 //! Datacenter financial reports (三大报表-数据中心) from Eastmoney.
 
-use super::helpers::{fmt_date, json_f64_opt, json_str, json_str_opt};
+use super::helpers::{json_f64_opt, json_str, json_str_opt};
+use crate::util::fmt_date;
 use super::types::{BalanceSheet, CashFlowSheet, ProfitSheet};
 use crate::client::AkShareClient;
 use crate::error::Result;

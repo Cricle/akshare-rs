@@ -4,7 +4,8 @@
 //! This implementation uses a static fallback approach. For production use,
 //! consider integrating a JS runtime or reverse-engineering the token.
 
-use super::helpers::{fmt_date, json_f64_opt, json_str};
+use super::helpers::{json_f64_opt, json_str};
+use crate::util::fmt_date;
 use super::types::{ForecastCninfo, RankThsEntry};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -281,7 +282,7 @@ impl AkShareClient {
             .map_err(Error::from)?
             .error_for_status()
             .map_err(Error::from)?;
-        let payload: super::helpers::ClistSpotEnvelope = resp.json().await.map_err(Error::from)?;
+        let payload: crate::types::wire::ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
         Ok(items
             .iter()
