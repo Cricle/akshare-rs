@@ -2,6 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 use crate::types::{FundNavHistory, FundSnapshot};
 use crate::util::{parse_f64_safe, today_iso};
 
@@ -41,24 +42,11 @@ impl AkShareClient {
             .filter_map(|v| {
                 Some(FundSnapshot {
                     symbol: v.get("f12")?.as_str()?.to_string(),
-                    name: v
-                        .get("f14")
-                        .and_then(|x| x.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                    name: v.str_or(&["f14"], ""),
                     date: date.clone(),
-                    nav: v
-                        .get("f2")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    acc_nav: v
-                        .get("f2")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    change_pct: v
-                        .get("f3")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
+                    nav: v.f64_or(&["f2"], 0.0),
+                    acc_nav: v.f64_or(&["f2"], 0.0),
+                    change_pct: v.f64_or(&["f3"], 0.0),
                     fund_type: Some("graded".to_string()),
                 })
             })

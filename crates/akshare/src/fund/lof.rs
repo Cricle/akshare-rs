@@ -2,6 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 use crate::types::{CandlePoint, EtfSpotItem, FundSnapshot};
 use crate::util::{parse_f64_safe, today_iso};
 
@@ -63,24 +64,11 @@ impl AkShareClient {
             .filter_map(|v| {
                 Some(FundSnapshot {
                     symbol: v.get("f12")?.as_str()?.to_string(),
-                    name: v
-                        .get("f14")
-                        .and_then(|x| x.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                    name: v.str_or(&["f14"], ""),
                     date: date.clone(),
-                    nav: v
-                        .get("f2")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    acc_nav: v
-                        .get("f2")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    change_pct: v
-                        .get("f3")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
+                    nav: v.f64_or(&["f2"], 0.0),
+                    acc_nav: v.f64_or(&["f2"], 0.0),
+                    change_pct: v.f64_or(&["f3"], 0.0),
                     fund_type: Some("lof".to_string()),
                 })
             })
@@ -308,63 +296,23 @@ impl AkShareClient {
             .filter_map(|v| {
                 Some(EtfSpotItem {
                     code: v.get("f12")?.as_str()?.to_string(),
-                    name: v
-                        .get("f14")
-                        .and_then(|x| x.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                    latest_price: v
-                        .get("f2")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    change_pct: v
-                        .get("f3")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    change_amount: v
-                        .get("f4")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    volume: v
-                        .get("f5")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    amount: v
-                        .get("f6")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    open: v
-                        .get("f17")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    high: v
-                        .get("f15")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    low: v
-                        .get("f16")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    prev_close: v
-                        .get("f18")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    amplitude: v
-                        .get("f7")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
+                    name: v.str_or(&["f14"], ""),
+                    latest_price: v.f64_or(&["f2"], 0.0),
+                    change_pct: v.f64_or(&["f3"], 0.0),
+                    change_amount: v.f64_or(&["f4"], 0.0),
+                    volume: v.f64_or(&["f5"], 0.0),
+                    amount: v.f64_or(&["f6"], 0.0),
+                    open: v.f64_or(&["f17"], 0.0),
+                    high: v.f64_or(&["f15"], 0.0),
+                    low: v.f64_or(&["f16"], 0.0),
+                    prev_close: v.f64_or(&["f18"], 0.0),
+                    amplitude: v.f64_or(&["f7"], 0.0),
                     turnover_rate: 0.0,
                     iopv: 0.0,
                     discount_rate: 0.0,
                     shares: 0.0,
-                    circ_mv: v
-                        .get("f21")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
-                    total_mv: v
-                        .get("f20")
-                        .and_then(serde_json::Value::as_f64)
-                        .unwrap_or(0.0),
+                    circ_mv: v.f64_or(&["f21"], 0.0),
+                    total_mv: v.f64_or(&["f20"], 0.0),
                     data_date: String::new(),
                 })
             })

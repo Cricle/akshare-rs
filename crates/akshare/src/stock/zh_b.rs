@@ -8,6 +8,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::market::eastmoney_secid;
+use crate::types::value_ext::ValueExt;
 
 use serde::{Deserialize, Serialize};
 
@@ -121,16 +122,8 @@ impl AkShareClient {
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
 
             for item in &data {
-                let symbol = item
-                    .get("symbol")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let name = item
-                    .get("name")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
+                let symbol = item.str_or(&["symbol"], "");
+                let name = item.str_or(&["name"], "");
 
                 all_quotes.push(ZhBSpotQuote {
                     symbol,

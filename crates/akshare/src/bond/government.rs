@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::BondSnapshot;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
@@ -33,11 +34,7 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let date = v
-                .get("SOLAR_DATE")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = v.str_or(&["SOLAR_DATE"], "");
             if date.is_empty() {
                 continue;
             }
@@ -55,37 +52,20 @@ impl AkShareClient {
             ];
 
             for (field, tenor_label) in &tenors {
-                let yield_rate = v.get(*field).and_then(serde_json::Value::as_f64);
-                if let Some(rate) = yield_rate {
-                    items.push(BillSnapshotInner {
+                if let Some(rate) = v.f64_field(&[*field]) {
+                    items.push(BondSnapshot {
                         symbol: format!("CNGB{tenor_label}"),
                         name: format!("China Gov Bond {tenor_label}"),
                         date: date.get(..10).unwrap_or(&date).to_string(),
+                        close: 0.0,
+                        change_pct: 0.0,
                         yield_rate: Some(rate),
+                        credit_rating: None,
                     });
                 }
             }
         }
 
-        Ok(items
-            .into_iter()
-            .map(|b| BondSnapshot {
-                symbol: b.symbol,
-                name: b.name,
-                date: b.date,
-                close: 0.0,
-                change_pct: 0.0,
-                yield_rate: b.yield_rate,
-                credit_rating: None,
-            })
-            .collect())
+        Ok(items)
     }
-}
-
-/// Intermediate struct for bond yield extraction.
-struct BillSnapshotInner {
-    symbol: String,
-    name: String,
-    date: String,
-    yield_rate: Option<f64>,
 }

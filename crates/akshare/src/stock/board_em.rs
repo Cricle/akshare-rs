@@ -353,7 +353,7 @@ impl AkShareClient {
         for item in &diff {
             let name = item.str_or(&["f14"], "");
             if name == symbol {
-                let code = item.get("f12").and_then(|v| v.as_str()).ok_or_else(|| {
+                let code = item.str_field(&["f12"]).ok_or_else(|| {
                     Error::not_found(format!("board code not found for: {symbol}"))
                 })?;
                 return Ok(format!("90.{code}"));
@@ -569,13 +569,13 @@ impl AkShareClient {
             .data
             .ok_or_else(|| Error::upstream("board spot missing data"))?;
 
-        let obj = data
-            .as_object()
-            .ok_or_else(|| Error::decode("board spot data is not an object"))?;
+        if !data.is_object() {
+            return Err(Error::decode("board spot data is not an object"));
+        }
 
         let mut items = Vec::new();
         for (field_key, label) in &field_map {
-            if let Some(val) = obj.get(*field_key).and_then(serde_json::Value::as_f64) {
+            if let Some(val) = data.f64_field(&[*field_key]) {
                 // Apply unit conversion: divide by 100 for most fields, keep volume/amount as-is
                 let converted = if *field_key == "f47" || *field_key == "f48" {
                     val

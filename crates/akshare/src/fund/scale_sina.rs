@@ -2,6 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 use crate::types::FundSnapshot;
 
 impl AkShareClient {
@@ -47,19 +48,9 @@ impl AkShareClient {
             .filter_map(|item| {
                 let code = item.get("symbol")?.as_str()?.to_string();
                 let name = item.get("sname")?.as_str()?.to_string();
-                let nav = item
-                    .get("dwjz")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
-                let scale = item
-                    .get("zmjgm")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
-                let date = item
-                    .get("jzrq")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
+                let nav = item.f64_or(&["dwjz"], 0.0);
+                let scale = item.f64_or(&["zmjgm"], 0.0);
+                let date = item.str_or(&["jzrq"], "");
                 Some(FundSnapshot {
                     symbol: code,
                     name,
@@ -104,19 +95,9 @@ impl AkShareClient {
             .filter_map(|item| {
                 let code = item.get("symbol")?.as_str()?.to_string();
                 let name = item.get("sname")?.as_str()?.to_string();
-                let nav = item
-                    .get("dwjz")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
-                let scale = item
-                    .get("zmjgm")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
-                let date = item
-                    .get("jzrq")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
+                let nav = item.f64_or(&["dwjz"], 0.0);
+                let scale = item.f64_or(&["zmjgm"], 0.0);
+                let date = item.str_or(&["jzrq"], "");
                 Some(FundSnapshot {
                     symbol: code,
                     name,
