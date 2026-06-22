@@ -481,19 +481,19 @@ impl AkShareClient {
                 let mut record = HashMap::new();
                 record.insert(
                     "report_date".to_string(),
-                    serde_json::Value::String(report_date.to_string()),
+                    serde_json::Value::String(report_date.clone()),
                 );
                 record.insert(
                     "report_name".to_string(),
-                    serde_json::Value::String(report_name.to_string()),
+                    serde_json::Value::String(report_name.clone()),
                 );
                 record.insert(
                     "report_period".to_string(),
-                    serde_json::Value::String(report_period.to_string()),
+                    serde_json::Value::String(report_period.clone()),
                 );
                 record.insert(
                     "quarter_name".to_string(),
-                    serde_json::Value::String(quarter_name.to_string()),
+                    serde_json::Value::String(quarter_name.clone()),
                 );
                 record.insert(
                     "metric_name".to_string(),

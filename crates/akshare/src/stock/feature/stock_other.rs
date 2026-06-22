@@ -1593,7 +1593,7 @@ impl AkShareClient {
                 let date = v.str_or(&["date"], "");
                 let value = v.f64_or(&["pb"], 0.0);
                 MacroDataPoint {
-                    date: date.to_string(),
+                    date,
                     value,
                     name: symbol.to_string(),
                 }
@@ -1640,7 +1640,7 @@ impl AkShareClient {
                 let date = v.str_or(&["date"], "");
                 let value = v.f64_or(&["pe"], 0.0);
                 MacroDataPoint {
-                    date: date.to_string(),
+                    date,
                     value,
                     name: symbol.to_string(),
                 }

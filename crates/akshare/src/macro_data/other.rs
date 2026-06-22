@@ -156,7 +156,7 @@ impl AkShareClient {
                 items.push(MacroDataPoint {
                     date: date_str,
                     value: actual,
-                    name: title.to_string(),
+                    name: title,
                 });
             }
         }
