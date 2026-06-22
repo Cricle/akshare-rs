@@ -51,10 +51,7 @@ impl AkShareClient {
     /// SSE option risk indicators.
     ///
     /// `date` is "YYYYMMDD" (data available from 20150209).
-    pub async fn option_risk_indicator(
-        &self,
-        date: &str,
-    ) -> Result<Vec<OptionRiskIndicatorRow>> {
+    pub async fn option_risk_indicator(&self, date: &str) -> Result<Vec<OptionRiskIndicatorRow>> {
         let url = "http://query.sse.com.cn/commonQuery.do";
 
         let resp: SseQueryEnvelope = self

@@ -1,9 +1,6 @@
 //! Miscellaneous stock feature functions from Eastmoney, CNINFO, Legulegu, Sina, etc.
 
-use super::helpers::{
-    json_f64, json_f64_opt, json_i64, json_i64_opt, json_str, json_str_opt,
-};
-use crate::util::fmt_date;
+use super::helpers::{json_f64, json_f64_opt, json_i64, json_i64_opt, json_str, json_str_opt};
 use super::types::{
     AccountStatistics, AllotmentCninfo, BuffettIndexLg, CgEquityMortgage, CgGuarantee, CgLawsuit,
     ClassifySina, ConceptConsFutu, CongestionLg, CxMainNews, CyqData, DelistedReport,
@@ -18,6 +15,7 @@ use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
 use crate::types::value_ext::ValueExt;
+use crate::util::fmt_date;
 
 impl AkShareClient {
     /// 东方财富-股票账户统计
@@ -1314,11 +1312,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-重大合同明细
-    pub async fn stock_zdhtmx(
-        &self,
-        start_date: &str,
-        end_date: &str,
-    ) -> Result<Vec<ZdhtmxEntry>> {
+    pub async fn stock_zdhtmx(&self, start_date: &str, end_date: &str) -> Result<Vec<ZdhtmxEntry>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
         let filter = format!("(DIM_RDATE>='{sd}')(DIM_RDATE<='{ed}')");
@@ -1452,10 +1446,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-股权抵押
-    pub async fn stock_cg_equity_mortgage(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CgEquityMortgage>> {
+    pub async fn stock_cg_equity_mortgage(&self, symbol: &str) -> Result<Vec<CgEquityMortgage>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1098";
         let resp = self
             .post(url)

@@ -55,10 +55,7 @@ impl AkShareClient {
     }
 
     /// Get northbound net flow data from Eastmoney (KAMT kline).
-    pub async fn stock_hsgt_north_net_flow_kamt(
-        &self,
-        limit: usize,
-    ) -> Result<Vec<HsgtFlowEntry>> {
+    pub async fn stock_hsgt_north_net_flow_kamt(&self, limit: usize) -> Result<Vec<HsgtFlowEntry>> {
         self.fetch_hsgt_flow(
             "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
             limit,
@@ -67,10 +64,7 @@ impl AkShareClient {
     }
 
     /// Get southbound net flow data from Eastmoney (KAMT kline).
-    pub async fn stock_hsgt_south_net_flow_kamt(
-        &self,
-        limit: usize,
-    ) -> Result<Vec<HsgtFlowEntry>> {
+    pub async fn stock_hsgt_south_net_flow_kamt(&self, limit: usize) -> Result<Vec<HsgtFlowEntry>> {
         self.fetch_hsgt_flow(
             "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
             limit,

@@ -1329,8 +1329,7 @@ async fn test_stock_zdhtmx_em() {
 #[tokio::test]
 async fn test_stock_zcfz_bj_em() {
     let server = MockServer::start().await;
-    let body =
-        serde_json::json!({"data": [{"TOTAL_ASSETS": 1_000_000.0, "TOTAL_LIABILITIES": 500_000.0}]});
+    let body = serde_json::json!({"data": [{"TOTAL_ASSETS": 1_000_000.0, "TOTAL_LIABILITIES": 500_000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_zcfz_bj("SZ000001").await;
@@ -1370,9 +1369,7 @@ async fn test_stock_analyst_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_analyst_detail("A001", "最新跟踪成分股")
-        .await;
+    let result = client.stock_analyst_detail("A001", "最新跟踪成分股").await;
     assert!(result.is_ok());
 }
 
@@ -2065,9 +2062,7 @@ async fn test_stock_gdfx_free_holding_statistics_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_gdfx_free_holding_statistics("20240101")
-        .await;
+    let result = client.stock_gdfx_free_holding_statistics("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2115,9 +2110,7 @@ async fn test_stock_gdfx_free_top_10_em() {
     let body = serde_json::json!({"sdltgd": [{"HOLDER_NAME": "Fund A", "HOLD_NUM": 100_000.0, "FREE_HOLDNUM_RATIO": 0.05}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_gdfx_free_top_10("SZ000001", "20240101")
-        .await;
+    let result = client.stock_gdfx_free_top_10("SZ000001", "20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2403,9 +2396,7 @@ async fn test_stock_cash_flow_sheet_by_quarterly_em() {
         serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100_000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_cash_flow_sheet_by_quarterly("SZ000001")
-        .await;
+    let result = client.stock_cash_flow_sheet_by_quarterly("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2426,8 +2417,7 @@ async fn test_stock_info_cjzc_em() {
 #[tokio::test]
 async fn test_stock_balance_sheet_by_report_delisted_em() {
     let server = MockServer::start().await;
-    let body =
-        serde_json::json!({"data": [{"TOTAL_ASSETS": 1_000_000.0, "TOTAL_LIABILITIES": 500_000.0}]});
+    let body = serde_json::json!({"data": [{"TOTAL_ASSETS": 1_000_000.0, "TOTAL_LIABILITIES": 500_000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
@@ -2666,9 +2656,8 @@ async fn test_stock_new_a_spot_em() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_push2_response(&[sample_em_stock_row(
-                "000001", "测试",
-            )])),
+            ResponseTemplate::new(200)
+                .set_body_json(em_push2_response(&[sample_em_stock_row("000001", "测试")])),
         )
         .mount(&server)
         .await;
@@ -3324,9 +3313,7 @@ async fn test_stock_financial_benefit_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client
-        .stock_financial_benefit("000001", "按报告期")
-        .await;
+    let _ = client.stock_financial_benefit("000001", "按报告期").await;
 }
 
 #[tokio::test]
@@ -3367,9 +3354,7 @@ async fn test_stock_financial_cash_new_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client
-        .stock_financial_cash_new("000001", "按报告期")
-        .await;
+    let _ = client.stock_financial_cash_new("000001", "按报告期").await;
 }
 
 #[tokio::test]
@@ -3395,9 +3380,7 @@ async fn test_stock_financial_debt_new_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client
-        .stock_financial_debt_new("000001", "按报告期")
-        .await;
+    let _ = client.stock_financial_debt_new("000001", "按报告期").await;
 }
 
 #[tokio::test]

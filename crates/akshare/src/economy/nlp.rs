@@ -199,10 +199,7 @@ mod tests {
         let resp: EmDatacenterResp = serde_json::from_str(json).unwrap();
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
-        assert_eq!(
-            data[0].f64_field(&["EPU_INDEX"]),
-            Some(152.3)
-        );
+        assert_eq!(data[0].f64_field(&["EPU_INDEX"]), Some(152.3));
     }
 
     #[test]

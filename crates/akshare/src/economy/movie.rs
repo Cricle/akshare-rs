@@ -307,10 +307,7 @@ mod tests {
         let resp: EmDatacenterResp = serde_json::from_str(json).unwrap();
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
-        assert_eq!(
-            data[0].f64_field(&["BOX_OFFICE"]),
-            Some(12580.5)
-        );
+        assert_eq!(data[0].f64_field(&["BOX_OFFICE"]), Some(12580.5));
     }
 
     #[test]

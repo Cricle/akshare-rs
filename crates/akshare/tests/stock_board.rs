@@ -888,9 +888,7 @@ async fn test_stock_board_industry_hist_min_em() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_board_industry_hist_min("BK1027", "15")
-        .await;
+    let result = client.stock_board_industry_hist_min("BK1027", "15").await;
     let _ = result;
 }
 
@@ -1707,9 +1705,7 @@ async fn test_stock_financial_report_sina_income() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, sina_finance_report_body()).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_financial_report("sh600600", "利润表")
-        .await;
+    let result = client.stock_financial_report("sh600600", "利润表").await;
     let _ = result;
 }
 
@@ -2275,9 +2271,7 @@ async fn test_stock_board_industry_hist_min_em_60min() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, board_kline_body()).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_board_industry_hist_min("BK1027", "60")
-        .await;
+    let result = client.stock_board_industry_hist_min("BK1027", "60").await;
     let _ = result;
 }
 
@@ -2502,9 +2496,7 @@ async fn test_stock_financial_report_sina_invalid_symbol() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, sina_finance_report_body()).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_financial_report("sh600600", "无效报表")
-        .await;
+    let result = client.stock_financial_report("sh600600", "无效报表").await;
     assert!(result.is_err());
 }
 
@@ -2567,11 +2559,7 @@ fn hk_index_spot_em_row() -> serde_json::Value {
 #[tokio::test]
 async fn test_stock_hk_index_spot_em() {
     let server = MockServer::start().await;
-    mount_catch_all_json(
-        &server,
-        em_push2_response(&[hk_index_spot_em_row()]),
-    )
-    .await;
+    mount_catch_all_json(&server, em_push2_response(&[hk_index_spot_em_row()])).await;
     let client = mock_client(&server);
     let result = client.stock_hk_index_spot_em().await;
     assert!(result.is_ok());
@@ -2709,9 +2697,7 @@ async fn test_stock_hk_valuation() {
     let server = MockServer::start().await;
     mount_catch_all_json(&server, hk_valuation_baidu_body()).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_hk_valuation("00700", "pe_ttm", "近一年")
-        .await;
+    let result = client.stock_hk_valuation("00700", "pe_ttm", "近一年").await;
     assert!(result.is_ok());
     let items = result.unwrap();
     assert!(!items.is_empty());

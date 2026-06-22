@@ -256,9 +256,7 @@ impl AkShareClient {
 
         // Helper to extract raw value from Yahoo Finance nested format
         // Yahoo returns {"raw": 123.45, "fmt": "123.45"} for numeric fields
-        let raw = |v: &serde_json::Value| -> Option<f64> {
-            v.f64_field(&["raw"])
-        };
+        let raw = |v: &serde_json::Value| -> Option<f64> { v.f64_field(&["raw"]) };
 
         Ok(UsKeyStats {
             symbol: symbol.to_uppercase(),

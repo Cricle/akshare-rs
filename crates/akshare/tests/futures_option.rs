@@ -981,9 +981,7 @@ async fn test_option_sse_expire_day_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .option_sse_expire_day("202401", "50ETF", "SH")
-        .await;
+    let result = client.option_sse_expire_day("202401", "50ETF", "SH").await;
     assert!(result.is_ok());
 }
 
@@ -1026,9 +1024,7 @@ async fn test_option_sse_underlying_spot_price_sina() {
     let body_text = format!(r#"var hq_str_sh510050="{values}";"#);
     mock_any_get_text(&server, ".*", &body_text).await;
     let client = mock_client(&server);
-    let result = client
-        .option_sse_underlying_spot_price("sh510050")
-        .await;
+    let result = client.option_sse_underlying_spot_price("sh510050").await;
     assert!(result.is_ok());
 }
 

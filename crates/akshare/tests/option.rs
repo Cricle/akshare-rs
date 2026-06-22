@@ -51,9 +51,8 @@ async fn test_option_chain_kline_fallback() {
     let empty_body = serde_json::json!({
         "result": { "data": [], "pages": 0 }
     });
-    let kline_body = em_kline_response(&[
-        "2024-01-02,0.05,0.06,0.07,0.04,10000,500.0,2.0,20.0,0.01,1.0",
-    ]);
+    let kline_body =
+        em_kline_response(&["2024-01-02,0.05,0.06,0.07,0.04,10000,500.0,2.0,20.0,0.01,1.0"]);
     // Mount both: datacenter pattern first, then kline
     mock_any_get(&server, "datacenter", empty_body).await;
     mock_any_get(&server, "push2his", kline_body).await;
@@ -247,9 +246,7 @@ async fn test_option_sse_expire_day_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .option_sse_expire_day("202401", "50ETF", "SSE")
-        .await;
+    let result = client.option_sse_expire_day("202401", "50ETF", "SSE").await;
     assert!(result.is_ok());
     let (date, days) = result.unwrap();
     assert_eq!(date, "2024-01-24");
@@ -292,9 +289,7 @@ async fn test_option_sse_underlying_spot_price_sina() {
     let body = format!("var hq_str_sh510050=\"{}\"", values.join(","));
     mock_any_get_text(&server, ".*", &body).await;
     let client = mock_client(&server);
-    let result = client
-        .option_sse_underlying_spot_price("sh510050")
-        .await;
+    let result = client.option_sse_underlying_spot_price("sh510050").await;
     assert!(result.is_ok());
     let pairs = result.unwrap();
     assert_eq!(pairs.len(), 33);

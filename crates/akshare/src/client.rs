@@ -104,7 +104,6 @@ impl AkShareClient {
             proxy: None,
         }
     }
-
 }
 
 impl Default for AkShareClient {

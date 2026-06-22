@@ -5,10 +5,10 @@
 //! consider integrating a JS runtime or reverse-engineering the token.
 
 use super::helpers::{json_f64_opt, json_str};
-use crate::util::fmt_date;
 use super::types::{ForecastCninfo, RankThsEntry};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::util::fmt_date;
 
 impl AkShareClient {
     /// 同花顺-创新低-持续创新低

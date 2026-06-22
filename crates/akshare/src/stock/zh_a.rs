@@ -305,9 +305,9 @@ impl AkShareClient {
         } else {
             let normalized = crate::market::normalize_a_share_symbol(symbol)
                 .ok_or_else(|| Error::invalid_input(format!("invalid symbol: {symbol}")))?;
-            let (code, suffix) = normalized
-                .split_once('.')
-                .ok_or_else(|| Error::invalid_input(format!("invalid symbol format: {normalized}")))?;
+            let (code, suffix) = normalized.split_once('.').ok_or_else(|| {
+                Error::invalid_input(format!("invalid symbol format: {normalized}"))
+            })?;
             let prefix = match suffix {
                 "SH" => "sh",
                 _ => "sz",
@@ -713,9 +713,9 @@ impl AkShareClient {
         } else {
             let normalized = crate::market::normalize_a_share_symbol(symbol)
                 .ok_or_else(|| Error::invalid_input(format!("invalid symbol: {symbol}")))?;
-            let (code, suffix) = normalized
-                .split_once('.')
-                .ok_or_else(|| Error::invalid_input(format!("invalid symbol format: {normalized}")))?;
+            let (code, suffix) = normalized.split_once('.').ok_or_else(|| {
+                Error::invalid_input(format!("invalid symbol format: {normalized}"))
+            })?;
             let prefix = match suffix {
                 "SH" => "sh",
                 _ => "sz",

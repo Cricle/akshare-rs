@@ -1,7 +1,6 @@
 //! Billboard (龙虎榜) data from Eastmoney.
 
 use super::helpers::{json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
-use crate::util::fmt_date;
 use super::types::{
     LhbDetail, LhbHyyyb, LhbJgmmtj, LhbJgstatistic, LhbSinaDetail, LhbSinaGgtj, LhbSinaJgmx,
     LhbSinaJgzz, LhbSinaYytj, LhbStockDetail, LhbStockDetailDate, LhbStockStatistic,
@@ -9,6 +8,7 @@ use super::types::{
 };
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::util::fmt_date;
 
 fn fmt_date_range(start: &str, end: &str) -> (String, String) {
     (fmt_date(start), fmt_date(end))
@@ -64,10 +64,7 @@ impl AkShareClient {
     }
 
     /// 个股上榜统计
-    pub async fn stock_lhb_stock_statistic(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<LhbStockStatistic>> {
+    pub async fn stock_lhb_stock_statistic(&self, symbol: &str) -> Result<Vec<LhbStockStatistic>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -202,11 +199,7 @@ impl AkShareClient {
     }
 
     /// 每日活跃营业部
-    pub async fn stock_lhb_hyyyb(
-        &self,
-        start_date: &str,
-        end_date: &str,
-    ) -> Result<Vec<LhbHyyyb>> {
+    pub async fn stock_lhb_hyyyb(&self, start_date: &str, end_date: &str) -> Result<Vec<LhbHyyyb>> {
         let (sd, ed) = fmt_date_range(start_date, end_date);
         let filter = format!("(ONLIST_DATE>='{sd}')(ONLIST_DATE<='{ed}')");
         let data = self
@@ -283,10 +276,7 @@ impl AkShareClient {
     }
 
     /// 游资统计
-    pub async fn stock_lhb_traderstatistic(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<LhbTraderStatistic>> {
+    pub async fn stock_lhb_traderstatistic(&self, symbol: &str) -> Result<Vec<LhbTraderStatistic>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",

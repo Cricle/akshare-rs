@@ -907,10 +907,7 @@ impl AkShareClient {
     /// Get HK scale comparison from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_scale_comparison(symbol)`
-    pub async fn stock_hk_scale_comparison(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn stock_hk_scale_comparison(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         #[derive(Deserialize)]
         struct Env {
             result: Option<EnvResult>,
@@ -957,10 +954,7 @@ impl AkShareClient {
     /// Get HK dividend payout from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_dividend_payout(symbol)`
-    pub async fn stock_hk_dividend_payout(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn stock_hk_dividend_payout(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         #[derive(Deserialize)]
         struct Env {
             result: Option<EnvResult>,

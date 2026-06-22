@@ -16,15 +16,12 @@ static RE_HTML_TAG: LazyLock<regex::Regex> =
 static RE_TABLE: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r"(?is)<table[^>]*>(.*?)</table>").expect("valid regex: table")
 });
-static RE_TR: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r"(?is)<tr[^>]*>(.*?)</tr>").expect("valid regex: tr")
-});
-static RE_TH: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r"(?is)<th[^>]*>(.*?)</th>").expect("valid regex: th")
-});
-static RE_TD: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r"(?is)<td[^>]*>(.*?)</td>").expect("valid regex: td")
-});
+static RE_TR: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"(?is)<tr[^>]*>(.*?)</tr>").expect("valid regex: tr"));
+static RE_TH: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"(?is)<th[^>]*>(.*?)</th>").expect("valid regex: th"));
+static RE_TD: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"(?is)<td[^>]*>(.*?)</td>").expect("valid regex: td"));
 static RE_JSON_P: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"(?s)<p\s+id="main"[^>]*>(.*?)</p>"#).expect("valid regex: json p")
 });
@@ -52,9 +49,8 @@ static RE_UL_MAIN_INTRO: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"(?is)<ul[^>]*class="[^"]*main_intro_list[^"]*"[^>]*>(.*?)</ul>"#)
         .expect("valid regex: main_intro_list")
 });
-static RE_LI: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r"(?is)<li[^>]*>(.*?)</li>").expect("valid regex: li")
-});
+static RE_LI: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"(?is)<li[^>]*>(.*?)</li>").expect("valid regex: li"));
 
 // ---------------------------------------------------------------------------
 // Shared THS headers
@@ -585,10 +581,7 @@ impl AkShareClient {
     /// THS IPO subscription and allotment data (新股申购与中签).
     ///
     /// `market` is one of: "全部A股", "沪市主板", "深市主板", "创业板", "科创板", "京市主板".
-    pub async fn stock_ipo(
-        &self,
-        market: &str,
-    ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo(&self, market: &str) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let market_map: HashMap<&str, &str> = [
             ("全部A股", "all"),
             ("沪市主板", "hszb"),

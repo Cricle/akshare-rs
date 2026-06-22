@@ -1,13 +1,13 @@
 //! HSGT (沪深港通) data from Eastmoney.
 
 use super::helpers::{json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
-use crate::util::fmt_date;
 use super::types::{
     HsgtBoardRank, HsgtFundFlowSummary, HsgtHist, HsgtHoldStock, HsgtIndividualDetail,
     HsgtInstitutionStatistic, HsgtStockStatistic, SpotQuote,
 };
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::util::fmt_date;
 
 impl AkShareClient {
     /// 沪深港通资金流向
@@ -350,10 +350,7 @@ impl AkShareClient {
     }
 
     /// 沪深港通持股-个股 (Python: stock_hsgt_individual)
-    pub async fn stock_hsgt_individual(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HsgtIndividualDetail>> {
+    pub async fn stock_hsgt_individual(&self, symbol: &str) -> Result<Vec<HsgtIndividualDetail>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(

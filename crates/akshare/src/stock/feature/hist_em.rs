@@ -78,8 +78,16 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<HistData>> {
-        let beg = if start_date.is_empty() { "0" } else { start_date };
-        let end = if end_date.is_empty() { "20500000" } else { end_date };
+        let beg = if start_date.is_empty() {
+            "0"
+        } else {
+            start_date
+        };
+        let end = if end_date.is_empty() {
+            "20500000"
+        } else {
+            end_date
+        };
         let klines = self
             .kline_fetch(secid, klt, fqt, 1_000_000, &[("beg", beg), ("end", end)])
             .await?;
@@ -96,8 +104,14 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<HistData>> {
         let secid = eastmoney_secid(symbol)?;
-        self.hist_inner(&secid, daily_klt(period)?, adjust_fqt(adjust), start_date, end_date)
-            .await
+        self.hist_inner(
+            &secid,
+            daily_klt(period)?,
+            adjust_fqt(adjust),
+            start_date,
+            end_date,
+        )
+        .await
     }
 
     /// 东方财富-沪深A股-分时行情
@@ -110,8 +124,14 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<HistData>> {
         let secid = eastmoney_secid(symbol)?;
-        self.hist_inner(&secid, minute_klt(period)?, adjust_fqt(adjust), start_date, end_date)
-            .await
+        self.hist_inner(
+            &secid,
+            minute_klt(period)?,
+            adjust_fqt(adjust),
+            start_date,
+            end_date,
+        )
+        .await
     }
 
     /// 东方财富-港股-历史行情
@@ -124,8 +144,14 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<HistData>> {
         let secid = format!("116.{}", symbol.trim());
-        self.hist_inner(&secid, daily_klt(period)?, adjust_fqt(adjust), start_date, end_date)
-            .await
+        self.hist_inner(
+            &secid,
+            daily_klt(period)?,
+            adjust_fqt(adjust),
+            start_date,
+            end_date,
+        )
+        .await
     }
 
     /// 东方财富-港股-分时行情
@@ -138,8 +164,14 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<HistData>> {
         let secid = format!("116.{}", symbol.trim());
-        self.hist_inner(&secid, minute_klt(period)?, adjust_fqt(adjust), start_date, end_date)
-            .await
+        self.hist_inner(
+            &secid,
+            minute_klt(period)?,
+            adjust_fqt(adjust),
+            start_date,
+            end_date,
+        )
+        .await
     }
 
     /// 东方财富-美股-历史行情
@@ -168,8 +200,14 @@ impl AkShareClient {
         } else {
             format!("105.{symbol}")
         };
-        self.hist_inner(&secid, daily_klt(period)?, adjust_fqt(adjust), start_date, end_date)
-            .await
+        self.hist_inner(
+            &secid,
+            daily_klt(period)?,
+            adjust_fqt(adjust),
+            start_date,
+            end_date,
+        )
+        .await
     }
 
     /// 东方财富-美股-分时行情
@@ -182,7 +220,13 @@ impl AkShareClient {
         end_date: &str,
     ) -> Result<Vec<HistData>> {
         let secid = format!("105.{symbol}");
-        self.hist_inner(&secid, minute_klt(period)?, adjust_fqt(adjust), start_date, end_date)
-            .await
+        self.hist_inner(
+            &secid,
+            minute_klt(period)?,
+            adjust_fqt(adjust),
+            start_date,
+            end_date,
+        )
+        .await
     }
 }

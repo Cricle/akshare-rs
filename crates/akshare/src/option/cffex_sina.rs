@@ -114,44 +114,29 @@ impl AkShareClient {
     }
 
     /// CFFEX SZ50 index option spot (real-time call/put pairs) from Sina.
-    pub async fn option_cffex_sz50_spot(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CffexOptionSpotRow>> {
+    pub async fn option_cffex_sz50_spot(&self, symbol: &str) -> Result<Vec<CffexOptionSpotRow>> {
         self.fetch_cffex_spot_sina("ho", "cffex", symbol).await
     }
 
     /// CFFEX HS300 index option spot (real-time call/put pairs) from Sina.
-    pub async fn option_cffex_hs300_spot(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CffexOptionSpotRow>> {
+    pub async fn option_cffex_hs300_spot(&self, symbol: &str) -> Result<Vec<CffexOptionSpotRow>> {
         self.fetch_cffex_spot_sina("io", "cffex", symbol).await
     }
 
     /// CFFEX ZZ1000 index option spot (real-time call/put pairs) from Sina.
-    pub async fn option_cffex_zz1000_spot(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CffexOptionSpotRow>> {
+    pub async fn option_cffex_zz1000_spot(&self, symbol: &str) -> Result<Vec<CffexOptionSpotRow>> {
         self.fetch_cffex_spot_sina("mo", "cffex", symbol).await
     }
 
     /// CFFEX SZ50 index option daily kline from Sina.
     ///
     /// `symbol` is the contract code including call/put identifier, e.g. "ho2303P2350".
-    pub async fn option_cffex_sz50_daily(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CffexOptionDailyRow>> {
+    pub async fn option_cffex_sz50_daily(&self, symbol: &str) -> Result<Vec<CffexOptionDailyRow>> {
         self.fetch_cffex_daily_sina(symbol).await
     }
 
     /// CFFEX HS300 index option daily kline from Sina.
-    pub async fn option_cffex_hs300_daily(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<CffexOptionDailyRow>> {
+    pub async fn option_cffex_hs300_daily(&self, symbol: &str) -> Result<Vec<CffexOptionDailyRow>> {
         self.fetch_cffex_daily_sina(symbol).await
     }
 

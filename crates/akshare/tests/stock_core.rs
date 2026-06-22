@@ -1951,9 +1951,7 @@ async fn test_stock_us_valuation() {
     let server = MockServer::start().await;
     mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
     let client = mock_client(&server);
-    let result = client
-        .stock_us_valuation("NVDA", "总市值", "近一年")
-        .await;
+    let result = client.stock_us_valuation("NVDA", "总市值", "近一年").await;
     assert!(result.is_ok());
     let items = result.unwrap();
     assert!(!items.is_empty());

@@ -263,10 +263,9 @@ impl AkShareClient {
                 }
 
                 for item in items {
-                    if let (Some(title), Some(value)) = (
-                        item.str_field(&["item_title"]),
-                        item.get("item_value"),
-                    ) {
+                    if let (Some(title), Some(value)) =
+                        (item.str_field(&["item_title"]), item.get("item_value"))
+                    {
                         row.insert(title.to_string(), value.clone());
                     }
                 }

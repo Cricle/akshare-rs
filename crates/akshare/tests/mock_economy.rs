@@ -210,9 +210,7 @@ async fn test_mock_migration_area_baidu() {
     let server = MockServer::start().await;
     mount_em_mocks(&server).await;
     let client = common::mock_client(&server);
-    let result = client
-        .migration_area("北京", "迁入", "2024-01-01")
-        .await;
+    let result = client.migration_area("北京", "迁入", "2024-01-01").await;
     let _ = result;
 }
 macro_test_arg2!(

@@ -285,10 +285,7 @@ impl AkShareClient {
     /// SSE option spot price from Sina.
     ///
     /// Returns field-value pairs with the option's real-time data.
-    pub async fn option_sse_spot_price(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<OptionFieldValuePair>> {
+    pub async fn option_sse_spot_price(&self, symbol: &str) -> Result<Vec<OptionFieldValuePair>> {
         let url = format!("https://hq.sinajs.cn/list=CON_OP_{symbol}");
         let body = self
             .get(&url)
@@ -625,10 +622,7 @@ impl AkShareClient {
     }
 
     /// Option finance 5-day minute data from Sina.
-    pub async fn option_finance_minute(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<OptionFinanceMinuteRow>> {
+    pub async fn option_finance_minute(&self, symbol: &str) -> Result<Vec<OptionFinanceMinuteRow>> {
         let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/StockOptionDaylineService.getFiveDayLine";
         let con_symbol = format!("CON_OP_{symbol}");
 

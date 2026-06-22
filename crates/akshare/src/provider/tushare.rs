@@ -153,7 +153,10 @@ impl AkShareClient {
                 exchange: a.str("exchange"),
                 calendar_date: a.str("cal_date"),
                 is_open: a.i64("is_open") == 1,
-                previous_trade_date: a.get("pretrade_date").as_str().map(std::string::ToString::to_string),
+                previous_trade_date: a
+                    .get("pretrade_date")
+                    .as_str()
+                    .map(std::string::ToString::to_string),
             });
         }
         Ok(items)

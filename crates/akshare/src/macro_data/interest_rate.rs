@@ -148,9 +148,6 @@ mod tests {
         let resp: EmDatacenterResp = serde_json::from_str(json).unwrap();
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 1);
-        assert_eq!(
-            data[0].f64_field(&["IR_RATE"]),
-            Some(1.5)
-        );
+        assert_eq!(data[0].f64_field(&["IR_RATE"]), Some(1.5));
     }
 }

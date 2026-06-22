@@ -674,10 +674,7 @@ impl AkShareClient {
     /// Get A-share valuation comparison from Eastmoney.
     ///
     /// Python equivalent: `stock_zh_valuation_comparison(symbol)`
-    pub async fn stock_zh_valuation_comparison(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<PeerComparison>> {
+    pub async fn stock_zh_valuation_comparison(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
         let secucode = if symbol.len() >= 8 {
             let (prefix, code) = symbol.split_at(2);
             format!("{code}.{prefix}")
@@ -701,10 +698,7 @@ impl AkShareClient {
     /// Get HK valuation comparison from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_valuation_comparison(symbol)`
-    pub async fn stock_hk_valuation_comparison(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<PeerComparison>> {
+    pub async fn stock_hk_valuation_comparison(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
         let filter = format!("(SECUCODE=\"{symbol}.HK\")(CORRE_SECUCODE=\"{symbol}.HK\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_HKCVALUE", &filter, "F10")
             .await
@@ -722,10 +716,7 @@ impl AkShareClient {
     /// Get US valuation comparison from Eastmoney.
     ///
     /// Python equivalent: `stock_us_valuation_comparison(symbol)`
-    pub async fn stock_us_valuation_comparison(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<PeerComparison>> {
+    pub async fn stock_us_valuation_comparison(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
         let filter = format!("(SECUCODE=\"{symbol}.OQ\")(CORRE_SECUCODE=\"{symbol}.OQ\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_USCVALUE", &filter, "F10")
             .await
@@ -795,10 +786,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_a_dividend_payout(symbol)`
     ///
     /// `symbol` uses the format "SZ000895" or "SH600000".
-    pub async fn stock_zh_a_dividend_payout(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn stock_zh_a_dividend_payout(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         #[derive(Deserialize)]
         struct Env {
             result: Option<EnvResult>,

@@ -467,10 +467,7 @@ impl AkShareClient {
     /// Get HK security profile from Eastmoney.
     ///
     /// Python equivalent: `stock_hk_security_profile(symbol)`
-    pub async fn stock_hk_security_profile(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<HkSecurityProfile>> {
+    pub async fn stock_hk_security_profile(&self, symbol: &str) -> Result<Vec<HkSecurityProfile>> {
         let filter = format!("(SECUCODE=\"{symbol}.HK\")");
         self.fetch_hk_profile("RPT_HKF10_INFO_SECURITYINFO", &filter)
             .await

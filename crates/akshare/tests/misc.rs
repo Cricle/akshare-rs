@@ -190,9 +190,7 @@ async fn test_currency_boc_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .currency_boc("美元", "20240101", "20240131")
-        .await;
+    let result = client.currency_boc("美元", "20240101", "20240131").await;
     let _ = result;
 }
 
@@ -866,9 +864,7 @@ async fn test_migration_area_baidu() {
     let body = serde_json::json!({"data": [{"date": "2024-01-02", "value": 100}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .migration_area("北京市", "move_in", "20240102")
-        .await;
+    let result = client.migration_area("北京市", "move_in", "20240102").await;
     let _ = result;
 }
 

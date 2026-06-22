@@ -76,10 +76,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-行业市盈率
-    pub async fn stock_industry_pe_ratio(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<IndustryPeRatio>> {
+    pub async fn stock_industry_pe_ratio(&self, symbol: &str) -> Result<Vec<IndustryPeRatio>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1131";
         let resp = self
             .post(url)

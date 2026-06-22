@@ -12,10 +12,7 @@ impl AkShareClient {
     }
 
     /// Fetch fund semi-annual report data from CNINFO.
-    pub async fn fund_report_half_year(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_report_half_year(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         Err(Error::decode(format!(
             "fund semi-annual report for {symbol} from CNINFO requires HTML/JS parsing"
         )))

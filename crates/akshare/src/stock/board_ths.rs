@@ -25,15 +25,12 @@ static RE_BOARD_HREF_FALLBACK: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r#"<a[^>]+href="[^"]*?/code/(\d+)/?"[^>]*>([^<]+)</a>"#)
         .expect("valid regex: board href fallback")
 });
-static RE_DT: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r"<dt[^>]*>([^<]+)</dt>").expect("valid regex: dt tag")
-});
-static RE_DD: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r"<dd[^>]*>([\s\S]*?)</dd>").expect("valid regex: dd tag")
-});
-static RE_DATE: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r"(\d{4}-\d{2}-\d{2})").expect("valid regex: date")
-});
+static RE_DT: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"<dt[^>]*>([^<]+)</dt>").expect("valid regex: dt tag"));
+static RE_DD: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"<dd[^>]*>([\s\S]*?)</dd>").expect("valid regex: dd tag"));
+static RE_DATE: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new(r"(\d{4}-\d{2}-\d{2})").expect("valid regex: date"));
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -139,10 +136,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_board_concept_summary(symbol)`
     ///
     /// Returns concept board timeline/summary data.
-    pub async fn stock_board_concept_summary(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<ThsBoardSummary>> {
+    pub async fn stock_board_concept_summary(&self, symbol: &str) -> Result<Vec<ThsBoardSummary>> {
         let boards = self.stock_board_concept_name_ths().await?;
         let code = boards
             .iter()
@@ -203,10 +197,7 @@ impl AkShareClient {
     /// Get industry board summary from THS.
     ///
     /// Python equivalent: `stock_board_industry_summary(symbol)`
-    pub async fn stock_board_industry_summary(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<ThsBoardSummary>> {
+    pub async fn stock_board_industry_summary(&self, symbol: &str) -> Result<Vec<ThsBoardSummary>> {
         let boards = self.stock_board_industry_name_ths().await?;
         let code = boards
             .iter()

@@ -93,9 +93,7 @@ impl AkShareClient {
     }
 
     /// 质押机构分布统计-银行
-    pub async fn stock_gpzy_distribute_statistics_bank(
-        &self,
-    ) -> Result<Vec<GpzyDistributeEntry>> {
+    pub async fn stock_gpzy_distribute_statistics_bank(&self) -> Result<Vec<GpzyDistributeEntry>> {
         let data = self
             .dc_fetch_all(
                 "RPT_GDZY_ZYJG_SUM",

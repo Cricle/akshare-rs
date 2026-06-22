@@ -1,10 +1,10 @@
 //! Institutional research (机构调研) from Eastmoney.
 
 use super::helpers::{json_f64_opt, json_i64, json_str, json_str_opt};
-use crate::util::fmt_date;
 use super::types::{JgdyDetail, JgdyTj};
 use crate::client::AkShareClient;
 use crate::error::Result;
+use crate::util::fmt_date;
 
 impl AkShareClient {
     /// 机构调研统计

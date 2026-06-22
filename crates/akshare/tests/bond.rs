@@ -331,9 +331,7 @@ async fn test_bond_corporate_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .bond_corporate_issue("20240101", "20240131")
-        .await;
+    let result = client.bond_corporate_issue("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 
@@ -572,9 +570,8 @@ async fn test_bond_sh_buy_back_em() {
 #[tokio::test]
 async fn test_bond_buy_back_hist_em() {
     let server = MockServer::start().await;
-    let body = em_kline_response(&[
-        "2024-01-02,2.50,2.55,2.60,2.45,100000,250000.0,2.0,0.50,0.01,1.0",
-    ]);
+    let body =
+        em_kline_response(&["2024-01-02,2.50,2.55,2.60,2.45,100000,250000.0,2.0,0.50,0.01,1.0"]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.bond_buy_back_hist("204001", 10).await;
@@ -649,9 +646,7 @@ async fn test_bond_treasure_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .bond_treasure_issue("20240101", "20240131")
-        .await;
+    let result = client.bond_treasure_issue("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 
@@ -665,9 +660,7 @@ async fn test_bond_local_gov_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client
-        .bond_local_gov_issue("20240101", "20240131")
-        .await;
+    let result = client.bond_local_gov_issue("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 

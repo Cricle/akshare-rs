@@ -188,10 +188,7 @@ impl AkShareClient {
             .await?;
         let mut map = std::collections::HashMap::new();
         for item in &items {
-            if let (Some(code), Some(id)) = (
-                item.str_field(&["f12"]),
-                item.i64_field(&["f13"]),
-            ) {
+            if let (Some(code), Some(id)) = (item.str_field(&["f12"]), item.i64_field(&["f13"])) {
                 map.insert(code.to_string(), id);
             }
         }

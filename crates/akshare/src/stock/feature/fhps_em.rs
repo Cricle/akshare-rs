@@ -1,10 +1,10 @@
 //! Dividends (分红送配) from Eastmoney.
 
 use super::helpers::{json_f64_opt, json_str, json_str_opt};
-use crate::util::fmt_date;
 use super::types::DividendInfo;
 use crate::client::AkShareClient;
 use crate::error::Result;
+use crate::util::fmt_date;
 
 impl AkShareClient {
     /// 分红送配

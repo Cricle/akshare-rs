@@ -1079,10 +1079,7 @@ impl AkShareClient {
     /// Get US dividend payout from Eastmoney.
     ///
     /// Python equivalent: `stock_us_dividend_payout(symbol)`
-    pub async fn stock_us_dividend_payout(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn stock_us_dividend_payout(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         #[derive(Deserialize)]
         struct Env {
             result: Option<EnvResult>,
@@ -1171,10 +1168,7 @@ impl AkShareClient {
     /// Get US scale comparison from Eastmoney.
     ///
     /// Python equivalent: `stock_us_scale_comparison(symbol)`
-    pub async fn stock_us_scale_comparison(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn stock_us_scale_comparison(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         #[derive(Deserialize)]
         struct Env {
             result: Option<EnvResult>,

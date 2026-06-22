@@ -1035,9 +1035,7 @@ async fn test_fund_report_industry_allocation_cninfo() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     // Always returns Err (JS authentication required)
-    let result = client
-        .fund_report_industry_allocation("2024-01-01")
-        .await;
+    let result = client.fund_report_industry_allocation("2024-01-01").await;
     assert!(result.is_err());
 }
 
@@ -1072,9 +1070,7 @@ async fn test_fund_scale_daily_szse() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     // Always returns Err (xlsx parsing not supported)
-    let result = client
-        .fund_scale_daily("20240101", "20240131", "ETF")
-        .await;
+    let result = client.fund_scale_daily("20240101", "20240131", "ETF").await;
     assert!(result.is_err());
 }
 
@@ -1157,9 +1153,8 @@ async fn test_fund_etf_fund_daily_em() {
 #[tokio::test]
 async fn test_fund_etf_hist() {
     let server = MockServer::start().await;
-    let body = em_kline_response(&[
-        "2024-01-02,1.50,1.52,1.55,1.48,50000,75000.0,2.0,1.3,0.02,1.0",
-    ]);
+    let body =
+        em_kline_response(&["2024-01-02,1.50,1.52,1.55,1.48,50000,75000.0,2.0,1.3,0.02,1.0"]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.fund_etf_hist("510050", 10).await;
@@ -1185,9 +1180,8 @@ async fn test_fund_lof_list() {
 #[tokio::test]
 async fn test_fund_lof_hist() {
     let server = MockServer::start().await;
-    let body = em_kline_response(&[
-        "2024-01-02,1.50,1.52,1.55,1.48,50000,75000.0,2.0,1.3,0.02,1.0",
-    ]);
+    let body =
+        em_kline_response(&["2024-01-02,1.50,1.52,1.55,1.48,50000,75000.0,2.0,1.3,0.02,1.0"]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.fund_lof_hist("160105", 10).await;
@@ -1257,9 +1251,7 @@ async fn test_fund_info_index_em() {
         r#"jQuery({"datas":[["510300","华泰柏瑞沪深300ETF","etf","3.5000","4.0000"]]})"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client
-        .fund_info_index("沪深指数", "被动指数型", 10)
-        .await;
+    let result = client.fund_info_index("沪深指数", "被动指数型", 10).await;
     assert!(result.is_ok());
 }
 

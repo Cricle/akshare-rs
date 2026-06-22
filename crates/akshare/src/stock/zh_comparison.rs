@@ -85,10 +85,7 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_dupont_comparison(symbol)`
     ///
     /// - `symbol`: stock code like "SZ000895"
-    pub async fn stock_zh_dupont_comparison(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<DupontComparison>> {
+    pub async fn stock_zh_dupont_comparison(&self, symbol: &str) -> Result<Vec<DupontComparison>> {
         let filter = if symbol.len() >= 2 {
             let (prefix, code) = symbol.split_at(2);
             format!("(SECUCODE=\"{code}.{prefix}\")")
@@ -204,11 +201,7 @@ impl AkShareClient {
     ///
     /// - `symbol`: stock code like "000001"
     /// - `indicator`: "指数" or "股票"
-    pub async fn stock_zh_vote(
-        &self,
-        symbol: &str,
-        indicator: &str,
-    ) -> Result<Vec<BaiduVote>> {
+    pub async fn stock_zh_vote(&self, symbol: &str, indicator: &str) -> Result<Vec<BaiduVote>> {
         let finance_type = match indicator {
             "股票" => "stock",
             "指数" => "index",

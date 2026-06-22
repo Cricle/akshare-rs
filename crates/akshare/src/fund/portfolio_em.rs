@@ -37,10 +37,7 @@ impl AkShareClient {
     }
 
     /// Fetch fund bond holdings from Eastmoney.
-    pub async fn fund_portfolio_bond_hold(
-        &self,
-        symbol: &str,
-    ) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_portfolio_bond_hold(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         self.fund_portfolio_hold(symbol, "").await
     }
 

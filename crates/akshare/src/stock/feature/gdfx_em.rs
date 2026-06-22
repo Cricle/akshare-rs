@@ -1,15 +1,13 @@
 //! Shareholder analysis (股东分析) from Eastmoney.
 
-use super::helpers::{
-    json_f64, json_f64_opt, json_i64, json_i64_opt, json_str, json_str_opt,
-};
-use crate::util::fmt_date;
+use super::helpers::{json_f64, json_f64_opt, json_i64, json_i64_opt, json_str, json_str_opt};
 use super::types::{
     GdfxHoldingAnalyse, GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork,
     GdfxTop10, HoldChangeCninfo, HoldControlCninfo, ManagementDetail,
 };
 use crate::client::AkShareClient;
 use crate::error::Result;
+use crate::util::fmt_date;
 
 impl AkShareClient {
     /// 股东持股统计-十大流通股东
@@ -160,11 +158,7 @@ impl AkShareClient {
     }
 
     /// 个股-十大流通股东
-    pub async fn stock_gdfx_free_top_10(
-        &self,
-        symbol: &str,
-        date: &str,
-    ) -> Result<Vec<GdfxTop10>> {
+    pub async fn stock_gdfx_free_top_10(&self, symbol: &str, date: &str) -> Result<Vec<GdfxTop10>> {
         let url = "https://emweb.securities.eastmoney.com/PC_HSF10/ShareholderResearch/PageSDLTGD";
         let resp = self
             .get(url)
@@ -352,10 +346,7 @@ impl AkShareClient {
     }
 
     /// 股东持股分析-十大股东
-    pub async fn stock_gdfx_holding_analyse(
-        &self,
-        date: &str,
-    ) -> Result<Vec<GdfxHoldingAnalyse>> {
+    pub async fn stock_gdfx_holding_analyse(&self, date: &str) -> Result<Vec<GdfxHoldingAnalyse>> {
         let filter = format!("(END_DATE='{}')", fmt_date(date));
         let data = self
             .dc_fetch_all(
@@ -565,11 +556,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-股东户数
-    pub async fn stock_hold_num(
-        &self,
-        symbol: &str,
-        date: &str,
-    ) -> Result<Vec<HoldChangeCninfo>> {
+    pub async fn stock_hold_num(&self, symbol: &str, date: &str) -> Result<Vec<HoldChangeCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1090";
         let sd = fmt_date(date);
         let resp = self

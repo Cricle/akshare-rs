@@ -1,13 +1,13 @@
 //! Margin trading (融资融券) from Eastmoney, SSE, SZSE, PA.
 
 use super::helpers::{json_f64, json_f64_opt, json_i64_opt, json_str};
-use crate::util::fmt_date;
 use super::types::{
     MarginAccountInfo, MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail,
     MarginSzseSummary, MarginUnderlyingInfoSzse,
 };
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::util::fmt_date;
 
 impl AkShareClient {
     /// 融资融券账户统计
