@@ -2,8 +2,8 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::value_ext::ValueExt;
 use crate::types::FundSnapshot;
+use crate::types::value_ext::ValueExt;
 
 impl AkShareClient {
     /// Fetch open-end fund scale data from Sina Finance.

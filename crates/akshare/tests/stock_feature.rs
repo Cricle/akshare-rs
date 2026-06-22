@@ -3502,3 +3502,1001 @@ async fn test_stock_zyjs_ths() {
     let client = mock_client(&server);
     let _ = client.stock_zyjs("000001").await;
 }
+
+// ===========================================================================
+// Additional stock methods — kline, push2, datacenter, Sina, Tencent, Baidu
+// ===========================================================================
+
+// --- Kline-based history methods (1–13) ---
+
+#[tokio::test]
+async fn test_stock_zh_a_hist() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_a_hist("600000", "daily", "qfq", "20240101", "20240110")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_a_hist_min() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_a_hist_min("600000", "5", "qfq", "20240101", "20240102")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_a_hist_pre_min() {
+    let server = MockServer::start().await;
+    let trend_line = "2024-01-02 09:30,10.00,10.50,10.80,9.90,100000,10500000.0,0";
+    let body = serde_json::json!({
+        "data": {
+            "trends": [trend_line]
+        }
+    });
+    mock_any_get(&server, "/api/qt/stock/trends2/get", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_a_hist_pre_min("600000", "09:30", "09:35")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_a_hist_tx() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "sh600000": {
+                "day": [
+                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100000],
+                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120000]
+                ]
+            }
+        }
+    });
+    mock_any_get(&server, "/appstock/app/fqkline/get", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_a_hist_tx("600000", "20240101", "20240110", "qfq")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_a_daily() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_a_daily("600000", "20240101", "20240110", "qfq")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_a_cdr_daily() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_a_cdr_daily("600000", "20240101", "20240110")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_b_daily() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_b_daily("sh900901", "20240101", "20240110", "qfq")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_kcb_daily() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_kcb_daily("sh688399", "20240101", "20240110", "qfq")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_hk_hist_mock() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_hk_hist("00981", "daily", "qfq", "20240101", "20240110")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_hk_hist_min_mock() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_hk_hist_min("00981", "5", "qfq", "20240101", "20240102")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_hk_daily() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_hk_daily("00981", "20240101", "20240110", "qfq")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_us_hist_mock() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_us_hist("AAPL", "daily", "qfq", "20240101", "20240110")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_us_hist_min_mock() {
+    let server = MockServer::start().await;
+    mount_em_kline(&server).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_us_hist_min("AAPL", "5", "qfq", "20240101", "20240102")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+// --- Push2 clist spot methods (14–16) ---
+
+#[tokio::test]
+async fn test_stock_hk_spot_em() {
+    let server = MockServer::start().await;
+    let body = em_push2_response(&[sample_em_stock_row("000001", "Test")]);
+    mock_any_get(&server, "/api/qt/clist/get", body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_spot_em().await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_us_spot_em() {
+    let server = MockServer::start().await;
+    let body = em_push2_response(&[sample_em_stock_row("000001", "Test")]);
+    mock_any_get(&server, "/api/qt/clist/get", body).await;
+    let client = mock_client(&server);
+    let result = client.stock_us_spot_em().await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_sh_a_spot() {
+    let server = MockServer::start().await;
+    let body = em_push2_response(&[sample_em_stock_row("600000", "Test")]);
+    mock_any_get(&server, "/api/qt/clist/get", body).await;
+    let client = mock_client(&server);
+    let result = client.stock_sh_a_spot().await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+// --- Datacenter methods (17, 18, 20) ---
+
+#[tokio::test]
+async fn test_stock_zh_valuation() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "Result": [{
+            "DisplayData": {
+                "resultData": {
+                    "tplData": {
+                        "result": {
+                            "chartInfo": [{
+                                "body": [
+                                    ["2024-01-01", 100.0],
+                                    ["2024-02-01", 105.0]
+                                ]
+                            }]
+                        }
+                    }
+                }
+            }
+        }]
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_valuation("002044", "市盈率(TTM)", "近一年")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_a_disclosure_report() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "announcements": [{
+            "secCode": "000001",
+            "secName": "Test",
+            "announcementTitle": "Test Report",
+            "announcementTime": "2024-01-01",
+            "adjunctUrl": "test.pdf",
+            "announcementType": "category"
+        }]
+    });
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_a_disclosure_report("000001", "category_ndbg", "20240101", "20240601")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+// --- Sina method (19) ---
+
+#[tokio::test]
+async fn test_stock_zh_a_spot() {
+    let server = MockServer::start().await;
+    // Count endpoint returns plain text
+    mock_any_get_text(&server, ".*StockCount.*", "1").await;
+    // List endpoint returns JSON array
+    mock_any_get(
+        &server,
+        ".*",
+        serde_json::json!([{
+            "symbol": "sh600000",
+            "code": "600000",
+            "name": "Test Stock",
+            "trade": 10.50,
+            "pricechange": 0.15,
+            "changepercent": 1.5,
+            "buy": 10.49,
+            "sell": 10.51,
+            "settlement": 10.35,
+            "open": 10.30,
+            "high": 10.80,
+            "low": 10.20,
+            "volume": 1000000,
+            "amount": 10500000.0
+        }]),
+    )
+    .await;
+    let client = mock_client(&server);
+    let result = client.stock_zh_a_spot().await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_margin_account_info_em_new() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[serde_json::json!({
+        "TRADE_DATE": "2024-01-01", "RZYE": 100.0, "RQYE": 50.0,
+        "RZMRE": 10.0, "RQMCL": 5.0
+    })]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_margin_account_info_em("20240101", "20240601")
+        .await;
+    assert!(result.is_ok());
+    assert!(!result.unwrap().is_empty());
+}
+
+// ===========================================================================
+// fundamental/sina.rs — stock_history_dividend_detail
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_history_dividend_detail_dividend_em() {
+    let server = MockServer::start().await;
+    // Build an HTML page with 13+ tables so index 12 ("分红") exists.
+    let html = "<html><body>".to_string()
+        + &"<table></table>".repeat(12)
+        + "<table><tr><th>除权除息日</th><th>派息</th></tr><tr><td>2024-01-02</td><td>0.50</td></tr></table>"
+        + "<table></table>"
+        + "</body></html>";
+    mock_any_get_text(&server, ".*", &html).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_history_dividend_detail("000002", "分红", None)
+        .await;
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_stock_history_dividend_detail_rights_em() {
+    let server = MockServer::start().await;
+    // Build an HTML page with 14+ tables so index 13 ("配股") exists.
+    let html = "<html><body>".to_string()
+        + &"<table></table>".repeat(13)
+        + "<table><tr><th>除权日</th><th>配股</th></tr><tr><td>2024-01-02</td><td>0.30</td></tr></table>"
+        + "</body></html>";
+    mock_any_get_text(&server, ".*", &html).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_history_dividend_detail("000002", "配股", None)
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// fundamental/eastmoney.rs — stock_restricted_release_detail
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_restricted_release_detail_em() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECURITY_CODE": "000001", "SECURITY_NAME_ABBR": "Test",
+        "FREE_DATE": "2024-01-15", "ADD_LISTING_SHARES": 1_000_000.0
+    })]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_restricted_release_detail("20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// fundamental/eastmoney.rs — stock_restricted_release_stockholder
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_restricted_release_stockholder_em() {
+    let server = MockServer::start().await;
+    // fetch_datacenter_page uses raw http client; mock both GET and POST.
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECURITY_CODE": "600000", "LIMITED_HOLDER_NAME": "Holder A",
+        "ADD_LISTING_SHARES": 500_000.0, "FREE_DATE": "2024-01-15"
+    })]);
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(body.clone()))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(body))
+        .mount(&server)
+        .await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_restricted_release_stockholder("600000", "20240115")
+        .await;
+    // fetch_datacenter_page bypasses mock_uri redirect (uses raw http client)
+    let _ = result;
+}
+
+// ===========================================================================
+// fundamental/eastmoney.rs — stock_restricted_release_summary
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_restricted_release_summary_em() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECURITY_CODE": "000001", "SECURITY_NAME_ABBR": "Test",
+        "FREE_DATE": "2024-01-15", "ADD_LISTING_SHARES": 1_000_000.0
+    })]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_restricted_release_summary("全部股票", "20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// eastmoney_misc.rs — stock_dzjy_mrmx
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_dzjy_mrmx_em() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECURITY_CODE": "000001", "SECURITY_NAME_ABBR": "Test",
+        "TRADE_DATE": "2024-01-02", "CLOSE_PRICE": 10.0,
+        "BLOCKTRADE_PRICE": 9.80, "BLOCKTRADE_VOLUME": 100_000.0,
+        "BLOCKTRADE_AMT": 980_000.0, "BUYER_SELLER": "某券商/某券商"
+    })]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_dzjy_mrmx("astock", "20240101", "20240102", 10)
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// fundamental/eastmoney.rs — stock_individual_notice_report
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_individual_notice_report_em() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "total_hits": 1,
+            "list": [{
+                "art_code": "AN20240102001",
+                "title": "年度报告",
+                "notice_date": "2024-01-02",
+                "codes": [{"stock_code": "300237", "short_name": "Test"}],
+                "columns": [{"column_name": "年度报告"}]
+            }]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_individual_notice_report("300237", "全部", Some("20240101"), Some("20240102"))
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// xueqiu.rs — stock_individual_basic_info_xq
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_individual_basic_info_xq_em() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "company": {
+                "org_name_cn": "平安银行",
+                "org_short_name_cn": "平安银行",
+                "org_id": "000001",
+                "main_business": "Banking",
+                "found_date": "1987-12-22",
+                "listed_date": "1991-04-03",
+                "reg_capital": "1000000",
+                "org_cn_introduction": "A bank."
+            }
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_individual_basic_info_xq("SH600000", "test_token")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// xueqiu.rs — stock_individual_basic_info_hk_xq
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_individual_basic_info_hk_xq_em() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "company": {
+                "org_name_cn": "某港股",
+                "org_short_name_cn": "某港股",
+                "org_id": "02097",
+                "main_business": "Retail"
+            }
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_individual_basic_info_hk_xq("02097", "test_token")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// xueqiu.rs — stock_individual_basic_info_us_xq
+// ===========================================================================
+
+#[tokio::test]
+async fn test_stock_individual_basic_info_us_xq_em() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "company": {
+                "org_name_cn": "NVIDIA",
+                "org_short_name_cn": "NVIDIA",
+                "org_id": "NVDA",
+                "main_business": "Semiconductors"
+            }
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_individual_basic_info_us_xq("NVDA", "test_token")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ===========================================================================
+// Additional mock tests for untested stock methods
+// ===========================================================================
+
+// -- 1. stock_board_concept_hist (kline API) ---------------------------------
+
+#[tokio::test]
+async fn test_stock_board_concept_hist() {
+    let server = MockServer::start().await;
+    // symbol "BK1001" starts with "BK" so resolve_board_secid returns "90.BK1001" directly
+    let kline = sample_kline_str("2024-01-02");
+    let body = em_kline_response(&[&kline]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_board_concept_hist("BK1001", "daily", "20240101", "20240102", "")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 2. stock_board_concept_index (THS board names + kline) ------------------
+
+#[tokio::test]
+async fn test_stock_board_concept_index() {
+    let server = MockServer::start().await;
+    // THS board names page needs HTML with matching board links
+    // redirect_url strips domain, so match on path portion only
+    let board_html = r#"<html><body>
+        <a href="/gn/detail/code/123456/">人工智能</a>
+    </body></html>"#;
+    // THS kline JS response with valid data
+    let kline_js = r#"quotebridge_v4_line_bk_123456_01_2024({"data":"2024-01-02,10.00,10.50,10.80,9.90,100000,10500000;2024-01-03,10.50,10.80,11.00,10.20,120000,12000000"})"#;
+    // Mount board names page (path will be /gn/detail/code/...)
+    Mock::given(method("GET"))
+        .and(path_regex("/gn/.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(board_html))
+        .mount(&server)
+        .await;
+    // Mount kline data (path will be /v4/line/bk_...)
+    Mock::given(method("GET"))
+        .and(path_regex("/v4/line/.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(kline_js))
+        .mount(&server)
+        .await;
+    // Catch-all for anything else (thshy names page etc.)
+    mock_any_get_text(&server, ".*", board_html).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_board_concept_index("人工智能", "20240101", "20241231")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 3. stock_board_industry_hist (kline API) ---------------------------------
+
+#[tokio::test]
+async fn test_stock_board_industry_hist() {
+    let server = MockServer::start().await;
+    let kline = sample_kline_str("2024-01-02");
+    let body = em_kline_response(&[&kline]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_board_industry_hist("BK1027", "daily", "20240101", "20240102", "")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 4. stock_board_industry_index (THS board names + kline) ------------------
+
+#[tokio::test]
+async fn test_stock_board_industry_index() {
+    let server = MockServer::start().await;
+    let board_html = r#"<html><body>
+        <a href="/thshy/detail/code/654321/">小金属</a>
+    </body></html>"#;
+    let kline_js = r#"quotebridge_v4_line_bk_654321_01_2024({"data":"2024-01-02,10.00,10.50,10.80,9.90,100000,10500000;2024-01-03,10.50,10.80,11.00,10.20,120000,12000000"})"#;
+    // Mount board names page (path will be /thshy/detail/code/...)
+    Mock::given(method("GET"))
+        .and(path_regex("/thshy/.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(board_html))
+        .mount(&server)
+        .await;
+    // Mount kline data (path will be /v4/line/bk_...)
+    Mock::given(method("GET"))
+        .and(path_regex("/v4/line/.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(kline_js))
+        .mount(&server)
+        .await;
+    // Catch-all for anything else
+    mock_any_get_text(&server, ".*", board_html).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_board_industry_index("小金属", "20240101", "20241231")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 5. stock_financial_abstract_ths (THS HTML page) -------------------------
+
+#[tokio::test]
+async fn test_stock_financial_abstract_ths_mock() {
+    let server = MockServer::start().await;
+    // THS parses <p id="main">...</p> JSON from the finance HTML page
+    let ths_json = serde_json::json!({
+        "title": [["指标A"], ["指标B"]],
+        "report": [
+            ["2024-01-01", "2023-01-01"],
+            ["100", "90"],
+            ["200", "180"]
+        ]
+    });
+    let html = format!(
+        r#"<html><body><p id="main">{}</p></body></html>"#,
+        ths_json
+    );
+    mock_any_get_text(&server, ".*", &html).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_financial_abstract_ths("000001", "按报告期")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 6. stock_financial_analysis_indicator (Sina HTML) -----------------------
+
+#[tokio::test]
+async fn test_stock_financial_analysis_indicator_mock() {
+    let server = MockServer::start().await;
+    // Return HTML without the expected year table structure;
+    // method will return Ok(vec![]) when no year links found
+    mock_any_get_text(&server, ".*", "<html><body><div id='con02-1'></div></body></html>").await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_financial_analysis_indicator("600000", "2020")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 7. stock_financial_analysis_indicator_em (emweb/securities API) ----------
+
+#[tokio::test]
+async fn test_stock_financial_analysis_indicator_em_mock() {
+    let server = MockServer::start().await;
+    // This method uses fetch_securities_page which calls self.http directly
+    // (not self.get), so mock may not intercept all calls.
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECUCODE": "000001.SZ", "REPORT_DATE": "2024-01-01", "BASIC_EPS": 0.5
+    })]);
+    mock_any_get(&server, ".*", body.clone()).await;
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let _ = client
+        .stock_financial_analysis_indicator_em("000001.SZ", "按报告期")
+        .await;
+}
+
+// -- 8. stock_financial_abstract_new (THS new API) ---------------------------
+
+#[tokio::test]
+async fn test_stock_financial_abstract_new_mock() {
+    let server = MockServer::start().await;
+    // THS new API returns JSON with /data/data array containing reports with index_list
+    let body = serde_json::json!({
+        "data": {
+            "data": [{
+                "date": "2024-01-01",
+                "report_name": "年报",
+                "report": "FY2023",
+                "quarter_name": "Q4",
+                "index_list": {
+                    "EPS": {"value": 1.5}
+                }
+            }]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_financial_abstract_new("000001", "按报告期")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 9. stock_financial_benefit_new (THS new API) ----------------------------
+
+#[tokio::test]
+async fn test_stock_financial_benefit_new_mock() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "data": [{
+                "date": "2024-01-01",
+                "report_name": "年报",
+                "report": "FY2023",
+                "quarter_name": "Q4",
+                "index_list": {
+                    "TOTAL_REVENUE": {"value": 100000.0}
+                }
+            }]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_financial_benefit_new("000001", "按报告期")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 10. stock_financial_hk_report (securities API) --------------------------
+
+#[tokio::test]
+async fn test_stock_financial_hk_report_mock() {
+    let server = MockServer::start().await;
+    // This method uses fetch_securities_page which calls self.http directly.
+    // Mount catch-all mocks; actual calls may bypass mock server.
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECUCODE": "00700.HK",
+        "SECURITY_CODE": "00700",
+        "REPORT_DATE": "2024-01-01",
+        "STD_ITEM_CODE": "A001",
+        "STD_ITEM_NAME": "Total Assets",
+        "AMOUNT": 1000000.0,
+        "REPORT_LIST": [{"REPORT_DATE": "2024-01-01 00:00:00", "REPORT_TYPE": "年报"}]
+    })]);
+    mock_any_get(&server, ".*", body.clone()).await;
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let _ = client
+        .stock_financial_hk_report("00700", "资产负债表", "报告期")
+        .await;
+}
+
+// -- 11. stock_financial_hk_analysis_indicator (securities API) ---------------
+
+#[tokio::test]
+async fn test_stock_financial_hk_analysis_indicator_mock() {
+    let server = MockServer::start().await;
+    // This method uses fetch_securities_page which calls self.http directly.
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECUCODE": "00700.HK",
+        "STD_REPORT_DATE": "2024-01-01",
+        "BASIC_EPS": 10.5
+    })]);
+    mock_any_get(&server, ".*", body.clone()).await;
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let _ = client
+        .stock_financial_hk_analysis_indicator("00700", "报告期")
+        .await;
+}
+
+// -- 12. stock_financial_us_report (securities API) --------------------------
+
+#[tokio::test]
+async fn test_stock_financial_us_report_mock() {
+    let server = MockServer::start().await;
+    // This method uses fetch_securities_page which calls self.http directly.
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECUCODE": "TSLA.OQ",
+        "SECURITY_CODE": "TSLA",
+        "REPORT": "FY2023",
+        "REPORT_DATE": "2024-01-01",
+        "STD_ITEM_CODE": "A001",
+        "AMOUNT": 500000.0
+    })]);
+    mock_any_get(&server, ".*", body.clone()).await;
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let _ = client
+        .stock_financial_us_report("TSLA", "综合损益表", "年报")
+        .await;
+}
+
+// -- 13. stock_financial_us_analysis_indicator (securities API) ---------------
+
+#[tokio::test]
+async fn test_stock_financial_us_analysis_indicator_mock() {
+    let server = MockServer::start().await;
+    // This method uses fetch_securities_page which calls self.http directly.
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECUCODE": "TSLA.OQ",
+        "REPORT_DATE": "2024-01-01",
+        "BASIC_EPS": 3.5
+    })]);
+    mock_any_get(&server, ".*", body.clone()).await;
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let _ = client
+        .stock_financial_us_analysis_indicator("TSLA", "年报")
+        .await;
+}
+
+// -- 14. stock_balance_sheet_by_report_em_typed (emweb API) -------------------
+
+#[tokio::test]
+async fn test_stock_balance_sheet_by_report_em_typed_mock() {
+    let server = MockServer::start().await;
+    // emweb_financial_fetch makes 3 requests:
+    // 1. Index page (HTML) to determine company type
+    // 2. DateAjaxNew (JSON) to get report dates
+    // 3. AjaxNew (JSON) to get actual data
+    let index_html = r#"<html><body><input id="hidctype" value="4"/></body></html>"#;
+    let dates_json = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01 00:00:00"}]});
+    let data_json = serde_json::json!({"data": [
+        {"SECURITY_CODE": "000001", "SECURITY_NAME_ABBR": "Test", "TOTAL_ASSETS": 1000000.0}
+    ]});
+    // Index HTML page
+    mock_any_get_text(
+        &server,
+        "PC_HSF10/NewFinanceAnalysis/Index",
+        index_html,
+    )
+    .await;
+    // Date list
+    Mock::given(method("GET"))
+        .and(path_regex(".*DateAjaxNew.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(dates_json))
+        .mount(&server)
+        .await;
+    // Actual financial data
+    Mock::given(method("GET"))
+        .and(path_regex(".*zcfzAjaxNew.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(data_json))
+        .mount(&server)
+        .await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_balance_sheet_by_report_em_typed("000001")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 15. stock_cash_flow_sheet_by_report_em_typed (emweb API) -----------------
+
+#[tokio::test]
+async fn test_stock_cash_flow_sheet_by_report_em_typed_mock() {
+    let server = MockServer::start().await;
+    let index_html = r#"<html><body><input id="hidctype" value="4"/></body></html>"#;
+    let dates_json = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01 00:00:00"}]});
+    let data_json = serde_json::json!({"data": [
+        {"SECURITY_CODE": "000001", "SECURITY_NAME_ABBR": "Test", "SALES_SERVICES": 500000.0}
+    ]});
+    mock_any_get_text(
+        &server,
+        "PC_HSF10/NewFinanceAnalysis/Index",
+        index_html,
+    )
+    .await;
+    Mock::given(method("GET"))
+        .and(path_regex(".*DateAjaxNew.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(dates_json))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path_regex(".*xjllAjaxNew.*"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(data_json))
+        .mount(&server)
+        .await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_cash_flow_sheet_by_report_em_typed("000001")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 16. stock_profit_sheet_by_report_delisted (emweb direct GET) ------------
+
+#[tokio::test]
+async fn test_stock_profit_sheet_by_report_delisted_mock() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({"data": [{"TOTAL_OPERATE_INCOME": 500000.0, "NETPROFIT": 50000.0}]});
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_profit_sheet_by_report_delisted("SZ000001")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 17. stock_balance_sheet_by_report_delisted (emweb direct GET) -----------
+
+#[tokio::test]
+async fn test_stock_balance_sheet_by_report_delisted_mock() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_balance_sheet_by_report_delisted("SZ000001")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 18. stock_cash_flow_sheet_by_report_delisted (emweb direct GET) ---------
+
+#[tokio::test]
+async fn test_stock_cash_flow_sheet_by_report_delisted_mock() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({"data": [{"NETCASH_OPERATE": 100000.0, "CCE_ADD": 50000.0}]});
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_cash_flow_sheet_by_report_delisted("SZ000001")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 19. stock_zh_index_daily_em (kline API) ---------------------------------
+
+#[tokio::test]
+async fn test_stock_zh_index_daily_em_mock() {
+    let server = MockServer::start().await;
+    let kline = sample_kline_str("2024-01-02");
+    let body = em_kline_response(&[&kline]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_index_daily_em("000001", "20240101", "20240102")
+        .await;
+    assert!(result.is_ok());
+}
+
+// -- 20. stock_zh_index_daily_tx (Tencent API) -------------------------------
+
+#[tokio::test]
+async fn test_stock_zh_index_daily_tx_mock() {
+    let server = MockServer::start().await;
+    // Tencent API returns {"data": {"sh000001": {"day": [[date, open, close, high, low, vol], ...]}}}
+    let body = serde_json::json!({
+        "data": {
+            "sh000001": {
+                "day": [
+                    ["2024-01-02", 3000.0, 3050.0, 3060.0, 2990.0, 100000000.0],
+                    ["2024-01-03", 3050.0, 3080.0, 3090.0, 3040.0, 120000000.0]
+                ]
+            }
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_index_daily_tx("sh000001", "20240101", "20240103")
+        .await;
+    assert!(result.is_ok());
+}

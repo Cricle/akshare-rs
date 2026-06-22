@@ -2123,3 +2123,776 @@ async fn test_amac_person_bond_org_list() {
     let result = client.amac_person_bond_org_list().await;
     let _ = result;
 }
+
+// ============================================================================
+// INDEX: zh_em.rs — index_zh_a_hist_min_em
+// ============================================================================
+
+#[tokio::test]
+async fn test_index_zh_a_hist_min_em_misc() {
+    let server = MockServer::start().await;
+    let k1 = sample_kline_str("2024-01-02");
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
+    let client = mock_client(&server);
+    let result = client
+        .index_zh_a_hist_min_em("000300", "5", "20240101", "20240131", "qfq")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// INDEX: cni.rs — index_hist_cni
+// ============================================================================
+
+#[tokio::test]
+async fn test_index_hist_cni_misc() {
+    let server = MockServer::start().await;
+    let row = vec![
+        serde_json::json!("2024-01-02"),
+        serde_json::json!(null),
+        serde_json::json!(10100.0),
+        serde_json::json!(10000.0),
+        serde_json::json!(9950.0),
+        serde_json::json!(10050.0),
+        serde_json::json!(null),
+        serde_json::json!("0.50%"),
+        serde_json::json!(50_000_000.0),
+        serde_json::json!(300_000_000.0),
+        serde_json::json!(null),
+    ];
+    let body = serde_json::json!({"data": {"data": [row]}});
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .index_hist_cni("399001", "20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// INDEX: cni.rs — index_detail_hist_cni
+// ============================================================================
+
+#[tokio::test]
+async fn test_index_detail_hist_cni_misc() {
+    let server = MockServer::start().await;
+    let row = vec![
+        serde_json::json!("2024-01-02"),
+        serde_json::json!(null),
+        serde_json::json!(10100.0),
+        serde_json::json!(10000.0),
+        serde_json::json!(9950.0),
+        serde_json::json!(10050.0),
+        serde_json::json!(null),
+        serde_json::json!("0.50%"),
+        serde_json::json!(50_000_000.0),
+        serde_json::json!(300_000_000.0),
+        serde_json::json!(null),
+    ];
+    let body = serde_json::json!({"data": {"data": [row]}});
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .index_detail_hist_cni("399001", "20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// INDEX: sw_research.rs — index_analysis_daily_sw
+// ============================================================================
+
+#[tokio::test]
+async fn test_index_analysis_daily_sw_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "results": [{
+                "swindexcode": "801010",
+                "swindexname": "农林牧渔",
+                "bargaindate": "2024-01-02",
+                "closeindex": 3000.0,
+                "bargainamount": 100_000_000.0,
+                "markup": 1.5,
+                "turnoverrate": 2.0,
+                "pe": 15.0,
+                "pb": 1.5,
+                "meanprice": 10.0,
+                "bargainsumrate": 1.2,
+                "negotiablessharesum1": 50_000_000_000.0,
+                "negotiablessharesum2": 25_000_000_000.0,
+                "dp": 2.5
+            }]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .index_analysis_daily_sw("801010", "2024-01-01", "2024-01-31")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// INDEX: sw_research.rs — index_analysis_weekly_sw
+// ============================================================================
+
+#[tokio::test]
+async fn test_index_analysis_weekly_sw_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "results": [{
+                "swindexcode": "801010",
+                "swindexname": "农林牧渔",
+                "bargaindate": "2024-01-02",
+                "closeindex": 3000.0,
+                "bargainamount": 100_000_000.0,
+                "markup": 1.5,
+                "turnoverrate": 2.0,
+                "pe": 15.0,
+                "pb": 1.5,
+                "meanprice": 10.0,
+                "bargainsumrate": 1.2,
+                "negotiablessharesum1": 50_000_000_000.0,
+                "negotiablessharesum2": 25_000_000_000.0,
+                "dp": 2.5
+            }]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .index_analysis_weekly_sw("801010", "2024-01-01")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// INDEX: sw_research.rs — index_analysis_monthly_sw
+// ============================================================================
+
+#[tokio::test]
+async fn test_index_analysis_monthly_sw_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "results": [{
+                "swindexcode": "801010",
+                "swindexname": "农林牧渔",
+                "bargaindate": "2024-01-02",
+                "closeindex": 3000.0,
+                "bargainamount": 100_000_000.0,
+                "markup": 1.5,
+                "turnoverrate": 2.0,
+                "pe": 15.0,
+                "pb": 1.5,
+                "meanprice": 10.0,
+                "bargainsumrate": 1.2,
+                "negotiablessharesum1": 50_000_000_000.0,
+                "negotiablessharesum2": 25_000_000_000.0,
+                "dp": 2.5
+            }]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .index_analysis_monthly_sw("801010", "2024-01-01")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// INDEX: csindex.rs — stock_zh_index_hist_csindex
+// ============================================================================
+
+#[tokio::test]
+async fn test_stock_zh_index_hist_csindex_misc() {
+    let server = MockServer::start().await;
+    let mut row = vec![serde_json::json!(null); 16];
+    row[0] = serde_json::json!("2024-01-02");
+    row[6] = serde_json::json!(3350.0);
+    row[7] = serde_json::json!(3370.0);
+    row[8] = serde_json::json!(3340.0);
+    row[9] = serde_json::json!(3360.0);
+    row[10] = serde_json::json!(10.0);
+    row[11] = serde_json::json!(0.3);
+    row[12] = serde_json::json!(100_000_000.0);
+    row[13] = serde_json::json!(50_000_000_000.0);
+    row[14] = serde_json::json!(300.0);
+    row[15] = serde_json::json!(12.5);
+    let body = serde_json::json!({"data": [row]});
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_index_hist_csindex("000300", "20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUND: etf_em.rs — fund_etf_hist_em
+// ============================================================================
+
+#[tokio::test]
+async fn test_fund_etf_hist_em_misc() {
+    let server = MockServer::start().await;
+    let k1 = sample_kline_str("2024-01-02");
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
+    let client = mock_client(&server);
+    let result = client
+        .fund_etf_hist_em("159707", "daily", "20240101", "20240131", "qfq")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUND: etf_em.rs — fund_etf_hist_min
+// ============================================================================
+
+#[tokio::test]
+async fn test_fund_etf_hist_min_misc() {
+    let server = MockServer::start().await;
+    let body = em_kline_response(&[
+        "2024-01-02 09:35,10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
+    ]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .fund_etf_hist_min(
+            "159707",
+            "5",
+            "2024-01-02 09:30:00",
+            "2024-01-02 15:00:00",
+            "qfq",
+        )
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUND: etf_em.rs — fund_etf_fund_info
+// ============================================================================
+
+#[tokio::test]
+async fn test_fund_etf_fund_info_misc() {
+    let server = MockServer::start().await;
+    let nav_item: Vec<serde_json::Value> = vec![
+        serde_json::json!("2024-01-02"),
+        serde_json::json!("1.0000"),
+        serde_json::json!("2.0000"),
+        serde_json::json!("0"),
+        serde_json::json!("0"),
+        serde_json::json!("0"),
+        serde_json::json!("0.50"),
+        serde_json::json!("开放申购"),
+        serde_json::json!("开放赎回"),
+        serde_json::json!(""),
+    ];
+    let body = serde_json::json!({
+        "Data": {
+            "LSJZList": [nav_item]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .fund_etf_fund_info("511280", "20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUND: lof.rs — fund_lof_hist_em
+// ============================================================================
+
+#[tokio::test]
+async fn test_fund_lof_hist_em_misc() {
+    let server = MockServer::start().await;
+    let k1 = sample_kline_str("2024-01-02");
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
+    let client = mock_client(&server);
+    let result = client
+        .fund_lof_hist_em("160105", "daily", "20240101", "20240131", "qfq")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUND: lof.rs — fund_lof_hist_min
+// ============================================================================
+
+#[tokio::test]
+async fn test_fund_lof_hist_min_misc() {
+    let server = MockServer::start().await;
+    let body = em_kline_response(&[
+        "2024-01-02 09:35,10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
+    ]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .fund_lof_hist_min(
+            "160105",
+            "5",
+            "2024-01-02 09:30:00",
+            "2024-01-02 15:00:00",
+            "qfq",
+        )
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUND: open.rs — fund_open_fund_info
+// ============================================================================
+
+#[tokio::test]
+async fn test_fund_open_fund_info_misc() {
+    let server = MockServer::start().await;
+    let nav_item: Vec<serde_json::Value> = vec![
+        serde_json::json!("2024-01-02"),
+        serde_json::json!("1.0000"),
+        serde_json::json!("2.0000"),
+        serde_json::json!("0"),
+        serde_json::json!("0"),
+        serde_json::json!("0"),
+        serde_json::json!("0.50"),
+        serde_json::json!("开放申购"),
+        serde_json::json!("开放赎回"),
+        serde_json::json!(""),
+    ];
+    let body = serde_json::json!({
+        "Data": {
+            "LSJZList": [nav_item]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .fund_open_fund_info("710001", "", "", "单位净值走势")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUND: xueqiu.rs — fund_individual_detail_hold_xq
+// ============================================================================
+
+#[tokio::test]
+async fn test_fund_individual_detail_hold_xq_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "chart_list": [
+                {"type_desc": "股票", "percent": 80.5},
+                {"type_desc": "债券", "percent": 15.0},
+                {"type_desc": "现金", "percent": 4.5}
+            ]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .fund_individual_detail_hold_xq("000001", "20240101")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUTURES: hist_em.rs — futures_hist
+// ============================================================================
+
+#[tokio::test]
+async fn test_futures_hist_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "code": "rb2405",
+            "klines": [
+                "2024-01-02,3800,3850,3900,3750,200000,760000000,100,1.32,50,0.5"
+            ]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .futures_hist("rb2405", "daily", "2024-01-01", "2024-01-31")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUTURES: derivative.rs — futures_main_sina_derivative
+// ============================================================================
+
+#[tokio::test]
+async fn test_futures_main_sina_derivative_misc() {
+    let server = MockServer::start().await;
+    let body = r#"var _rb02021_08_17=[[3800,3850,3900,3750,200000,"2024-01-02"]];"#;
+    mock_any_get_text(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .futures_main_sina_derivative("rb0", "20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUTURES: cot.rs — futures_dce_position_rank_other
+// ============================================================================
+
+#[tokio::test]
+async fn test_futures_dce_position_rank_other_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": [
+            {
+                "contractId": "a2405",
+                "abbr1": "TraderA",
+                "qty1": "5000",
+                "qty1_chg": "100",
+                "abbr2": "TraderB",
+                "qty2": "4800",
+                "qty2_chg": "-50",
+                "abbr3": "TraderC",
+                "qty3": "4600",
+                "qty3_chg": "80"
+            }
+        ]
+    });
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .futures_dce_position_rank_other("20240315", "a")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUTURES: cot.rs — futures_hold_pos
+// ============================================================================
+
+#[tokio::test]
+async fn test_futures_hold_pos_misc() {
+    let server = MockServer::start().await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><table><tr><td>test data</td></tr></table></html>",
+    )
+    .await;
+    let client = mock_client(&server);
+    let result = client
+        .futures_hold_pos("成交量", "rb2405", "20240315")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUTURES: basis.rs — futures_spot_price_daily
+// ============================================================================
+
+#[tokio::test]
+async fn test_futures_spot_price_daily_misc() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", serde_json::json!({})).await;
+    let client = mock_client(&server);
+    let result = client
+        .futures_spot_price_daily("20240301", "20240315")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// FUTURES: exchange.rs — get_roll_yield_bar
+// ============================================================================
+
+#[tokio::test]
+async fn test_get_roll_yield_bar_misc() {
+    let server = MockServer::start().await;
+    let shfe_body = serde_json::json!({"o_curinstrument": []});
+    mock_any_get(&server, ".*", shfe_body).await;
+    let dce_body = serde_json::json!({"data": []});
+    mock_any_post(&server, ".*", dce_body).await;
+    let client = mock_client(&server);
+    let result = client
+        .get_roll_yield_bar("20240315", None, None, None)
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// OPTION: commodity_sina.rs — option_commodity_contract_table
+// ============================================================================
+
+#[tokio::test]
+async fn test_option_commodity_contract_table_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "result": {
+            "data": {
+                "up": [[100, 0.05, 0.06, 0.07, 50, 5000, 1.5, 3000.0, "m2405C3000"]],
+                "down": [[80, 0.03, 0.04, 0.05, 40, 4000, -0.5, 3000.0, "m2405P3000"]]
+            }
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .option_commodity_contract_table("\u{8c46}\u{7c95}\u{9009}\u{6743}", "m2405")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// OPTION: lhb_em.rs — option_lhb
+// ============================================================================
+
+#[tokio::test]
+async fn test_option_lhb_misc() {
+    let server = MockServer::start().await;
+    let mut data = Vec::new();
+    for _ in 0..28 {
+        data.push(serde_json::json!([
+            "期权交易", "2024-01-02", "510050", "50ETF",
+            null, "某券商", 1, 1000.0, 500.0, 200.0, 100.0,
+            50.0, 300.0, 150.0, 100.0, 50.0, 25.0, 800.0,
+            400.0, 200.0, 100.0, 50.0, 25.0, 12.5, 600.0,
+            300.0, 150.0, 75.0
+        ]));
+    }
+    let body = serde_json::json!({ "result": { "data": data } });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .option_lhb("510050", "\u{9009}\u{6743}\u{4ea4}\u{6613}\u{60c5}\u{51b5}-\u{8ba4}\u{6cbd}\u{4ea4}\u{6613}\u{91cf}", "20240102")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// OPTION: sse_sina.rs — option_sse_codes
+// ============================================================================
+
+#[tokio::test]
+async fn test_option_sse_codes_misc() {
+    let server = MockServer::start().await;
+    let body = "var hq_str_OP_UP_51005003=\"CON_OP_10003720,CON_OP_10003721\"";
+    mock_any_get_text(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .option_sse_codes("看涨期权", "202401", "510050")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// BOND: china_money.rs — bond_china_close_return
+// ============================================================================
+
+#[tokio::test]
+async fn test_bond_china_close_return_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "records": [
+            { "newDateValue": "2024-01-02", "yield": 2.80 }
+        ]
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .bond_china_close_return("国债", "1", "20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// BOND: issue_cninfo.rs — bond_local_government_issue
+// ============================================================================
+
+#[tokio::test]
+async fn test_bond_local_government_issue_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "records": [
+            { "SECURITY_CODE": "123456", "SECURITY_NAME_ABBR": "TestLocalBond" }
+        ]
+    });
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .bond_local_government_issue("20240101", "20240131")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// MACRO: china.rs — macro_china_nbs_nation
+// ============================================================================
+
+#[tokio::test]
+async fn test_macro_china_nbs_nation_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "returndata": {
+            "datanodes": [{
+                "wds": [
+                    {"wdcode": "zb", "valuecode": "A010101"},
+                    {"wdcode": "reg", "valuecode": ""},
+                    {"wdcode": "sj", "valuecode": "202401"}
+                ],
+                "data": {"data": 123.45}
+            }]
+        }
+    });
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .macro_china_nbs_nation("月度数据", "A010101", "202401")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// MACRO: china.rs — macro_china_nbs_region
+// ============================================================================
+
+#[tokio::test]
+async fn test_macro_china_nbs_region_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "returndata": {
+            "datanodes": [{
+                "wds": [
+                    {"wdcode": "zb", "valuecode": "A010101"},
+                    {"wdcode": "reg", "valuecode": "110000"},
+                    {"wdcode": "sj", "valuecode": "202401"}
+                ],
+                "data": {"data": 123.45}
+            }]
+        }
+    });
+    mock_any_post(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .macro_china_nbs_region("分省月度数据", "A010101", "110000", "202401")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// MACRO: interest_rate.rs — rate_interbank
+// ============================================================================
+
+#[tokio::test]
+async fn test_rate_interbank_misc() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[
+        serde_json::json!({
+            "REPORT_DATE": "2024-01-02",
+            "INDICATOR_VALUE": 1.50,
+            "INDICATOR_NAME": "Shibor隔夜"
+        }),
+    ]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .rate_interbank("上海银行同业拆借市场", "Shibor人民币", "隔夜")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// NEWS: finnhub.rs — finnhub_company_news
+// ============================================================================
+
+#[tokio::test]
+async fn test_finnhub_company_news_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!([
+        {
+            "category": "company",
+            "datetime": 1_704_153_600,
+            "headline": "Test News",
+            "id": "12345",
+            "image": "https://example.com/img.jpg",
+            "related": "AAPL",
+            "source": "TestSource",
+            "summary": "Test summary.",
+            "url": "https://example.com/news"
+        }
+    ]);
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .finnhub_company_news("AAPL", "2024-01-01", "2024-01-31", "test_key")
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// NEWS: gdelt.rs — gdelt_news_search
+// ============================================================================
+
+#[tokio::test]
+async fn test_gdelt_news_search_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "articles": [
+            {
+                "url": "https://example.com/news",
+                "title": "Test Article",
+                "seendate": "2024-01-02T00:00:00Z",
+                "domain": "example.com",
+                "language": "English",
+                "sourcecountry": "US"
+            }
+        ]
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .gdelt_news_search(
+            "rust",
+            "https://api.gdeltproject.org/api/v2/doc/doc",
+            Some("English"),
+            None,
+            10,
+        )
+        .await;
+    assert!(result.is_ok());
+}
+
+// ============================================================================
+// NEWS: gdelt.rs — gdelt_news_search_owned
+// ============================================================================
+
+#[tokio::test]
+async fn test_gdelt_news_search_owned_misc() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "articles": [
+            {
+                "url": "https://example.com/news",
+                "title": "Test Article",
+                "seendate": "2024-01-02T00:00:00Z",
+                "domain": "example.com",
+                "language": "English",
+                "sourcecountry": "US"
+            }
+        ]
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client
+        .gdelt_news_search_owned(
+            "rust",
+            "https://api.gdeltproject.org/api/v2/doc/doc",
+            Some("English".to_string()),
+            None,
+            10,
+        )
+        .await;
+    assert!(result.is_ok());
+}
