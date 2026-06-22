@@ -57,7 +57,7 @@ async fn test_forex_spot_em() {
     })];
     mock_any_get(&server, ".*", em_push2_response(rows)).await;
     let client = mock_client(&server);
-    let result = client.forex_spot_em().await;
+    let result = client.forex_spot().await;
     let _ = result;
 }
 
@@ -68,7 +68,7 @@ async fn test_forex_hist_em() {
     mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
     let client = mock_client(&server);
     let result = client
-        .forex_hist_em("USDCNY", "day", "2024-01-01", "2024-01-31", "qfq")
+        .forex_hist("USDCNY", "day", "2024-01-01", "2024-01-31", "qfq")
         .await;
     let _ = result;
 }
@@ -191,7 +191,7 @@ async fn test_currency_boc_sina() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .currency_boc_sina("美元", "20240101", "20240131")
+        .currency_boc("美元", "20240101", "20240131")
         .await;
     let _ = result;
 }
@@ -282,7 +282,7 @@ async fn test_fx_quote_baidu() {
     let body = serde_json::json!({"data": {"result": [{"name": "USD/CNY", "price": "7.10"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fx_quote_baidu("美元兑人民币").await;
+    let result = client.fx_quote("美元兑人民币").await;
     let _ = result;
 }
 
@@ -499,7 +499,7 @@ async fn test_reits_realtime_em() {
     })];
     mock_any_get(&server, ".*", em_push2_response(rows)).await;
     let client = mock_client(&server);
-    let result = client.reits_realtime_em().await;
+    let result = client.reits_realtime().await;
     let _ = result;
 }
 
@@ -521,7 +521,7 @@ async fn test_reits_hist_min_em() {
     let k1 = sample_kline_str("2024-01-02");
     mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
     let client = mock_client(&server);
-    let result = client.reits_hist_min_em("508000", "5").await;
+    let result = client.reits_hist_min("508000", "5").await;
     let _ = result;
 }
 
@@ -867,7 +867,7 @@ async fn test_migration_area_baidu() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .migration_area_baidu("北京市", "move_in", "20240102")
+        .migration_area("北京市", "move_in", "20240102")
         .await;
     let _ = result;
 }
@@ -878,7 +878,7 @@ async fn test_migration_scale_baidu() {
     let body = serde_json::json!({"data": [{"date": "2024-01-02", "value": 100}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.migration_scale_baidu("北京市", "20240102").await;
+    let result = client.migration_scale("北京市", "20240102").await;
     let _ = result;
 }
 
@@ -931,7 +931,7 @@ async fn test_news_economic_baidu() {
         serde_json::json!({"data": {"list": [{"title": "Test", "url": "http://example.com"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.news_economic_baidu("财经").await;
+    let result = client.news_economic("财经").await;
     let _ = result;
 }
 
@@ -942,7 +942,7 @@ async fn test_news_report_time_baidu() {
         serde_json::json!({"data": {"list": [{"title": "Test", "url": "http://example.com"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.news_report_time_baidu("600000").await;
+    let result = client.news_report_time("600000").await;
     let _ = result;
 }
 
@@ -953,7 +953,7 @@ async fn test_news_trade_notify_dividend_baidu() {
         serde_json::json!({"data": {"list": [{"title": "Test", "url": "http://example.com"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.news_trade_notify_dividend_baidu("20240102").await;
+    let result = client.news_trade_notify_dividend("20240102").await;
     let _ = result;
 }
 
@@ -964,7 +964,7 @@ async fn test_news_trade_notify_suspend_baidu() {
         serde_json::json!({"data": {"list": [{"title": "Test", "url": "http://example.com"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.news_trade_notify_suspend_baidu("20240102").await;
+    let result = client.news_trade_notify_suspend("20240102").await;
     let _ = result;
 }
 
@@ -1219,7 +1219,7 @@ async fn test_tool_trade_date_hist_sina() {
     )
     .await;
     let client = mock_client(&server);
-    let result = client.tool_trade_date_hist_sina().await;
+    let result = client.tool_trade_date_hist().await;
     let _ = result;
 }
 
@@ -1306,7 +1306,7 @@ async fn test_rv_from_futures_zh_minute_sina() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "").await;
     let client = mock_client(&server);
-    let result = client.rv_from_futures_zh_minute_sina("RB0").await;
+    let result = client.rv_from_futures_zh_minute("RB0").await;
     let _ = result;
 }
 
@@ -1316,7 +1316,7 @@ async fn test_rv_from_stock_zh_a_hist_min_em() {
     let k1 = sample_kline_str("2024-01-02");
     mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
     let client = mock_client(&server);
-    let result = client.rv_from_stock_zh_a_hist_min_em("600000").await;
+    let result = client.rv_from_stock_zh_a_hist_min("600000").await;
     let _ = result;
 }
 

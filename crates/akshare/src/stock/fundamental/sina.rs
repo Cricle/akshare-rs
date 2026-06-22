@@ -180,7 +180,7 @@ impl AkShareClient {
     ///
     /// `stock` is the Sina-format code, e.g. "sh600600".
     /// `symbol` is one of "资产负债表", "利润表", "现金流量表".
-    pub async fn stock_financial_report_sina(
+    pub async fn stock_financial_report(
         &self,
         stock: &str,
         symbol: &str,

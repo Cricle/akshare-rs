@@ -148,10 +148,10 @@ impl AkShareClient {
         Ok(snapshots)
     }
 
-    /// Fetch open-fund daily data (Python: fund_open_fund_daily_em).
+    /// Fetch open-fund daily data (Python: fund_open_fund_daily).
     ///
     /// Returns all open-end fund NAV data for the current trading day.
-    pub async fn fund_open_fund_daily_em(&self) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_open_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
             .query(&[
@@ -224,7 +224,7 @@ impl AkShareClient {
     /// `symbol`: fund code (e.g. "710001").
     /// `indicator`: "单位净值走势", "累计净值走势", etc.
     /// `period`: "1月", "3月", "6月", "1年", "3年", "5年", "今年来", "成立来".
-    pub async fn fund_open_fund_info_em(
+    pub async fn fund_open_fund_info(
         &self,
         symbol: &str,
         _start_date: &str,

@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 股东户数
-    pub async fn stock_gdhs_em(&self, date: &str) -> Result<Vec<Gdhs>> {
+    pub async fn stock_gdhs(&self, date: &str) -> Result<Vec<Gdhs>> {
         let date_fmt = fmt_date(date);
         let filter = format!("(END_DATE='{date_fmt}')");
         let data = self
@@ -46,7 +46,7 @@ impl AkShareClient {
     }
 
     /// 股东户数详情
-    pub async fn stock_gdhs_detail_em(&self, symbol: &str) -> Result<Vec<GdhsDetail>> {
+    pub async fn stock_gdhs_detail(&self, symbol: &str) -> Result<Vec<GdhsDetail>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
@@ -120,8 +120,8 @@ impl AkShareClient {
             .collect())
     }
 
-    /// 东方财富-股东户数详情 (Python: stock_zh_a_gdhs_detail_em)
-    pub async fn stock_zh_a_gdhs_detail_em(&self, symbol: &str) -> Result<Vec<GdhsDetail>> {
+    /// 东方财富-股东户数详情 (Python: stock_zh_a_gdhs_detail)
+    pub async fn stock_zh_a_gdhs_detail(&self, symbol: &str) -> Result<Vec<GdhsDetail>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(

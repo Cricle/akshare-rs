@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 资产负债表(数据中心)
-    pub async fn stock_zcfz_em(&self, date: &str) -> Result<Vec<BalanceSheet>> {
+    pub async fn stock_zcfz(&self, date: &str) -> Result<Vec<BalanceSheet>> {
         let date_fmt = fmt_date(date);
         let filter = format!(
             "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{date_fmt}')"
@@ -48,7 +48,7 @@ impl AkShareClient {
     }
 
     /// 利润表(数据中心)
-    pub async fn stock_lrb_em(&self, date: &str) -> Result<Vec<ProfitSheet>> {
+    pub async fn stock_lrb(&self, date: &str) -> Result<Vec<ProfitSheet>> {
         let date_fmt = fmt_date(date);
         let filter = format!(
             "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{date_fmt}')"
@@ -90,7 +90,7 @@ impl AkShareClient {
     }
 
     /// 现金流量表(数据中心)
-    pub async fn stock_xjll_em(&self, date: &str) -> Result<Vec<CashFlowSheet>> {
+    pub async fn stock_xjll(&self, date: &str) -> Result<Vec<CashFlowSheet>> {
         let date_fmt = fmt_date(date);
         let filter = format!(
             "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{date_fmt}')"

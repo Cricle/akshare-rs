@@ -123,7 +123,7 @@ impl AkShareClient {
     ///
     /// `symbol`: REIT code, e.g. "508000"
     /// `period`: "1", "5", "15", "30", "60"
-    pub async fn reits_hist_min_em(&self, symbol: &str, period: &str) -> Result<Vec<CandlePoint>> {
+    pub async fn reits_hist_min(&self, symbol: &str, period: &str) -> Result<Vec<CandlePoint>> {
         let secid = reits_eastmoney_secid(symbol)?;
         let klines = self.kline_fetch(&secid, period, "1", 500, &[]).await?;
 
@@ -143,7 +143,7 @@ impl AkShareClient {
     /// REITs real-time data from Eastmoney.
     ///
     /// Returns real-time pricing for all listed REITs.
-    pub async fn reits_realtime_em(&self) -> Result<Vec<ReitSnapshot>> {
+    pub async fn reits_realtime(&self) -> Result<Vec<ReitSnapshot>> {
         self.reits_list(200).await
     }
 

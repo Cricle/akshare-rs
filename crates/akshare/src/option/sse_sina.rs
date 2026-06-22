@@ -141,7 +141,7 @@ impl AkShareClient {
     /// SSE option expiry month list from Sina.
     ///
     /// `symbol` is "50ETF" or "300ETF".
-    pub async fn option_sse_list_sina(&self, symbol: &str, exchange: &str) -> Result<Vec<String>> {
+    pub async fn option_sse_list(&self, symbol: &str, exchange: &str) -> Result<Vec<String>> {
         let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/StockOptionService.getStockName";
         let resp: SinaStockNameResponse = self
             .get(url)
@@ -170,7 +170,7 @@ impl AkShareClient {
     /// SSE option expiry day and remaining days from Sina.
     ///
     /// Returns `(expiry_date_string, remaining_days)`.
-    pub async fn option_sse_expire_day_sina(
+    pub async fn option_sse_expire_day(
         &self,
         trade_date: &str,
         symbol: &str,
@@ -235,7 +235,7 @@ impl AkShareClient {
     /// `symbol` is "看涨期权" (call) or "看跌期权" (put).
     /// `trade_date` is the expiry month, e.g. "202202".
     /// `underlying` is the underlying code, e.g. "510050" or "510300".
-    pub async fn option_sse_codes_sina(
+    pub async fn option_sse_codes(
         &self,
         symbol: &str,
         trade_date: &str,
@@ -291,7 +291,7 @@ impl AkShareClient {
     /// SSE option spot price from Sina.
     ///
     /// Returns field-value pairs with the option's real-time data.
-    pub async fn option_sse_spot_price_sina(
+    pub async fn option_sse_spot_price(
         &self,
         symbol: &str,
     ) -> Result<Vec<OptionFieldValuePair>> {
@@ -379,7 +379,7 @@ impl AkShareClient {
     /// SSE option underlying spot price from Sina.
     ///
     /// `symbol` is e.g. "sh510050" or "sh510300".
-    pub async fn option_sse_underlying_spot_price_sina(
+    pub async fn option_sse_underlying_spot_price(
         &self,
         symbol: &str,
     ) -> Result<Vec<OptionFieldValuePair>> {
@@ -457,7 +457,7 @@ impl AkShareClient {
     /// SSE option greeks from Sina.
     ///
     /// Returns field-value pairs with Delta, Gamma, Theta, Vega, implied volatility, etc.
-    pub async fn option_sse_greeks_sina(&self, symbol: &str) -> Result<Vec<OptionFieldValuePair>> {
+    pub async fn option_sse_greeks(&self, symbol: &str) -> Result<Vec<OptionFieldValuePair>> {
         let url = format!("https://hq.sinajs.cn/list=CON_SO_{symbol}");
         let body = self
             .get(&url)
@@ -517,7 +517,7 @@ impl AkShareClient {
     }
 
     /// SSE option minute data (current trading day) from Sina.
-    pub async fn option_sse_minute_sina(&self, symbol: &str) -> Result<Vec<OptionSseMinuteRow>> {
+    pub async fn option_sse_minute(&self, symbol: &str) -> Result<Vec<OptionSseMinuteRow>> {
         let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/StockOptionDaylineService.getOptionMinline";
         let con_symbol = format!("CON_OP_{symbol}");
 
@@ -580,7 +580,7 @@ impl AkShareClient {
     }
 
     /// SSE option daily kline data from Sina.
-    pub async fn option_sse_daily_sina(&self, symbol: &str) -> Result<Vec<OptionSseDailyRow>> {
+    pub async fn option_sse_daily(&self, symbol: &str) -> Result<Vec<OptionSseDailyRow>> {
         let url = "https://stock.finance.sina.com.cn/futures/api/jsonp_v2.php//StockOptionDaylineService.getSymbolInfo";
         let con_symbol = format!("CON_OP_{symbol}");
 
@@ -631,7 +631,7 @@ impl AkShareClient {
     }
 
     /// Option finance 5-day minute data from Sina.
-    pub async fn option_finance_minute_sina(
+    pub async fn option_finance_minute(
         &self,
         symbol: &str,
     ) -> Result<Vec<OptionFinanceMinuteRow>> {

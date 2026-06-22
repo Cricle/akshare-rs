@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 全部增发
-    pub async fn stock_qbzf_em(&self) -> Result<Vec<Qbzf>> {
+    pub async fn stock_qbzf(&self) -> Result<Vec<Qbzf>> {
         let data = self
             .dc_fetch_all(
                 "RPT_SEO_DETAIL",
@@ -39,7 +39,7 @@ impl AkShareClient {
     }
 
     /// 配股
-    pub async fn stock_pg_em(&self) -> Result<Vec<Pg>> {
+    pub async fn stock_pg(&self) -> Result<Vec<Pg>> {
         let data = self
             .dc_fetch_all(
                 "RPT_RIGHTS_ISSUE",

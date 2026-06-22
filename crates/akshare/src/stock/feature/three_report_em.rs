@@ -50,7 +50,7 @@ impl AkShareClient {
     }
 
     /// 资产负债表-按报告期
-    pub async fn stock_balance_sheet_by_report_em(
+    pub async fn stock_balance_sheet_by_report(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {
@@ -59,7 +59,7 @@ impl AkShareClient {
     }
 
     /// 资产负债表-按年度
-    pub async fn stock_balance_sheet_by_yearly_em(
+    pub async fn stock_balance_sheet_by_yearly(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {
@@ -68,7 +68,7 @@ impl AkShareClient {
     }
 
     /// 利润表-按报告期
-    pub async fn stock_profit_sheet_by_report_em(
+    pub async fn stock_profit_sheet_by_report(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {
@@ -77,7 +77,7 @@ impl AkShareClient {
     }
 
     /// 利润表-按年度
-    pub async fn stock_profit_sheet_by_yearly_em(
+    pub async fn stock_profit_sheet_by_yearly(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {
@@ -86,7 +86,7 @@ impl AkShareClient {
     }
 
     /// 利润表-按单季度
-    pub async fn stock_profit_sheet_by_quarterly_em(
+    pub async fn stock_profit_sheet_by_quarterly(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {
@@ -95,7 +95,7 @@ impl AkShareClient {
     }
 
     /// 现金流量表-按报告期
-    pub async fn stock_cash_flow_sheet_by_report_em(
+    pub async fn stock_cash_flow_sheet_by_report(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {
@@ -104,7 +104,7 @@ impl AkShareClient {
     }
 
     /// 现金流量表-按年度
-    pub async fn stock_cash_flow_sheet_by_yearly_em(
+    pub async fn stock_cash_flow_sheet_by_yearly(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {
@@ -113,7 +113,7 @@ impl AkShareClient {
     }
 
     /// 现金流量表-按单季度
-    pub async fn stock_cash_flow_sheet_by_quarterly_em(
+    pub async fn stock_cash_flow_sheet_by_quarterly(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThreeReportEntry>> {

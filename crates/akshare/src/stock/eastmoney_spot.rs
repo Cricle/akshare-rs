@@ -2,18 +2,18 @@
 //!
 //! Covers Python functions:
 //! - `stock_zh_a_spot_em` — All A-share spot data
-//! - `stock_zh_a_st_em` — ST / risk-warning stocks
+//! - `stock_zh_a_st` — ST / risk-warning stocks
 //! - `stock_zh_a_new` — New stocks (次新股)
 //! - `stock_staq_net_stop` — STAQ/NET delisted stocks
 //! - `stock_hk_spot_em` — HK stock spot data
 //! - `stock_us_spot_em` — US stock spot data
 //! - `stock_board_concept_name_em` — Concept board names
-//! - `stock_board_concept_cons_em` — Concept board constituents
+//! - `stock_board_concept_cons` — Concept board constituents
 //! - `stock_board_industry_name_em` — Industry board names
-//! - `stock_board_industry_cons_em` — Industry board constituents
+//! - `stock_board_industry_cons` — Industry board constituents
 //! - `stock_zh_ah_spot_em` — AH stock comparison
-//! - `stock_hsgt_sh_hk_spot_em` — HSGT stocks (Shanghai)
-//! - `stock_hsgt_sz_hk_spot_em` — HSGT stocks (Shenzhen)
+//! - `stock_hsgt_sh_hk_spot` — HSGT stocks (Shanghai)
+//! - `stock_hsgt_sz_hk_spot` — HSGT stocks (Shenzhen)
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -171,8 +171,8 @@ impl AkShareClient {
 
     /// Get ST / risk-warning stocks from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_a_st_em()`
-    pub async fn stock_zh_a_st_em(&self, limit: usize) -> Result<Vec<SpotRow>> {
+    /// Python equivalent: `stock_zh_a_st()`
+    pub async fn stock_zh_a_st(&self, limit: usize) -> Result<Vec<SpotRow>> {
         self.fetch_spot_list("m:0 f:4,m:1 f:4", limit).await
     }
 
@@ -216,8 +216,8 @@ impl AkShareClient {
 
     /// Get concept board constituents from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_concept_cons_em(board_code)`
-    pub async fn stock_board_concept_cons_em(
+    /// Python equivalent: `stock_board_concept_cons(board_code)`
+    pub async fn stock_board_concept_cons(
         &self,
         board_code: &str,
         limit: usize,
@@ -235,8 +235,8 @@ impl AkShareClient {
 
     /// Get industry board constituents from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_industry_cons_em(board_code)`
-    pub async fn stock_board_industry_cons_em(
+    /// Python equivalent: `stock_board_industry_cons(board_code)`
+    pub async fn stock_board_industry_cons(
         &self,
         board_code: &str,
         limit: usize,
@@ -294,15 +294,15 @@ impl AkShareClient {
 
     /// Get HSGT stocks (Shanghai -> HK) from Eastmoney.
     ///
-    /// Python equivalent: `stock_hsgt_sh_hk_spot_em()`
-    pub async fn stock_hsgt_sh_hk_spot_em(&self, limit: usize) -> Result<Vec<HsgtStockRow>> {
+    /// Python equivalent: `stock_hsgt_sh_hk_spot()`
+    pub async fn stock_hsgt_sh_hk_spot(&self, limit: usize) -> Result<Vec<HsgtStockRow>> {
         self.fetch_hsgt_stocks("b:DLMK0144", limit).await
     }
 
     /// Get HSGT stocks (Shenzhen -> HK) from Eastmoney.
     ///
-    /// Python equivalent: `stock_hsgt_sz_hk_spot_em()`
-    pub async fn stock_hsgt_sz_hk_spot_em(&self, limit: usize) -> Result<Vec<HsgtStockRow>> {
+    /// Python equivalent: `stock_hsgt_sz_hk_spot()`
+    pub async fn stock_hsgt_sz_hk_spot(&self, limit: usize) -> Result<Vec<HsgtStockRow>> {
         self.fetch_hsgt_stocks("b:DLMK0145", limit).await
     }
 

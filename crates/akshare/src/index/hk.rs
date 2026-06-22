@@ -130,7 +130,7 @@ impl AkShareClient {
     /// `symbol` is the HK index code, e.g. "HSTECH", "HSTECF2L", "HSI".
     /// `internal_id` is the Eastmoney internal market id (e.g. "100", "124").
     /// Use `index_hk_spot_em` to discover the mapping.
-    pub async fn index_hk_daily_em(
+    pub async fn index_hk_daily(
         &self,
         symbol: &str,
         internal_id: &str,

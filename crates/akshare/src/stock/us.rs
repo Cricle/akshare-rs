@@ -39,7 +39,7 @@ impl AkShareClient {
     }
 
     /// Get market cap for a specific US stock from Sina Finance.
-    pub async fn us_market_cap_from_sina(&self, symbol: &str) -> Result<Option<f64>> {
+    pub async fn us_market_cap_from(&self, symbol: &str) -> Result<Option<f64>> {
         let url = "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/callback/US_CategoryService.getList?page=1&num=200&sort=&asc=0&market=&id=";
         let resp = self
             .get(url)

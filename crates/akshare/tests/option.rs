@@ -3,7 +3,7 @@ use common::*;
 use wiremock::MockServer;
 
 // ---------------------------------------------------------------------------
-// em.rs — option_chain, option_current_em, option_current_cffex_em, option_minute_em
+// em.rs — option_chain, option_current, option_current_cffex, option_minute
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
@@ -89,7 +89,7 @@ async fn test_option_current_cffex_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_current_cffex_em().await;
+    let result = client.option_current_cffex().await;
     assert!(result.is_ok());
     let items = result.unwrap();
     assert_eq!(items.len(), 1);
@@ -133,7 +133,7 @@ async fn test_option_premium_analysis_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_premium_analysis_em().await;
+    let result = client.option_premium_analysis().await;
     assert!(result.is_ok());
     let items = result.unwrap();
     assert_eq!(items.len(), 1);
@@ -173,7 +173,7 @@ async fn test_option_value_analysis_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_value_analysis_em().await;
+    let result = client.option_value_analysis().await;
     assert!(result.is_ok());
 }
 
@@ -207,7 +207,7 @@ async fn test_option_risk_analysis_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_risk_analysis_em().await;
+    let result = client.option_risk_analysis().await;
     assert!(result.is_ok());
 }
 
@@ -227,7 +227,7 @@ async fn test_option_sse_list_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_list_sina("50ETF", "SSE").await;
+    let result = client.option_sse_list("50ETF", "SSE").await;
     assert!(result.is_ok());
     let months = result.unwrap();
     assert_eq!(months.len(), 3);
@@ -248,7 +248,7 @@ async fn test_option_sse_expire_day_sina() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .option_sse_expire_day_sina("202401", "50ETF", "SSE")
+        .option_sse_expire_day("202401", "50ETF", "SSE")
         .await;
     assert!(result.is_ok());
     let (date, days) = result.unwrap();
@@ -263,7 +263,7 @@ async fn test_option_sse_codes_sina() {
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .option_sse_codes_sina("看涨期权", "202401", "510050")
+        .option_sse_codes("看涨期权", "202401", "510050")
         .await;
     assert!(result.is_ok());
     let codes = result.unwrap();
@@ -279,7 +279,7 @@ async fn test_option_sse_spot_price_sina() {
     let body = format!("var hq_str_CON_OP_10003720=\"{}\"", values.join(","));
     mock_any_get_text(&server, ".*", &body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_spot_price_sina("10003720").await;
+    let result = client.option_sse_spot_price("10003720").await;
     assert!(result.is_ok());
     let pairs = result.unwrap();
     assert_eq!(pairs.len(), 43);
@@ -293,7 +293,7 @@ async fn test_option_sse_underlying_spot_price_sina() {
     mock_any_get_text(&server, ".*", &body).await;
     let client = mock_client(&server);
     let result = client
-        .option_sse_underlying_spot_price_sina("sh510050")
+        .option_sse_underlying_spot_price("sh510050")
         .await;
     assert!(result.is_ok());
     let pairs = result.unwrap();
@@ -308,7 +308,7 @@ async fn test_option_sse_greeks_sina() {
     let body = format!("var hq_str_CON_SO_10003720=\"{}\"", values.join(","));
     mock_any_get_text(&server, ".*", &body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_greeks_sina("10003720").await;
+    let result = client.option_sse_greeks("10003720").await;
     assert!(result.is_ok());
     let pairs = result.unwrap();
     assert_eq!(pairs.len(), 13);
@@ -327,7 +327,7 @@ async fn test_option_sse_minute_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_minute_sina("10003720").await;
+    let result = client.option_sse_minute("10003720").await;
     assert!(result.is_ok());
     let rows = result.unwrap();
     assert_eq!(rows.len(), 2);
@@ -342,7 +342,7 @@ async fn test_option_sse_daily_sina() {
     let body = "jQuery12345([[\"2024-01-02\",0.05,0.06,0.04,0.055,10000]])";
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_sse_daily_sina("10003720").await;
+    let result = client.option_sse_daily("10003720").await;
     assert!(result.is_ok());
     let rows = result.unwrap();
     assert_eq!(rows.len(), 1);
@@ -364,7 +364,7 @@ async fn test_option_finance_minute_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_finance_minute_sina("10003720").await;
+    let result = client.option_finance_minute("10003720").await;
     assert!(result.is_ok());
     let rows = result.unwrap();
     assert_eq!(rows.len(), 2);
@@ -383,7 +383,7 @@ async fn test_option_cffex_sz50_list_sina() {
     </body></html>"#;
     mock_any_get_text(&server, ".*", html).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_sz50_list_sina().await;
+    let result = client.option_cffex_sz50_list().await;
     assert!(result.is_ok());
     let items = result.unwrap();
     assert_eq!(items.len(), 1);
@@ -400,7 +400,7 @@ async fn test_option_cffex_hs300_list_sina() {
     </body></html>"#;
     mock_any_get_text(&server, ".*", html).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_hs300_list_sina().await;
+    let result = client.option_cffex_hs300_list().await;
     assert!(result.is_ok());
 }
 
@@ -413,7 +413,7 @@ async fn test_option_cffex_zz1000_list_sina() {
     </body></html>"#;
     mock_any_get_text(&server, ".*", html).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_zz1000_list_sina().await;
+    let result = client.option_cffex_zz1000_list().await;
     let _ = result; // method may use raw HTTP client
 }
 
@@ -430,7 +430,7 @@ async fn test_option_cffex_sz50_spot_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_sz50_spot_sina("ho2403").await;
+    let result = client.option_cffex_sz50_spot("ho2403").await;
     assert!(result.is_ok());
     let rows = result.unwrap();
     assert_eq!(rows.len(), 1);
@@ -450,7 +450,7 @@ async fn test_option_cffex_hs300_spot_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_hs300_spot_sina("io2403").await;
+    let result = client.option_cffex_hs300_spot("io2403").await;
     assert!(result.is_ok());
 }
 
@@ -467,7 +467,7 @@ async fn test_option_cffex_zz1000_spot_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_zz1000_spot_sina("mo2403").await;
+    let result = client.option_cffex_zz1000_spot("mo2403").await;
     assert!(result.is_ok());
 }
 
@@ -478,7 +478,7 @@ async fn test_option_cffex_sz50_daily_sina() {
     let body = "jQuery12345([[0.05,0.06,0.04,0.055,10000,\"2024-01-02\"]])";
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_sz50_daily_sina("ho2403C2500").await;
+    let result = client.option_cffex_sz50_daily("ho2403C2500").await;
     assert!(result.is_ok());
     let rows = result.unwrap();
     assert_eq!(rows.len(), 1);
@@ -491,7 +491,7 @@ async fn test_option_cffex_hs300_daily_sina() {
     let body = "jQuery12345([[0.05,0.06,0.04,0.055,10000,\"2024-01-02\"]])";
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_hs300_daily_sina("io2403C4000").await;
+    let result = client.option_cffex_hs300_daily("io2403C4000").await;
     assert!(result.is_ok());
 }
 
@@ -501,7 +501,7 @@ async fn test_option_cffex_zz1000_daily_sina() {
     let body = "jQuery12345([[0.05,0.06,0.04,0.055,10000,\"2024-01-02\"]])";
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_cffex_zz1000_daily_sina("mo2403C6000").await;
+    let result = client.option_cffex_zz1000_daily("mo2403C6000").await;
     assert!(result.is_ok());
 }
 
@@ -698,7 +698,7 @@ async fn test_option_commodity_contract_sina() {
     </body></html>"#;
     mock_any_get_text(&server, ".*", html).await;
     let client = mock_client(&server);
-    let result = client.option_commodity_contract_sina("豆粕期权").await;
+    let result = client.option_commodity_contract("豆粕期权").await;
     // This will try to parse HTML; may succeed or fail depending on parsing
     let _ = result;
 }
@@ -717,7 +717,7 @@ async fn test_option_commodity_contract_table_sina() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .option_commodity_contract_table_sina("豆粕期权", "m2405")
+        .option_commodity_contract_table("豆粕期权", "m2405")
         .await;
     let _ = result; // Sina commodity format may differ from mock
 }
@@ -729,7 +729,7 @@ async fn test_option_commodity_hist_sina() {
     let body = "jQuery12345([[5000.0,5500.0,4800.0,5200.0,10000,\"2024-01-02\"]])";
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_commodity_hist_sina("au2012C392").await;
+    let result = client.option_commodity_hist("au2012C392").await;
     assert!(result.is_ok());
     let rows = result.unwrap();
     assert_eq!(rows.len(), 1);
@@ -977,7 +977,7 @@ async fn test_option_lhb_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .option_lhb_em("510050", "期权交易情况-认沽交易量", "20240102")
+        .option_lhb("510050", "期权交易情况-认沽交易量", "20240102")
         .await;
     let _ = result; // LHB EM array format may differ from mock
 }
@@ -1050,7 +1050,7 @@ async fn test_option_risk_indicator_sse() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.option_risk_indicator_sse("20240102").await;
+    let result = client.option_risk_indicator("20240102").await;
     assert!(result.is_ok());
     let rows = result.unwrap();
     assert_eq!(rows.len(), 1);
@@ -1238,7 +1238,7 @@ async fn test_option_commodity_contract_table_sina_invalid() {
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client
-        .option_commodity_contract_table_sina("invalid_symbol", "xxx")
+        .option_commodity_contract_table("invalid_symbol", "xxx")
         .await;
     assert!(result.is_err());
 }
@@ -1269,7 +1269,7 @@ async fn test_option_lhb_em_invalid_indicator() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .option_lhb_em("510050", "invalid_indicator", "20240102")
+        .option_lhb("510050", "invalid_indicator", "20240102")
         .await;
     assert!(result.is_err());
 }

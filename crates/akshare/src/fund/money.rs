@@ -94,8 +94,8 @@ impl AkShareClient {
         Ok(snapshots)
     }
 
-    /// Fetch money fund daily data (Python: fund_money_fund_daily_em).
-    pub async fn fund_money_fund_daily_em(&self) -> Result<Vec<serde_json::Value>> {
+    /// Fetch money fund daily data (Python: fund_money_fund_daily).
+    pub async fn fund_money_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .get("https://fund.eastmoney.com/HBJJ_pjsyl.html")
             .send()
@@ -121,7 +121,7 @@ impl AkShareClient {
     /// Fetch money fund info (historical NAV) from Eastmoney.
     ///
     /// `symbol`: money fund code (e.g. "000009").
-    pub async fn fund_money_fund_info_em(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
+    pub async fn fund_money_fund_info(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
         let response = self
             .get("https://api.fund.eastmoney.com/f10/lsjz")
             .header(
@@ -170,8 +170,8 @@ impl AkShareClient {
         Ok(result)
     }
 
-    /// Fetch money fund ranking (Python: fund_money_rank_em).
-    pub async fn fund_money_rank_em(&self) -> Result<Vec<FundMoneyRankItem>> {
+    /// Fetch money fund ranking (Python: fund_money_rank).
+    pub async fn fund_money_rank(&self) -> Result<Vec<FundMoneyRankItem>> {
         let response = self
             .get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
             .query(&[

@@ -48,7 +48,7 @@ impl AkShareClient {
     /// `area` must be a full name (e.g., "重庆市", "杭州市").
     /// `indicator` is "move_in" or "move_out".
     /// `date` is "YYYYMMDD" format.
-    pub async fn migration_area_baidu(
+    pub async fn migration_area(
         &self,
         area: &str,
         indicator: &str,
@@ -109,7 +109,7 @@ impl AkShareClient {
     /// Returns the historical migration scale index for the given area.
     /// `area` must be a full name (e.g., "广州市").
     /// `indicator` is "move_in" or "move_out".
-    pub async fn migration_scale_baidu(
+    pub async fn migration_scale(
         &self,
         area: &str,
         indicator: &str,

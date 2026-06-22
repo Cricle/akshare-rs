@@ -5,10 +5,10 @@ use crate::error::{Error, Result};
 use crate::types::{FundDividendItem, FundDividendRankItem};
 
 impl AkShareClient {
-    /// Fetch fund dividend data (Python: fund_fh_em).
+    /// Fetch fund dividend data (Python: fund_fh).
     ///
     /// `year`: query year (e.g. "2025").
-    pub async fn fund_fh_em(&self, year: &str) -> Result<Vec<FundDividendItem>> {
+    pub async fn fund_fh(&self, year: &str) -> Result<Vec<FundDividendItem>> {
         let response = self
             .get("https://fund.eastmoney.com/Data/funddataIndex_Interface.aspx")
             .query(&[
@@ -55,8 +55,8 @@ impl AkShareClient {
         Ok(result)
     }
 
-    /// Fetch fund dividend ranking (Python: fund_fh_rank_em).
-    pub async fn fund_fh_rank_em(&self) -> Result<Vec<FundDividendRankItem>> {
+    /// Fetch fund dividend ranking (Python: fund_fh_rank).
+    pub async fn fund_fh_rank(&self) -> Result<Vec<FundDividendRankItem>> {
         let response = self
             .get("https://fund.eastmoney.com/Data/funddataIndex_Interface.aspx")
             .query(&[

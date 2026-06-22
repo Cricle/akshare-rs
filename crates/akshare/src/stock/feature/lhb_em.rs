@@ -15,7 +15,7 @@ fn fmt_date_range(start: &str, end: &str) -> (String, String) {
 
 impl AkShareClient {
     /// 龙虎榜详情
-    pub async fn stock_lhb_detail_em(
+    pub async fn stock_lhb_detail(
         &self,
         start_date: &str,
         end_date: &str,
@@ -63,7 +63,7 @@ impl AkShareClient {
     }
 
     /// 个股上榜统计
-    pub async fn stock_lhb_stock_statistic_em(
+    pub async fn stock_lhb_stock_statistic(
         &self,
         symbol: &str,
     ) -> Result<Vec<LhbStockStatistic>> {
@@ -114,7 +114,7 @@ impl AkShareClient {
     }
 
     /// 机构买卖每日统计
-    pub async fn stock_lhb_jgmmtj_em(
+    pub async fn stock_lhb_jgmmtj(
         &self,
         start_date: &str,
         end_date: &str,
@@ -157,7 +157,7 @@ impl AkShareClient {
     }
 
     /// 机构席位追踪
-    pub async fn stock_lhb_jgstatistic_em(&self, symbol: &str) -> Result<Vec<LhbJgstatistic>> {
+    pub async fn stock_lhb_jgstatistic(&self, symbol: &str) -> Result<Vec<LhbJgstatistic>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -201,7 +201,7 @@ impl AkShareClient {
     }
 
     /// 每日活跃营业部
-    pub async fn stock_lhb_hyyyb_em(
+    pub async fn stock_lhb_hyyyb(
         &self,
         start_date: &str,
         end_date: &str,
@@ -238,7 +238,7 @@ impl AkShareClient {
     }
 
     /// 营业部排行
-    pub async fn stock_lhb_yybph_em(&self, symbol: &str) -> Result<Vec<LhbYybph>> {
+    pub async fn stock_lhb_yybph(&self, symbol: &str) -> Result<Vec<LhbYybph>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -282,7 +282,7 @@ impl AkShareClient {
     }
 
     /// 游资统计
-    pub async fn stock_lhb_traderstatistic_em(
+    pub async fn stock_lhb_traderstatistic(
         &self,
         symbol: &str,
     ) -> Result<Vec<LhbTraderStatistic>> {
@@ -329,7 +329,7 @@ impl AkShareClient {
     }
 
     /// 个股上榜日期
-    pub async fn stock_lhb_stock_detail_date_em(
+    pub async fn stock_lhb_stock_detail_date(
         &self,
         symbol: &str,
     ) -> Result<Vec<LhbStockDetailDate>> {
@@ -362,7 +362,7 @@ impl AkShareClient {
     }
 
     /// 个股龙虎榜详情
-    pub async fn stock_lhb_stock_detail_em(
+    pub async fn stock_lhb_stock_detail(
         &self,
         symbol: &str,
         date: &str,
@@ -399,7 +399,7 @@ impl AkShareClient {
     }
 
     /// 营业部龙虎榜详情
-    pub async fn stock_lhb_yyb_detail_em(&self, symbol: &str) -> Result<Vec<LhbYybDetail>> {
+    pub async fn stock_lhb_yyb_detail(&self, symbol: &str) -> Result<Vec<LhbYybDetail>> {
         let filter = format!("(OPERATEDEPT_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
@@ -431,7 +431,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-每日详情
-    pub async fn stock_lhb_detail_daily_sina(&self, date: &str) -> Result<Vec<LhbSinaDetail>> {
+    pub async fn stock_lhb_detail_daily(&self, date: &str) -> Result<Vec<LhbSinaDetail>> {
         let formatted = fmt_date(date);
         let url =
             "https://vip.stock.finance.sina.com.cn/q/go.php/vInvestConsult/kind/lhb/index.phtml";
@@ -449,7 +449,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-个股上榜统计
-    pub async fn stock_lhb_ggtj_sina(&self) -> Result<Vec<LhbSinaGgtj>> {
+    pub async fn stock_lhb_ggtj(&self) -> Result<Vec<LhbSinaGgtj>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/ggtj/index.phtml";
         let resp = self
             .get(url)
@@ -464,7 +464,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-机构席位成交明细
-    pub async fn stock_lhb_jgmx_sina(&self) -> Result<Vec<LhbSinaJgmx>> {
+    pub async fn stock_lhb_jgmx(&self) -> Result<Vec<LhbSinaJgmx>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgmx/index.phtml";
         let resp = self
             .get(url)
@@ -479,7 +479,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-机构席位追踪
-    pub async fn stock_lhb_jgzz_sina(&self, symbol: &str) -> Result<Vec<LhbSinaJgzz>> {
+    pub async fn stock_lhb_jgzz(&self, symbol: &str) -> Result<Vec<LhbSinaJgzz>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgzz/index.phtml";
         let resp = self
             .get(url)
@@ -494,7 +494,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-营业部上榜统计
-    pub async fn stock_lhb_yytj_sina(&self, symbol: &str) -> Result<Vec<LhbSinaYytj>> {
+    pub async fn stock_lhb_yytj(&self, symbol: &str) -> Result<Vec<LhbSinaYytj>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/yytj/index.phtml";
         let resp = self
             .get(url)

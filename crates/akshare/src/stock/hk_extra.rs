@@ -4,21 +4,21 @@
 //! Covers Python functions:
 //! - `stock_hk_spot` — HK spot (Sina)
 //! - `stock_hk_daily` — HK daily (Sina, via Eastmoney kline)
-//! - `stock_hk_famous_spot_em` — Famous HK stocks (Eastmoney)
+//! - `stock_hk_famous_spot` — Famous HK stocks (Eastmoney)
 //! - `stock_hk_index_daily_em` — HK index daily (Eastmoney)
 //! - `stock_hk_index_daily_sina` — HK index daily (Sina)
 //! - `stock_hk_index_spot_em` — HK index spot (Eastmoney)
 //! - `stock_hk_index_spot_sina` — HK index spot (Sina)
 //! - `stock_hk_indicator_eniu` — Eniu indicators
-//! - `stock_hk_scale_comparison_em` — HK scale comparison (Eastmoney)
-//! - `stock_hk_valuation_baidu` — HK valuation (Baidu)
-//! - `stock_hk_hot_rank_em` — HK hot rank (Eastmoney)
-//! - `stock_hk_hot_rank_latest_em` — HK latest hot rank (Eastmoney)
-//! - `stock_hk_hot_rank_detail_em` — HK hot rank detail (Eastmoney)
-//! - `stock_hk_hot_rank_detail_realtime_em` — HK realtime hot rank (Eastmoney)
-//! - `stock_hk_dividend_payout_em` — HK dividend payout (Eastmoney)
-//! - `stock_hk_fhpx_detail_ths` — HK fhpx detail (THS)
-//! - `stock_hk_financial_indicator_em` — HK financial indicators (Eastmoney)
+//! - `stock_hk_scale_comparison` — HK scale comparison (Eastmoney)
+//! - `stock_hk_valuation` — HK valuation (Baidu)
+//! - `stock_hk_hot_rank` — HK hot rank (Eastmoney)
+//! - `stock_hk_hot_rank_latest` — HK latest hot rank (Eastmoney)
+//! - `stock_hk_hot_rank_detail` — HK hot rank detail (Eastmoney)
+//! - `stock_hk_hot_rank_detail_realtime` — HK realtime hot rank (Eastmoney)
+//! - `stock_hk_dividend_payout` — HK dividend payout (Eastmoney)
+//! - `stock_hk_fhpx_detail` — HK fhpx detail (THS)
+//! - `stock_hk_financial_indicator` — HK financial indicators (Eastmoney)
 //! - `stock_hk_gxl_lg` — HK dividend yield (Legulegu)
 
 use std::sync::LazyLock;
@@ -350,8 +350,8 @@ impl AkShareClient {
 
     /// Get famous HK stocks from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_famous_spot_em()`
-    pub async fn stock_hk_famous_spot_em(&self) -> Result<Vec<HkFamousStock>> {
+    /// Python equivalent: `stock_hk_famous_spot()`
+    pub async fn stock_hk_famous_spot(&self) -> Result<Vec<HkFamousStock>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<EnvData>,
@@ -634,8 +634,8 @@ impl AkShareClient {
 
     /// Get HK stock hot rank from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_hot_rank_em()`
-    pub async fn stock_hk_hot_rank_em(&self) -> Result<Vec<HkHotRank>> {
+    /// Python equivalent: `stock_hk_hot_rank()`
+    pub async fn stock_hk_hot_rank(&self) -> Result<Vec<HkHotRank>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<Vec<RankItem>>,
@@ -692,8 +692,8 @@ impl AkShareClient {
 
     /// Get HK latest hot rank from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_hot_rank_latest_em(symbol)`
-    pub async fn stock_hk_hot_rank_latest_em(&self, symbol: &str) -> Result<Vec<HkHotRankDetail>> {
+    /// Python equivalent: `stock_hk_hot_rank_latest(symbol)`
+    pub async fn stock_hk_hot_rank_latest(&self, symbol: &str) -> Result<Vec<HkHotRankDetail>> {
         let url = "https://emappdata.eastmoney.com/stockrank/getCurrentHkUsLatest";
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -735,8 +735,8 @@ impl AkShareClient {
 
     /// Get HK hot rank detail from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_hot_rank_detail_em(symbol)`
-    pub async fn stock_hk_hot_rank_detail_em(&self, symbol: &str) -> Result<Vec<HkHotRankDetail>> {
+    /// Python equivalent: `stock_hk_hot_rank_detail(symbol)`
+    pub async fn stock_hk_hot_rank_detail(&self, symbol: &str) -> Result<Vec<HkHotRankDetail>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<Vec<RankDetailItem>>,
@@ -785,8 +785,8 @@ impl AkShareClient {
 
     /// Get HK realtime hot rank from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_hot_rank_detail_realtime_em(symbol)`
-    pub async fn stock_hk_hot_rank_detail_realtime_em(
+    /// Python equivalent: `stock_hk_hot_rank_detail_realtime(symbol)`
+    pub async fn stock_hk_hot_rank_detail_realtime(
         &self,
         symbol: &str,
     ) -> Result<Vec<HkHotRankDetail>> {
@@ -838,8 +838,8 @@ impl AkShareClient {
 
     /// Get HK valuation from Baidu.
     ///
-    /// Python equivalent: `stock_hk_valuation_baidu(symbol, indicator, period)`
-    pub async fn stock_hk_valuation_baidu(
+    /// Python equivalent: `stock_hk_valuation(symbol, indicator, period)`
+    pub async fn stock_hk_valuation(
         &self,
         symbol: &str,
         indicator: &str,
@@ -907,8 +907,8 @@ impl AkShareClient {
 
     /// Get HK scale comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_scale_comparison_em(symbol)`
-    pub async fn stock_hk_scale_comparison_em(
+    /// Python equivalent: `stock_hk_scale_comparison(symbol)`
+    pub async fn stock_hk_scale_comparison(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
@@ -957,8 +957,8 @@ impl AkShareClient {
 
     /// Get HK dividend payout from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_dividend_payout_em(symbol)`
-    pub async fn stock_hk_dividend_payout_em(
+    /// Python equivalent: `stock_hk_dividend_payout(symbol)`
+    pub async fn stock_hk_dividend_payout(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
@@ -1007,8 +1007,8 @@ impl AkShareClient {
 
     /// Get HK fhpx detail from THS.
     ///
-    /// Python equivalent: `stock_hk_fhpx_detail_ths(symbol)`
-    pub async fn stock_hk_fhpx_detail_ths(&self, symbol: &str) -> Result<Vec<HkFhpxDetailThs>> {
+    /// Python equivalent: `stock_hk_fhpx_detail(symbol)`
+    pub async fn stock_hk_fhpx_detail(&self, symbol: &str) -> Result<Vec<HkFhpxDetailThs>> {
         let url = format!("https://basic.10jqka.com.cn/176/HK{symbol}/bonus.html");
 
         let response = self
@@ -1059,8 +1059,8 @@ impl AkShareClient {
 
     /// Get HK financial indicators from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_financial_indicator_em(symbol)`
-    pub async fn stock_hk_financial_indicator_em(
+    /// Python equivalent: `stock_hk_financial_indicator(symbol)`
+    pub async fn stock_hk_financial_indicator(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {

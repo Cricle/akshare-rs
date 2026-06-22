@@ -43,7 +43,7 @@ impl AkShareClient {
     }
 
     /// 全部注册制
-    pub async fn stock_register_all_em(&self) -> Result<Vec<RegisterEntry>> {
+    pub async fn stock_register_all(&self) -> Result<Vec<RegisterEntry>> {
         self.register_fetch("全部").await
     }
 

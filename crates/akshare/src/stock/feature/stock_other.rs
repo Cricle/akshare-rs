@@ -19,7 +19,7 @@ use crate::types::MacroDataPoint;
 
 impl AkShareClient {
     /// 东方财富-股票账户统计
-    pub async fn stock_account_statistics_em(&self) -> Result<Vec<AccountStatistics>> {
+    pub async fn stock_account_statistics(&self) -> Result<Vec<AccountStatistics>> {
         let data = self
             .dc_fetch_all(
                 "RPT_STOCK_OPEN_DATA",
@@ -51,7 +51,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-配股
-    pub async fn stock_allotment_cninfo(&self, symbol: &str) -> Result<Vec<AllotmentCninfo>> {
+    pub async fn stock_allotment(&self, symbol: &str) -> Result<Vec<AllotmentCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1091";
         let resp = self
             .post(url)
@@ -229,7 +229,7 @@ impl AkShareClient {
     }
 
     /// 新浪-行业分类
-    pub async fn stock_classify_sina(&self, symbol: &str) -> Result<Vec<ClassifySina>> {
+    pub async fn stock_classify(&self, symbol: &str) -> Result<Vec<ClassifySina>> {
         let url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData".to_string();
         let resp = self
             .get(&url)
@@ -288,7 +288,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-筹码分布
-    pub async fn stock_cyq_em(&self, symbol: &str, adjust: &str) -> Result<Vec<CyqData>> {
+    pub async fn stock_cyq(&self, symbol: &str, adjust: &str) -> Result<Vec<CyqData>> {
         let adjust_code = match adjust {
             "qfq" => "1",
             "hfq" => "2",
@@ -318,7 +318,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-分红送配
-    pub async fn stock_dividend_cninfo(&self, symbol: &str) -> Result<Vec<DividendCninfo>> {
+    pub async fn stock_dividend(&self, symbol: &str) -> Result<Vec<DividendCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1092";
         let resp = self
             .post(url)
@@ -359,7 +359,7 @@ impl AkShareClient {
     }
 
     /// 新浪-ESG评级
-    pub async fn stock_esg_rate_sina(&self, symbol: &str) -> Result<Vec<EsgRateSina>> {
+    pub async fn stock_esg_rate(&self, symbol: &str) -> Result<Vec<EsgRateSina>> {
         let url = format!("https://finance.sina.com.cn/esg/stock/{symbol}");
         let resp = self
             .get(&url)
@@ -394,7 +394,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-股东大会
-    pub async fn stock_gddh_em(&self) -> Result<Vec<GddhEntry>> {
+    pub async fn stock_gddh(&self) -> Result<Vec<GddhEntry>> {
         let data = self.dc_fetch_all(
             "RPT_GENERALMEETING_DETAIL",
             "SECURITY_CODE,SECURITY_NAME_ABBR,MEETING_TITLE,START_ADJUST_DATE,EQUITY_RECORD_DATE,ONSITE_RECORD_DATE,DECISION_NOTICE_DATE,NOTICE_DATE,WEB_START_DATE,WEB_END_DATE,SERIAL_NUM,PROPOSAL",
@@ -425,14 +425,14 @@ impl AkShareClient {
     }
 
     /// 同花顺-IPO受益
-    pub async fn stock_ipo_benefit_ths(&self) -> Result<Vec<IpoBenefitThs>> {
+    pub async fn stock_ipo_benefit(&self) -> Result<Vec<IpoBenefitThs>> {
         Ok(vec![IpoBenefitThs {
             data: serde_json::json!({"note": "THS API requires hexin-v token"}),
         }])
     }
 
     /// 巨潮-IPO概况
-    pub async fn stock_ipo_summary_cninfo(&self) -> Result<Vec<IpoSummaryCninfo>> {
+    pub async fn stock_ipo_summary(&self) -> Result<Vec<IpoSummaryCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1093";
         let resp = self
             .post(url)
@@ -523,7 +523,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-新股过会
-    pub async fn stock_new_gh_cninfo(&self) -> Result<Vec<NewGhCninfo>> {
+    pub async fn stock_new_gh(&self) -> Result<Vec<NewGhCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1094";
         let resp = self
             .post(url)
@@ -546,7 +546,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-新股IPO
-    pub async fn stock_new_ipo_cninfo(&self) -> Result<Vec<NewIpoCninfo>> {
+    pub async fn stock_new_ipo(&self) -> Result<Vec<NewIpoCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1095";
         let resp = self
             .post(url)
@@ -569,7 +569,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-个股新闻 (A股, by stock code)
-    pub async fn stock_news_em(&self, symbol: &str) -> Result<Vec<StockNews>> {
+    pub async fn stock_news(&self, symbol: &str) -> Result<Vec<StockNews>> {
         self.stock_news_em_inner(symbol, "default", "default", 20)
             .await
     }
@@ -703,7 +703,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-公司概况
-    pub async fn stock_profile_cninfo(&self, symbol: &str) -> Result<Vec<ProfileCninfo>> {
+    pub async fn stock_profile(&self, symbol: &str) -> Result<Vec<ProfileCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1096";
         let resp = self
             .post(url)
@@ -727,7 +727,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-券商业绩月报
-    pub async fn stock_qsjy_em(&self, date: &str) -> Result<Vec<QsjyEntry>> {
+    pub async fn stock_qsjy(&self, date: &str) -> Result<Vec<QsjyEntry>> {
         let sd = fmt_date(date);
         let filter = format!("(END_DATE='{sd}')");
         let data = self.dc_fetch_all(
@@ -806,7 +806,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-个股研报
-    pub async fn stock_research_report_em(&self, symbol: &str) -> Result<Vec<ResearchReport>> {
+    pub async fn stock_research_report(&self, symbol: &str) -> Result<Vec<ResearchReport>> {
         let url = "https://reportapi.eastmoney.com/report/list";
         let resp = self
             .get(url)
@@ -902,7 +902,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-股本变动
-    pub async fn stock_share_change_cninfo(&self, symbol: &str) -> Result<Vec<ShareChangeCninfo>> {
+    pub async fn stock_share_change(&self, symbol: &str) -> Result<Vec<ShareChangeCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1097";
         let resp = self
             .post(url)
@@ -1064,7 +1064,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-行业市盈率
-    pub async fn stock_sy_hy_em(&self) -> Result<Vec<GpzyIndustry>> {
+    pub async fn stock_sy_hy(&self) -> Result<Vec<GpzyIndustry>> {
         let data = self
             .dc_fetch_all(
                 "RPT_INDUSTRY_PE",
@@ -1190,7 +1190,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-停复牌
-    pub async fn stock_tfp_em(&self, date: &str) -> Result<Vec<TfpInfo>> {
+    pub async fn stock_tfp(&self, date: &str) -> Result<Vec<TfpInfo>> {
         let sd = fmt_date(date);
         let filter = format!("(MARKET=\"全部\")(DATETIME='{sd}')");
         let data = self
@@ -1223,7 +1223,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-估值分析
-    pub async fn stock_value_em(&self, symbol: &str) -> Result<Vec<StockValue>> {
+    pub async fn stock_value(&self, symbol: &str) -> Result<Vec<StockValue>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
@@ -1258,7 +1258,7 @@ impl AkShareClient {
     }
 
     /// 同花顺-新股上市日
-    pub async fn stock_xgsr_ths(&self, symbol: &str) -> Result<Vec<XgsrThs>> {
+    pub async fn stock_xgsr(&self, symbol: &str) -> Result<Vec<XgsrThs>> {
         let url = format!("https://basic.10jqka.com.cn/api/stockph/xgsr/{symbol}");
         let resp = self
             .get(&url)
@@ -1278,7 +1278,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-一致行动人
-    pub async fn stock_yzxdr_em(&self, date: &str) -> Result<Vec<YzxdrEntry>> {
+    pub async fn stock_yzxdr(&self, date: &str) -> Result<Vec<YzxdrEntry>> {
         let sd = fmt_date(date);
         let filter = format!("(enddate='{sd}')");
         let data = self
@@ -1312,7 +1312,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-重大合同明细
-    pub async fn stock_zdhtmx_em(
+    pub async fn stock_zdhtmx(
         &self,
         start_date: &str,
         end_date: &str,
@@ -1356,7 +1356,7 @@ impl AkShareClient {
     }
 
     /// 退市公司-资产负债表
-    pub async fn stock_balance_sheet_by_report_delisted_em(
+    pub async fn stock_balance_sheet_by_report_delisted(
         &self,
         symbol: &str,
     ) -> Result<Vec<DelistedReport>> {
@@ -1387,7 +1387,7 @@ impl AkShareClient {
     }
 
     /// 退市公司-现金流量表
-    pub async fn stock_cash_flow_sheet_by_report_delisted_em(
+    pub async fn stock_cash_flow_sheet_by_report_delisted(
         &self,
         symbol: &str,
     ) -> Result<Vec<DelistedReport>> {
@@ -1418,7 +1418,7 @@ impl AkShareClient {
     }
 
     /// 退市公司-利润表
-    pub async fn stock_profit_sheet_by_report_delisted_em(
+    pub async fn stock_profit_sheet_by_report_delisted(
         &self,
         symbol: &str,
     ) -> Result<Vec<DelistedReport>> {
@@ -1450,7 +1450,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-股权抵押
-    pub async fn stock_cg_equity_mortgage_cninfo(
+    pub async fn stock_cg_equity_mortgage(
         &self,
         symbol: &str,
     ) -> Result<Vec<CgEquityMortgage>> {
@@ -1477,7 +1477,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-担保
-    pub async fn stock_cg_guarantee_cninfo(&self, symbol: &str) -> Result<Vec<CgGuarantee>> {
+    pub async fn stock_cg_guarantee(&self, symbol: &str) -> Result<Vec<CgGuarantee>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1099";
         let resp = self
             .post(url)
@@ -1501,7 +1501,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-诉讼
-    pub async fn stock_cg_lawsuit_cninfo(&self, symbol: &str) -> Result<Vec<CgLawsuit>> {
+    pub async fn stock_cg_lawsuit(&self, symbol: &str) -> Result<Vec<CgLawsuit>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1100";
         let resp = self
             .post(url)
@@ -1525,7 +1525,7 @@ impl AkShareClient {
     }
 
     /// 北交所-资产负债表
-    pub async fn stock_zcfz_bj_em(&self, symbol: &str) -> Result<Vec<DelistedReport>> {
+    pub async fn stock_zcfz_bj(&self, symbol: &str) -> Result<Vec<DelistedReport>> {
         let code_lower = symbol.to_lowercase();
         let url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/BalanceSheetDateAjaxNew";
         let resp = self

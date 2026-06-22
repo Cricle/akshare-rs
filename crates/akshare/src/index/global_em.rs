@@ -26,7 +26,7 @@ struct EmGlobalData {
 
 impl AkShareClient {
     /// 东方财富 — 全球指数实时行情.
-    pub async fn index_global_spot_em(&self) -> Result<Vec<GlobalEmSpotItem>> {
+    pub async fn index_global_spot(&self) -> Result<Vec<GlobalEmSpotItem>> {
         let fs = "i:1.000001,i:0.399001,i:0.399005,i:0.399006,i:1.000300,\
             i:100.HSI,i:100.HSCEI,i:124.HSCCI,i:100.TWII,i:100.N225,\
             i:100.KOSPI200,i:100.KS11,i:100.STI,i:100.SENSEX,i:100.KLSE,\

@@ -56,24 +56,24 @@ impl AkShareClient {
         Ok(result)
     }
 
-    /// Fetch fund dividend announcements (Python: fund_announcement_dividend_em).
-    pub async fn fund_announcement_dividend_em(
+    /// Fetch fund dividend announcements (Python: fund_announcement_dividend).
+    pub async fn fund_announcement_dividend(
         &self,
         symbol: &str,
     ) -> Result<Vec<FundAnnouncementItem>> {
         self.fund_announcement_em_inner(symbol, "2").await
     }
 
-    /// Fetch fund report announcements (Python: fund_announcement_report_em).
-    pub async fn fund_announcement_report_em(
+    /// Fetch fund report announcements (Python: fund_announcement_report).
+    pub async fn fund_announcement_report(
         &self,
         symbol: &str,
     ) -> Result<Vec<FundAnnouncementItem>> {
         self.fund_announcement_em_inner(symbol, "3").await
     }
 
-    /// Fetch fund personnel announcements (Python: fund_announcement_personnel_em).
-    pub async fn fund_announcement_personnel_em(
+    /// Fetch fund personnel announcements (Python: fund_announcement_personnel).
+    pub async fn fund_announcement_personnel(
         &self,
         symbol: &str,
     ) -> Result<Vec<FundAnnouncementItem>> {

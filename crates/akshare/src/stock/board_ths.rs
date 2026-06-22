@@ -2,13 +2,13 @@
 //!
 //! Covers Python functions:
 //! - `stock_board_concept_name_ths` — Concept board names from THS
-//! - `stock_board_concept_info_ths` — Concept board info from THS
-//! - `stock_board_concept_index_ths` — Concept board index from THS
-//! - `stock_board_concept_summary_ths` — Concept board summary from THS
+//! - `stock_board_concept_info` — Concept board info from THS
+//! - `stock_board_concept_index` — Concept board index from THS
+//! - `stock_board_concept_summary` — Concept board summary from THS
 //! - `stock_board_industry_name_ths` — Industry board names from THS
-//! - `stock_board_industry_info_ths` — Industry board info from THS
-//! - `stock_board_industry_index_ths` — Industry board index from THS
-//! - `stock_board_industry_summary_ths` — Industry board summary from THS
+//! - `stock_board_industry_info` — Industry board info from THS
+//! - `stock_board_industry_index` — Industry board index from THS
+//! - `stock_board_industry_summary` — Industry board summary from THS
 
 use std::sync::LazyLock;
 
@@ -91,10 +91,10 @@ impl AkShareClient {
 
     /// Get concept board info from THS.
     ///
-    /// Python equivalent: `stock_board_concept_info_ths(symbol)`
+    /// Python equivalent: `stock_board_concept_info(symbol)`
     ///
     /// `symbol` is the board name, e.g. "阿里巴巴概念".
-    pub async fn stock_board_concept_info_ths(&self, symbol: &str) -> Result<Vec<ThsBoardInfo>> {
+    pub async fn stock_board_concept_info(&self, symbol: &str) -> Result<Vec<ThsBoardInfo>> {
         let boards = self.stock_board_concept_name_ths().await?;
         let code = boards
             .iter()
@@ -108,12 +108,12 @@ impl AkShareClient {
 
     /// Get concept board index data from THS.
     ///
-    /// Python equivalent: `stock_board_concept_index_ths(symbol, start_date, end_date)`
+    /// Python equivalent: `stock_board_concept_index(symbol, start_date, end_date)`
     ///
     /// Returns daily OHLCV data for the concept board index.
     /// Note: THS requires JavaScript execution for full data; this returns
     /// data from the THS kline API directly.
-    pub async fn stock_board_concept_index_ths(
+    pub async fn stock_board_concept_index(
         &self,
         symbol: &str,
         start_date: &str,
@@ -131,10 +131,10 @@ impl AkShareClient {
 
     /// Get concept board summary from THS.
     ///
-    /// Python equivalent: `stock_board_concept_summary_ths(symbol)`
+    /// Python equivalent: `stock_board_concept_summary(symbol)`
     ///
     /// Returns concept board timeline/summary data.
-    pub async fn stock_board_concept_summary_ths(
+    pub async fn stock_board_concept_summary(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThsBoardSummary>> {
@@ -161,8 +161,8 @@ impl AkShareClient {
 
     /// Get industry board info from THS.
     ///
-    /// Python equivalent: `stock_board_industry_info_ths(symbol)`
-    pub async fn stock_board_industry_info_ths(&self, symbol: &str) -> Result<Vec<ThsBoardInfo>> {
+    /// Python equivalent: `stock_board_industry_info(symbol)`
+    pub async fn stock_board_industry_info(&self, symbol: &str) -> Result<Vec<ThsBoardInfo>> {
         let boards = self.stock_board_industry_name_ths().await?;
         let code = boards
             .iter()
@@ -178,8 +178,8 @@ impl AkShareClient {
 
     /// Get industry board index data from THS.
     ///
-    /// Python equivalent: `stock_board_industry_index_ths(symbol, start_date, end_date)`
-    pub async fn stock_board_industry_index_ths(
+    /// Python equivalent: `stock_board_industry_index(symbol, start_date, end_date)`
+    pub async fn stock_board_industry_index(
         &self,
         symbol: &str,
         start_date: &str,
@@ -197,8 +197,8 @@ impl AkShareClient {
 
     /// Get industry board summary from THS.
     ///
-    /// Python equivalent: `stock_board_industry_summary_ths(symbol)`
-    pub async fn stock_board_industry_summary_ths(
+    /// Python equivalent: `stock_board_industry_summary(symbol)`
+    pub async fn stock_board_industry_summary(
         &self,
         symbol: &str,
     ) -> Result<Vec<ThsBoardSummary>> {

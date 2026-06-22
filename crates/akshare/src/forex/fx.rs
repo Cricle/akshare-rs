@@ -207,7 +207,7 @@ impl AkShareClient {
     /// Baidu Finance FX quote.
     ///
     /// Fetches real-time FX quotes from Baidu Finance.
-    pub async fn fx_quote_baidu(&self, pair: &str) -> Result<Vec<MacroDataPoint>> {
+    pub async fn fx_quote(&self, pair: &str) -> Result<Vec<MacroDataPoint>> {
         let url = "https://finance.pae.baidu.com/api/getbondprice";
         let body: serde_json::Value = self
             .get(url)

@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 业绩报表
-    pub async fn stock_yjbb_em(&self, date: &str) -> Result<Vec<EarningsReport>> {
+    pub async fn stock_yjbb(&self, date: &str) -> Result<Vec<EarningsReport>> {
         let date_fmt = fmt_date(date);
         let filter = format!("(REPORTDATE='{date_fmt}')");
         let data = self

@@ -46,7 +46,7 @@ async fn test_bond_cov_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_cov_issue_cninfo("20240101", "20240131").await;
+    let result = client.bond_cov_issue("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 
@@ -229,7 +229,7 @@ async fn test_bond_cb_profile_sina() {
     mock_any_get_text(&server, ".*", "<html>mock</html>").await;
     let client = mock_client(&server);
     // This method returns an error indicating HTML parsing is required
-    let result = client.bond_cb_profile_sina("sz128039").await;
+    let result = client.bond_cb_profile("sz128039").await;
     assert!(result.is_err());
 }
 
@@ -239,7 +239,7 @@ async fn test_bond_cb_summary_sina() {
     mock_any_get_text(&server, ".*", "<html>mock</html>").await;
     let client = mock_client(&server);
     // This method returns an error indicating HTML parsing is required
-    let result = client.bond_cb_summary_sina("sh155255").await;
+    let result = client.bond_cb_summary("sh155255").await;
     assert!(result.is_err());
 }
 
@@ -297,7 +297,7 @@ async fn test_bond_gb_zh_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_gb_zh_sina("中国10年期国债").await;
+    let result = client.bond_gb_zh("中国10年期国债").await;
     assert!(result.is_ok());
 }
 
@@ -313,7 +313,7 @@ async fn test_bond_gb_us_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_gb_us_sina("美国10年期国债").await;
+    let result = client.bond_gb_us("美国10年期国债").await;
     assert!(result.is_ok());
 }
 
@@ -332,7 +332,7 @@ async fn test_bond_corporate_issue_cninfo() {
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .bond_corporate_issue_cninfo("20240101", "20240131")
+        .bond_corporate_issue("20240101", "20240131")
         .await;
     assert!(result.is_ok());
 }
@@ -348,7 +348,7 @@ async fn test_bond_local_government_issue_cninfo() {
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .bond_local_government_issue_cninfo("20240101", "20240131")
+        .bond_local_government_issue("20240101", "20240131")
         .await;
     assert!(result.is_ok());
 }
@@ -565,7 +565,7 @@ async fn test_bond_sh_buy_back_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_sh_buy_back_em(10).await;
+    let result = client.bond_sh_buy_back(10).await;
     assert!(result.is_ok());
 }
 
@@ -577,7 +577,7 @@ async fn test_bond_buy_back_hist_em() {
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_buy_back_hist_em("204001", 10).await;
+    let result = client.bond_buy_back_hist("204001", 10).await;
     assert!(result.is_ok());
 }
 
@@ -591,7 +591,7 @@ async fn test_bond_cash_summary_sse() {
     // SSE returns Excel files; the method returns an error
     mock_any_get_text(&server, ".*", "binary data").await;
     let client = mock_client(&server);
-    let result = client.bond_cash_summary_sse("20240102").await;
+    let result = client.bond_cash_summary("20240102").await;
     assert!(result.is_err());
 }
 
@@ -601,7 +601,7 @@ async fn test_bond_deal_summary_sse() {
     // SSE returns Excel files; the method returns an error
     mock_any_get_text(&server, ".*", "binary data").await;
     let client = mock_client(&server);
-    let result = client.bond_deal_summary_sse("20240102").await;
+    let result = client.bond_deal_summary("20240102").await;
     assert!(result.is_err());
 }
 
@@ -650,7 +650,7 @@ async fn test_bond_treasure_issue_cninfo() {
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .bond_treasure_issue_cninfo("20240101", "20240131")
+        .bond_treasure_issue("20240101", "20240131")
         .await;
     assert!(result.is_ok());
 }
@@ -666,7 +666,7 @@ async fn test_bond_local_gov_issue_cninfo() {
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .bond_local_gov_issue_cninfo("20240101", "20240131")
+        .bond_local_gov_issue("20240101", "20240131")
         .await;
     assert!(result.is_ok());
 }
@@ -681,7 +681,7 @@ async fn test_bond_cov_stock_issue_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_cov_stock_issue_cninfo().await;
+    let result = client.bond_cov_stock_issue().await;
     assert!(result.is_ok());
 }
 
@@ -812,7 +812,7 @@ fn test_bond_gb_zh_symbols() {
 }
 
 // ---------------------------------------------------------------------------
-// buyback.rs — bond_sz_buy_back_em
+// buyback.rs — bond_sz_buy_back
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
@@ -827,7 +827,7 @@ async fn test_bond_sz_buy_back_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.bond_sz_buy_back_em(10).await;
+    let result = client.bond_sz_buy_back(10).await;
     assert!(result.is_ok());
 }
 

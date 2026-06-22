@@ -10,7 +10,7 @@ use crate::error::{Error, Result};
 
 impl AkShareClient {
     /// 沪深港通资金流向
-    pub async fn stock_hsgt_fund_flow_summary_em(&self) -> Result<Vec<HsgtFundFlowSummary>> {
+    pub async fn stock_hsgt_fund_flow_summary(&self) -> Result<Vec<HsgtFundFlowSummary>> {
         let data = self.dc_fetch_all(
             "RPT_MUTUAL_QUOTA",
             "TRADE_DATE,MUTUAL_TYPE,BOARD_TYPE,MUTUAL_TYPE_NAME,FUNDS_DIRECTION,INDEX_CODE,INDEX_NAME,BOARD_CODE",
@@ -40,7 +40,7 @@ impl AkShareClient {
     }
 
     /// 港股通成份股
-    pub async fn stock_hk_ggt_components_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_hk_ggt_components(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch(
                 "b:DLMK0146,b:DLMK0144",
@@ -84,7 +84,7 @@ impl AkShareClient {
     }
 
     /// 沪深港通持股-个股排行
-    pub async fn stock_hsgt_hold_stock_em(
+    pub async fn stock_hsgt_hold_stock(
         &self,
         market: &str,
         indicator: &str,
@@ -140,7 +140,7 @@ impl AkShareClient {
     }
 
     /// 沪深港通持股-每日个股统计
-    pub async fn stock_hsgt_stock_statistics_em(
+    pub async fn stock_hsgt_stock_statistics(
         &self,
         symbol: &str,
         start_date: &str,
@@ -178,7 +178,7 @@ impl AkShareClient {
     }
 
     /// 沪深港通持股-机构统计
-    pub async fn stock_hsgt_institution_statistics_em(
+    pub async fn stock_hsgt_institution_statistics(
         &self,
         _symbol: &str,
         start_date: &str,
@@ -212,7 +212,7 @@ impl AkShareClient {
     }
 
     /// 沪深港通历史数据
-    pub async fn stock_hsgt_hist_em(&self, _symbol: &str) -> Result<Vec<HsgtHist>> {
+    pub async fn stock_hsgt_hist(&self, _symbol: &str) -> Result<Vec<HsgtHist>> {
         let data = self.dc_fetch_all(
             "RPT_MUTUAL_QUOTA",
             "TRADE_DATE,MUTUAL_TYPE,BOARD_TYPE,MUTUAL_TYPE_NAME,FUNDS_DIRECTION,INDEX_CODE,INDEX_NAME,BOARD_CODE",
@@ -236,7 +236,7 @@ impl AkShareClient {
     }
 
     /// 沪深港通板块排行
-    pub async fn stock_hsgt_board_rank_em(
+    pub async fn stock_hsgt_board_rank(
         &self,
         symbol: &str,
         indicator: &str,
@@ -282,7 +282,7 @@ impl AkShareClient {
     }
 
     /// 沪深港通个股详情
-    pub async fn stock_hsgt_individual_detail_em(
+    pub async fn stock_hsgt_individual_detail(
         &self,
         symbol: &str,
         indicator: &str,
@@ -321,8 +321,8 @@ impl AkShareClient {
             .collect())
     }
 
-    /// 沪深港通资金流向-分钟数据 (Python: stock_hsgt_fund_min_em)
-    pub async fn stock_hsgt_fund_min_em(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
+    /// 沪深港通资金流向-分钟数据 (Python: stock_hsgt_fund_min)
+    pub async fn stock_hsgt_fund_min(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let market = match symbol {
             "深股通" | "港股通深" => "2",
             "北向" | "南向" => "3",
@@ -348,8 +348,8 @@ impl AkShareClient {
         Ok(items)
     }
 
-    /// 沪深港通持股-个股 (Python: stock_hsgt_individual_em)
-    pub async fn stock_hsgt_individual_em(
+    /// 沪深港通持股-个股 (Python: stock_hsgt_individual)
+    pub async fn stock_hsgt_individual(
         &self,
         symbol: &str,
     ) -> Result<Vec<HsgtIndividualDetail>> {

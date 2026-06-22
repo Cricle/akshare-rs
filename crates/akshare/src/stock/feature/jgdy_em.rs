@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 机构调研统计
-    pub async fn stock_jgdy_tj_em(&self, date: &str) -> Result<Vec<JgdyTj>> {
+    pub async fn stock_jgdy_tj(&self, date: &str) -> Result<Vec<JgdyTj>> {
         let date_fmt = fmt_date(date);
         let filter = format!("(NUMBERNEW=\"1\")(IS_SOURCE=\"1\")(NOTICE_DATE>'{date_fmt}')");
         let data = self
@@ -40,7 +40,7 @@ impl AkShareClient {
     }
 
     /// 机构调研详细
-    pub async fn stock_jgdy_detail_em(&self, date: &str) -> Result<Vec<JgdyDetail>> {
+    pub async fn stock_jgdy_detail(&self, date: &str) -> Result<Vec<JgdyDetail>> {
         let date_fmt = fmt_date(date);
         let filter = format!("(NOTICE_DATE>'{date_fmt}')");
         let data = self

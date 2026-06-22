@@ -70,8 +70,8 @@ impl AkShareClient {
         Ok(snapshots)
     }
 
-    /// Fetch graded fund daily data (Python: fund_graded_fund_daily_em).
-    pub async fn fund_graded_fund_daily_em(&self) -> Result<Vec<serde_json::Value>> {
+    /// Fetch graded fund daily data (Python: fund_graded_fund_daily).
+    pub async fn fund_graded_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
             .header("Referer", "https://fund.eastmoney.com/fjjj.html")
@@ -141,7 +141,7 @@ impl AkShareClient {
     /// Fetch graded fund info (historical NAV) from Eastmoney.
     ///
     /// `symbol`: graded fund code (e.g. "150232").
-    pub async fn fund_graded_fund_info_em(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
+    pub async fn fund_graded_fund_info(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
         let response = self
             .get("https://api.fund.eastmoney.com/f10/lsjz")
             .header(

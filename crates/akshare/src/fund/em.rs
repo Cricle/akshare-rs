@@ -22,7 +22,7 @@ impl AkShareClient {
     /// Fetch fund purchase/redemption status from Eastmoney.
     ///
     /// Returns up to `limit` funds with their current purchase and redemption status.
-    pub async fn fund_purchase_em(&self, limit: usize) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_purchase(&self, limit: usize) -> Result<Vec<serde_json::Value>> {
         let page = format!("1,{}", limit.max(1));
         let resp = self
             .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
@@ -62,7 +62,7 @@ impl AkShareClient {
     /// Fetch all fund names and types from Eastmoney.
     ///
     /// Returns a list of fund code, name, and type for all available funds.
-    pub async fn fund_name_em(&self) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_name(&self) -> Result<Vec<serde_json::Value>> {
         let resp = self
             .get("https://fund.eastmoney.com/js/fundcode_search.js")
             .send()
@@ -94,7 +94,7 @@ impl AkShareClient {
     ///
     /// `symbol` filters by index category (e.g. "沪深指数", "行业主题").
     /// `indicator` filters by fund type ("被动指数型" or "增强指数型").
-    pub async fn fund_info_index_em(
+    pub async fn fund_info_index(
         &self,
         symbol: &str,
         indicator: &str,

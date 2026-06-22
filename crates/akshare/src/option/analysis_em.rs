@@ -97,7 +97,7 @@ pub struct OptionRiskAnalysisRow {
 
 impl AkShareClient {
     /// Option premium analysis from Eastmoney.
-    pub async fn option_premium_analysis_em(&self) -> Result<Vec<OptionPremiumAnalysisRow>> {
+    pub async fn option_premium_analysis(&self) -> Result<Vec<OptionPremiumAnalysisRow>> {
         let resp = self
             .fetch_em_option_clist(
                 "f250",
@@ -134,7 +134,7 @@ impl AkShareClient {
     }
 
     /// Option value analysis from Eastmoney.
-    pub async fn option_value_analysis_em(&self) -> Result<Vec<OptionValueAnalysisRow>> {
+    pub async fn option_value_analysis(&self) -> Result<Vec<OptionValueAnalysisRow>> {
         let resp = self
             .fetch_em_option_clist(
                 "f301",
@@ -171,7 +171,7 @@ impl AkShareClient {
     }
 
     /// Option risk analysis from Eastmoney.
-    pub async fn option_risk_analysis_em(&self) -> Result<Vec<OptionRiskAnalysisRow>> {
+    pub async fn option_risk_analysis(&self) -> Result<Vec<OptionRiskAnalysisRow>> {
         let resp = self
             .fetch_em_option_clist(
                 "f12",

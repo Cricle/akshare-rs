@@ -6,7 +6,7 @@ use crate::client::AkShareClient;
 use crate::error::Result;
 
 impl AkShareClient {
-    /// 资产负债表 (typed version; for raw JSON see `stock_balance_sheet_by_report_em` in three_report_em)
+    /// 资产负债表 (typed version; for raw JSON see `stock_balance_sheet_by_report` in three_report_em)
     pub async fn stock_balance_sheet_by_report_em_typed(
         &self,
         symbol: &str,

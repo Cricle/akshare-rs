@@ -11,21 +11,21 @@ impl AkShareClient {
     /// Fetch Shanghai exchange bond buyback (质押式回购) list.
     ///
     /// Returns up to `limit` instruments from `m:1+b:MK0356`.
-    pub async fn bond_sh_buy_back_em(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
+    pub async fn bond_sh_buy_back(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
         self.fetch_buyback_list("m:1+b:MK0356", limit).await
     }
 
     /// Fetch Shenzhen exchange bond buyback (质押式回购) list.
     ///
     /// Returns up to `limit` instruments from `m:0+b:MK0356`.
-    pub async fn bond_sz_buy_back_em(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
+    pub async fn bond_sz_buy_back(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
         self.fetch_buyback_list("m:0+b:MK0356", limit).await
     }
 
     /// Fetch historical daily candles for a bond buyback instrument.
     ///
     /// Uses Eastmoney kline API. `symbol` is the 6-digit code (e.g. "204001").
-    pub async fn bond_buy_back_hist_em(
+    pub async fn bond_buy_back_hist(
         &self,
         symbol: &str,
         limit: usize,

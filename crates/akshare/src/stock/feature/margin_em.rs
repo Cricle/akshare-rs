@@ -359,7 +359,7 @@ impl AkShareClient {
     }
 
     /// 深圳证券交易所-标的证券信息
-    pub async fn stock_margin_underlying_info_szse(
+    pub async fn stock_margin_underlying_info(
         &self,
         date: &str,
     ) -> Result<Vec<MarginUnderlyingInfoSzse>> {

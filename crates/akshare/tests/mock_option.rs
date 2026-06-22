@@ -30,5 +30,5 @@ macro_rules! macro_test_arg1 {
     };
 }
 
-macro_test!(test_mock_option_current_em, option_current_em);
-macro_test_arg1!(test_mock_option_minute_em, option_minute_em, "10000001");
+macro_test!(test_mock_option_current_em, option_current);
+macro_test_arg1!(test_mock_option_minute_em, option_minute, "10000001");

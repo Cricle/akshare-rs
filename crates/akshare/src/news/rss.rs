@@ -71,7 +71,7 @@ impl AkShareClient {
     ///
     /// Queries `cn.bing.com/search?q=...&format=rss` and parses the RSS response.
     /// Filters out items whose title contains "必应" or "Bing".
-    pub async fn bing_news_rss(&self, query: &str, timeout_secs: u64) -> Result<Vec<NewsItem>> {
+    pub async fn bing_news(&self, query: &str, timeout_secs: u64) -> Result<Vec<NewsItem>> {
         self.bing_news_rss_with_lang(query, timeout_secs, None)
             .await
     }
@@ -115,7 +115,7 @@ impl AkShareClient {
     /// Fetch news from Google News RSS search.
     ///
     /// Queries `news.google.com/rss/search?q=...&hl=en-US&gl=US&ceid=US:en`.
-    pub async fn google_news_rss(&self, query: &str, timeout_secs: u64) -> Result<Vec<NewsItem>> {
+    pub async fn google_news(&self, query: &str, timeout_secs: u64) -> Result<Vec<NewsItem>> {
         let gnews_url = format!(
             "https://news.google.com/rss/search?q={}&hl=en-US&gl=US&ceid=US:en",
             query.replace(' ', "+")
@@ -135,7 +135,7 @@ impl AkShareClient {
         .await
         .map_err(crate::Error::from)?;
 
-        Ok(parse_rss_items(&body, "google_news_rss", &[]))
+        Ok(parse_rss_items(&body, "google_news", &[]))
     }
 
     /// Fetch stock-specific news from Seeking Alpha RSS.

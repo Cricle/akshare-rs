@@ -5,9 +5,9 @@
 //! - `stock_zh_a_daily` — Daily candles (Sina, via Eastmoney kline)
 //! - `stock_zh_a_minute` — Minute candles (Sina)
 //! - `stock_zh_a_new` — New stock list (Sina)
-//! - `stock_zh_a_stop_em` — Stopped/delisted stocks (Eastmoney)
+//! - `stock_zh_a_stop` — Stopped/delisted stocks (Eastmoney)
 //! - `stock_zh_a_cdr_daily` — CDR daily data
-//! - `stock_zh_a_hist_pre_min_em` — Pre-market minute data (Eastmoney)
+//! - `stock_zh_a_hist_pre_min` — Pre-market minute data (Eastmoney)
 //! - `stock_zh_a_hist_tx` — Tencent historical data
 //! - `stock_zh_a_tick_tx_js` — Tencent tick data
 
@@ -443,8 +443,8 @@ impl AkShareClient {
 
     /// Get stopped/delisted stocks from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_a_stop_em()`
-    pub async fn stock_zh_a_stop_em(&self) -> Result<Vec<ZhAStopStock>> {
+    /// Python equivalent: `stock_zh_a_stop()`
+    pub async fn stock_zh_a_stop(&self) -> Result<Vec<ZhAStopStock>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<EnvData>,
@@ -556,10 +556,10 @@ impl AkShareClient {
 
     /// Get pre-market minute data from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_a_hist_pre_min_em(symbol, start_time, end_time)`
+    /// Python equivalent: `stock_zh_a_hist_pre_min(symbol, start_time, end_time)`
     ///
     /// Uses the Eastmoney trends API for pre-market data.
-    pub async fn stock_zh_a_hist_pre_min_em(
+    pub async fn stock_zh_a_hist_pre_min(
         &self,
         symbol: &str,
         _start_time: &str,

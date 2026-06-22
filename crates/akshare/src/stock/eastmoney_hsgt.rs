@@ -2,7 +2,7 @@
 //! Eastmoney HSGT (沪深港通) data — northbound/southbound flows, quota.
 //!
 //! Covers Python functions:
-//! - `stock_hsgt_fund_flow_summary_em` — HSGT fund flow summary
+//! - `stock_hsgt_fund_flow_summary` — HSGT fund flow summary
 //! - `stock_hsgt_north_net_flow_in_em` — Northbound net flow
 //! - `stock_hsgt_south_net_flow_in_em` — Southbound net flow
 //! - `stock_hsgt_north_acc_flow_in_em` — Northbound accumulated flow
@@ -52,7 +52,7 @@ impl AkShareClient {
     /// Get HSGT fund flow summary (KAMT kline) from Eastmoney.
     ///
     /// For the comprehensive datacenter version, see `feature::hsgt_em`.
-    pub async fn stock_hsgt_kamt_flow_em(&self, limit: usize) -> Result<Vec<HsgtFlowEntry>> {
+    pub async fn stock_hsgt_kamt_flow(&self, limit: usize) -> Result<Vec<HsgtFlowEntry>> {
         self.fetch_hsgt_flow(
             "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64",
             limit,
@@ -61,7 +61,7 @@ impl AkShareClient {
     }
 
     /// Get northbound net flow data from Eastmoney (KAMT kline).
-    pub async fn stock_hsgt_north_net_flow_kamt_em(
+    pub async fn stock_hsgt_north_net_flow_kamt(
         &self,
         limit: usize,
     ) -> Result<Vec<HsgtFlowEntry>> {
@@ -73,7 +73,7 @@ impl AkShareClient {
     }
 
     /// Get southbound net flow data from Eastmoney (KAMT kline).
-    pub async fn stock_hsgt_south_net_flow_kamt_em(
+    pub async fn stock_hsgt_south_net_flow_kamt(
         &self,
         limit: usize,
     ) -> Result<Vec<HsgtFlowEntry>> {

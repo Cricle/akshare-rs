@@ -63,7 +63,7 @@ impl AkShareClient {
     /// - "\u{9009}\u{6743}\u{4ea4}\u{6613}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{4ea4}\u{6613}\u{91cf}"
     /// - "\u{9009}\u{6743}\u{6301}\u{4ed3}\u{60c5}\u{51b5}-\u{8ba4}\u{8d2d}\u{6301}\u{4ed3}\u{91cf}"
     ///   `trade_date` is "YYYYMMDD".
-    pub async fn option_lhb_em(
+    pub async fn option_lhb(
         &self,
         symbol: &str,
         indicator: &str,

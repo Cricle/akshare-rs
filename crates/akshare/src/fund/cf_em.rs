@@ -5,10 +5,10 @@ use crate::error::{Error, Result};
 use crate::types::FundSplitItem;
 
 impl AkShareClient {
-    /// Fetch fund split data (Python: fund_cf_em).
+    /// Fetch fund split data (Python: fund_cf).
     ///
     /// `year`: query year (e.g. "2025").
-    pub async fn fund_cf_em(&self, year: &str) -> Result<Vec<FundSplitItem>> {
+    pub async fn fund_cf(&self, year: &str) -> Result<Vec<FundSplitItem>> {
         let response = self
             .get("https://fund.eastmoney.com/Data/funddataIndex_Interface.aspx")
             .query(&[

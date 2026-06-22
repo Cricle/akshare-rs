@@ -14,7 +14,7 @@ impl AkShareClient {
     /// - `"nf_SC0"` — Crude oil (Shanghai INE)
     /// - `"nf_RB0"` — Rebar
     /// - `"nf_IF0"` — CSI 300 index futures
-    pub async fn futures_main_sina(&self, symbol: &str, limit: usize) -> Result<Vec<CandlePoint>> {
+    pub async fn futures_main(&self, symbol: &str, limit: usize) -> Result<Vec<CandlePoint>> {
         let url = format!(
             "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_=/InnerFuturesNewService.getDailyKLine?symbol={symbol}&_={}",
             chrono::Utc::now().timestamp_millis()
@@ -261,7 +261,7 @@ impl AkShareClient {
     ///
     /// `symbol`: contract code like "IF2008", "RB0"
     /// `period`: "1", "5", "15", "30", "60" for 1/5/15/30/60 minute bars
-    pub async fn futures_zh_minute_sina(&self, symbol: &str, period: &str) -> Result<Vec<Row>> {
+    pub async fn futures_zh_minute(&self, symbol: &str, period: &str) -> Result<Vec<Row>> {
         let url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/=/InnerFuturesNewService.getFewMinLine";
         let body = self
             .get(url)
@@ -306,7 +306,7 @@ impl AkShareClient {
     /// Daily kline data for a specific futures contract from Sina.
     ///
     /// `symbol`: contract code like "RB0", "V2105"
-    pub async fn futures_zh_daily_sina(&self, symbol: &str) -> Result<Vec<Row>> {
+    pub async fn futures_zh_daily(&self, symbol: &str) -> Result<Vec<Row>> {
         let date = chrono::Utc::now().format("%Y%m%d").to_string();
         let date_formatted = format!("{}_{}_{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_dummy=/InnerFuturesNewService.getDailyKLine";

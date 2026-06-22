@@ -5,8 +5,8 @@ use crate::error::{Error, Result};
 use crate::types::FundScaleChangeItem;
 
 impl AkShareClient {
-    /// Fetch fund scale change data (Python: fund_scale_change_em).
-    pub async fn fund_scale_change_em(&self) -> Result<Vec<FundScaleChangeItem>> {
+    /// Fetch fund scale change data (Python: fund_scale_change).
+    pub async fn fund_scale_change(&self) -> Result<Vec<FundScaleChangeItem>> {
         let response = self
             .get("https://fund.eastmoney.com/data/FundDataPortfolio_Interface.aspx")
             .query(&[

@@ -172,7 +172,7 @@ impl AkShareClient {
 }
 
 // ---------------------------------------------------------------------------
-// Return types for option_current_em / option_current_cffex_em
+// Return types for option_current / option_current_cffex
 // ---------------------------------------------------------------------------
 
 /// Option current day data from Eastmoney (push2 clist API).
@@ -223,7 +223,7 @@ struct FutsseapiEnvelope {
 }
 
 // ---------------------------------------------------------------------------
-// Implementation — option_current_em / option_current_cffex_em / option_minute_em
+// Implementation — option_current / option_current_cffex / option_minute
 // ---------------------------------------------------------------------------
 
 impl AkShareClient {
@@ -231,7 +231,7 @@ impl AkShareClient {
     ///
     /// Fetches SSE/SZSE options via push2 clist API and CFFEX options via futsseapi,
     /// then combines them into a single list.
-    pub async fn option_current_em(&self) -> Result<Vec<OptionCurrentEmRow>> {
+    pub async fn option_current(&self) -> Result<Vec<OptionCurrentEmRow>> {
         let mut all_rows = Vec::new();
 
         // Part 1: SSE/SZSE options via push2 clist
@@ -239,7 +239,7 @@ impl AkShareClient {
         all_rows.extend(sse_rows);
 
         // Part 2: CFFEX options via futsseapi
-        let cffex_rows = self.option_current_cffex_em().await?;
+        let cffex_rows = self.option_current_cffex().await?;
         all_rows.extend(cffex_rows);
 
         // Re-number
@@ -251,7 +251,7 @@ impl AkShareClient {
     }
 
     /// CFFEX options from Eastmoney (futsseapi).
-    pub async fn option_current_cffex_em(&self) -> Result<Vec<OptionCurrentEmRow>> {
+    pub async fn option_current_cffex(&self) -> Result<Vec<OptionCurrentEmRow>> {
         let url = "https://futsseapi.eastmoney.com/list/option/221";
 
         let resp: FutsseapiEnvelope = self
@@ -302,7 +302,7 @@ impl AkShareClient {
     /// Option minute (intraday trend) data from Eastmoney.
     ///
     /// `symbol` is the option code, e.g. "MO2404-P-4450".
-    pub async fn option_minute_em(&self, symbol: &str) -> Result<Vec<OptionMinuteRow>> {
+    pub async fn option_minute(&self, symbol: &str) -> Result<Vec<OptionMinuteRow>> {
         // First, look up the market id from the current options list
         let current = self.fetch_em_option_clist_current().await?;
         let option = current

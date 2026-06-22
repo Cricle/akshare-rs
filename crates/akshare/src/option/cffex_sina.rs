@@ -96,25 +96,25 @@ impl AkShareClient {
     /// CFFEX SZ50 index option contract list from Sina.
     ///
     /// Returns a map of index name to contract list (first contract is the main contract).
-    pub async fn option_cffex_sz50_list_sina(&self) -> Result<Vec<(String, Vec<String>)>> {
+    pub async fn option_cffex_sz50_list(&self) -> Result<Vec<(String, Vec<String>)>> {
         let url = "https://stock.finance.sina.com.cn/futures/view/optionsCffexDP.php/ho/cffex";
         self.fetch_cffex_list_sina(url, 0).await
     }
 
     /// CFFEX HS300 index option contract list from Sina.
-    pub async fn option_cffex_hs300_list_sina(&self) -> Result<Vec<(String, Vec<String>)>> {
+    pub async fn option_cffex_hs300_list(&self) -> Result<Vec<(String, Vec<String>)>> {
         let url = "https://stock.finance.sina.com.cn/futures/view/optionsCffexDP.php";
         self.fetch_cffex_list_sina(url, 1).await
     }
 
     /// CFFEX ZZ1000 index option contract list from Sina.
-    pub async fn option_cffex_zz1000_list_sina(&self) -> Result<Vec<(String, Vec<String>)>> {
+    pub async fn option_cffex_zz1000_list(&self) -> Result<Vec<(String, Vec<String>)>> {
         let url = "https://stock.finance.sina.com.cn/futures/view/optionsCffexDP.php/mo/cffex";
         self.fetch_cffex_list_sina(url, 2).await
     }
 
     /// CFFEX SZ50 index option spot (real-time call/put pairs) from Sina.
-    pub async fn option_cffex_sz50_spot_sina(
+    pub async fn option_cffex_sz50_spot(
         &self,
         symbol: &str,
     ) -> Result<Vec<CffexOptionSpotRow>> {
@@ -122,7 +122,7 @@ impl AkShareClient {
     }
 
     /// CFFEX HS300 index option spot (real-time call/put pairs) from Sina.
-    pub async fn option_cffex_hs300_spot_sina(
+    pub async fn option_cffex_hs300_spot(
         &self,
         symbol: &str,
     ) -> Result<Vec<CffexOptionSpotRow>> {
@@ -130,7 +130,7 @@ impl AkShareClient {
     }
 
     /// CFFEX ZZ1000 index option spot (real-time call/put pairs) from Sina.
-    pub async fn option_cffex_zz1000_spot_sina(
+    pub async fn option_cffex_zz1000_spot(
         &self,
         symbol: &str,
     ) -> Result<Vec<CffexOptionSpotRow>> {
@@ -140,7 +140,7 @@ impl AkShareClient {
     /// CFFEX SZ50 index option daily kline from Sina.
     ///
     /// `symbol` is the contract code including call/put identifier, e.g. "ho2303P2350".
-    pub async fn option_cffex_sz50_daily_sina(
+    pub async fn option_cffex_sz50_daily(
         &self,
         symbol: &str,
     ) -> Result<Vec<CffexOptionDailyRow>> {
@@ -148,7 +148,7 @@ impl AkShareClient {
     }
 
     /// CFFEX HS300 index option daily kline from Sina.
-    pub async fn option_cffex_hs300_daily_sina(
+    pub async fn option_cffex_hs300_daily(
         &self,
         symbol: &str,
     ) -> Result<Vec<CffexOptionDailyRow>> {
@@ -156,7 +156,7 @@ impl AkShareClient {
     }
 
     /// CFFEX ZZ1000 index option daily kline from Sina.
-    pub async fn option_cffex_zz1000_daily_sina(
+    pub async fn option_cffex_zz1000_daily(
         &self,
         symbol: &str,
     ) -> Result<Vec<CffexOptionDailyRow>> {

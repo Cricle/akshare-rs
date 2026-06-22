@@ -5,8 +5,8 @@ use crate::error::{Error, Result};
 use crate::types::FundHkRankItem;
 
 impl AkShareClient {
-    /// Fetch HK fund ranking (Python: fund_hk_rank_em).
-    pub async fn fund_hk_rank_em(&self) -> Result<Vec<FundHkRankItem>> {
+    /// Fetch HK fund ranking (Python: fund_hk_rank).
+    pub async fn fund_hk_rank(&self) -> Result<Vec<FundHkRankItem>> {
         let format_date = chrono::Utc::now().format("%Y-%m-%d").to_string();
         let response = self
             .get("https://overseas.1234567.com.cn/overseasapi/OpenApiHander.ashx")
@@ -74,11 +74,11 @@ impl AkShareClient {
         Ok(result)
     }
 
-    /// Fetch HK fund historical NAV (Python: fund_hk_fund_hist_em).
+    /// Fetch HK fund historical NAV (Python: fund_hk_fund_hist).
     ///
-    /// `code`: HK fund code (from fund_hk_rank_em).
+    /// `code`: HK fund code (from fund_hk_rank).
     /// `symbol`: "历史净值明细" or "分红送配详情".
-    pub async fn fund_hk_fund_hist_em(
+    pub async fn fund_hk_fund_hist(
         &self,
         code: &str,
         symbol: &str,

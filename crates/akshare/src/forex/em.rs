@@ -88,7 +88,7 @@ impl AkShareClient {
     /// Forex spot (real-time) data from Eastmoney.
     ///
     /// Returns all forex spot prices from Eastmoney.
-    pub async fn forex_spot_em(&self) -> Result<Vec<ForexRate>> {
+    pub async fn forex_spot(&self) -> Result<Vec<ForexRate>> {
         self.forex_em_rates().await
     }
 
@@ -99,7 +99,7 @@ impl AkShareClient {
     /// `start_date`: format YYYYMMDD (currently unused; returns recent data)
     /// `end_date`: format YYYYMMDD (currently unused)
     /// `adjust`: "qfq", "hfq", or "" (forward/backward adjust)
-    pub async fn forex_hist_em(
+    pub async fn forex_hist(
         &self,
         symbol: &str,
         period: &str,

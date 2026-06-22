@@ -61,7 +61,7 @@ impl AkShareClient {
     /// Baidu economic calendar news.
     ///
     /// `symbol`: event name filter (e.g., "中国", "美国")
-    pub async fn news_economic_baidu(&self, symbol: &str) -> Result<Vec<Row>> {
+    pub async fn news_economic(&self, symbol: &str) -> Result<Vec<Row>> {
         let url = "https://gushitong.baidu.com/opendata";
         let body = self
             .get(url)
@@ -110,7 +110,7 @@ impl AkShareClient {
     /// Baidu report time data for a given stock symbol.
     ///
     /// `symbol`: stock code (e.g., "600000")
-    pub async fn news_report_time_baidu(&self, symbol: &str) -> Result<Vec<Row>> {
+    pub async fn news_report_time(&self, symbol: &str) -> Result<Vec<Row>> {
         let url = "https://gushitong.baidu.com/opendata";
         let body = self
             .get(url)
@@ -159,7 +159,7 @@ impl AkShareClient {
     /// Baidu dividend notification data.
     ///
     /// `date`: format YYYYMMDD
-    pub async fn news_trade_notify_dividend_baidu(&self, date: &str) -> Result<Vec<Row>> {
+    pub async fn news_trade_notify_dividend(&self, date: &str) -> Result<Vec<Row>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://gushitong.baidu.com/opendata";
         let body = self
@@ -210,7 +210,7 @@ impl AkShareClient {
     /// Baidu stock suspension notification data.
     ///
     /// `date`: format YYYYMMDD
-    pub async fn news_trade_notify_suspend_baidu(&self, date: &str) -> Result<Vec<Row>> {
+    pub async fn news_trade_notify_suspend(&self, date: &str) -> Result<Vec<Row>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
         let url = "https://gushitong.baidu.com/opendata";
         let body = self

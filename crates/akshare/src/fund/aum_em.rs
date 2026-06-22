@@ -5,8 +5,8 @@ use crate::error::{Error, Result};
 use crate::types::{FundAumCompanyItem, FundAumHistItem, FundAumTrendPoint};
 
 impl AkShareClient {
-    /// Fetch fund company AUM ranking (Python: fund_aum_em).
-    pub async fn fund_aum_em(&self) -> Result<Vec<FundAumCompanyItem>> {
+    /// Fetch fund company AUM ranking (Python: fund_aum).
+    pub async fn fund_aum(&self) -> Result<Vec<FundAumCompanyItem>> {
         let response = self
             .get("https://fund.eastmoney.com/Company/home/gspmlist")
             .query(&[("fundType", "0")])
@@ -43,8 +43,8 @@ impl AkShareClient {
         Ok(result)
     }
 
-    /// Fetch fund market AUM trend (Python: fund_aum_trend_em).
-    pub async fn fund_aum_trend_em(&self) -> Result<Vec<FundAumTrendPoint>> {
+    /// Fetch fund market AUM trend (Python: fund_aum_trend).
+    pub async fn fund_aum_trend(&self) -> Result<Vec<FundAumTrendPoint>> {
         let response = self
             .get("https://fund.eastmoney.com/Company/home/GetFundTotalScaleForChart")
             .send()
@@ -76,8 +76,8 @@ impl AkShareClient {
         Ok(result)
     }
 
-    /// Fetch fund company historical AUM ranking (Python: fund_aum_hist_em).
-    pub async fn fund_aum_hist_em(&self, year: &str) -> Result<Vec<FundAumHistItem>> {
+    /// Fetch fund company historical AUM ranking (Python: fund_aum_hist).
+    pub async fn fund_aum_hist(&self, year: &str) -> Result<Vec<FundAumHistItem>> {
         let response = self
             .get("https://fund.eastmoney.com/Company/home/HistoryScaleTable")
             .query(&[("year", year)])

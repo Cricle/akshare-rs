@@ -449,7 +449,7 @@ async fn test_index_global_candles() {
 async fn test_index_global_spot_em() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.index_global_spot_em().await;
+    let result = client.index_global_spot().await;
     let _ = result;
 }
 
@@ -560,7 +560,7 @@ async fn test_index_hk_daily_em() {
     )
     .await;
     let client = mock_client(&server);
-    let result = client.index_hk_daily_em("HSI", "100", 10).await;
+    let result = client.index_hk_daily("HSI", "100", 10).await;
     let _ = result;
 }
 
@@ -929,7 +929,7 @@ async fn test_index_analysis_monthly_sw() {
 async fn test_index_us_stock_sina() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.index_us_stock_sina("SPX").await;
+    let result = client.index_us_stock("SPX").await;
     assert!(result.is_err());
 }
 
@@ -977,7 +977,7 @@ async fn test_index_yw_invalid() {
 async fn test_index_code_id_map_em() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.index_code_id_map_em().await;
+    let result = client.index_code_id_map().await;
     let _ = result;
 }
 

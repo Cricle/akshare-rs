@@ -19,7 +19,7 @@ impl AkShareClient {
     /// Fetch ETF fund daily listing data from Eastmoney.
     ///
     /// Returns up to `limit` ETF funds with latest NAV and change percentage.
-    pub async fn fund_etf_fund_daily_em(&self, limit: usize) -> Result<Vec<FundSnapshot>> {
+    pub async fn fund_etf_fund_daily(&self, limit: usize) -> Result<Vec<FundSnapshot>> {
         let pz = limit.max(1).to_string();
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
@@ -154,7 +154,7 @@ impl AkShareClient {
     /// `period`: "1", "5", "15", "30", or "60".
     /// `start_date` / `end_date`: format "YYYY-MM-DD HH:MM:SS".
     /// `adjust`: "", "qfq", or "hfq".
-    pub async fn fund_etf_hist_min_em(
+    pub async fn fund_etf_hist_min(
         &self,
         symbol: &str,
         period: &str,
@@ -388,7 +388,7 @@ impl AkShareClient {
     ///
     /// `fund`: ETF fund code (e.g. "511280").
     /// `start_date` / `end_date`: format "YYYYMMDD".
-    pub async fn fund_etf_fund_info_em(
+    pub async fn fund_etf_fund_info(
         &self,
         fund: &str,
         start_date: &str,
@@ -623,7 +623,7 @@ impl AkShareClient {
     /// Fetch Sina ETF dividend data.
     ///
     /// `symbol`: e.g. "sh510050" (with exchange prefix).
-    pub async fn fund_etf_dividend_sina(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_etf_dividend(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let factor_url = format!("https://finance.sina.com.cn/realstock/company/{symbol}/hfq.js");
         let response = self
             .get(&factor_url)

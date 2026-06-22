@@ -401,7 +401,7 @@ impl AkShareClient {
     /// Sina futures position data for a single contract.
     ///
     /// `data_type`: "成交量", "多单持仓", or "空单持仓"
-    pub async fn futures_hold_pos_sina(
+    pub async fn futures_hold_pos(
         &self,
         data_type: &str,
         contract: &str,

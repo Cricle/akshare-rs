@@ -94,7 +94,7 @@ async fn test_stock_margin_underlying_info_szse() {
     }]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_margin_underlying_info_szse("20240101").await;
+    let result = client.stock_margin_underlying_info("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -108,7 +108,7 @@ async fn test_stock_rank_cxd_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_cxd_ths().await;
+    let result = client.stock_rank_cxd().await;
     assert!(result.is_ok());
 }
 
@@ -118,7 +118,7 @@ async fn test_stock_rank_cxfl_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_cxfl_ths().await;
+    let result = client.stock_rank_cxfl().await;
     assert!(result.is_ok());
 }
 
@@ -128,7 +128,7 @@ async fn test_stock_rank_cxg_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_cxg_ths().await;
+    let result = client.stock_rank_cxg().await;
     assert!(result.is_ok());
 }
 
@@ -138,7 +138,7 @@ async fn test_stock_rank_cxsl_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_cxsl_ths().await;
+    let result = client.stock_rank_cxsl().await;
     assert!(result.is_ok());
 }
 
@@ -148,7 +148,7 @@ async fn test_stock_rank_forecast_cninfo() {
     let body = serde_json::json!({"records": [{"test": true}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_forecast_cninfo("20240101").await;
+    let result = client.stock_rank_forecast("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -158,7 +158,7 @@ async fn test_stock_rank_ljqd_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_ljqd_ths().await;
+    let result = client.stock_rank_ljqd().await;
     assert!(result.is_ok());
 }
 
@@ -168,7 +168,7 @@ async fn test_stock_rank_ljqs_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_ljqs_ths().await;
+    let result = client.stock_rank_ljqs().await;
     assert!(result.is_ok());
 }
 
@@ -178,7 +178,7 @@ async fn test_stock_rank_lxsz_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_lxsz_ths().await;
+    let result = client.stock_rank_lxsz().await;
     assert!(result.is_ok());
 }
 
@@ -188,7 +188,7 @@ async fn test_stock_rank_lxxd_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_lxxd_ths().await;
+    let result = client.stock_rank_lxxd().await;
     assert!(result.is_ok());
 }
 
@@ -198,7 +198,7 @@ async fn test_stock_rank_xstp_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_xstp_ths().await;
+    let result = client.stock_rank_xstp().await;
     assert!(result.is_ok());
 }
 
@@ -208,7 +208,7 @@ async fn test_stock_rank_xxtp_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_xxtp_ths().await;
+    let result = client.stock_rank_xxtp().await;
     assert!(result.is_ok());
 }
 
@@ -218,7 +218,7 @@ async fn test_stock_rank_xzjp_ths() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_rank_xzjp_ths().await;
+    let result = client.stock_rank_xzjp().await;
     assert!(result.is_ok());
 }
 
@@ -236,7 +236,7 @@ async fn test_stock_register_all_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_register_all_em().await;
+    let result = client.stock_register_all().await;
     assert!(result.is_ok());
 }
 
@@ -383,7 +383,7 @@ async fn test_stock_gpzy_distribute_statistics_bank_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gpzy_distribute_statistics_bank_em().await;
+    let result = client.stock_gpzy_distribute_statistics_bank().await;
     assert!(result.is_ok());
 }
 
@@ -396,7 +396,7 @@ async fn test_stock_gpzy_distribute_statistics_company_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gpzy_distribute_statistics_company_em().await;
+    let result = client.stock_gpzy_distribute_statistics_company().await;
     assert!(result.is_ok());
 }
 
@@ -411,7 +411,7 @@ async fn test_stock_gpzy_individual_pledge_ratio_detail_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_gpzy_individual_pledge_ratio_detail_em("000001")
+        .stock_gpzy_individual_pledge_ratio_detail("000001")
         .await;
     assert!(result.is_ok());
 }
@@ -425,7 +425,7 @@ async fn test_stock_gpzy_industry_data_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gpzy_industry_data_em().await;
+    let result = client.stock_gpzy_industry_data().await;
     assert!(result.is_ok());
 }
 
@@ -439,7 +439,7 @@ async fn test_stock_gpzy_pledge_ratio_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gpzy_pledge_ratio_detail_em().await;
+    let result = client.stock_gpzy_pledge_ratio_detail().await;
     assert!(result.is_ok());
 }
 
@@ -453,7 +453,7 @@ async fn test_stock_hold_change_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "holder": "Test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hold_change_cninfo("000001").await;
+    let result = client.stock_hold_change("000001").await;
     assert!(result.is_ok());
 }
 
@@ -463,7 +463,7 @@ async fn test_stock_hold_control_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "controller": "Test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hold_control_cninfo("000001").await;
+    let result = client.stock_hold_control("000001").await;
     assert!(result.is_ok());
 }
 
@@ -493,7 +493,7 @@ async fn test_stock_hold_management_person_em() {
     let body = serde_json::json!([{"name": "Test", "position": "CEO"}]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hold_management_person_em("SZ000001").await;
+    let result = client.stock_hold_management_person("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -503,7 +503,7 @@ async fn test_stock_hold_num_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "holder_num": 10000}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hold_num_cninfo("000001", "20240101").await;
+    let result = client.stock_hold_num("000001", "20240101").await;
     assert!(result.is_ok());
 }
 
@@ -517,7 +517,7 @@ async fn test_stock_industry_category_cninfo() {
     let body = serde_json::json!({"records": [{"INDUSTRYCODE": "01", "INDUSTRYNAME": "Bank", "CATALOGNAME": "Finance"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_industry_category_cninfo().await;
+    let result = client.stock_industry_category().await;
     assert!(result.is_ok());
 }
 
@@ -527,7 +527,7 @@ async fn test_stock_industry_change_cninfo() {
     let body = serde_json::json!({"records": [{"indcode": "01", "change": "test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_industry_change_cninfo("01").await;
+    let result = client.stock_industry_change("01").await;
     assert!(result.is_ok());
 }
 
@@ -546,7 +546,7 @@ async fn test_stock_industry_pe_ratio_cninfo() {
     let body = serde_json::json!({"records": [{"indcode": "01", "pe_ratio": 15.0}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_industry_pe_ratio_cninfo("01").await;
+    let result = client.stock_industry_pe_ratio("01").await;
     assert!(result.is_ok());
 }
 
@@ -647,7 +647,7 @@ async fn test_stock_lhb_detail_daily_sina() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_detail_daily_sina("20240101").await;
+    let result = client.stock_lhb_detail_daily("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -656,7 +656,7 @@ async fn test_stock_lhb_ggtj_sina() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_ggtj_sina().await;
+    let result = client.stock_lhb_ggtj().await;
     assert!(result.is_ok());
 }
 
@@ -665,7 +665,7 @@ async fn test_stock_lhb_jgmx_sina() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_jgmx_sina().await;
+    let result = client.stock_lhb_jgmx().await;
     assert!(result.is_ok());
 }
 
@@ -674,7 +674,7 @@ async fn test_stock_lhb_jgzz_sina() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_jgzz_sina("5").await;
+    let result = client.stock_lhb_jgzz("5").await;
     assert!(result.is_ok());
 }
 
@@ -683,7 +683,7 @@ async fn test_stock_lhb_yytj_sina() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_yytj_sina("5").await;
+    let result = client.stock_lhb_yytj("5").await;
     assert!(result.is_ok());
 }
 
@@ -801,7 +801,7 @@ async fn test_stock_account_statistics_em() {
     let body = em_datacenter_response(vec![serde_json::json!({"STATISTICS_DATE": "2024-01-01"})]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_account_statistics_em().await;
+    let result = client.stock_account_statistics().await;
     assert!(result.is_ok());
 }
 
@@ -811,7 +811,7 @@ async fn test_stock_allotment_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_allotment_cninfo("000001").await;
+    let result = client.stock_allotment("000001").await;
     assert!(result.is_ok());
 }
 
@@ -901,7 +901,7 @@ async fn test_stock_classify_sina() {
     let body = serde_json::json!([{"symbol": "sh600000", "name": "Test"}]);
     mock_any_get_text(&server, ".*", &body.to_string()).await;
     let client = mock_client(&server);
-    let result = client.stock_classify_sina("new_dlhy").await;
+    let result = client.stock_classify("new_dlhy").await;
     assert!(result.is_ok());
 }
 
@@ -921,7 +921,7 @@ async fn test_stock_cyq_em() {
     let body = serde_json::json!({"data": {"klines": ["2024-01-02,10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2"]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cyq_em("000001", "qfq").await;
+    let result = client.stock_cyq("000001", "qfq").await;
     assert!(result.is_ok());
 }
 
@@ -931,7 +931,7 @@ async fn test_stock_dividend_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "bonus": "10派5"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_dividend_cninfo("000001").await;
+    let result = client.stock_dividend("000001").await;
     assert!(result.is_ok());
 }
 
@@ -950,7 +950,7 @@ async fn test_stock_esg_rate_sina() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html><body>ESG</body></html>").await;
     let client = mock_client(&server);
-    let result = client.stock_esg_rate_sina("600000").await;
+    let result = client.stock_esg_rate("600000").await;
     assert!(result.is_ok());
 }
 
@@ -973,7 +973,7 @@ async fn test_stock_gddh_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gddh_em().await;
+    let result = client.stock_gddh().await;
     assert!(result.is_ok());
 }
 
@@ -982,7 +982,7 @@ async fn test_stock_ipo_benefit_ths() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     // No HTTP needed, returns hardcoded
-    let result = client.stock_ipo_benefit_ths().await;
+    let result = client.stock_ipo_benefit().await;
     assert!(result.is_ok());
 }
 
@@ -992,7 +992,7 @@ async fn test_stock_ipo_summary_cninfo() {
     let body = serde_json::json!({"records": [{"code": "000001", "name": "Test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_ipo_summary_cninfo().await;
+    let result = client.stock_ipo_summary().await;
     assert!(result.is_ok());
 }
 
@@ -1032,7 +1032,7 @@ async fn test_stock_new_gh_cninfo() {
     let body = serde_json::json!({"records": [{"code": "000001", "name": "Test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_new_gh_cninfo().await;
+    let result = client.stock_new_gh().await;
     assert!(result.is_ok());
 }
 
@@ -1042,7 +1042,7 @@ async fn test_stock_new_ipo_cninfo() {
     let body = serde_json::json!({"records": [{"code": "000001", "name": "Test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_new_ipo_cninfo().await;
+    let result = client.stock_new_ipo().await;
     assert!(result.is_ok());
 }
 
@@ -1051,7 +1051,7 @@ async fn test_stock_news_em() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "jQuery12345({})").await;
     let client = mock_client(&server);
-    let result = client.stock_news_em("000001").await;
+    let result = client.stock_news("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1080,7 +1080,7 @@ async fn test_stock_profile_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "name": "Test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_profile_cninfo("000001").await;
+    let result = client.stock_profile("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1092,7 +1092,7 @@ async fn test_stock_qsjy_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_qsjy_em("20240101").await;
+    let result = client.stock_qsjy("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -1124,7 +1124,7 @@ async fn test_stock_research_report_em() {
     let body = serde_json::json!({"data": [{"stockCode": "000001", "stockName": "Test", "title": "Report", "orgSName": "Org", "publishDate": "2024-01-01"}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_research_report_em("000001").await;
+    let result = client.stock_research_report("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1162,7 +1162,7 @@ async fn test_stock_share_change_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "change": "test"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_share_change_cninfo("000001").await;
+    let result = client.stock_share_change("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1224,7 +1224,7 @@ async fn test_stock_sy_hy_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_sy_hy_em().await;
+    let result = client.stock_sy_hy().await;
     assert!(result.is_ok());
 }
 
@@ -1268,7 +1268,7 @@ async fn test_stock_tfp_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_tfp_em("20240101").await;
+    let result = client.stock_tfp("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -1284,7 +1284,7 @@ async fn test_stock_value_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_value_em("000001").await;
+    let result = client.stock_value("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1295,7 +1295,7 @@ async fn test_stock_xgsr_ths() {
         serde_json::json!({"data": [{"ipo_date": "2024-01-01", "listing_date": "2024-01-15"}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_xgsr_ths("600000").await;
+    let result = client.stock_xgsr("600000").await;
     assert!(result.is_ok());
 }
 
@@ -1309,7 +1309,7 @@ async fn test_stock_yzxdr_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_yzxdr_em("20240101").await;
+    let result = client.stock_yzxdr("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -1322,7 +1322,7 @@ async fn test_stock_zdhtmx_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_zdhtmx_em("20240101", "20240131").await;
+    let result = client.stock_zdhtmx("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 
@@ -1333,7 +1333,7 @@ async fn test_stock_zcfz_bj_em() {
         serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_zcfz_bj_em("SZ000001").await;
+    let result = client.stock_zcfz_bj("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -1371,7 +1371,7 @@ async fn test_stock_analyst_detail_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_analyst_detail_em("A001", "最新跟踪成分股")
+        .stock_analyst_detail("A001", "最新跟踪成分股")
         .await;
     assert!(result.is_ok());
 }
@@ -1387,7 +1387,7 @@ async fn test_stock_analyst_rank_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_analyst_rank_em("2024").await;
+    let result = client.stock_analyst_rank("2024").await;
     assert!(result.is_ok());
 }
 
@@ -1406,7 +1406,7 @@ async fn test_stock_comment_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_comment_em().await;
+    let result = client.stock_comment().await;
     assert!(result.is_ok());
 }
 
@@ -1418,7 +1418,7 @@ async fn test_stock_comment_detail_scrd_desire_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_comment_detail_scrd_desire_em("000001").await;
+    let result = client.stock_comment_detail_scrd_desire("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1430,7 +1430,7 @@ async fn test_stock_comment_detail_scrd_focus_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_comment_detail_scrd_focus_em("000001").await;
+    let result = client.stock_comment_detail_scrd_focus("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1442,7 +1442,7 @@ async fn test_stock_comment_detail_zhpj_lspf_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_comment_detail_zhpj_lspf_em("000001").await;
+    let result = client.stock_comment_detail_zhpj_lspf("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1454,7 +1454,7 @@ async fn test_stock_comment_detail_zlkp_jgcyd_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_comment_detail_zlkp_jgcyd_em("000001").await;
+    let result = client.stock_comment_detail_zlkp_jgcyd("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1470,7 +1470,7 @@ async fn test_stock_esg_hz_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_esg_hz_sina().await;
+    let result = client.stock_esg_hz().await;
     assert!(result.is_ok());
 }
 
@@ -1482,7 +1482,7 @@ async fn test_stock_esg_msci_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_esg_msci_sina().await;
+    let result = client.stock_esg_msci().await;
     assert!(result.is_ok());
 }
 
@@ -1494,7 +1494,7 @@ async fn test_stock_esg_rft_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_esg_rft_sina().await;
+    let result = client.stock_esg_rft().await;
     assert!(result.is_ok());
 }
 
@@ -1506,7 +1506,7 @@ async fn test_stock_esg_zd_sina() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_esg_zd_sina().await;
+    let result = client.stock_esg_zd().await;
     assert!(result.is_ok());
 }
 
@@ -1564,7 +1564,7 @@ async fn test_stock_fhps_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_fhps_em("20240101").await;
+    let result = client.stock_fhps("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -1595,7 +1595,7 @@ async fn test_stock_gdhs_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdhs_em("20240101").await;
+    let result = client.stock_gdhs("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -1608,7 +1608,7 @@ async fn test_stock_gdhs_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdhs_detail_em("000001").await;
+    let result = client.stock_gdhs_detail("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1635,7 +1635,7 @@ async fn test_stock_zh_a_gdhs_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_a_gdhs_detail_em("000001").await;
+    let result = client.stock_zh_a_gdhs_detail("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1644,7 +1644,7 @@ async fn test_stock_zh_a_gdhs_detail_em() {
 // ===========================================================================
 
 // Note: hot_xq.rs contains stock_hot_follow_xq, stock_hot_tweet_xq, stock_hot_deal_xq
-// The task lists stock_hot_rank_em, stock_hot_keyword_em, stock_hot_up_em
+// The task lists stock_hot_rank, stock_hot_keyword, stock_hot_up
 // which are in eastmoney_hot.rs -- those are tested in the eastmoney_hot section below.
 
 // ===========================================================================
@@ -1659,7 +1659,7 @@ async fn test_stock_hsgt_fund_flow_summary_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_fund_flow_summary_em().await;
+    let result = client.stock_hsgt_fund_flow_summary().await;
     assert!(result.is_ok());
 }
 
@@ -1669,7 +1669,7 @@ async fn test_stock_hk_ggt_components_em() {
     let body = em_push2_response(vec![sample_em_stock_row("000001", "Test")]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hk_ggt_components_em().await;
+    let result = client.stock_hk_ggt_components().await;
     assert!(result.is_ok());
 }
 
@@ -1683,7 +1683,7 @@ async fn test_stock_hsgt_hold_stock_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_hold_stock_em("沪股通", "今日排行").await;
+    let result = client.stock_hsgt_hold_stock("沪股通", "今日排行").await;
     assert!(result.is_ok());
 }
 
@@ -1699,7 +1699,7 @@ async fn test_stock_hsgt_stock_statistics_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_hsgt_stock_statistics_em("沪股通", "20240101", "20240131")
+        .stock_hsgt_stock_statistics("沪股通", "20240101", "20240131")
         .await;
     assert!(result.is_ok());
 }
@@ -1714,7 +1714,7 @@ async fn test_stock_hsgt_institution_statistics_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_hsgt_institution_statistics_em("沪股通", "20240101", "20240131")
+        .stock_hsgt_institution_statistics("沪股通", "20240101", "20240131")
         .await;
     assert!(result.is_ok());
 }
@@ -1727,7 +1727,7 @@ async fn test_stock_hsgt_hist_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_hist_em("沪股通").await;
+    let result = client.stock_hsgt_hist("沪股通").await;
     assert!(result.is_ok());
 }
 
@@ -1739,7 +1739,7 @@ async fn test_stock_hsgt_board_rank_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_board_rank_em("沪股通", "今日排行").await;
+    let result = client.stock_hsgt_board_rank("沪股通", "今日排行").await;
     assert!(result.is_ok());
 }
 
@@ -1754,7 +1754,7 @@ async fn test_stock_hsgt_individual_detail_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_hsgt_individual_detail_em("000001", "今日排行")
+        .stock_hsgt_individual_detail("000001", "今日排行")
         .await;
     assert!(result.is_ok());
 }
@@ -1765,7 +1765,7 @@ async fn test_stock_hsgt_fund_min_em() {
     let body = serde_json::json!({"data": {"s2n": [["09:30", "100", "200", "300", "400", "500"]]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_fund_min_em("沪股通").await;
+    let result = client.stock_hsgt_fund_min("沪股通").await;
     assert!(result.is_ok());
 }
 
@@ -1779,7 +1779,7 @@ async fn test_stock_hsgt_individual_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hsgt_individual_em("000001").await;
+    let result = client.stock_hsgt_individual("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1797,7 +1797,7 @@ async fn test_stock_hot_rank_em() {
     let get_body = serde_json::json!({"data": {"diff": [{"f2": 10.5, "f3": 1.5, "f12": "000001", "f14": "Test"}]}});
     mock_any_get(&server, ".*", get_body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_rank_em(10).await;
+    let result = client.stock_hot_rank(10).await;
     assert!(result.is_ok());
 }
 
@@ -1807,7 +1807,7 @@ async fn test_stock_hot_rank_detail_em() {
     let body = serde_json::json!({"data": [{"sc": "2024-01-01", "rk": 50}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_rank_detail_em("SZ000001").await;
+    let result = client.stock_hot_rank_detail("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -1818,7 +1818,7 @@ async fn test_stock_hot_rank_detail_realtime_em() {
         serde_json::json!({"data": [{"currentTime": "2024-01-01 09:30", "currentRanking": 50}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_rank_detail_realtime_em("SZ000001").await;
+    let result = client.stock_hot_rank_detail_realtime("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -1828,7 +1828,7 @@ async fn test_stock_hot_keyword_em() {
     let body = serde_json::json!({"data": [{"dateTime": "2024-01-01", "securityCode": "000001", "conceptName": "AI", "conceptCode": "001", "hotNum": 100.0}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_keyword_em("SZ000001").await;
+    let result = client.stock_hot_keyword("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -1842,7 +1842,7 @@ async fn test_stock_hot_up_em() {
     let get_body = serde_json::json!({"data": {"diff": [{"f2": 10.5, "f3": 1.5, "f12": "000001", "f14": "Test"}]}});
     mock_any_get(&server, ".*", get_body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_up_em(10).await;
+    let result = client.stock_hot_up(10).await;
     assert!(result.is_ok());
 }
 
@@ -1852,7 +1852,7 @@ async fn test_stock_hot_rank_latest_em() {
     let body = serde_json::json!({"data": [{"dateTime": "2024-01-01", "rank": 50, "newFanRate": 0.5, "oldFanRate": 0.5}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_rank_latest_em("SZ000001").await;
+    let result = client.stock_hot_rank_latest("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -1862,7 +1862,7 @@ async fn test_stock_hot_rank_relate_em() {
     let body = serde_json::json!({"data": [{"sc": "SZ000001", "rk": 1}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_rank_relate_em("SZ000001").await;
+    let result = client.stock_hot_rank_relate("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -1872,7 +1872,7 @@ async fn test_stock_hot_search_baidu() {
     let body = serde_json::json!({"result": [{"name": "Test", "code": "000001"}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_hot_search_baidu("000001", "20240101").await;
+    let result = client.stock_hot_search("000001", "20240101").await;
     assert!(result.is_ok());
 }
 
@@ -1912,7 +1912,7 @@ async fn test_stock_lhb_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_detail_em("20240101", "20240131").await;
+    let result = client.stock_lhb_detail("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 
@@ -1929,7 +1929,7 @@ async fn test_stock_lhb_stock_statistic_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_stock_statistic_em("近一月").await;
+    let result = client.stock_lhb_stock_statistic("近一月").await;
     assert!(result.is_ok());
 }
 
@@ -1945,7 +1945,7 @@ async fn test_stock_lhb_jgmmtj_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_jgmmtj_em("20240101", "20240131").await;
+    let result = client.stock_lhb_jgmmtj("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 
@@ -1960,7 +1960,7 @@ async fn test_stock_lhb_jgstatistic_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_jgstatistic_em("近一月").await;
+    let result = client.stock_lhb_jgstatistic("近一月").await;
     assert!(result.is_ok());
 }
 
@@ -1975,7 +1975,7 @@ async fn test_stock_lhb_hyyyb_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_hyyyb_em("20240101", "20240131").await;
+    let result = client.stock_lhb_hyyyb("20240101", "20240131").await;
     assert!(result.is_ok());
 }
 
@@ -1990,7 +1990,7 @@ async fn test_stock_lhb_yybph_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_yybph_em("近一月").await;
+    let result = client.stock_lhb_yybph("近一月").await;
     assert!(result.is_ok());
 }
 
@@ -2005,7 +2005,7 @@ async fn test_stock_lhb_traderstatistic_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_traderstatistic_em("近一月").await;
+    let result = client.stock_lhb_traderstatistic("近一月").await;
     assert!(result.is_ok());
 }
 
@@ -2019,7 +2019,7 @@ async fn test_stock_lhb_stock_detail_date_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_stock_detail_date_em("000001").await;
+    let result = client.stock_lhb_stock_detail_date("000001").await;
     assert!(result.is_ok());
 }
 
@@ -2034,7 +2034,7 @@ async fn test_stock_lhb_stock_detail_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_lhb_stock_detail_em("000001", "20240101", "买入")
+        .stock_lhb_stock_detail("000001", "20240101", "买入")
         .await;
     assert!(result.is_ok());
 }
@@ -2049,7 +2049,7 @@ async fn test_stock_lhb_yyb_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_lhb_yyb_detail_em("B001").await;
+    let result = client.stock_lhb_yyb_detail("B001").await;
     assert!(result.is_ok());
 }
 
@@ -2066,7 +2066,7 @@ async fn test_stock_gdfx_free_holding_statistics_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_gdfx_free_holding_statistics_em("20240101")
+        .stock_gdfx_free_holding_statistics("20240101")
         .await;
     assert!(result.is_ok());
 }
@@ -2079,7 +2079,7 @@ async fn test_stock_gdfx_holding_statistics_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_holding_statistics_em("20240101").await;
+    let result = client.stock_gdfx_holding_statistics("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2092,7 +2092,7 @@ async fn test_stock_gdfx_free_holding_change_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_free_holding_change_em("20240101").await;
+    let result = client.stock_gdfx_free_holding_change("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2105,7 +2105,7 @@ async fn test_stock_gdfx_holding_change_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_holding_change_em("20240101").await;
+    let result = client.stock_gdfx_holding_change("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2116,7 +2116,7 @@ async fn test_stock_gdfx_free_top_10_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_gdfx_free_top_10_em("SZ000001", "20240101")
+        .stock_gdfx_free_top_10("SZ000001", "20240101")
         .await;
     assert!(result.is_ok());
 }
@@ -2127,7 +2127,7 @@ async fn test_stock_gdfx_top_10_em() {
     let body = serde_json::json!({"sdgd": [{"HOLDER_NAME": "Fund A", "HOLD_NUM": 100000.0, "HOLD_RATIO": 0.05}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_top_10_em("SZ000001", "20240101").await;
+    let result = client.stock_gdfx_top_10("SZ000001", "20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2140,7 +2140,7 @@ async fn test_stock_gdfx_free_holding_detail_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_free_holding_detail_em("20240101").await;
+    let result = client.stock_gdfx_free_holding_detail("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2154,7 +2154,7 @@ async fn test_stock_gdfx_holding_detail_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_gdfx_holding_detail_em("20240101", "个人", "001")
+        .stock_gdfx_holding_detail("20240101", "个人", "001")
         .await;
     assert!(result.is_ok());
 }
@@ -2168,7 +2168,7 @@ async fn test_stock_gdfx_free_holding_analyse_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_free_holding_analyse_em("20240101").await;
+    let result = client.stock_gdfx_free_holding_analyse("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2181,7 +2181,7 @@ async fn test_stock_gdfx_holding_analyse_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_holding_analyse_em("20240101").await;
+    let result = client.stock_gdfx_holding_analyse("20240101").await;
     assert!(result.is_ok());
 }
 
@@ -2193,7 +2193,7 @@ async fn test_stock_gdfx_free_holding_teamwork_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_free_holding_teamwork_em("001").await;
+    let result = client.stock_gdfx_free_holding_teamwork("001").await;
     assert!(result.is_ok());
 }
 
@@ -2205,7 +2205,7 @@ async fn test_stock_gdfx_holding_teamwork_em() {
     })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_gdfx_holding_teamwork_em("001").await;
+    let result = client.stock_gdfx_holding_teamwork("001").await;
     assert!(result.is_ok());
 }
 
@@ -2220,7 +2220,7 @@ async fn test_stock_zh_a_disclosure_report_cninfo() {
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_zh_a_disclosure_report_cninfo("000001", "category_ndbg_szsh", "20240101", "20241231")
+        .stock_zh_a_disclosure_report("000001", "category_ndbg_szsh", "20240101", "20241231")
         .await;
     assert!(result.is_ok());
 }
@@ -2231,7 +2231,7 @@ async fn test_stock_zh_a_disclosure_relation_cninfo() {
     let body = serde_json::json!({"announcements": [{"secCode": "000001", "secName": "Test", "announcementTitle": "Related", "announcementTime": "2024-01-01"}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_zh_a_disclosure_relation_cninfo("ann123").await;
+    let result = client.stock_zh_a_disclosure_relation("ann123").await;
     assert!(result.is_ok());
 }
 
@@ -2243,7 +2243,7 @@ async fn test_stock_zh_a_disclosure_relation_cninfo() {
 async fn test_stock_irm_cninfo() {
     let server = MockServer::start().await;
     // cninfo_org_id returns {"data": [{"secid": "123"}]}
-    // stock_irm_cninfo returns {"data": [...], "totalPage": 1}
+    // stock_irm returns {"data": [...], "totalPage": 1}
     let body = serde_json::json!({
         "data": [{"secid": "123", "stockCode": "000001", "orgName": "Test",
             "mainContent": "Q?", "attachContent": "A", "mainPerson": "User",
@@ -2252,7 +2252,7 @@ async fn test_stock_irm_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_irm_cninfo("000001").await;
+    let result = client.stock_irm("000001").await;
     assert!(result.is_ok());
 }
 
@@ -2266,7 +2266,7 @@ async fn test_stock_irm_ans_cninfo() {
     });
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_irm_ans_cninfo("q123").await;
+    let result = client.stock_irm_ans("q123").await;
     assert!(result.is_ok());
 }
 
@@ -2329,7 +2329,7 @@ async fn test_stock_balance_sheet_by_report_em() {
         serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_ASSETS": 1000000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_balance_sheet_by_report_em("SZ000001").await;
+    let result = client.stock_balance_sheet_by_report("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2340,7 +2340,7 @@ async fn test_stock_balance_sheet_by_yearly_em() {
         serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_ASSETS": 1000000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_balance_sheet_by_yearly_em("SZ000001").await;
+    let result = client.stock_balance_sheet_by_yearly("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2350,7 +2350,7 @@ async fn test_stock_profit_sheet_by_report_em() {
     let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_OPERATE_INCOME": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_profit_sheet_by_report_em("SZ000001").await;
+    let result = client.stock_profit_sheet_by_report("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2360,7 +2360,7 @@ async fn test_stock_profit_sheet_by_yearly_em() {
     let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_OPERATE_INCOME": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_profit_sheet_by_yearly_em("SZ000001").await;
+    let result = client.stock_profit_sheet_by_yearly("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2370,7 +2370,7 @@ async fn test_stock_profit_sheet_by_quarterly_em() {
     let body = serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "TOTAL_OPERATE_INCOME": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_profit_sheet_by_quarterly_em("SZ000001").await;
+    let result = client.stock_profit_sheet_by_quarterly("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2381,7 +2381,7 @@ async fn test_stock_cash_flow_sheet_by_report_em() {
         serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cash_flow_sheet_by_report_em("SZ000001").await;
+    let result = client.stock_cash_flow_sheet_by_report("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2392,7 +2392,7 @@ async fn test_stock_cash_flow_sheet_by_yearly_em() {
         serde_json::json!({"data": [{"REPORT_DATE": "2024-01-01", "NETCASH_OPERATE": 100000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cash_flow_sheet_by_yearly_em("SZ000001").await;
+    let result = client.stock_cash_flow_sheet_by_yearly("SZ000001").await;
     assert!(result.is_ok());
 }
 
@@ -2404,7 +2404,7 @@ async fn test_stock_cash_flow_sheet_by_quarterly_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_cash_flow_sheet_by_quarterly_em("SZ000001")
+        .stock_cash_flow_sheet_by_quarterly("SZ000001")
         .await;
     assert!(result.is_ok());
 }
@@ -2419,7 +2419,7 @@ async fn test_stock_info_cjzc_em() {
     let body = serde_json::json!({"data": {"list": [{"title": "Test", "summary": "Summary", "showTime": "2024-01-01"}]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_info_cjzc_em().await;
+    let result = client.stock_info_cjzc().await;
     assert!(result.is_ok());
 }
 
@@ -2431,7 +2431,7 @@ async fn test_stock_balance_sheet_by_report_delisted_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_balance_sheet_by_report_delisted_em("SZ000001")
+        .stock_balance_sheet_by_report_delisted("SZ000001")
         .await;
     assert!(result.is_ok());
 }
@@ -2443,7 +2443,7 @@ async fn test_stock_cash_flow_sheet_by_report_delisted_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_cash_flow_sheet_by_report_delisted_em("SZ000001")
+        .stock_cash_flow_sheet_by_report_delisted("SZ000001")
         .await;
     assert!(result.is_ok());
 }
@@ -2455,7 +2455,7 @@ async fn test_stock_profit_sheet_by_report_delisted_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .stock_profit_sheet_by_report_delisted_em("SZ000001")
+        .stock_profit_sheet_by_report_delisted("SZ000001")
         .await;
     assert!(result.is_ok());
 }
@@ -2466,7 +2466,7 @@ async fn test_stock_cg_equity_mortgage_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "test": true}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cg_equity_mortgage_cninfo("000001").await;
+    let result = client.stock_cg_equity_mortgage("000001").await;
     assert!(result.is_ok());
 }
 
@@ -2476,7 +2476,7 @@ async fn test_stock_cg_guarantee_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "test": true}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cg_guarantee_cninfo("000001").await;
+    let result = client.stock_cg_guarantee("000001").await;
     assert!(result.is_ok());
 }
 
@@ -2486,7 +2486,7 @@ async fn test_stock_cg_lawsuit_cninfo() {
     let body = serde_json::json!({"records": [{"seccode": "000001", "test": true}]});
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.stock_cg_lawsuit_cninfo("000001").await;
+    let result = client.stock_cg_lawsuit("000001").await;
     assert!(result.is_ok());
 }
 
@@ -2530,7 +2530,7 @@ async fn test_stock_changes_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_changes_em("涨速").await;
+    let _ = client.stock_changes("涨速").await;
 }
 
 #[tokio::test]
@@ -2551,7 +2551,7 @@ async fn test_stock_dxsyl_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_dxsyl_em().await;
+    let _ = client.stock_dxsyl().await;
 }
 
 #[tokio::test]
@@ -2572,7 +2572,7 @@ async fn test_stock_zt_pool_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zt_pool_em("20240102").await;
+    let _ = client.stock_zt_pool("20240102").await;
 }
 
 #[tokio::test]
@@ -2589,7 +2589,7 @@ async fn test_stock_zt_pool_strong_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zt_pool_strong_em("20240102").await;
+    let _ = client.stock_zt_pool_strong("20240102").await;
 }
 
 #[tokio::test]
@@ -2606,7 +2606,7 @@ async fn test_stock_zt_pool_sub_new_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zt_pool_sub_new_em("20240102").await;
+    let _ = client.stock_zt_pool_sub_new("20240102").await;
 }
 
 #[tokio::test]
@@ -2623,7 +2623,7 @@ async fn test_stock_zt_pool_previous_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zt_pool_previous_em("20240102").await;
+    let _ = client.stock_zt_pool_previous("20240102").await;
 }
 
 #[tokio::test]
@@ -2640,7 +2640,7 @@ async fn test_stock_zt_pool_dtgc_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zt_pool_dtgc_em("20240102").await;
+    let _ = client.stock_zt_pool_dtgc("20240102").await;
 }
 
 #[tokio::test]
@@ -2657,7 +2657,7 @@ async fn test_stock_zt_pool_zbgc_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zt_pool_zbgc_em("20240102").await;
+    let _ = client.stock_zt_pool_zbgc("20240102").await;
 }
 
 #[tokio::test]
@@ -2678,7 +2678,7 @@ async fn test_stock_new_a_spot_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_new_a_spot_em().await;
+    let _ = client.stock_new_a_spot().await;
 }
 
 #[tokio::test]
@@ -2695,7 +2695,7 @@ async fn test_stock_pg_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_pg_em().await;
+    let _ = client.stock_pg().await;
 }
 
 #[tokio::test]
@@ -2712,7 +2712,7 @@ async fn test_stock_xgsglb_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_xgsglb_em("全部股票").await;
+    let _ = client.stock_xgsglb("全部股票").await;
 }
 
 #[tokio::test]
@@ -2729,7 +2729,7 @@ async fn test_stock_qbzf_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_qbzf_em().await;
+    let _ = client.stock_qbzf().await;
 }
 
 #[tokio::test]
@@ -2746,7 +2746,7 @@ async fn test_stock_sy_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_sy_em("000001").await;
+    let _ = client.stock_sy("000001").await;
 }
 
 #[tokio::test]
@@ -2763,7 +2763,7 @@ async fn test_stock_sy_jz_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_sy_jz_em("000001").await;
+    let _ = client.stock_sy_jz("000001").await;
 }
 
 #[tokio::test]
@@ -2780,7 +2780,7 @@ async fn test_stock_sy_profile_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_sy_profile_em().await;
+    let _ = client.stock_sy_profile().await;
 }
 
 #[tokio::test]
@@ -2797,7 +2797,7 @@ async fn test_stock_sy_yq_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_sy_yq_em("全部").await;
+    let _ = client.stock_sy_yq("全部").await;
 }
 
 #[tokio::test]
@@ -2814,7 +2814,7 @@ async fn test_stock_yjbb_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_yjbb_em("20240102").await;
+    let _ = client.stock_yjbb("20240102").await;
 }
 
 #[tokio::test]
@@ -2831,7 +2831,7 @@ async fn test_stock_yjkb_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_yjkb_em("20240102").await;
+    let _ = client.stock_yjkb("20240102").await;
 }
 
 #[tokio::test]
@@ -2848,7 +2848,7 @@ async fn test_stock_yjyg_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_yjyg_em("20240102").await;
+    let _ = client.stock_yjyg("20240102").await;
 }
 
 #[tokio::test]
@@ -2865,7 +2865,7 @@ async fn test_stock_yysj_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_yysj_em("沪深A股", "20240102").await;
+    let _ = client.stock_yysj("沪深A股", "20240102").await;
 }
 
 #[tokio::test]
@@ -2882,7 +2882,7 @@ async fn test_stock_lrb_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_lrb_em("20240102").await;
+    let _ = client.stock_lrb("20240102").await;
 }
 
 #[tokio::test]
@@ -2899,7 +2899,7 @@ async fn test_stock_zcfz_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zcfz_em("20240102").await;
+    let _ = client.stock_zcfz("20240102").await;
 }
 
 #[tokio::test]
@@ -2916,7 +2916,7 @@ async fn test_stock_xjll_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_xjll_em("20240102").await;
+    let _ = client.stock_xjll("20240102").await;
 }
 
 #[tokio::test]
@@ -2933,7 +2933,7 @@ async fn test_stock_ggcg_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_ggcg_em("000001").await;
+    let _ = client.stock_ggcg("000001").await;
 }
 
 #[tokio::test]
@@ -2950,7 +2950,7 @@ async fn test_stock_gpzy_pledge_ratio_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_gpzy_pledge_ratio_em().await;
+    let _ = client.stock_gpzy_pledge_ratio().await;
 }
 
 #[tokio::test]
@@ -2967,7 +2967,7 @@ async fn test_stock_gpzy_pledge_detail_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_gpzy_pledge_detail_em().await;
+    let _ = client.stock_gpzy_pledge_detail().await;
 }
 
 #[tokio::test]
@@ -2984,7 +2984,7 @@ async fn test_stock_gpzy_profile_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_gpzy_profile_em().await;
+    let _ = client.stock_gpzy_profile().await;
 }
 
 #[tokio::test]
@@ -3001,7 +3001,7 @@ async fn test_stock_jgdy_detail_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_jgdy_detail_em("20240102").await;
+    let _ = client.stock_jgdy_detail("20240102").await;
 }
 
 #[tokio::test]
@@ -3018,7 +3018,7 @@ async fn test_stock_jgdy_tj_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_jgdy_tj_em("20240102").await;
+    let _ = client.stock_jgdy_tj("20240102").await;
 }
 
 #[tokio::test]
@@ -3108,7 +3108,7 @@ async fn test_stock_zh_ab_comparison_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_zh_ab_comparison_em().await;
+    let _ = client.stock_zh_ab_comparison().await;
 }
 
 #[tokio::test]
@@ -3150,7 +3150,7 @@ async fn test_stock_hk_hist_min_em() {
         .await;
     let client = mock_client(&server);
     let _ = client
-        .stock_hk_hist_min_em("00593", "5", "qfq", "20240101", "20240102")
+        .stock_hk_hist_min("00593", "5", "qfq", "20240101", "20240102")
         .await;
 }
 
@@ -3168,7 +3168,7 @@ async fn test_stock_hk_main_board_spot_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let _ = client.stock_hk_main_board_spot_em().await;
+    let _ = client.stock_hk_main_board_spot().await;
 }
 
 #[tokio::test]
@@ -3225,7 +3225,7 @@ async fn test_stock_us_hist_min_em() {
         .await;
     let client = mock_client(&server);
     let _ = client
-        .stock_us_hist_min_em("AAPL", "5", "qfq", "20240101", "20240102")
+        .stock_us_hist_min("AAPL", "5", "qfq", "20240101", "20240102")
         .await;
 }
 
@@ -3310,7 +3310,7 @@ async fn test_stock_financial_abstract_new_ths() {
     .await;
     let client = mock_client(&server);
     let _ = client
-        .stock_financial_abstract_new_ths("000001", "按报告期")
+        .stock_financial_abstract_new("000001", "按报告期")
         .await;
 }
 
@@ -3325,7 +3325,7 @@ async fn test_stock_financial_benefit_ths() {
     .await;
     let client = mock_client(&server);
     let _ = client
-        .stock_financial_benefit_ths("000001", "按报告期")
+        .stock_financial_benefit("000001", "按报告期")
         .await;
 }
 
@@ -3340,7 +3340,7 @@ async fn test_stock_financial_benefit_new_ths() {
     .await;
     let client = mock_client(&server);
     let _ = client
-        .stock_financial_benefit_new_ths("000001", "按报告期")
+        .stock_financial_benefit_new("000001", "按报告期")
         .await;
 }
 
@@ -3354,7 +3354,7 @@ async fn test_stock_financial_cash_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_cash_ths("000001", "按报告期").await;
+    let _ = client.stock_financial_cash("000001", "按报告期").await;
 }
 
 #[tokio::test]
@@ -3368,7 +3368,7 @@ async fn test_stock_financial_cash_new_ths() {
     .await;
     let client = mock_client(&server);
     let _ = client
-        .stock_financial_cash_new_ths("000001", "按报告期")
+        .stock_financial_cash_new("000001", "按报告期")
         .await;
 }
 
@@ -3382,7 +3382,7 @@ async fn test_stock_financial_debt_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client.stock_financial_debt_ths("000001", "按报告期").await;
+    let _ = client.stock_financial_debt("000001", "按报告期").await;
 }
 
 #[tokio::test]
@@ -3396,7 +3396,7 @@ async fn test_stock_financial_debt_new_ths() {
     .await;
     let client = mock_client(&server);
     let _ = client
-        .stock_financial_debt_new_ths("000001", "按报告期")
+        .stock_financial_debt_new("000001", "按报告期")
         .await;
 }
 
@@ -3465,7 +3465,7 @@ async fn test_stock_ipo_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client.stock_ipo_ths("全部A股").await;
+    let _ = client.stock_ipo("全部A股").await;
 }
 
 #[tokio::test]
@@ -3478,7 +3478,7 @@ async fn test_stock_ipo_hk_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client.stock_ipo_hk_ths().await;
+    let _ = client.stock_ipo_hk().await;
 }
 
 #[tokio::test]
@@ -3491,7 +3491,7 @@ async fn test_stock_management_change_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client.stock_management_change_ths("000001").await;
+    let _ = client.stock_management_change("000001").await;
 }
 
 #[tokio::test]
@@ -3504,7 +3504,7 @@ async fn test_stock_shareholder_change_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client.stock_shareholder_change_ths("000001").await;
+    let _ = client.stock_shareholder_change("000001").await;
 }
 
 #[tokio::test]
@@ -3517,5 +3517,5 @@ async fn test_stock_zyjs_ths() {
     )
     .await;
     let client = mock_client(&server);
-    let _ = client.stock_zyjs_ths("000001").await;
+    let _ = client.stock_zyjs("000001").await;
 }

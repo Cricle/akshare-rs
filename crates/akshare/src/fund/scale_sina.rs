@@ -6,7 +6,7 @@ use crate::types::FundSnapshot;
 
 impl AkShareClient {
     /// Fetch open-end fund scale data from Sina Finance.
-    pub async fn fund_scale_open_sina(&self, symbol: &str) -> Result<Vec<FundSnapshot>> {
+    pub async fn fund_scale_open(&self, symbol: &str) -> Result<Vec<FundSnapshot>> {
         let type_map: &[(&str, &str)] = &[
             ("股票型基金", "2"),
             ("混合型基金", "1"),
@@ -79,7 +79,7 @@ impl AkShareClient {
     }
 
     /// Fetch closed-end fund scale data from Sina Finance.
-    pub async fn fund_scale_close_sina(&self) -> Result<Vec<FundSnapshot>> {
+    pub async fn fund_scale_close(&self) -> Result<Vec<FundSnapshot>> {
         let resp = self
             .get("http://vip.stock.finance.sina.com.cn/fund_center/data/jsonp.php/IO.XSRV2.CallbackList['J2cW8KXheoWKdSHc']/NetValueReturn_Service.NetValueReturnClose")
             .query(&[("page", "1"), ("num", "10000"), ("sort", "zmjgm"), ("asc", "0")])
@@ -136,13 +136,13 @@ impl AkShareClient {
     }
 
     /// Fetch money market fund scale data from Sina Finance.
-    pub async fn fund_scale_money_sina(&self) -> Result<Vec<FundSnapshot>> {
-        self.fund_scale_open_sina("货币型基金").await
+    pub async fn fund_scale_money(&self) -> Result<Vec<FundSnapshot>> {
+        self.fund_scale_open("货币型基金").await
     }
 
-    /// Fetch structured fund scale data from Sina (Python: fund_scale_structured_sina).
-    pub async fn fund_scale_structured_sina(&self) -> Result<Vec<FundSnapshot>> {
+    /// Fetch structured fund scale data from Sina (Python: fund_scale_structured).
+    pub async fn fund_scale_structured(&self) -> Result<Vec<FundSnapshot>> {
         // Structured funds use the close fund endpoint
-        self.fund_scale_close_sina().await
+        self.fund_scale_close().await
     }
 }

@@ -131,39 +131,39 @@ macro_test_arg1!(test_mock_stock_news_em_hk, stock_news_em_hk, "00593");
 macro_test_arg1!(test_mock_stock_news_em_us, stock_news_em_us, "AAPL");
 macro_test_arg1!(
     test_mock_stock_us_dividend_payout_em,
-    stock_us_dividend_payout_em,
+    stock_us_dividend_payout,
     "AAPL"
 );
 macro_test_arg1!(
     test_mock_stock_us_financial_indicator_em,
-    stock_us_financial_indicator_em,
+    stock_us_financial_indicator,
     "AAPL"
 );
 macro_test_arg1!(
     test_mock_stock_us_growth_comparison_em,
-    stock_us_growth_comparison_em,
+    stock_us_growth_comparison,
     "AAPL"
 );
 macro_test!(test_mock_stock_us_gxl_lg, stock_us_gxl_lg);
 macro_test_arg1!(
     test_mock_stock_us_hot_keyword_em,
-    stock_us_hot_keyword_em,
+    stock_us_hot_keyword,
     "AAPL"
 );
 macro_test_arg1!(
     test_mock_stock_us_hot_rank_detail_em,
-    stock_us_hot_rank_detail_em,
+    stock_us_hot_rank_detail,
     "AAPL"
 );
 macro_test_arg1!(
     test_mock_stock_us_hot_rank_detail_realtime_em,
-    stock_us_hot_rank_detail_realtime_em,
+    stock_us_hot_rank_detail_realtime,
     "AAPL"
 );
-macro_test!(test_mock_stock_us_hot_rank_em, stock_us_hot_rank_em);
+macro_test!(test_mock_stock_us_hot_rank_em, stock_us_hot_rank);
 macro_test_arg1!(
     test_mock_stock_us_hot_rank_latest_em,
-    stock_us_hot_rank_latest_em,
+    stock_us_hot_rank_latest,
     "AAPL"
 );
 macro_test_arg1!(
@@ -180,27 +180,27 @@ macro_test!(test_mock_stock_us_index_spot_em, stock_us_index_spot_em);
 macro_test!(test_mock_stock_us_index_spot_sina, stock_us_index_spot_sina);
 macro_test_arg1!(
     test_mock_stock_us_scale_comparison_em,
-    stock_us_scale_comparison_em,
+    stock_us_scale_comparison,
     "AAPL"
 );
 macro_test_arg1!(
     test_mock_stock_us_valuation_comparison_em,
-    stock_us_valuation_comparison_em,
+    stock_us_valuation_comparison,
     "AAPL"
 );
 macro_test_arg1!(
     test_mock_stock_zh_a_dividend_payout_em,
-    stock_zh_a_dividend_payout_em,
+    stock_zh_a_dividend_payout,
     "600000"
 );
 macro_test_arg1!(
     test_mock_stock_zh_a_financial_indicator_em,
-    stock_zh_a_financial_indicator_em,
+    stock_zh_a_financial_indicator,
     "600000"
 );
 macro_test_arg1!(
     test_mock_us_market_cap_from_sina,
-    us_market_cap_from_sina,
+    us_market_cap_from,
     "AAPL"
 );
 // us_stock_industry returns a tuple, not a Result
@@ -232,7 +232,7 @@ async fn test_mock_stock_zh_a_hist_min_em() {
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client
-        .stock_zh_a_hist_min_em("600000", "1", "qfq", "2024-01-01", "2024-01-31")
+        .stock_zh_a_hist_min("600000", "1", "qfq", "2024-01-01", "2024-01-31")
         .await;
     result.unwrap();
 }

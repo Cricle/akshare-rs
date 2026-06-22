@@ -3,22 +3,22 @@
 //! Covers Python functions:
 //! - `stock_us_daily` — US daily candles (Sina)
 //! - `stock_us_spot` — US spot quotes (Sina)
-//! - `stock_us_famous_spot_em` — Famous US stocks (Eastmoney)
-//! - `stock_us_pink_spot_em` — Pink sheet stocks (Eastmoney)
-//! - `stock_us_valuation_baidu` — US valuation (Baidu)
-//! - `stock_us_hot_rank_em` — US hot rank (Eastmoney)
-//! - `stock_us_hot_rank_latest_em` — US latest hot rank (Eastmoney)
-//! - `stock_us_hot_rank_detail_em` — US hot rank detail (Eastmoney)
-//! - `stock_us_hot_rank_detail_realtime_em` — US realtime hot rank (Eastmoney)
+//! - `stock_us_famous_spot` — Famous US stocks (Eastmoney)
+//! - `stock_us_pink_spot` — Pink sheet stocks (Eastmoney)
+//! - `stock_us_valuation` — US valuation (Baidu)
+//! - `stock_us_hot_rank` — US hot rank (Eastmoney)
+//! - `stock_us_hot_rank_latest` — US latest hot rank (Eastmoney)
+//! - `stock_us_hot_rank_detail` — US hot rank detail (Eastmoney)
+//! - `stock_us_hot_rank_detail_realtime` — US realtime hot rank (Eastmoney)
 //! - `stock_us_index_spot_em` — US index spot (Eastmoney)
 //! - `stock_us_index_daily_em` — US index daily (Eastmoney)
 //! - `stock_us_index_spot_sina` — US index spot (Sina)
 //! - `stock_us_index_daily_sina` — US index daily (Sina)
-//! - `stock_us_financial_indicator_em` — US financial indicators (Eastmoney)
-//! - `stock_us_dividend_payout_em` — US dividend payout (Eastmoney)
+//! - `stock_us_financial_indicator` — US financial indicators (Eastmoney)
+//! - `stock_us_dividend_payout` — US dividend payout (Eastmoney)
 //! - `stock_us_gxl_lg` — US dividend yield (Legulegu)
-//! - `stock_us_scale_comparison_em` — US scale comparison (Eastmoney)
-//! - `stock_us_hot_keyword_em` — US hot keywords (Eastmoney)
+//! - `stock_us_scale_comparison` — US scale comparison (Eastmoney)
+//! - `stock_us_hot_keyword` — US hot keywords (Eastmoney)
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -349,10 +349,10 @@ impl AkShareClient {
 
     /// Get famous US stocks from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_famous_spot_em(symbol)`
+    /// Python equivalent: `stock_us_famous_spot(symbol)`
     ///
     /// - `symbol`: category like "科技类", "金融类", "医药食品类", "媒体类", "汽车能源类", "制造零售类"
-    pub async fn stock_us_famous_spot_em(&self, symbol: &str) -> Result<Vec<UsFamousStock>> {
+    pub async fn stock_us_famous_spot(&self, symbol: &str) -> Result<Vec<UsFamousStock>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<EnvData>,
@@ -460,8 +460,8 @@ impl AkShareClient {
 
     /// Get pink sheet stocks from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_pink_spot_em()`
-    pub async fn stock_us_pink_spot_em(&self) -> Result<Vec<UsPinkStock>> {
+    /// Python equivalent: `stock_us_pink_spot()`
+    pub async fn stock_us_pink_spot(&self) -> Result<Vec<UsPinkStock>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<EnvData>,
@@ -527,12 +527,12 @@ impl AkShareClient {
 
     /// Get US valuation data from Baidu.
     ///
-    /// Python equivalent: `stock_us_valuation_baidu(symbol, indicator, period)`
+    /// Python equivalent: `stock_us_valuation(symbol, indicator, period)`
     ///
     /// - `symbol`: US stock code like "NVDA"
     /// - `indicator`: "总市值", "市盈率(TTM)", "市盈率(静)", "市净率", "市现率"
     /// - `period`: "近一年", "近三年", "全部"
-    pub async fn stock_us_valuation_baidu(
+    pub async fn stock_us_valuation(
         &self,
         symbol: &str,
         indicator: &str,
@@ -603,8 +603,8 @@ impl AkShareClient {
 
     /// Get US stock hot rank from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_hot_rank_em()`
-    pub async fn stock_us_hot_rank_em(&self) -> Result<Vec<UsHotRank>> {
+    /// Python equivalent: `stock_us_hot_rank()`
+    pub async fn stock_us_hot_rank(&self) -> Result<Vec<UsHotRank>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<Vec<RankItem>>,
@@ -660,8 +660,8 @@ impl AkShareClient {
 
     /// Get US latest hot rank from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_hot_rank_latest_em(symbol)`
-    pub async fn stock_us_hot_rank_latest_em(&self, symbol: &str) -> Result<Vec<UsHotRankDetail>> {
+    /// Python equivalent: `stock_us_hot_rank_latest(symbol)`
+    pub async fn stock_us_hot_rank_latest(&self, symbol: &str) -> Result<Vec<UsHotRankDetail>> {
         let url = "https://emappdata.eastmoney.com/stockrank/getCurrentHkUsLatest";
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -703,8 +703,8 @@ impl AkShareClient {
 
     /// Get US hot rank detail from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_hot_rank_detail_em(symbol)`
-    pub async fn stock_us_hot_rank_detail_em(&self, symbol: &str) -> Result<Vec<UsHotRankDetail>> {
+    /// Python equivalent: `stock_us_hot_rank_detail(symbol)`
+    pub async fn stock_us_hot_rank_detail(&self, symbol: &str) -> Result<Vec<UsHotRankDetail>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<Vec<RankDetailItem>>,
@@ -753,8 +753,8 @@ impl AkShareClient {
 
     /// Get US realtime hot rank from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_hot_rank_detail_realtime_em(symbol)`
-    pub async fn stock_us_hot_rank_detail_realtime_em(
+    /// Python equivalent: `stock_us_hot_rank_detail_realtime(symbol)`
+    pub async fn stock_us_hot_rank_detail_realtime(
         &self,
         symbol: &str,
     ) -> Result<Vec<UsHotRankDetail>> {
@@ -1028,8 +1028,8 @@ impl AkShareClient {
 
     /// Get US financial indicators from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_financial_indicator_em(symbol)`
-    pub async fn stock_us_financial_indicator_em(
+    /// Python equivalent: `stock_us_financial_indicator(symbol)`
+    pub async fn stock_us_financial_indicator(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
@@ -1078,8 +1078,8 @@ impl AkShareClient {
 
     /// Get US dividend payout from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_dividend_payout_em(symbol)`
-    pub async fn stock_us_dividend_payout_em(
+    /// Python equivalent: `stock_us_dividend_payout(symbol)`
+    pub async fn stock_us_dividend_payout(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
@@ -1170,8 +1170,8 @@ impl AkShareClient {
 
     /// Get US scale comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_scale_comparison_em(symbol)`
-    pub async fn stock_us_scale_comparison_em(
+    /// Python equivalent: `stock_us_scale_comparison(symbol)`
+    pub async fn stock_us_scale_comparison(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
@@ -1224,8 +1224,8 @@ impl AkShareClient {
 
     /// Get US hot keyword from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_hot_keyword_em(symbol)`
-    pub async fn stock_us_hot_keyword_em(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
+    /// Python equivalent: `stock_us_hot_keyword(symbol)`
+    pub async fn stock_us_hot_keyword(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         #[derive(Deserialize)]
         struct Env {
             result: Option<EnvResult>,

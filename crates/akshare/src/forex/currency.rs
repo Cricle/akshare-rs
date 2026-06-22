@@ -231,7 +231,7 @@ impl AkShareClient {
     ///
     /// `symbol`: currency name in Chinese (e.g., "美元", "英镑", "欧元").
     /// `start_date` and `end_date` in "YYYYMMDD" format.
-    pub async fn currency_boc_sina(
+    pub async fn currency_boc(
         &self,
         symbol: &str,
         start_date: &str,

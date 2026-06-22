@@ -167,7 +167,7 @@ impl AkShareClient {
     /// `period`: "1", "5", "15", "30", or "60".
     /// `start_date` / `end_date`: format "YYYY-MM-DD HH:MM:SS".
     /// `adjust`: "", "qfq", or "hfq".
-    pub async fn fund_lof_hist_min_em(
+    pub async fn fund_lof_hist_min(
         &self,
         symbol: &str,
         period: &str,
@@ -271,7 +271,7 @@ impl AkShareClient {
     }
 
     /// Fetch LOF spot (real-time) data from Eastmoney.
-    pub async fn fund_lof_spot_em(&self) -> Result<Vec<EtfSpotItem>> {
+    pub async fn fund_lof_spot(&self) -> Result<Vec<EtfSpotItem>> {
         let response = self
             .get("https://88.push2.eastmoney.com/api/qt/clist/get")
             .query(&[

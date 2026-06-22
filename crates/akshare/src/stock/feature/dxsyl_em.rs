@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 打新收益率
-    pub async fn stock_dxsyl_em(&self) -> Result<Vec<Dxsyl>> {
+    pub async fn stock_dxsyl(&self) -> Result<Vec<Dxsyl>> {
         let filter = "((APPLY_DATE>'2010-01-01')(|@APPLY_DATE=\"NULL\"))((LISTING_DATE>'2010-01-01')(|@LISTING_DATE=\"NULL\"))(TRADE_MARKET_CODE!=\"069001017\")";
         let data = self
             .dc_fetch_all(
@@ -45,7 +45,7 @@ impl AkShareClient {
     }
 
     /// 新股申购与中签查询
-    pub async fn stock_xgsglb_em(&self, market: &str) -> Result<Vec<Xgsglb>> {
+    pub async fn stock_xgsglb(&self, market: &str) -> Result<Vec<Xgsglb>> {
         let filter = match market {
             "沪市主板" => {
                 "(APPLY_DATE>'2010-01-01')(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE in (\"069001001001\",\"069001001003\",\"069001001006\"))"

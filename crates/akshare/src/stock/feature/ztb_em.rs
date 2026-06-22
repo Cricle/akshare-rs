@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 涨停股池
-    pub async fn stock_zt_pool_em(&self, date: &str) -> Result<Vec<ZtPool>> {
+    pub async fn stock_zt_pool(&self, date: &str) -> Result<Vec<ZtPool>> {
         let date_fmt = date.to_string();
         let data = self.push2ex_fetch("gettopicZTPool", &[
             ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
@@ -48,7 +48,7 @@ impl AkShareClient {
     }
 
     /// 跌停股池
-    pub async fn stock_zt_pool_dtgc_em(&self, date: &str) -> Result<Vec<ZtPoolDtgc>> {
+    pub async fn stock_zt_pool_dtgc(&self, date: &str) -> Result<Vec<ZtPoolDtgc>> {
         let date_fmt = date.to_string();
         let data = self.push2ex_fetch("gettopicDTPool", &[
             ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
@@ -87,7 +87,7 @@ impl AkShareClient {
     }
 
     /// 昨日涨停股池
-    pub async fn stock_zt_pool_previous_em(&self, date: &str) -> Result<Vec<ZtPoolPrevious>> {
+    pub async fn stock_zt_pool_previous(&self, date: &str) -> Result<Vec<ZtPoolPrevious>> {
         let date_fmt = date.to_string();
         let data = self.push2ex_fetch("gettopicZTPool", &[
             ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
@@ -129,7 +129,7 @@ impl AkShareClient {
     }
 
     /// 强势股池
-    pub async fn stock_zt_pool_strong_em(&self, date: &str) -> Result<Vec<ZtPoolStrong>> {
+    pub async fn stock_zt_pool_strong(&self, date: &str) -> Result<Vec<ZtPoolStrong>> {
         let date_fmt = date.to_string();
         let data = self.push2ex_fetch("gettopicQSPool", &[
             ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
@@ -170,7 +170,7 @@ impl AkShareClient {
     }
 
     /// 次新股池
-    pub async fn stock_zt_pool_sub_new_em(&self, date: &str) -> Result<Vec<ZtPoolSubNew>> {
+    pub async fn stock_zt_pool_sub_new(&self, date: &str) -> Result<Vec<ZtPoolSubNew>> {
         let date_fmt = date.to_string();
         let data = self.push2ex_fetch("gettopicCXPool", &[
             ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
@@ -206,7 +206,7 @@ impl AkShareClient {
     }
 
     /// 炸板股池
-    pub async fn stock_zt_pool_zbgc_em(&self, date: &str) -> Result<Vec<ZtPoolZbgc>> {
+    pub async fn stock_zt_pool_zbgc(&self, date: &str) -> Result<Vec<ZtPoolZbgc>> {
         let date_fmt = date.to_string();
         let data = self.push2ex_fetch("gettopicZBPool", &[
             ("ut", "7eea3edcaed734bea9cbfc24409ed989"),

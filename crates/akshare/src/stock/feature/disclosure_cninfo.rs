@@ -7,7 +7,7 @@ use super::types::DisclosureReport;
 
 impl AkShareClient {
     /// 巨潮资讯-公告查询-信息披露
-    pub async fn stock_zh_a_disclosure_report_cninfo(
+    pub async fn stock_zh_a_disclosure_report(
         &self,
         symbol: &str,
         category: &str,
@@ -88,7 +88,7 @@ impl AkShareClient {
     }
 
     /// 巨潮资讯-公告查询-关联公告
-    pub async fn stock_zh_a_disclosure_relation_cninfo(
+    pub async fn stock_zh_a_disclosure_relation(
         &self,
         announcement_id: &str,
     ) -> Result<Vec<DisclosureReport>> {

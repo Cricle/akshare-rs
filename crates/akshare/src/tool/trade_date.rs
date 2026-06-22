@@ -13,7 +13,7 @@ impl AkShareClient {
     ///
     /// Downloads the A-share trading calendar from Sina Finance.
     /// Returns a list of trading dates.
-    pub async fn tool_trade_date_hist_sina(&self) -> Result<Vec<MacroDataPoint>> {
+    pub async fn tool_trade_date_hist(&self) -> Result<Vec<MacroDataPoint>> {
         let url = "https://finance.sina.com.cn/realstock/company/klc_td_sh.txt";
         let body = self.get(url).send().await?.text().await?;
 

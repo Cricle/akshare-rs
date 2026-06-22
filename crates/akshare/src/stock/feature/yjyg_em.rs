@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 业绩快报
-    pub async fn stock_yjkb_em(&self, date: &str) -> Result<Vec<EarningsQuickReport>> {
+    pub async fn stock_yjkb(&self, date: &str) -> Result<Vec<EarningsQuickReport>> {
         let date_fmt = fmt_date(date);
         let filter = format!(
             "(SECURITY_TYPE_CODE in (\"058001001\",\"058001008\"))(TRADE_MARKET_CODE!=\"069001017\")(REPORT_DATE='{date_fmt}')"
@@ -43,7 +43,7 @@ impl AkShareClient {
     }
 
     /// 业绩预告
-    pub async fn stock_yjyg_em(&self, date: &str) -> Result<Vec<EarningsForecast>> {
+    pub async fn stock_yjyg(&self, date: &str) -> Result<Vec<EarningsForecast>> {
         let date_fmt = fmt_date(date);
         let filter = format!("(REPORT_DATE='{date_fmt}')");
         let data = self
@@ -74,7 +74,7 @@ impl AkShareClient {
     }
 
     /// 预约披露时间
-    pub async fn stock_yysj_em(&self, market: &str, date: &str) -> Result<Vec<serde_json::Value>> {
+    pub async fn stock_yysj(&self, market: &str, date: &str) -> Result<Vec<serde_json::Value>> {
         let date_fmt = fmt_date(date);
         let filter = match market {
             "沪市A股" => format!(

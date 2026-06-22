@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 东方财富-财经早餐
-    pub async fn stock_info_cjzc_em(&self) -> Result<Vec<NewsEntry>> {
+    pub async fn stock_info_cjzc(&self) -> Result<Vec<NewsEntry>> {
         let mut all = Vec::new();
         for page in 1..=2 {
             let resp = self

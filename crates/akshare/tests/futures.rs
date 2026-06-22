@@ -547,7 +547,7 @@ async fn test_futures_hold_pos_sina() {
     .await;
     let client = mock_client(&server);
     let result = client
-        .futures_hold_pos_sina("成交量", "rb2405", "20240315")
+        .futures_hold_pos("成交量", "rb2405", "20240315")
         .await;
     result.unwrap();
 }
@@ -1113,7 +1113,7 @@ async fn test_futures_comex_inventory_invalid() {
 }
 
 // ===========================================================================
-// inventory.rs — futures_inventory_em, futures_inventory_99
+// inventory.rs — futures_inventory, futures_inventory_99
 // ===========================================================================
 
 #[tokio::test]
@@ -1160,7 +1160,7 @@ async fn test_futures_inventory_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let result = client.futures_inventory_em("铜").await;
+    let result = client.futures_inventory("铜").await;
     result.unwrap();
 }
 
@@ -1386,7 +1386,7 @@ async fn test_match_main_contract() {
 }
 
 // ===========================================================================
-// hf_em.rs — futures_global_spot_em, futures_global_hist_em
+// hf_em.rs — futures_global_spot, futures_global_hist
 // ===========================================================================
 
 #[tokio::test]
@@ -1412,7 +1412,7 @@ async fn test_futures_global_spot_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.futures_global_spot_em().await;
+    let result = client.futures_global_spot().await;
     result.unwrap();
 }
 
@@ -1430,7 +1430,7 @@ async fn test_futures_global_hist_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.futures_global_hist_em("HG00Y").await;
+    let result = client.futures_global_hist("HG00Y").await;
     result.unwrap();
 }
 
@@ -1812,7 +1812,7 @@ async fn test_futures_zh_spot() {
 }
 
 // ===========================================================================
-// derivative.rs — futures_display_main_sina
+// derivative.rs — futures_display_main
 // ===========================================================================
 
 #[tokio::test]
@@ -1827,12 +1827,12 @@ async fn test_futures_display_main_sina() {
     ]);
     mock_any_get(&server, ".*", realtime_body).await;
     let client = mock_client(&server);
-    let result = client.futures_display_main_sina().await;
+    let result = client.futures_display_main().await;
     result.unwrap();
 }
 
 // ===========================================================================
-// hist_em.rs — futures_hist_table_em
+// hist_em.rs — futures_hist_table
 // ===========================================================================
 
 #[tokio::test]
@@ -1859,7 +1859,7 @@ async fn test_futures_hist_table_em() {
         .mount(&server)
         .await;
     let client = mock_client(&server);
-    let result = client.futures_hist_table_em().await;
+    let result = client.futures_hist_table().await;
     result.unwrap();
 }
 

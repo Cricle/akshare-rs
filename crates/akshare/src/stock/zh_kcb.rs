@@ -3,7 +3,7 @@
 //! Covers Python functions:
 //! - `stock_zh_kcb_spot` — KCB spot from Sina
 //! - `stock_zh_kcb_daily` — KCB daily from Sina (via Eastmoney kline)
-//! - `stock_zh_kcb_report_em` — KCB reports from Eastmoney
+//! - `stock_zh_kcb_report` — KCB reports from Eastmoney
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -233,10 +233,10 @@ impl AkShareClient {
 
     /// Get KCB reports from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_kcb_report_em(from_page, to_page)`
+    /// Python equivalent: `stock_zh_kcb_report(from_page, to_page)`
     ///
     /// Returns KCB announcement reports.
-    pub async fn stock_zh_kcb_report_em(
+    pub async fn stock_zh_kcb_report(
         &self,
         from_page: i32,
         to_page: i32,

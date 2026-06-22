@@ -1,10 +1,10 @@
 //! Comparison and valuation data — Dupont, scale, Baidu valuation, Baidu vote.
 //!
 //! Covers Python functions:
-//! - `stock_zh_dupont_comparison_em` — Dupont comparison from Eastmoney
-//! - `stock_zh_scale_comparison_em` — Scale comparison from Eastmoney
-//! - `stock_zh_valuation_baidu` — Baidu valuation data
-//! - `stock_zh_vote_baidu` — Baidu vote data
+//! - `stock_zh_dupont_comparison` — Dupont comparison from Eastmoney
+//! - `stock_zh_scale_comparison` — Scale comparison from Eastmoney
+//! - `stock_zh_valuation` — Baidu valuation data
+//! - `stock_zh_vote` — Baidu vote data
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -82,10 +82,10 @@ pub struct BaiduVote {
 impl AkShareClient {
     /// Get Dupont comparison data from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_dupont_comparison_em(symbol)`
+    /// Python equivalent: `stock_zh_dupont_comparison(symbol)`
     ///
     /// - `symbol`: stock code like "SZ000895"
-    pub async fn stock_zh_dupont_comparison_em(
+    pub async fn stock_zh_dupont_comparison(
         &self,
         symbol: &str,
     ) -> Result<Vec<DupontComparison>> {
@@ -122,10 +122,10 @@ impl AkShareClient {
 
     /// Get scale comparison data from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_scale_comparison_em(symbol)`
+    /// Python equivalent: `stock_zh_scale_comparison(symbol)`
     ///
     /// - `symbol`: stock code like "SZ000895"
-    pub async fn stock_zh_scale_comparison_em(&self, symbol: &str) -> Result<Vec<ScaleComparison>> {
+    pub async fn stock_zh_scale_comparison(&self, symbol: &str) -> Result<Vec<ScaleComparison>> {
         let filter = if symbol.len() >= 2 {
             let (prefix, code) = symbol.split_at(2);
             format!("(SECUCODE=\"{code}.{prefix}\")")
@@ -159,12 +159,12 @@ impl AkShareClient {
 
     /// Get Baidu valuation data.
     ///
-    /// Python equivalent: `stock_zh_valuation_baidu(symbol, indicator, period)`
+    /// Python equivalent: `stock_zh_valuation(symbol, indicator, period)`
     ///
     /// - `symbol`: stock code like "002044"
     /// - `indicator`: "总市值", "市盈率(TTM)", "市盈率(静)", "市净率", "市现率"
     /// - `period`: "近一年", "近三年", "近五年", "近十年", "全部"
-    pub async fn stock_zh_valuation_baidu(
+    pub async fn stock_zh_valuation(
         &self,
         symbol: &str,
         indicator: &str,
@@ -200,11 +200,11 @@ impl AkShareClient {
 
     /// Get Baidu vote data.
     ///
-    /// Python equivalent: `stock_zh_vote_baidu(symbol, indicator)`
+    /// Python equivalent: `stock_zh_vote(symbol, indicator)`
     ///
     /// - `symbol`: stock code like "000001"
     /// - `indicator`: "指数" or "股票"
-    pub async fn stock_zh_vote_baidu(
+    pub async fn stock_zh_vote(
         &self,
         symbol: &str,
         indicator: &str,

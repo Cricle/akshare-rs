@@ -29,7 +29,7 @@ impl AkShareClient {
     }
 
     /// 互动易-提问
-    pub async fn stock_irm_cninfo(&self, symbol: &str) -> Result<Vec<IrmQuestion>> {
+    pub async fn stock_irm(&self, symbol: &str) -> Result<Vec<IrmQuestion>> {
         let org_id = self.cninfo_org_id(symbol).await?;
         let mut all = Vec::new();
         for page in 1..=10 {
@@ -107,7 +107,7 @@ impl AkShareClient {
     }
 
     /// 互动易-回答详情
-    pub async fn stock_irm_ans_cninfo(&self, question_id: &str) -> Result<Vec<IrmQuestion>> {
+    pub async fn stock_irm_ans(&self, question_id: &str) -> Result<Vec<IrmQuestion>> {
         let resp = self
             .post("https://irm.cninfo.com.cn/newircs/company/question/detail")
             .query(&[("_t", "1691142650")])

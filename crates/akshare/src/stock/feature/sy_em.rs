@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// A股商誉市场概况
-    pub async fn stock_sy_profile_em(&self) -> Result<Vec<SyProfile>> {
+    pub async fn stock_sy_profile(&self) -> Result<Vec<SyProfile>> {
         let data = self
             .dc_fetch_all(
                 "RPT_GOODWILL_MARKET",
@@ -36,7 +36,7 @@ impl AkShareClient {
     }
 
     /// 商誉减值预期明细
-    pub async fn stock_sy_yq_em(&self, indicator: &str) -> Result<Vec<SyYqDetail>> {
+    pub async fn stock_sy_yq(&self, indicator: &str) -> Result<Vec<SyYqDetail>> {
         let report_name = match indicator {
             "沪市主板" => "RPT_GOODWILL_EXPECT_SH",
             "深市主板" => "RPT_GOODWILL_EXPECT_SZ",
@@ -62,7 +62,7 @@ impl AkShareClient {
     }
 
     /// 个股商誉减值明细
-    pub async fn stock_sy_jz_em(&self, symbol: &str) -> Result<Vec<SyJzDetail>> {
+    pub async fn stock_sy_jz(&self, symbol: &str) -> Result<Vec<SyJzDetail>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
@@ -91,7 +91,7 @@ impl AkShareClient {
     }
 
     /// 个股商誉明细
-    pub async fn stock_sy_em(&self, symbol: &str) -> Result<Vec<SyDetail>> {
+    pub async fn stock_sy(&self, symbol: &str) -> Result<Vec<SyDetail>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(

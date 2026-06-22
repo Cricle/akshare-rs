@@ -127,7 +127,7 @@ impl AkShareClient {
     ///
     /// `symbol`: futures contract code (e.g., "AU2406")
     /// Fetches minute kline data and computes Yang-Zhang realized volatility.
-    pub async fn rv_from_futures_zh_minute_sina(
+    pub async fn rv_from_futures_zh_minute(
         &self,
         symbol: &str,
     ) -> Result<Vec<MacroDataPoint>> {
@@ -137,7 +137,7 @@ impl AkShareClient {
                 .unwrap_or(0.0)
         }
 
-        let klines = self.futures_zh_minute_sina(symbol, "1").await?;
+        let klines = self.futures_zh_minute(symbol, "1").await?;
         if klines.is_empty() {
             return Err(Error::not_found(format!("no minute data for {symbol}")));
         }
@@ -164,12 +164,12 @@ impl AkShareClient {
     ///
     /// `symbol`: stock code (e.g., "600000")
     /// Fetches minute kline data and computes Yang-Zhang realized volatility.
-    pub async fn rv_from_stock_zh_a_hist_min_em(
+    pub async fn rv_from_stock_zh_a_hist_min(
         &self,
         symbol: &str,
     ) -> Result<Vec<MacroDataPoint>> {
         let klines = self
-            .stock_zh_a_hist_min_em(symbol, "5", "qfq", "", "")
+            .stock_zh_a_hist_min(symbol, "5", "qfq", "", "")
             .await?;
         if klines.is_empty() {
             return Err(Error::not_found(format!("no minute data for {symbol}")));

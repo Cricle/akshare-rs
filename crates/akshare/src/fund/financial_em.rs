@@ -5,8 +5,8 @@ use crate::error::{Error, Result};
 use crate::types::FundNavHistory;
 
 impl AkShareClient {
-    /// Fetch financial fund daily data (Python: fund_financial_fund_daily_em).
-    pub async fn fund_financial_fund_daily_em(&self) -> Result<Vec<serde_json::Value>> {
+    /// Fetch financial fund daily data (Python: fund_financial_fund_daily).
+    pub async fn fund_financial_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .get("https://api.fund.eastmoney.com/FundNetValue/GetLCJJJZ")
             .header("Referer", "https://fund.eastmoney.com/lcjj.html")
@@ -39,10 +39,10 @@ impl AkShareClient {
         Ok(list.clone())
     }
 
-    /// Fetch financial fund info (historical NAV) (Python: fund_financial_fund_info_em).
+    /// Fetch financial fund info (historical NAV) (Python: fund_financial_fund_info).
     ///
     /// `symbol`: financial fund code (e.g. "000134").
-    pub async fn fund_financial_fund_info_em(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
+    pub async fn fund_financial_fund_info(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
         let response = self
             .get("https://api.fund.eastmoney.com/f10/lsjz")
             .query(&[

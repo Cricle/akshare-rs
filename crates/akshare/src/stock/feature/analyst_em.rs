@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 东方财富分析师指数
-    pub async fn stock_analyst_rank_em(&self, year: &str) -> Result<Vec<AnalystRank>> {
+    pub async fn stock_analyst_rank(&self, year: &str) -> Result<Vec<AnalystRank>> {
         let filter = format!("(YEAR=\"{year}\")");
         let data = self
             .dc_fetch_all(
@@ -44,7 +44,7 @@ impl AkShareClient {
     }
 
     /// 东方财富分析师详情
-    pub async fn stock_analyst_detail_em(
+    pub async fn stock_analyst_detail(
         &self,
         analyst_id: &str,
         indicator: &str,

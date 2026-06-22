@@ -64,22 +64,22 @@ impl AkShareClient {
     }
 
     /// 新浪-ESG评级-MSCI
-    pub async fn stock_esg_msci_sina(&self) -> Result<Vec<EsgRating>> {
+    pub async fn stock_esg_msci(&self) -> Result<Vec<EsgRating>> {
         self.esg_sina_fetch("EsgService.getMsciEsgStocks").await
     }
 
     /// 新浪-ESG评级-路孚特
-    pub async fn stock_esg_rft_sina(&self) -> Result<Vec<EsgRating>> {
+    pub async fn stock_esg_rft(&self) -> Result<Vec<EsgRating>> {
         self.esg_sina_fetch("EsgService.getRftEsgStocks").await
     }
 
     /// 新浪-ESG评级-秩鼎
-    pub async fn stock_esg_zd_sina(&self) -> Result<Vec<EsgRating>> {
+    pub async fn stock_esg_zd(&self) -> Result<Vec<EsgRating>> {
         self.esg_sina_fetch("EsgService.getZdEsgStocks").await
     }
 
     /// 新浪-ESG评级-华证
-    pub async fn stock_esg_hz_sina(&self) -> Result<Vec<EsgRating>> {
+    pub async fn stock_esg_hz(&self) -> Result<Vec<EsgRating>> {
         self.esg_sina_fetch("EsgService.getHzEsgStocks").await
     }
 }

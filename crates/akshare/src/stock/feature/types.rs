@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
-// Spot market data (stock_zh_a_spot_em, stock_sh_a_spot_em, etc.)
+// Spot market data (stock_zh_a_spot_em, stock_sh_a_spot, etc.)
 // ---------------------------------------------------------------------------
 
 /// Real-time A-share spot quote from Eastmoney.

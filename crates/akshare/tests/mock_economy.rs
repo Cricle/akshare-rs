@@ -211,13 +211,13 @@ async fn test_mock_migration_area_baidu() {
     mount_em_mocks(&server).await;
     let client = common::mock_client(&server);
     let result = client
-        .migration_area_baidu("北京", "迁入", "2024-01-01")
+        .migration_area("北京", "迁入", "2024-01-01")
         .await;
     let _ = result;
 }
 macro_test_arg2!(
     test_mock_migration_scale_baidu,
-    migration_scale_baidu,
+    migration_scale,
     "北京",
     "迁入"
 );

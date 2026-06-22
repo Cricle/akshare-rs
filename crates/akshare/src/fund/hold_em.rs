@@ -5,8 +5,8 @@ use crate::error::{Error, Result};
 use crate::types::FundHolderStructureItem;
 
 impl AkShareClient {
-    /// Fetch fund holder structure (Python: fund_hold_structure_em).
-    pub async fn fund_hold_structure_em(&self) -> Result<Vec<FundHolderStructureItem>> {
+    /// Fetch fund holder structure (Python: fund_hold_structure).
+    pub async fn fund_hold_structure(&self) -> Result<Vec<FundHolderStructureItem>> {
         let response = self
             .get("https://fund.eastmoney.com/data/FundDataPortfolio_Interface.aspx")
             .query(&[

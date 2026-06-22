@@ -5,19 +5,19 @@
 //! Covers Python functions:
 //! - `stock_dzjy_sctj` — Block trade market statistics
 //! - `stock_dzjy_mrmx` — Block trade daily details
-//! - `stock_repurchase_em` — Stock repurchase data
-//! - `stock_gsrl_gsdt_em` — Company events calendar
+//! - `stock_repurchase` — Stock repurchase data
+//! - `stock_gsrl_gsdt` — Company events calendar
 //! - `stock_report_fund_hold` — Fund holdings
 //! - `stock_share_hold_change_sse` — Shareholder changes (SSE)
 //! - `stock_share_hold_change_szse` — Shareholder changes (SZSE)
 //! - `stock_szse_summary` — SZSE market summary
 //! - `stock_sse_summary` — SSE market summary
 //! - `stock_sector_spot` — Sector spot (Sina)
-//! - `stock_rank_forecast_cninfo` — Analyst forecasts
-//! - `stock_zh_growth_comparison_em` — Growth comparison
-//! - `stock_zh_valuation_comparison_em` — Valuation comparison
-//! - `stock_hk_growth_comparison_em` — HK growth comparison
-//! - `stock_hk_valuation_comparison_em` — HK valuation comparison
+//! - `stock_rank_forecast` — Analyst forecasts
+//! - `stock_zh_growth_comparison` — Growth comparison
+//! - `stock_zh_valuation_comparison` — Valuation comparison
+//! - `stock_hk_growth_comparison` — HK growth comparison
+//! - `stock_hk_valuation_comparison` — HK valuation comparison
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -413,8 +413,8 @@ impl AkShareClient {
 
     /// Get stock repurchase data from Eastmoney.
     ///
-    /// Python equivalent: `stock_repurchase_em()`
-    pub async fn stock_repurchase_em(&self, limit: usize) -> Result<Vec<RepurchaseEntry>> {
+    /// Python equivalent: `stock_repurchase()`
+    pub async fn stock_repurchase(&self, limit: usize) -> Result<Vec<RepurchaseEntry>> {
         let page_size = limit.min(500).to_string();
         let response = self
             .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
@@ -478,8 +478,8 @@ impl AkShareClient {
 
     /// Get company events calendar from Eastmoney.
     ///
-    /// Python equivalent: `stock_gsrl_gsdt_em(date)`
-    pub async fn stock_gsrl_gsdt_em(&self, date: &str) -> Result<Vec<CompanyEvent>> {
+    /// Python equivalent: `stock_gsrl_gsdt(date)`
+    pub async fn stock_gsrl_gsdt(&self, date: &str) -> Result<Vec<CompanyEvent>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let filter = format!("(TRADE_DATE='{date_fmt}')");
         let response = self
@@ -669,10 +669,10 @@ impl AkShareClient {
 
     /// Get A-share growth comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_growth_comparison_em(symbol)`
+    /// Python equivalent: `stock_zh_growth_comparison(symbol)`
     ///
     /// `symbol` uses the format "SZ000895" or "SH600000".
-    pub async fn stock_zh_growth_comparison_em(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
+    pub async fn stock_zh_growth_comparison(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
         let secucode = if symbol.len() >= 8 {
             let (prefix, code) = symbol.split_at(2);
             format!("{code}.{prefix}")
@@ -686,8 +686,8 @@ impl AkShareClient {
 
     /// Get A-share valuation comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_valuation_comparison_em(symbol)`
-    pub async fn stock_zh_valuation_comparison_em(
+    /// Python equivalent: `stock_zh_valuation_comparison(symbol)`
+    pub async fn stock_zh_valuation_comparison(
         &self,
         symbol: &str,
     ) -> Result<Vec<PeerComparison>> {
@@ -704,8 +704,8 @@ impl AkShareClient {
 
     /// Get HK growth comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_growth_comparison_em(symbol)`
-    pub async fn stock_hk_growth_comparison_em(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
+    /// Python equivalent: `stock_hk_growth_comparison(symbol)`
+    pub async fn stock_hk_growth_comparison(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
         let filter = format!("(SECUCODE=\"{symbol}.HK\")(CORRE_SECUCODE=\"{symbol}.HK\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_HKGROWTH", &filter, "F10")
             .await
@@ -713,8 +713,8 @@ impl AkShareClient {
 
     /// Get HK valuation comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_valuation_comparison_em(symbol)`
-    pub async fn stock_hk_valuation_comparison_em(
+    /// Python equivalent: `stock_hk_valuation_comparison(symbol)`
+    pub async fn stock_hk_valuation_comparison(
         &self,
         symbol: &str,
     ) -> Result<Vec<PeerComparison>> {
@@ -725,8 +725,8 @@ impl AkShareClient {
 
     /// Get US growth comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_growth_comparison_em(symbol)`
-    pub async fn stock_us_growth_comparison_em(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
+    /// Python equivalent: `stock_us_growth_comparison(symbol)`
+    pub async fn stock_us_growth_comparison(&self, symbol: &str) -> Result<Vec<PeerComparison>> {
         let filter = format!("(SECUCODE=\"{symbol}.OQ\")(CORRE_SECUCODE=\"{symbol}.OQ\")");
         self.fetch_peer_comparison("RPT_PCF10_INDUSTRY_USGROWTH", &filter, "F10")
             .await
@@ -734,8 +734,8 @@ impl AkShareClient {
 
     /// Get US valuation comparison from Eastmoney.
     ///
-    /// Python equivalent: `stock_us_valuation_comparison_em(symbol)`
-    pub async fn stock_us_valuation_comparison_em(
+    /// Python equivalent: `stock_us_valuation_comparison(symbol)`
+    pub async fn stock_us_valuation_comparison(
         &self,
         symbol: &str,
     ) -> Result<Vec<PeerComparison>> {
@@ -746,10 +746,10 @@ impl AkShareClient {
 
     /// Get A-share financial indicators from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_a_financial_indicator_em(symbol)`
+    /// Python equivalent: `stock_zh_a_financial_indicator(symbol)`
     ///
     /// `symbol` uses the format "SZ000895" or "SH600000".
-    pub async fn stock_zh_a_financial_indicator_em(
+    pub async fn stock_zh_a_financial_indicator(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
@@ -805,10 +805,10 @@ impl AkShareClient {
 
     /// Get A-share dividend payout from Eastmoney.
     ///
-    /// Python equivalent: `stock_zh_a_dividend_payout_em(symbol)`
+    /// Python equivalent: `stock_zh_a_dividend_payout(symbol)`
     ///
     /// `symbol` uses the format "SZ000895" or "SH600000".
-    pub async fn stock_zh_a_dividend_payout_em(
+    pub async fn stock_zh_a_dividend_payout(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {

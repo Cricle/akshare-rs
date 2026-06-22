@@ -10,7 +10,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 股权质押市场概况
-    pub async fn stock_gpzy_profile_em(&self) -> Result<Vec<GpzyProfile>> {
+    pub async fn stock_gpzy_profile(&self) -> Result<Vec<GpzyProfile>> {
         let data = self
             .dc_fetch_all("RPT_CSDC_LIST", "ALL", "", "TRADE_DATE", "-1", 500, 2, &[])
             .await?;
@@ -30,7 +30,7 @@ impl AkShareClient {
     }
 
     /// 上市公司质押比例
-    pub async fn stock_gpzy_pledge_ratio_em(&self) -> Result<Vec<GpzyPledgeRatio>> {
+    pub async fn stock_gpzy_pledge_ratio(&self) -> Result<Vec<GpzyPledgeRatio>> {
         let data = self
             .dc_fetch_all(
                 "RPT_CSDC_LIST2",
@@ -63,7 +63,7 @@ impl AkShareClient {
     }
 
     /// 重要股东股权质押明细
-    pub async fn stock_gpzy_pledge_detail_em(&self) -> Result<Vec<GpzyPledgeDetail>> {
+    pub async fn stock_gpzy_pledge_detail(&self) -> Result<Vec<GpzyPledgeDetail>> {
         let data = self
             .dc_fetch_all(
                 "RPT_CSDC_DETAIL",
@@ -93,7 +93,7 @@ impl AkShareClient {
     }
 
     /// 质押机构分布统计-银行
-    pub async fn stock_gpzy_distribute_statistics_bank_em(
+    pub async fn stock_gpzy_distribute_statistics_bank(
         &self,
     ) -> Result<Vec<GpzyDistributeEntry>> {
         let data = self
@@ -125,7 +125,7 @@ impl AkShareClient {
     }
 
     /// 质押机构分布统计-证券公司
-    pub async fn stock_gpzy_distribute_statistics_company_em(
+    pub async fn stock_gpzy_distribute_statistics_company(
         &self,
     ) -> Result<Vec<GpzyDistributeEntry>> {
         let data = self
@@ -157,7 +157,7 @@ impl AkShareClient {
     }
 
     /// 个股股权质押明细
-    pub async fn stock_gpzy_individual_pledge_ratio_detail_em(
+    pub async fn stock_gpzy_individual_pledge_ratio_detail(
         &self,
         symbol: &str,
     ) -> Result<Vec<GpzyPledgeRatioDetail>> {
@@ -198,7 +198,7 @@ impl AkShareClient {
     }
 
     /// 行业质押数据
-    pub async fn stock_gpzy_industry_data_em(&self) -> Result<Vec<GpzyIndustry>> {
+    pub async fn stock_gpzy_industry_data(&self) -> Result<Vec<GpzyIndustry>> {
         let data = self
             .dc_fetch_all(
                 "RPT_CSDC_INDUSTRY_STATISTICS",
@@ -225,7 +225,7 @@ impl AkShareClient {
     }
 
     /// 重要股东股权质押明细（全部）
-    pub async fn stock_gpzy_pledge_ratio_detail_em(&self) -> Result<Vec<GpzyPledgeRatioDetail>> {
+    pub async fn stock_gpzy_pledge_ratio_detail(&self) -> Result<Vec<GpzyPledgeRatioDetail>> {
         let data = self
             .dc_fetch_all(
                 "RPTA_APP_ACCUMDETAILS",

@@ -77,7 +77,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-沪深A股-分时行情
-    pub async fn stock_zh_a_hist_min_em(
+    pub async fn stock_zh_a_hist_min(
         &self,
         symbol: &str,
         period: &str,
@@ -205,7 +205,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-港股-分时行情
-    pub async fn stock_hk_hist_min_em(
+    pub async fn stock_hk_hist_min(
         &self,
         symbol: &str,
         period: &str,
@@ -350,7 +350,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-美股-分时行情
-    pub async fn stock_us_hist_min_em(
+    pub async fn stock_us_hist_min(
         &self,
         symbol: &str,
         period: &str,

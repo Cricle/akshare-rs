@@ -19,7 +19,7 @@ impl AkShareClient {
     /// Eastmoney futures inventory data.
     ///
     /// `symbol`: variety name in Chinese (e.g., "铝") or code (e.g., "a")
-    pub async fn futures_inventory_em(&self, symbol: &str) -> Result<Vec<Row>> {
+    pub async fn futures_inventory(&self, symbol: &str) -> Result<Vec<Row>> {
         // Step 1: Get product code mapping
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let body = self

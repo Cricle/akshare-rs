@@ -4,8 +4,8 @@ use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
 impl AkShareClient {
-    /// Fetch financial fund ranking (Python: fund_lcx_rank_em).
-    pub async fn fund_lcx_rank_em(&self) -> Result<Vec<serde_json::Value>> {
+    /// Fetch financial fund ranking (Python: fund_lcx_rank).
+    pub async fn fund_lcx_rank(&self) -> Result<Vec<serde_json::Value>> {
         let response = self
             .get("https://api.fund.eastmoney.com/FundRank/GetLcRankList")
             .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")

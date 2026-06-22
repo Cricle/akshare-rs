@@ -8,7 +8,7 @@ impl AkShareClient {
     ///
     /// `symbol` is in Sina format with market prefix, e.g. "sz128039".
     /// Returns raw key-value pairs as JSON.
-    pub async fn bond_cb_profile_sina(&self, symbol: &str) -> Result<serde_json::Value> {
+    pub async fn bond_cb_profile(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://money.finance.sina.com.cn/bond/info/{symbol}.html");
         let resp = self
             .get(&url)
@@ -29,7 +29,7 @@ impl AkShareClient {
     /// Fetch convertible bond summary data from Sina Finance.
     ///
     /// `symbol` is in Sina format with market prefix, e.g. "sh155255".
-    pub async fn bond_cb_summary_sina(&self, symbol: &str) -> Result<serde_json::Value> {
+    pub async fn bond_cb_summary(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://money.finance.sina.com.cn/bond/quotes/{symbol}.html");
         let resp = self
             .get(&url)

@@ -33,7 +33,7 @@ macro_rules! macro_test_arg2 {
 }
 
 macro_test_arg2!(test_mock_baidu_news_search, baidu_news_search, "rust", 10);
-macro_test_arg2!(test_mock_bing_news_rss, bing_news_rss, "rust", 10);
+macro_test_arg2!(test_mock_bing_news_rss, bing_news, "rust", 10);
 macro_test_arg1!(test_mock_seeking_alpha_news, seeking_alpha_news, "AAPL");
 macro_test_arg2!(test_mock_sogou_news_search, sogou_news_search, "rust", 10);
 
@@ -96,7 +96,7 @@ async fn test_mock_google_news_rss() {
     let server = MockServer::start().await;
     mount_mocks(&server).await;
     let client = common::mock_client(&server);
-    let result = client.google_news_rss("rust", 10).await;
+    let result = client.google_news("rust", 10).await;
     result.unwrap();
 }
 

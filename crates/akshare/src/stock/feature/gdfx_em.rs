@@ -12,7 +12,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 股东持股统计-十大流通股东
-    pub async fn stock_gdfx_free_holding_statistics_em(
+    pub async fn stock_gdfx_free_holding_statistics(
         &self,
         date: &str,
     ) -> Result<Vec<GdfxHoldingStatistic>> {
@@ -53,7 +53,7 @@ impl AkShareClient {
     }
 
     /// 股东持股统计-十大股东
-    pub async fn stock_gdfx_holding_statistics_em(
+    pub async fn stock_gdfx_holding_statistics(
         &self,
         date: &str,
     ) -> Result<Vec<GdfxHoldingStatistic>> {
@@ -94,7 +94,7 @@ impl AkShareClient {
     }
 
     /// 股东持股变动统计-十大流通股东
-    pub async fn stock_gdfx_free_holding_change_em(
+    pub async fn stock_gdfx_free_holding_change(
         &self,
         date: &str,
     ) -> Result<Vec<GdfxHoldingChange>> {
@@ -128,7 +128,7 @@ impl AkShareClient {
     }
 
     /// 股东持股变动统计-十大股东
-    pub async fn stock_gdfx_holding_change_em(&self, date: &str) -> Result<Vec<GdfxHoldingChange>> {
+    pub async fn stock_gdfx_holding_change(&self, date: &str) -> Result<Vec<GdfxHoldingChange>> {
         let filter = format!("(END_DATE='{}')", fmt_date(date));
         let data = self
             .dc_fetch_all(
@@ -159,7 +159,7 @@ impl AkShareClient {
     }
 
     /// 个股-十大流通股东
-    pub async fn stock_gdfx_free_top_10_em(
+    pub async fn stock_gdfx_free_top_10(
         &self,
         symbol: &str,
         date: &str,
@@ -199,7 +199,7 @@ impl AkShareClient {
     }
 
     /// 个股-十大股东
-    pub async fn stock_gdfx_top_10_em(&self, symbol: &str, date: &str) -> Result<Vec<GdfxTop10>> {
+    pub async fn stock_gdfx_top_10(&self, symbol: &str, date: &str) -> Result<Vec<GdfxTop10>> {
         let url = "https://emweb.securities.eastmoney.com/PC_HSF10/ShareholderResearch/PageSDGD";
         let resp = self
             .get(url)
@@ -235,7 +235,7 @@ impl AkShareClient {
     }
 
     /// 股东持股明细-十大流通股东
-    pub async fn stock_gdfx_free_holding_detail_em(
+    pub async fn stock_gdfx_free_holding_detail(
         &self,
         date: &str,
     ) -> Result<Vec<GdfxHoldingDetail>> {
@@ -271,7 +271,7 @@ impl AkShareClient {
     }
 
     /// 股东持股明细-十大股东
-    pub async fn stock_gdfx_holding_detail_em(
+    pub async fn stock_gdfx_holding_detail(
         &self,
         date: &str,
         _indicator: &str,
@@ -314,7 +314,7 @@ impl AkShareClient {
     }
 
     /// 股东持股分析-十大流通股东
-    pub async fn stock_gdfx_free_holding_analyse_em(
+    pub async fn stock_gdfx_free_holding_analyse(
         &self,
         date: &str,
     ) -> Result<Vec<GdfxHoldingAnalyse>> {
@@ -351,7 +351,7 @@ impl AkShareClient {
     }
 
     /// 股东持股分析-十大股东
-    pub async fn stock_gdfx_holding_analyse_em(
+    pub async fn stock_gdfx_holding_analyse(
         &self,
         date: &str,
     ) -> Result<Vec<GdfxHoldingAnalyse>> {
@@ -388,7 +388,7 @@ impl AkShareClient {
     }
 
     /// 股东协同-十大流通股东
-    pub async fn stock_gdfx_free_holding_teamwork_em(
+    pub async fn stock_gdfx_free_holding_teamwork(
         &self,
         symbol: &str,
     ) -> Result<Vec<GdfxTeamwork>> {
@@ -418,7 +418,7 @@ impl AkShareClient {
     }
 
     /// 股东协同-十大股东
-    pub async fn stock_gdfx_holding_teamwork_em(&self, symbol: &str) -> Result<Vec<GdfxTeamwork>> {
+    pub async fn stock_gdfx_holding_teamwork(&self, symbol: &str) -> Result<Vec<GdfxTeamwork>> {
         let filter = format!("(HOLDER_TYPE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
@@ -445,7 +445,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-股东持股变动
-    pub async fn stock_hold_change_cninfo(&self, symbol: &str) -> Result<Vec<HoldChangeCninfo>> {
+    pub async fn stock_hold_change(&self, symbol: &str) -> Result<Vec<HoldChangeCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1087";
         let resp = self
             .post(url)
@@ -469,7 +469,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-实际控制人
-    pub async fn stock_hold_control_cninfo(&self, symbol: &str) -> Result<Vec<HoldControlCninfo>> {
+    pub async fn stock_hold_control(&self, symbol: &str) -> Result<Vec<HoldControlCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1088";
         let resp = self
             .post(url)
@@ -542,7 +542,7 @@ impl AkShareClient {
     }
 
     /// 东方财富-管理层人员
-    pub async fn stock_hold_management_person_em(
+    pub async fn stock_hold_management_person(
         &self,
         symbol: &str,
     ) -> Result<Vec<ManagementDetail>> {
@@ -564,7 +564,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-股东户数
-    pub async fn stock_hold_num_cninfo(
+    pub async fn stock_hold_num(
         &self,
         symbol: &str,
         date: &str,

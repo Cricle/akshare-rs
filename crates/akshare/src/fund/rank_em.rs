@@ -7,7 +7,7 @@ use crate::util::parse_f64_safe;
 
 impl AkShareClient {
     /// Fetch open-end fund rankings from Eastmoney.
-    pub async fn fund_open_fund_rank_em(
+    pub async fn fund_open_fund_rank(
         &self,
         symbol: &str,
         limit: usize,
@@ -95,8 +95,8 @@ impl AkShareClient {
         Ok(snapshots)
     }
 
-    /// Fetch exchange fund ranking (Python: fund_exchange_rank_em).
-    pub async fn fund_exchange_rank_em(&self) -> Result<Vec<FundExchangeRankItem>> {
+    /// Fetch exchange fund ranking (Python: fund_exchange_rank).
+    pub async fn fund_exchange_rank(&self) -> Result<Vec<FundExchangeRankItem>> {
         let response = self
             .get("https://fund.eastmoney.com/data/rankhandler.aspx")
             .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")

@@ -173,10 +173,10 @@ impl AkShareClient {
         Ok(points)
     }
 
-    /// 东方财富-股票和市场代码 (Python: index_code_id_map_em)
+    /// 东方财富-股票和市场代码 (Python: index_code_id_map)
     ///
     /// Returns a mapping of stock codes to market IDs.
-    pub async fn index_code_id_map_em(&self) -> Result<std::collections::HashMap<String, i64>> {
+    pub async fn index_code_id_map(&self) -> Result<std::collections::HashMap<String, i64>> {
         let items = self
             .clist_spot_fetch(
                 "b:MK0010,m:1+t:1,m:0 t:5,m:1+s:3,m:0+t:5,m:2",

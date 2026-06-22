@@ -5,10 +5,10 @@ use crate::error::{Error, Result};
 use crate::types::FundValueEstimationItem;
 
 impl AkShareClient {
-    /// Fetch fund value estimation (Python: fund_value_estimation_em).
+    /// Fetch fund value estimation (Python: fund_value_estimation).
     ///
     /// `symbol`: "全部", "股票型", "混合型", "债券型", "指数型", "QDII", "ETF联接", "LOF", "场内交易基金".
-    pub async fn fund_value_estimation_em(
+    pub async fn fund_value_estimation(
         &self,
         symbol: &str,
     ) -> Result<Vec<FundValueEstimationItem>> {

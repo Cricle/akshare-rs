@@ -2,11 +2,11 @@
 //! Eastmoney hot rankings — stock popularity, keywords, rising stocks.
 //!
 //! Covers Python functions:
-//! - `stock_hot_rank_em` — Hot stock popularity ranking
-//! - `stock_hot_rank_detail_em` — Historical trend for a stock
-//! - `stock_hot_rank_detail_realtime_em` — Realtime rank changes
-//! - `stock_hot_keyword_em` — Hot keywords for a stock
-//! - `stock_hot_up_em` — Rising stocks (飙升榜)
+//! - `stock_hot_rank` — Hot stock popularity ranking
+//! - `stock_hot_rank_detail` — Historical trend for a stock
+//! - `stock_hot_rank_detail_realtime` — Realtime rank changes
+//! - `stock_hot_keyword` — Hot keywords for a stock
+//! - `stock_hot_up` — Rising stocks (飙升榜)
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -161,8 +161,8 @@ struct UlistData {
 impl AkShareClient {
     /// Get stock hot popularity ranking from Eastmoney.
     ///
-    /// Python equivalent: `stock_hot_rank_em()`
-    pub async fn stock_hot_rank_em(&self, limit: usize) -> Result<Vec<HotRankEntry>> {
+    /// Python equivalent: `stock_hot_rank()`
+    pub async fn stock_hot_rank(&self, limit: usize) -> Result<Vec<HotRankEntry>> {
         // Step 1: Get rank data
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -255,10 +255,10 @@ impl AkShareClient {
 
     /// Get historical trend and fan characteristics for a stock.
     ///
-    /// Python equivalent: `stock_hot_rank_detail_em(symbol)`
+    /// Python equivalent: `stock_hot_rank_detail(symbol)`
     ///
     /// `symbol` uses the Eastmoney format like "SZ000665".
-    pub async fn stock_hot_rank_detail_em(&self, symbol: &str) -> Result<Vec<HotRankTrendEntry>> {
+    pub async fn stock_hot_rank_detail(&self, symbol: &str) -> Result<Vec<HotRankTrendEntry>> {
         // Step 1: Get rank history
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -323,10 +323,10 @@ impl AkShareClient {
 
     /// Get realtime rank changes for a stock.
     ///
-    /// Python equivalent: `stock_hot_rank_detail_realtime_em(symbol)`
+    /// Python equivalent: `stock_hot_rank_detail_realtime(symbol)`
     ///
     /// `symbol` uses the Eastmoney format like "SZ000665".
-    pub async fn stock_hot_rank_detail_realtime_em(
+    pub async fn stock_hot_rank_detail_realtime(
         &self,
         symbol: &str,
     ) -> Result<Vec<HotRankRealtimeEntry>> {
@@ -361,10 +361,10 @@ impl AkShareClient {
 
     /// Get hot keywords for a stock.
     ///
-    /// Python equivalent: `stock_hot_keyword_em(symbol)`
+    /// Python equivalent: `stock_hot_keyword(symbol)`
     ///
     /// `symbol` uses the Eastmoney format like "SZ000665".
-    pub async fn stock_hot_keyword_em(&self, symbol: &str) -> Result<Vec<HotKeywordEntry>> {
+    pub async fn stock_hot_keyword(&self, symbol: &str) -> Result<Vec<HotKeywordEntry>> {
         let payload = serde_json::json!({
             "appId": "appId01",
             "globalId": "786e4c21-70dc-435a-93bb-38",
@@ -398,8 +398,8 @@ impl AkShareClient {
 
     /// Get rising stocks (飙升榜) from Eastmoney.
     ///
-    /// Python equivalent: `stock_hot_up_em()`
-    pub async fn stock_hot_up_em(&self, limit: usize) -> Result<Vec<HotUpEntry>> {
+    /// Python equivalent: `stock_hot_up()`
+    pub async fn stock_hot_up(&self, limit: usize) -> Result<Vec<HotUpEntry>> {
         // Step 1: Get rising rank data
         let payload = serde_json::json!({
             "appId": "appId01",
@@ -491,8 +491,8 @@ impl AkShareClient {
         Ok(entries)
     }
 
-    /// 最新热度排名 (Python: stock_hot_rank_latest_em)
-    pub async fn stock_hot_rank_latest_em(&self, symbol: &str) -> Result<Vec<HotRankTrendEntry>> {
+    /// 最新热度排名 (Python: stock_hot_rank_latest)
+    pub async fn stock_hot_rank_latest(&self, symbol: &str) -> Result<Vec<HotRankTrendEntry>> {
         let payload = serde_json::json!({
             "appId": "appId01",
             "globalId": "786e4c21-70dc-435a-93bb-38",
@@ -520,8 +520,8 @@ impl AkShareClient {
             .collect())
     }
 
-    /// 相关热度排名 (Python: stock_hot_rank_relate_em)
-    pub async fn stock_hot_rank_relate_em(&self, symbol: &str) -> Result<Vec<HotRankEntry>> {
+    /// 相关热度排名 (Python: stock_hot_rank_relate)
+    pub async fn stock_hot_rank_relate(&self, symbol: &str) -> Result<Vec<HotRankEntry>> {
         let payload = serde_json::json!({
             "appId": "appId01",
             "globalId": "786e4c21-70dc-435a-93bb-38",
@@ -553,8 +553,8 @@ impl AkShareClient {
             .collect())
     }
 
-    /// 百度热搜股票 (Python: stock_hot_search_baidu)
-    pub async fn stock_hot_search_baidu(
+    /// 百度热搜股票 (Python: stock_hot_search)
+    pub async fn stock_hot_search(
         &self,
         symbol: &str,
         _date: &str,

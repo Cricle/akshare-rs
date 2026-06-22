@@ -6,7 +6,7 @@ use crate::types::FundRatingItem;
 
 impl AkShareClient {
     /// Fetch fund ratings from Eastmoney.
-    pub async fn fund_rating_em(&self, limit: usize) -> Result<Vec<serde_json::Value>> {
+    pub async fn fund_rating(&self, limit: usize) -> Result<Vec<serde_json::Value>> {
         let pn = limit.max(1).to_string();
         let resp = self
             .get("https://api.fund.eastmoney.com/FundRating/GetFundRatingList")

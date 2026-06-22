@@ -6,7 +6,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 盘口异动
-    pub async fn stock_changes_em(&self, symbol: &str) -> Result<Vec<PankouChange>> {
+    pub async fn stock_changes(&self, symbol: &str) -> Result<Vec<PankouChange>> {
         let data = self
             .push2ex_fetch(
                 "getChangesList",

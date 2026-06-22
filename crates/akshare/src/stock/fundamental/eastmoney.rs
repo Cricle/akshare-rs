@@ -226,7 +226,7 @@ impl AkShareClient {
     /// `stock` is the HK stock code, e.g. "00700".
     /// `symbol` is one of "资产负债表", "利润表", "现金流量表".
     /// `indicator` is "年度" or "报告期".
-    pub async fn stock_financial_hk_report_em(
+    pub async fn stock_financial_hk_report(
         &self,
         stock: &str,
         symbol: &str,
@@ -336,7 +336,7 @@ impl AkShareClient {
     ///
     /// `symbol` is the HK stock code, e.g. "00700".
     /// `indicator` is "年度" or "报告期".
-    pub async fn stock_financial_hk_analysis_indicator_em(
+    pub async fn stock_financial_hk_analysis_indicator(
         &self,
         symbol: &str,
         indicator: &str,
@@ -397,7 +397,7 @@ impl AkShareClient {
     /// `stock` is the US stock code, e.g. "TSLA".
     /// `symbol` is one of "资产负债表", "综合损益表", "现金流量表".
     /// `indicator` is "年报", "单季报", or "累计季报".
-    pub async fn stock_financial_us_report_em(
+    pub async fn stock_financial_us_report(
         &self,
         stock: &str,
         symbol: &str,
@@ -498,7 +498,7 @@ impl AkShareClient {
     ///
     /// `symbol` is the US stock code, e.g. "TSLA".
     /// `indicator` is "年报", "单季报", or "累计季报".
-    pub async fn stock_financial_us_analysis_indicator_em(
+    pub async fn stock_financial_us_analysis_indicator(
         &self,
         symbol: &str,
         indicator: &str,
@@ -568,7 +568,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::HkMainIndicator>> {
         let data = self
-            .stock_financial_hk_analysis_indicator_em(symbol, indicator)
+            .stock_financial_hk_analysis_indicator(symbol, indicator)
             .await?;
         Ok(data
             .iter()
@@ -617,7 +617,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::BalanceSheet>> {
         let rows = self
-            .stock_financial_hk_report_em(stock, "资产负债表", indicator)
+            .stock_financial_hk_report(stock, "资产负债表", indicator)
             .await?;
         Ok(pivot_hk_report_to_balance_sheet(&rows))
     }
@@ -629,7 +629,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::ProfitSheet>> {
         let rows = self
-            .stock_financial_hk_report_em(stock, "利润表", indicator)
+            .stock_financial_hk_report(stock, "利润表", indicator)
             .await?;
         Ok(pivot_hk_report_to_profit_sheet(&rows))
     }
@@ -641,7 +641,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::CashFlowSheet>> {
         let rows = self
-            .stock_financial_hk_report_em(stock, "现金流量表", indicator)
+            .stock_financial_hk_report(stock, "现金流量表", indicator)
             .await?;
         Ok(pivot_hk_report_to_cashflow_sheet(&rows))
     }
@@ -653,7 +653,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::UsMainIndicator>> {
         let data = self
-            .stock_financial_us_analysis_indicator_em(symbol, indicator)
+            .stock_financial_us_analysis_indicator(symbol, indicator)
             .await?;
         Ok(data
             .iter()
@@ -729,7 +729,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::BalanceSheet>> {
         let rows = self
-            .stock_financial_us_report_em(stock, "资产负债表", indicator)
+            .stock_financial_us_report(stock, "资产负债表", indicator)
             .await?;
         Ok(pivot_us_report_to_balance_sheet(&rows))
     }
@@ -741,7 +741,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::ProfitSheet>> {
         let rows = self
-            .stock_financial_us_report_em(stock, "综合损益表", indicator)
+            .stock_financial_us_report(stock, "综合损益表", indicator)
             .await?;
         Ok(pivot_us_report_to_profit_sheet(&rows))
     }
@@ -753,7 +753,7 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<crate::stock::feature::CashFlowSheet>> {
         let rows = self
-            .stock_financial_us_report_em(stock, "现金流量表", indicator)
+            .stock_financial_us_report(stock, "现金流量表", indicator)
             .await?;
         Ok(pivot_us_report_to_cashflow_sheet(&rows))
     }
@@ -767,7 +767,7 @@ impl AkShareClient {
     /// Eastmoney IPO registration data.
     ///
     /// `market` is one of: "全部", "科创板", "创业板", "北交所", "沪主板", "深主板", "达标企业".
-    pub async fn stock_register_em(
+    pub async fn stock_register(
         &self,
         market: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
@@ -844,7 +844,7 @@ impl AkShareClient {
     ///
     /// `market` is one of: "全部股票", "沪市A股", "科创板", "深市A股", "创业板", "京市A股".
     /// `start_date` and `end_date` are in "YYYYMMDD" format.
-    pub async fn stock_restricted_release_summary_em(
+    pub async fn stock_restricted_release_summary(
         &self,
         market: &str,
         start_date: &str,
@@ -899,7 +899,7 @@ impl AkShareClient {
     /// Eastmoney restricted release detail list.
     ///
     /// `start_date` and `end_date` are in "YYYYMMDD" format.
-    pub async fn stock_restricted_release_detail_em(
+    pub async fn stock_restricted_release_detail(
         &self,
         start_date: &str,
         end_date: &str,
@@ -968,7 +968,7 @@ impl AkShareClient {
     ///
     /// `symbol` is the stock code, e.g. "600000".
     /// `date` is in "YYYYMMDD" format (obtained from `stock_restricted_release_queue_em`).
-    pub async fn stock_restricted_release_stockholder_em(
+    pub async fn stock_restricted_release_stockholder(
         &self,
         symbol: &str,
         date: &str,
@@ -1003,7 +1003,7 @@ impl AkShareClient {
     // -----------------------------------------------------------------------
 
     /// Eastmoney IPO declaration (first-time filing) information.
-    pub async fn stock_ipo_declare_em(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo_declare(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_IPO_DECORGNEWEST",
@@ -1028,7 +1028,7 @@ impl AkShareClient {
     }
 
     /// Eastmoney IPO review (listing committee) information.
-    pub async fn stock_ipo_review_em(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo_review(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_IPO_REVIEW",
@@ -1053,7 +1053,7 @@ impl AkShareClient {
     }
 
     /// Eastmoney IPO tutor (coaching/filing) information.
-    pub async fn stock_ipo_tutor_em(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo_tutor(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let data = fetch_datacenter_all(
             &self.http,
             "RPT_IPO_TUTRECORD",
@@ -1125,7 +1125,7 @@ impl AkShareClient {
     /// Eastmoney A-share share capital structure (股本结构).
     ///
     /// `symbol` is in SECUCODE format, e.g. "603392.SH".
-    pub async fn stock_zh_a_gbjg_em(
+    pub async fn stock_zh_a_gbjg(
         &self,
         symbol: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
@@ -1157,7 +1157,7 @@ impl AkShareClient {
     /// Eastmoney main business composition (主营构成).
     ///
     /// `symbol` is in SECUCODE format, e.g. "SH688041" or "688041.SH".
-    pub async fn stock_zygc_em(
+    pub async fn stock_zygc(
         &self,
         symbol: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {

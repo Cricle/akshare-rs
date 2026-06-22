@@ -9,7 +9,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 千股千评
-    pub async fn stock_comment_em(&self) -> Result<Vec<StockComment>> {
+    pub async fn stock_comment(&self) -> Result<Vec<StockComment>> {
         let data = self
             .dc_fetch_all(
                 "RPT_DMSK_TS_STOCKNEW",
@@ -43,7 +43,7 @@ impl AkShareClient {
     }
 
     /// 千股千评-主力控盘-机构参与度
-    pub async fn stock_comment_detail_zlkp_jgcyd_em(
+    pub async fn stock_comment_detail_zlkp_jgcyd(
         &self,
         symbol: &str,
     ) -> Result<Vec<CommentOrgParticipation>> {
@@ -70,7 +70,7 @@ impl AkShareClient {
     }
 
     /// 千股千评-综合评价-历史评分
-    pub async fn stock_comment_detail_zhpj_lspf_em(
+    pub async fn stock_comment_detail_zhpj_lspf(
         &self,
         symbol: &str,
     ) -> Result<Vec<CommentHistScore>> {
@@ -97,7 +97,7 @@ impl AkShareClient {
     }
 
     /// 千股千评-市场热度-用户关注指数
-    pub async fn stock_comment_detail_scrd_focus_em(
+    pub async fn stock_comment_detail_scrd_focus(
         &self,
         symbol: &str,
     ) -> Result<Vec<CommentFocusIndex>> {
@@ -124,7 +124,7 @@ impl AkShareClient {
     }
 
     /// 千股千评-市场热度-市场渴望指数
-    pub async fn stock_comment_detail_scrd_desire_em(
+    pub async fn stock_comment_detail_scrd_desire(
         &self,
         symbol: &str,
     ) -> Result<Vec<CommentDesireIndex>> {

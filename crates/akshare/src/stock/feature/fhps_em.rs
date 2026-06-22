@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 分红送配
-    pub async fn stock_fhps_em(&self, date: &str) -> Result<Vec<DividendInfo>> {
+    pub async fn stock_fhps(&self, date: &str) -> Result<Vec<DividendInfo>> {
         let date_fmt = fmt_date(date);
         let filter = format!("(REPORT_DATE='{date_fmt}')");
         let data = self

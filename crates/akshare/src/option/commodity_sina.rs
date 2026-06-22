@@ -95,7 +95,7 @@ impl AkShareClient {
     /// Commodity option contract list from Sina.
     ///
     /// Scrapes the Sina options page to get available contracts for a given symbol.
-    pub async fn option_commodity_contract_sina(
+    pub async fn option_commodity_contract(
         &self,
         symbol: &str,
     ) -> Result<Vec<CommodityContractEntry>> {
@@ -148,7 +148,7 @@ impl AkShareClient {
     /// Commodity option contract table (call/put pairs) from Sina.
     ///
     /// Returns the real-time option chain for a specific commodity contract.
-    pub async fn option_commodity_contract_table_sina(
+    pub async fn option_commodity_contract_table(
         &self,
         symbol: &str,
         contract: &str,
@@ -238,7 +238,7 @@ impl AkShareClient {
     /// Commodity option daily history from Sina.
     ///
     /// `symbol` is the contract code including call/put, e.g. "au2012C392".
-    pub async fn option_commodity_hist_sina(&self, symbol: &str) -> Result<Vec<CommodityHistRow>> {
+    pub async fn option_commodity_hist(&self, symbol: &str) -> Result<Vec<CommodityHistRow>> {
         let now = chrono::Utc::now();
         let url = format!(
             "https://stock.finance.sina.com.cn/futures/api/jsonp.php/var%20_m{}C3000{}_{}_{}=/FutureOptionAllService.getOptionDayline",

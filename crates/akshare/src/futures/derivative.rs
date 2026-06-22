@@ -638,7 +638,7 @@ impl AkShareClient {
     ///
     /// Iterates over dce, czce, shfe, cffex, gfex to find main contracts.
     /// Returns (exchange, symbol, name) for each main contract.
-    pub async fn futures_display_main_sina(&self) -> Result<Vec<Row>> {
+    pub async fn futures_display_main(&self) -> Result<Vec<Row>> {
         let mut all_items = Vec::new();
         for exchange in &["dce", "czce", "shfe", "cffex", "gfex"] {
             let items = self.match_main_contract_sina(exchange).await?;

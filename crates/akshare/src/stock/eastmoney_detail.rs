@@ -2,11 +2,11 @@
 //! Eastmoney detailed stock data — bid/ask, intraday, individual info, profiles.
 //!
 //! Covers Python functions:
-//! - `stock_bid_ask_em` / `stock_ask_bid_em` — Bid/ask data
+//! - `stock_bid_ask` / `stock_ask_bid_em` — Bid/ask data
 //! - `stock_intraday_em` — Intraday tick data
-//! - `stock_individual_info_em` — Individual stock info
-//! - `stock_hk_security_profile_em` — HK security profile
-//! - `stock_hk_company_profile_em` — HK company profile
+//! - `stock_individual_info` — Individual stock info
+//! - `stock_hk_security_profile` — HK security profile
+//! - `stock_hk_company_profile` — HK company profile
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -216,8 +216,8 @@ pub struct HkCompanyProfile {
 impl AkShareClient {
     /// Get bid/ask data for an A-share stock from Eastmoney.
     ///
-    /// Python equivalent: `stock_bid_ask_em(symbol)` / `stock_ask_bid_em(symbol)`
-    pub async fn stock_bid_ask_em(&self, symbol: &str) -> Result<BidAskData> {
+    /// Python equivalent: `stock_bid_ask(symbol)` / `stock_ask_bid_em(symbol)`
+    pub async fn stock_bid_ask(&self, symbol: &str) -> Result<BidAskData> {
         let secid = crate::market::eastmoney_secid(symbol)?;
         let response = self
             .get("https://push2.eastmoney.com/api/qt/stock/get")
@@ -354,8 +354,8 @@ impl AkShareClient {
 
     /// Get individual stock info from Eastmoney.
     ///
-    /// Python equivalent: `stock_individual_info_em(symbol)`
-    pub async fn stock_individual_info_em(&self, symbol: &str) -> Result<Vec<StockInfoItem>> {
+    /// Python equivalent: `stock_individual_info(symbol)`
+    pub async fn stock_individual_info(&self, symbol: &str) -> Result<Vec<StockInfoItem>> {
         let secid = crate::market::eastmoney_secid(symbol)?;
         let response = self
             .get("https://push2.eastmoney.com/api/qt/stock/get")
@@ -405,7 +405,7 @@ impl AkShareClient {
 
     /// Get individual stock info from Eastmoney using a raw secid.
     ///
-    /// Unlike `stock_individual_info_em`, this accepts a pre-formatted secid
+    /// Unlike `stock_individual_info`, this accepts a pre-formatted secid
     /// (e.g. "105.AAPL" for NASDAQ, "106.AAPL" for NYSE, "116.00700" for HK).
     pub async fn stock_individual_info_em_by_secid(
         &self,
@@ -482,8 +482,8 @@ impl AkShareClient {
 
     /// Get HK security profile from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_security_profile_em(symbol)`
-    pub async fn stock_hk_security_profile_em(
+    /// Python equivalent: `stock_hk_security_profile(symbol)`
+    pub async fn stock_hk_security_profile(
         &self,
         symbol: &str,
     ) -> Result<Vec<HkSecurityProfile>> {
@@ -494,8 +494,8 @@ impl AkShareClient {
 
     /// Get HK company profile from Eastmoney.
     ///
-    /// Python equivalent: `stock_hk_company_profile_em(symbol)`
-    pub async fn stock_hk_company_profile_em(&self, symbol: &str) -> Result<Vec<HkCompanyProfile>> {
+    /// Python equivalent: `stock_hk_company_profile(symbol)`
+    pub async fn stock_hk_company_profile(&self, symbol: &str) -> Result<Vec<HkCompanyProfile>> {
         let filter = format!("(SECUCODE=\"{symbol}.HK\")");
         self.fetch_hk_profile("RPT_HKF10_INFO_COMPANYINFO", &filter)
             .await

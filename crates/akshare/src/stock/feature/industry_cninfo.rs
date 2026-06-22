@@ -7,7 +7,7 @@ use crate::error::{Error, Result};
 
 impl AkShareClient {
     /// 巨潮-行业分类
-    pub async fn stock_industry_category_cninfo(&self) -> Result<Vec<IndustryCategory>> {
+    pub async fn stock_industry_category(&self) -> Result<Vec<IndustryCategory>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1125";
         let resp = self
             .post(url)
@@ -35,7 +35,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-行业变动
-    pub async fn stock_industry_change_cninfo(&self, symbol: &str) -> Result<Vec<IndustryChange>> {
+    pub async fn stock_industry_change(&self, symbol: &str) -> Result<Vec<IndustryChange>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1126";
         let resp = self
             .post(url)
@@ -76,7 +76,7 @@ impl AkShareClient {
     }
 
     /// 巨潮-行业市盈率
-    pub async fn stock_industry_pe_ratio_cninfo(
+    pub async fn stock_industry_pe_ratio(
         &self,
         symbol: &str,
     ) -> Result<Vec<IndustryPeRatio>> {

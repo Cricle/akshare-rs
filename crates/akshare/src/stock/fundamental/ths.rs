@@ -206,7 +206,7 @@ impl AkShareClient {
     }
 
     /// THS balance sheet (资产负债表) - old API.
-    pub async fn stock_financial_debt_ths(
+    pub async fn stock_financial_debt(
         &self,
         symbol: &str,
         indicator: &str,
@@ -216,7 +216,7 @@ impl AkShareClient {
     }
 
     /// THS income statement (利润表) - old API.
-    pub async fn stock_financial_benefit_ths(
+    pub async fn stock_financial_benefit(
         &self,
         symbol: &str,
         indicator: &str,
@@ -226,7 +226,7 @@ impl AkShareClient {
     }
 
     /// THS cash flow statement (现金流量表) - old API.
-    pub async fn stock_financial_cash_ths(
+    pub async fn stock_financial_cash(
         &self,
         symbol: &str,
         indicator: &str,
@@ -379,7 +379,7 @@ impl AkShareClient {
     ///
     /// `symbol` is the stock code, e.g. "000063".
     /// `indicator` is one of "按报告期", "一季度", "二季度", "三季度", "四季度", "按年度".
-    pub async fn stock_financial_abstract_new_ths(
+    pub async fn stock_financial_abstract_new(
         &self,
         symbol: &str,
         indicator: &str,
@@ -389,7 +389,7 @@ impl AkShareClient {
     }
 
     /// THS new balance sheet (资产负债表).
-    pub async fn stock_financial_debt_new_ths(
+    pub async fn stock_financial_debt_new(
         &self,
         symbol: &str,
         indicator: &str,
@@ -404,7 +404,7 @@ impl AkShareClient {
     }
 
     /// THS new income statement (利润表).
-    pub async fn stock_financial_benefit_new_ths(
+    pub async fn stock_financial_benefit_new(
         &self,
         symbol: &str,
         indicator: &str,
@@ -414,7 +414,7 @@ impl AkShareClient {
     }
 
     /// THS new cash flow statement (现金流量表).
-    pub async fn stock_financial_cash_new_ths(
+    pub async fn stock_financial_cash_new(
         &self,
         symbol: &str,
         indicator: &str,
@@ -516,7 +516,7 @@ impl AkShareClient {
     // -----------------------------------------------------------------------
 
     /// THS management shareholding changes (高管持股变动).
-    pub async fn stock_management_change_ths(
+    pub async fn stock_management_change(
         &self,
         symbol: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
@@ -546,7 +546,7 @@ impl AkShareClient {
     }
 
     /// THS shareholder shareholding changes (股东持股变动).
-    pub async fn stock_shareholder_change_ths(
+    pub async fn stock_shareholder_change(
         &self,
         symbol: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
@@ -581,7 +581,7 @@ impl AkShareClient {
     /// THS IPO subscription and allotment data (新股申购与中签).
     ///
     /// `market` is one of: "全部A股", "沪市主板", "深市主板", "创业板", "科创板", "京市主板".
-    pub async fn stock_ipo_ths(
+    pub async fn stock_ipo(
         &self,
         market: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
@@ -631,7 +631,7 @@ impl AkShareClient {
     }
 
     /// THS HK IPO subscription and allotment data (港股新股申购与中签).
-    pub async fn stock_ipo_hk_ths(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+    pub async fn stock_ipo_hk(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = "https://data.10jqka.com.cn/ipo/xgsgyzq/hkstock/";
         let html = self
             .get(url)
@@ -730,7 +730,7 @@ impl AkShareClient {
     /// THS main business introduction (主营介绍).
     ///
     /// `symbol` is the stock code, e.g. "000066".
-    pub async fn stock_zyjs_ths(&self, symbol: &str) -> Result<HashMap<String, serde_json::Value>> {
+    pub async fn stock_zyjs(&self, symbol: &str) -> Result<HashMap<String, serde_json::Value>> {
         let url = format!("https://basic.10jqka.com.cn/new/{symbol}/operate.html");
         let resp = self.get(&url).headers(ths_headers()).send().await?;
 

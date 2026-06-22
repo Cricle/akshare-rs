@@ -1,13 +1,13 @@
 //! Eastmoney board data — concept and industry boards: hist, minute, spot, change.
 //!
 //! Covers Python functions:
-//! - `stock_board_concept_hist_em` — Concept board historical kline
-//! - `stock_board_concept_hist_min_em` — Concept board minute kline
-//! - `stock_board_concept_spot_em` — Concept board spot data
-//! - `stock_board_industry_hist_em` — Industry board historical kline
-//! - `stock_board_industry_hist_min_em` — Industry board minute kline
-//! - `stock_board_industry_spot_em` — Industry board spot data
-//! - `stock_board_change_em` — Board change data
+//! - `stock_board_concept_hist` — Concept board historical kline
+//! - `stock_board_concept_hist_min` — Concept board minute kline
+//! - `stock_board_concept_spot` — Concept board spot data
+//! - `stock_board_industry_hist` — Industry board historical kline
+//! - `stock_board_industry_hist_min` — Industry board minute kline
+//! - `stock_board_industry_spot` — Industry board spot data
+//! - `stock_board_change` — Board change data
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -106,14 +106,14 @@ impl AkShareClient {
 
     /// Get concept board historical kline data from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_concept_hist_em(symbol, period, start_date, end_date, adjust)`
+    /// Python equivalent: `stock_board_concept_hist(symbol, period, start_date, end_date, adjust)`
     ///
     /// - `symbol`: board name (e.g. "绿色电力") or board code (e.g. "BK0715")
     /// - `period`: "daily", "weekly", "monthly"
     /// - `start_date`: "20220101"
     /// - `end_date`: "20221128"
     /// - `adjust`: "", "qfq", "hfq"
-    pub async fn stock_board_concept_hist_em(
+    pub async fn stock_board_concept_hist(
         &self,
         symbol: &str,
         period: &str,
@@ -140,11 +140,11 @@ impl AkShareClient {
 
     /// Get concept board minute kline data from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_concept_hist_min_em(symbol, period)`
+    /// Python equivalent: `stock_board_concept_hist_min(symbol, period)`
     ///
     /// - `symbol`: board name or code
     /// - `period`: "1", "5", "15", "30", "60"
-    pub async fn stock_board_concept_hist_min_em(
+    pub async fn stock_board_concept_hist_min(
         &self,
         symbol: &str,
         period: &str,
@@ -155,10 +155,10 @@ impl AkShareClient {
 
     /// Get concept board spot data from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_concept_spot_em(symbol)`
+    /// Python equivalent: `stock_board_concept_spot(symbol)`
     ///
     /// Returns key-value pairs of board metrics.
-    pub async fn stock_board_concept_spot_em(&self, symbol: &str) -> Result<Vec<BoardSpotItem>> {
+    pub async fn stock_board_concept_spot(&self, symbol: &str) -> Result<Vec<BoardSpotItem>> {
         let secid = self.resolve_board_secid(symbol, "concept").await?;
         self.fetch_board_spot(&secid).await
     }
@@ -167,14 +167,14 @@ impl AkShareClient {
 
     /// Get industry board historical kline data from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_industry_hist_em(symbol, period, start_date, end_date, adjust)`
+    /// Python equivalent: `stock_board_industry_hist(symbol, period, start_date, end_date, adjust)`
     ///
     /// - `symbol`: board name (e.g. "小金属") or board code (e.g. "BK1027")
     /// - `period`: "daily", "weekly", "monthly"
     /// - `start_date`: "20211201"
     /// - `end_date`: "20220401"
     /// - `adjust`: "", "qfq", "hfq"
-    pub async fn stock_board_industry_hist_em(
+    pub async fn stock_board_industry_hist(
         &self,
         symbol: &str,
         period: &str,
@@ -201,11 +201,11 @@ impl AkShareClient {
 
     /// Get industry board minute kline data from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_industry_hist_min_em(symbol, period)`
+    /// Python equivalent: `stock_board_industry_hist_min(symbol, period)`
     ///
     /// - `symbol`: board name or code
     /// - `period`: "1", "5", "15", "30", "60"
-    pub async fn stock_board_industry_hist_min_em(
+    pub async fn stock_board_industry_hist_min(
         &self,
         symbol: &str,
         period: &str,
@@ -216,8 +216,8 @@ impl AkShareClient {
 
     /// Get industry board spot data from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_industry_spot_em(symbol)`
-    pub async fn stock_board_industry_spot_em(&self, symbol: &str) -> Result<Vec<BoardSpotItem>> {
+    /// Python equivalent: `stock_board_industry_spot(symbol)`
+    pub async fn stock_board_industry_spot(&self, symbol: &str) -> Result<Vec<BoardSpotItem>> {
         let secid = self.resolve_board_secid(symbol, "industry").await?;
         self.fetch_board_spot(&secid).await
     }
@@ -226,10 +226,10 @@ impl AkShareClient {
 
     /// Get board change data from Eastmoney.
     ///
-    /// Python equivalent: `stock_board_change_em(symbol)`
+    /// Python equivalent: `stock_board_change(symbol)`
     ///
     /// `symbol` is a board filter like "行业板块" or "概念板块".
-    pub async fn stock_board_change_em(&self, symbol: &str) -> Result<Vec<BoardChangeRow>> {
+    pub async fn stock_board_change(&self, symbol: &str) -> Result<Vec<BoardChangeRow>> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<EnvData>,

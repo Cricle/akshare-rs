@@ -5,7 +5,7 @@ use crate::error::{Error, Result};
 
 impl AkShareClient {
     /// Fetch fund portfolio holdings from Eastmoney.
-    pub async fn fund_portfolio_hold_em(
+    pub async fn fund_portfolio_hold(
         &self,
         symbol: &str,
         _date: &str,
@@ -37,23 +37,23 @@ impl AkShareClient {
     }
 
     /// Fetch fund bond holdings from Eastmoney.
-    pub async fn fund_portfolio_bond_hold_em(
+    pub async fn fund_portfolio_bond_hold(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        self.fund_portfolio_hold_em(symbol, "").await
+        self.fund_portfolio_hold(symbol, "").await
     }
 
     /// Fetch fund asset allocation from Eastmoney.
-    pub async fn fund_portfolio_asset_allocation_em(
+    pub async fn fund_portfolio_asset_allocation(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        self.fund_portfolio_hold_em(symbol, "").await
+        self.fund_portfolio_hold(symbol, "").await
     }
 
-    /// Fetch fund portfolio industry allocation (Python: fund_portfolio_industry_allocation_em).
-    pub async fn fund_portfolio_industry_allocation_em(
+    /// Fetch fund portfolio industry allocation (Python: fund_portfolio_industry_allocation).
+    pub async fn fund_portfolio_industry_allocation(
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
@@ -105,11 +105,11 @@ impl AkShareClient {
         Ok(result)
     }
 
-    /// Fetch fund portfolio major changes (Python: fund_portfolio_change_em).
+    /// Fetch fund portfolio major changes (Python: fund_portfolio_change).
     ///
     /// `symbol`: fund code.
     /// `indicator`: "累计买入" or "累计卖出".
-    pub async fn fund_portfolio_change_em(
+    pub async fn fund_portfolio_change(
         &self,
         symbol: &str,
         indicator: &str,

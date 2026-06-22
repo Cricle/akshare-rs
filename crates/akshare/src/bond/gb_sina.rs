@@ -74,7 +74,7 @@ impl AkShareClient {
     ///
     /// `symbol` is one of the China bond tenor names (e.g. "中国10年期国债").
     /// Returns daily open/high/low/close yield data.
-    pub async fn bond_gb_zh_sina(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
+    pub async fn bond_gb_zh(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let code = resolve_sina_code(ZH_GB_MAP, symbol)?;
         self.fetch_sina_bond(&code, symbol).await
     }
@@ -83,7 +83,7 @@ impl AkShareClient {
     ///
     /// `symbol` is one of the US bond tenor names (e.g. "美国10年期国债").
     /// Returns daily open/high/low/close yield data.
-    pub async fn bond_gb_us_sina(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
+    pub async fn bond_gb_us(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let code = resolve_sina_code(US_GB_MAP, symbol)?;
         self.fetch_sina_bond(&code, symbol).await
     }

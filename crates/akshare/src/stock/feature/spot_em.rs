@@ -1,4 +1,4 @@
-//! Spot market data from Eastmoney (stock_zh_a_spot_em, stock_sh_a_spot_em, etc.)
+//! Spot market data from Eastmoney (stock_zh_a_spot_em, stock_sh_a_spot, etc.)
 
 use super::helpers::json_f64;
 use super::types::SpotQuote;
@@ -52,7 +52,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-沪 A 股-实时行情
-    pub async fn stock_sh_a_spot_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_sh_a_spot(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:1 t:2,m:1 t:23", SPOT_FIELDS, "5000", "f12")
             .await?;
@@ -60,7 +60,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-深 A 股-实时行情
-    pub async fn stock_sz_a_spot_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_sz_a_spot(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:0 t:6,m:0 t:80", SPOT_FIELDS, "5000", "f12")
             .await?;
@@ -68,7 +68,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-京 A 股-实时行情
-    pub async fn stock_bj_a_spot_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_bj_a_spot(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:0 t:81 s:2048", SPOT_FIELDS, "5000", "f12")
             .await?;
@@ -76,7 +76,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-新股-实时行情
-    pub async fn stock_new_a_spot_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_new_a_spot(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:0 f:8,m:1 f:8", SPOT_FIELDS, "5000", "f26")
             .await?;
@@ -84,7 +84,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-创业板-实时行情
-    pub async fn stock_cy_a_spot_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_cy_a_spot(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:0 t:80", SPOT_FIELDS, "5000", "f12")
             .await?;
@@ -92,7 +92,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-科创板-实时行情
-    pub async fn stock_kc_a_spot_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_kc_a_spot(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:1 t:23", SPOT_FIELDS, "5000", "f12")
             .await?;
@@ -100,7 +100,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-AB 股比价
-    pub async fn stock_zh_ab_comparison_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_zh_ab_comparison(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:0 t:6,m:0 t:80,m:1 t:2", SPOT_FIELDS, "5000", "f12")
             .await?;
@@ -124,7 +124,7 @@ impl AkShareClient {
     }
 
     /// 东方财富网-港股主板-实时行情
-    pub async fn stock_hk_main_board_spot_em(&self) -> Result<Vec<SpotQuote>> {
+    pub async fn stock_hk_main_board_spot(&self) -> Result<Vec<SpotQuote>> {
         let items = self
             .clist_spot_fetch("m:128 t:3", SPOT_FIELDS, "5000", "f12")
             .await?;

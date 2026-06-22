@@ -32,7 +32,7 @@ impl AkShareClient {
     /// Eastmoney futures market table (品种对照表).
     ///
     /// Returns contract names and codes for all exchanges.
-    pub async fn futures_hist_table_em(&self) -> Result<Vec<Row>> {
+    pub async fn futures_hist_table(&self) -> Result<Vec<Row>> {
         let url = "https://futsse-static.eastmoney.com/redis";
         let body = self
             .get(url)
@@ -83,7 +83,7 @@ impl AkShareClient {
     ///
     /// `symbol`: Chinese name like "热卷主连" or code like "rb2505"
     /// `period`: "daily", "weekly", or "monthly"
-    pub async fn futures_hist_em(
+    pub async fn futures_hist(
         &self,
         symbol: &str,
         period: &str,

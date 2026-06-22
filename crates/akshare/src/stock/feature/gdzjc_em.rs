@@ -7,7 +7,7 @@ use crate::error::Result;
 
 impl AkShareClient {
     /// 高管持股变动
-    pub async fn stock_ggcg_em(&self, symbol: &str) -> Result<Vec<Ggcg>> {
+    pub async fn stock_ggcg(&self, symbol: &str) -> Result<Vec<Ggcg>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(

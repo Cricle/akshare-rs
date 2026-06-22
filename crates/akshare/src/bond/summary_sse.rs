@@ -8,7 +8,7 @@ impl AkShareClient {
     ///
     /// `date` is in YYYYMMDD format.
     /// Returns custody statistics for bond types.
-    pub async fn bond_cash_summary_sse(&self, date: &str) -> Result<Vec<serde_json::Value>> {
+    pub async fn bond_cash_summary(&self, date: &str) -> Result<Vec<serde_json::Value>> {
         let formatted = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "http://query.sse.com.cn/commonExcelDd.do";
         let resp = self
@@ -35,7 +35,7 @@ impl AkShareClient {
     ///
     /// `date` is in YYYYMMDD format.
     /// Returns trading volume and deal statistics by bond type.
-    pub async fn bond_deal_summary_sse(&self, date: &str) -> Result<Vec<serde_json::Value>> {
+    pub async fn bond_deal_summary(&self, date: &str) -> Result<Vec<serde_json::Value>> {
         let formatted = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "http://query.sse.com.cn/commonExcelDd.do";
         let resp = self

@@ -12,7 +12,7 @@ impl AkShareClient {
     /// Global futures realtime quotes from Eastmoney.
     ///
     /// Fetches all international futures contracts (COMEX, NYMEX, LME, etc.)
-    pub async fn futures_global_spot_em(&self) -> Result<Vec<Row>> {
+    pub async fn futures_global_spot(&self) -> Result<Vec<Row>> {
         let url =
             "https://futsseapi.eastmoney.com/list/COMEX,NYMEX,COBOT,SGX,NYBOT,LME,MDEX,TOCOM,IPE";
         let mut all_items = Vec::new();
@@ -73,7 +73,7 @@ impl AkShareClient {
     /// Global futures historical kline data from Eastmoney.
     ///
     /// `symbol`: Eastmoney symbol code, e.g., "HG00Y", "CL00Y"
-    pub async fn futures_global_hist_em(&self, symbol: &str) -> Result<Vec<GlobalFuturesKline>> {
+    pub async fn futures_global_hist(&self, symbol: &str) -> Result<Vec<GlobalFuturesKline>> {
         // Determine market code from symbol prefix
         let base: String = symbol
             .chars()

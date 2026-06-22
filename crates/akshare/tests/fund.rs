@@ -26,7 +26,7 @@ async fn test_fund_etf_dividend_sina() {
     let body = r#"var hq_str_sh510050_hfq={"data":[["2024-01-01","0","0","0.05"],["1900-01-01","0","0","0"]]}"#;
     mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_etf_dividend_sina("sh510050").await;
+    let result = client.fund_etf_dividend("sh510050").await;
     assert!(result.is_ok());
 }
 
@@ -54,7 +54,7 @@ async fn test_fund_etf_fund_info_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_etf_fund_info_em("511280", "20240101", "20240131")
+        .fund_etf_fund_info("511280", "20240101", "20240131")
         .await;
     assert!(result.is_ok());
 }
@@ -82,7 +82,7 @@ async fn test_fund_etf_hist_min_em_5min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_etf_hist_min_em(
+        .fund_etf_hist_min(
             "159707",
             "5",
             "2024-01-02 09:30:00",
@@ -109,7 +109,7 @@ async fn test_fund_etf_hist_min_em_1min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_etf_hist_min_em(
+        .fund_etf_hist_min(
             "159707",
             "1",
             "2024-01-02 09:30:00",
@@ -206,7 +206,7 @@ async fn test_fund_lof_hist_min_em_5min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_lof_hist_min_em(
+        .fund_lof_hist_min(
             "160105",
             "5",
             "2024-01-02 09:30:00",
@@ -232,7 +232,7 @@ async fn test_fund_lof_hist_min_em_1min() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_lof_hist_min_em(
+        .fund_lof_hist_min(
             "160105",
             "1",
             "2024-01-02 09:30:00",
@@ -255,7 +255,7 @@ async fn test_fund_lof_spot_em() {
     let body = em_push2_response(vec![row]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_lof_spot_em().await;
+    let result = client.fund_lof_spot().await;
     assert!(result.is_ok());
 }
 
@@ -270,7 +270,7 @@ async fn test_fund_open_fund_daily_em() {
     let text_body = r#"var db={"showday":["2024-01-02","2024-01-01"],"datas":["000001,华夏成长,1,1.0000,2.0000,0.9900,1.9900,0.01,0.50"]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_open_fund_daily_em().await;
+    let result = client.fund_open_fund_daily().await;
     assert!(result.is_ok());
 }
 
@@ -297,7 +297,7 @@ async fn test_fund_open_fund_info_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_open_fund_info_em("710001", "", "", "单位净值走势")
+        .fund_open_fund_info("710001", "", "", "单位净值走势")
         .await;
     assert!(result.is_ok());
 }
@@ -313,7 +313,7 @@ async fn test_fund_money_fund_daily_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     // This always returns Err (HTML table parsing not supported)
-    let result = client.fund_money_fund_daily_em().await;
+    let result = client.fund_money_fund_daily().await;
     assert!(result.is_err());
 }
 
@@ -339,7 +339,7 @@ async fn test_fund_money_fund_info_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_money_fund_info_em("000009").await;
+    let result = client.fund_money_fund_info("000009").await;
     assert!(result.is_ok());
 }
 
@@ -372,7 +372,7 @@ async fn test_fund_money_rank_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_money_rank_em().await;
+    let result = client.fund_money_rank().await;
     assert!(result.is_ok());
 }
 
@@ -387,7 +387,7 @@ async fn test_fund_graded_fund_daily_em() {
     let text_body = r#"var db={"showday":["2024-01-02","2024-01-01"],"datas":["150001,国泰进取,1,1.0000,2.0000,0.9900,1.9900,0.01,0.50,1.05,5.00"]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_graded_fund_daily_em().await;
+    let result = client.fund_graded_fund_daily().await;
     assert!(result.is_ok());
 }
 
@@ -413,7 +413,7 @@ async fn test_fund_graded_fund_info_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_graded_fund_info_em("150232").await;
+    let result = client.fund_graded_fund_info("150232").await;
     assert!(result.is_ok());
 }
 
@@ -440,7 +440,7 @@ async fn test_fund_announcement_dividend_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_announcement_dividend_em("000001").await;
+    let result = client.fund_announcement_dividend("000001").await;
     assert!(result.is_ok());
 }
 
@@ -462,7 +462,7 @@ async fn test_fund_announcement_report_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_announcement_report_em("000001").await;
+    let result = client.fund_announcement_report("000001").await;
     assert!(result.is_ok());
 }
 
@@ -484,7 +484,7 @@ async fn test_fund_announcement_personnel_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_announcement_personnel_em("000001").await;
+    let result = client.fund_announcement_personnel("000001").await;
     assert!(result.is_ok());
 }
 
@@ -499,7 +499,7 @@ async fn test_fund_aum_hist_em() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     // This always returns Err (HTML table parsing not supported)
-    let result = client.fund_aum_hist_em("2024").await;
+    let result = client.fund_aum_hist("2024").await;
     assert!(result.is_err());
 }
 
@@ -512,7 +512,7 @@ async fn test_fund_aum_trend_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_aum_trend_em().await;
+    let result = client.fund_aum_trend().await;
     assert!(result.is_ok());
 }
 
@@ -527,7 +527,7 @@ async fn test_fund_cf_em() {
     let text_body = r#"[["000001","华夏成长","2024-01-02","拆分","2.0","其他"]];var jjcf_jjgs={}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_cf_em("2024").await;
+    let result = client.fund_cf("2024").await;
     assert!(result.is_ok());
 }
 
@@ -572,7 +572,7 @@ async fn test_fund_exchange_rank_em() {
     let text_body = format!("var rankHandler={{\"datas\":[\"{row}\"]}}");
     mock_any_get_text(&server, ".*", text_body.as_str()).await;
     let client = mock_client(&server);
-    let result = client.fund_exchange_rank_em().await;
+    let result = client.fund_exchange_rank().await;
     assert!(result.is_ok());
 }
 
@@ -587,7 +587,7 @@ async fn test_fund_fh_em() {
     let text_body = r#"[["000001","华夏成长","2024-01-01","2024-01-02","0.05","2024-01-03","备注"]];var jjfh_jjgs={}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_fh_em("2024").await;
+    let result = client.fund_fh("2024").await;
     assert!(result.is_ok());
 }
 
@@ -598,7 +598,7 @@ async fn test_fund_fh_rank_em() {
     let text_body = r#"[["000001","华夏成长","1.50","10","2020-01-01","备注"]];var fhph_jjgs={}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_fh_rank_em().await;
+    let result = client.fund_fh_rank().await;
     assert!(result.is_ok());
 }
 
@@ -618,7 +618,7 @@ async fn test_fund_financial_fund_daily_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_financial_fund_daily_em().await;
+    let result = client.fund_financial_fund_daily().await;
     assert!(result.is_ok());
 }
 
@@ -644,7 +644,7 @@ async fn test_fund_financial_fund_info_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_financial_fund_info_em("000134").await;
+    let result = client.fund_financial_fund_info("000134").await;
     assert!(result.is_ok());
 }
 
@@ -682,7 +682,7 @@ async fn test_fund_hk_rank_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_hk_rank_em().await;
+    let result = client.fund_hk_rank().await;
     assert!(result.is_ok());
 }
 
@@ -696,7 +696,7 @@ async fn test_fund_hk_fund_hist_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_hk_fund_hist_em("968001", "历史净值明细").await;
+    let result = client.fund_hk_fund_hist("968001", "历史净值明细").await;
     assert!(result.is_ok());
 }
 
@@ -712,7 +712,7 @@ async fn test_fund_hold_structure_em() {
     let text_body = r#"{"data":[["2024-01-02","100","30.5","60.5","9.0","10000000","extra"]]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_hold_structure_em().await;
+    let result = client.fund_hold_structure().await;
     assert!(result.is_ok());
 }
 
@@ -881,7 +881,7 @@ async fn test_fund_lcx_rank_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_lcx_rank_em().await;
+    let result = client.fund_lcx_rank().await;
     assert!(result.is_ok());
 }
 
@@ -928,7 +928,7 @@ async fn test_fund_manager_em() {
     let text_body = r#"var returnjson= {"data":[["","","张三","","华夏基金","000001,000002","华夏成长,华夏回报","1000","15.50","","","50.5亿元"]]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_manager_em().await;
+    let result = client.fund_manager().await;
     assert!(result.is_ok());
 }
 
@@ -969,7 +969,7 @@ async fn test_fund_portfolio_change_em() {
     let text_body = r#"var apidata={"content":"<table><tr><td>累计买入</td></tr></table>"}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_portfolio_change_em("000001", "累计买入").await;
+    let result = client.fund_portfolio_change("000001", "累计买入").await;
     assert!(result.is_ok());
 }
 
@@ -980,7 +980,7 @@ async fn test_fund_portfolio_industry_allocation_em() {
     let text_body = r#"jQuery183006997159478989867_1648016188499({"Data":{"QuarterInfos":[{"HYPZInfo":[{"INDUSTRY":"制造业","RATIO":30.5}]}]}})"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_portfolio_industry_allocation_em("000001").await;
+    let result = client.fund_portfolio_industry_allocation("000001").await;
     assert!(result.is_ok());
 }
 
@@ -1026,7 +1026,7 @@ async fn test_fund_report_stock_cninfo() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     // Always returns Err (JS authentication required)
-    let result = client.fund_report_stock_cninfo("2024-01-01").await;
+    let result = client.fund_report_stock("2024-01-01").await;
     assert!(result.is_err());
 }
 
@@ -1036,7 +1036,7 @@ async fn test_fund_report_industry_allocation_cninfo() {
     let client = mock_client(&server);
     // Always returns Err (JS authentication required)
     let result = client
-        .fund_report_industry_allocation_cninfo("2024-01-01")
+        .fund_report_industry_allocation("2024-01-01")
         .await;
     assert!(result.is_err());
 }
@@ -1046,7 +1046,7 @@ async fn test_fund_report_asset_allocation_cninfo() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     // Always returns Err (JS authentication required)
-    let result = client.fund_report_asset_allocation_cninfo().await;
+    let result = client.fund_report_asset_allocation().await;
     assert!(result.is_err());
 }
 
@@ -1063,7 +1063,7 @@ async fn test_fund_scale_change_em() {
         r#"{"data":[["2024-01-02","100","5000.00","3000.00","8000.00","120000.00","extra"]]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_scale_change_em().await;
+    let result = client.fund_scale_change().await;
     assert!(result.is_ok());
 }
 
@@ -1073,7 +1073,7 @@ async fn test_fund_scale_daily_szse() {
     let client = mock_client(&server);
     // Always returns Err (xlsx parsing not supported)
     let result = client
-        .fund_scale_daily_szse("20240101", "20240131", "ETF")
+        .fund_scale_daily("20240101", "20240131", "ETF")
         .await;
     assert!(result.is_err());
 }
@@ -1081,12 +1081,12 @@ async fn test_fund_scale_daily_szse() {
 #[tokio::test]
 async fn test_fund_scale_structured_sina() {
     let server = MockServer::start().await;
-    // fund_scale_structured_sina delegates to fund_scale_close_sina
+    // fund_scale_structured delegates to fund_scale_close
     // Sina returns JSONP: IO.XSRV2.CallbackList({...({"data":[{"symbol":"sh500001","sname":"基金金泰","dwjz":1.5,"zmjgm":100000000,"jzrq":"2024-01-02"}]})})
     let text_body = r#"IO.XSRV2.CallbackList['J2cW8KXheoWKdSHc']({"data":[{"symbol":"sh500001","sname":"基金金泰","dwjz":1.5,"zmjgm":100000000,"jzrq":"2024-01-02"}]})"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_scale_structured_sina().await;
+    let result = client.fund_scale_structured().await;
     assert!(result.is_ok());
 }
 
@@ -1116,7 +1116,7 @@ async fn test_fund_value_estimation_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_value_estimation_em("全部").await;
+    let result = client.fund_value_estimation("全部").await;
     assert!(result.is_ok());
 }
 
@@ -1143,14 +1143,14 @@ async fn test_fund_graded() {
 #[tokio::test]
 async fn test_fund_etf_fund_daily_em() {
     let server = MockServer::start().await;
-    // fund_etf_fund_daily_em uses push2 clist endpoint, expects data.diff with f12,f14,f2,f3
+    // fund_etf_fund_daily uses push2 clist endpoint, expects data.diff with f12,f14,f2,f3
     let row = serde_json::json!({
         "f12": "510050", "f14": "华夏上证50ETF", "f2": 3.0000, "f3": 0.50
     });
     let body = em_push2_response(vec![row]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_etf_fund_daily_em(10).await;
+    let result = client.fund_etf_fund_daily(10).await;
     assert!(result.is_ok());
 }
 
@@ -1236,7 +1236,7 @@ async fn test_fund_purchase_em() {
     let text_body = r#"var reData={"datas":["000001,华夏成长,开放申购,开放赎回,1.0000"]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_purchase_em(10).await;
+    let result = client.fund_purchase(10).await;
     assert!(result.is_ok());
 }
 
@@ -1246,7 +1246,7 @@ async fn test_fund_name_em() {
     let text_body = r#"var r = [["000001","华夏成长","混合型"],["000002","华夏回报","混合型"]];"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_name_em().await;
+    let result = client.fund_name().await;
     assert!(result.is_ok());
 }
 
@@ -1258,7 +1258,7 @@ async fn test_fund_info_index_em() {
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
     let result = client
-        .fund_info_index_em("沪深指数", "被动指数型", 10)
+        .fund_info_index("沪深指数", "被动指数型", 10)
         .await;
     assert!(result.is_ok());
 }
@@ -1273,7 +1273,7 @@ async fn test_fund_rating_em() {
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_rating_em(10).await;
+    let result = client.fund_rating(10).await;
     assert!(result.is_ok());
 }
 
@@ -1305,7 +1305,7 @@ async fn test_fund_rating_jiashi() {
 async fn test_fund_overview_em() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.fund_overview_em(10).await;
+    let result = client.fund_overview(10).await;
     assert!(result.is_err());
 }
 
@@ -1313,7 +1313,7 @@ async fn test_fund_overview_em() {
 async fn test_fund_info_ths() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.fund_info_ths(10).await;
+    let result = client.fund_info(10).await;
     assert!(result.is_err());
 }
 
@@ -1321,7 +1321,7 @@ async fn test_fund_info_ths() {
 async fn test_fund_lof_ths() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.fund_lof_ths(10).await;
+    let result = client.fund_lof(10).await;
     assert!(result.is_err());
 }
 
@@ -1329,7 +1329,7 @@ async fn test_fund_lof_ths() {
 async fn test_fund_fee_em() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.fund_fee_em(10).await;
+    let result = client.fund_fee(10).await;
     assert!(result.is_err());
 }
 
@@ -1339,7 +1339,7 @@ async fn test_fund_open_fund_rank_em() {
     let text_body = r#"{"datas":[["000001","华夏成长","type1","type2","2024-01-02","1.0000","2.0000","0.50"]]}"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_open_fund_rank_em("全部", 10).await;
+    let result = client.fund_open_fund_rank("全部", 10).await;
     assert!(result.is_ok());
 }
 
@@ -1377,7 +1377,7 @@ async fn test_fund_aum_em() {
     )
     .await;
     let client = mock_client(&server);
-    let result = client.fund_aum_em().await;
+    let result = client.fund_aum().await;
     assert!(result.is_ok());
 }
 
@@ -1441,7 +1441,7 @@ async fn test_fund_scale_open_sina() {
     let text_body = r#"IO.XSRV2.CallbackList['J2cW8KXheoWKdSHc']({"data":[{"symbol":"sh000001","sname":"华夏成长","dwjz":1.5,"zmjgm":100000000,"jzrq":"2024-01-02"}]})"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_scale_open_sina("股票型基金").await;
+    let result = client.fund_scale_open("股票型基金").await;
     assert!(result.is_ok());
 }
 
@@ -1451,7 +1451,7 @@ async fn test_fund_scale_close_sina() {
     let text_body = r#"IO.XSRV2.CallbackList['J2cW8KXheoWKdSHc']({"data":[{"symbol":"sh500001","sname":"基金金泰","dwjz":1.5,"zmjgm":100000000,"jzrq":"2024-01-02"}]})"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_scale_close_sina().await;
+    let result = client.fund_scale_close().await;
     assert!(result.is_ok());
 }
 
@@ -1461,7 +1461,7 @@ async fn test_fund_scale_money_sina() {
     let text_body = r#"IO.XSRV2.CallbackList['J2cW8KXheoWKdSHc']({"data":[{"symbol":"sh000009","sname":"华夏货币","dwjz":1.0,"zmjgm":500000000,"jzrq":"2024-01-02"}]})"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
-    let result = client.fund_scale_money_sina().await;
+    let result = client.fund_scale_money().await;
     assert!(result.is_ok());
 }
 
@@ -1469,7 +1469,7 @@ async fn test_fund_scale_money_sina() {
 async fn test_fund_report_cninfo() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.fund_report_cninfo("000001").await;
+    let result = client.fund_report("000001").await;
     assert!(result.is_err());
 }
 
@@ -1477,7 +1477,7 @@ async fn test_fund_report_cninfo() {
 async fn test_fund_report_half_year_cninfo() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.fund_report_half_year_cninfo("000001").await;
+    let result = client.fund_report_half_year("000001").await;
     assert!(result.is_err());
 }
 
@@ -1485,7 +1485,7 @@ async fn test_fund_report_half_year_cninfo() {
 async fn test_fund_report_quarter_cninfo() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    let result = client.fund_report_quarter_cninfo("000001").await;
+    let result = client.fund_report_quarter("000001").await;
     assert!(result.is_err());
 }
 
@@ -1494,7 +1494,7 @@ async fn test_fund_portfolio_hold_em() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html>mock portfolio</html>").await;
     let client = mock_client(&server);
-    let result = client.fund_portfolio_hold_em("000001", "2024-01-02").await;
+    let result = client.fund_portfolio_hold("000001", "2024-01-02").await;
     assert!(result.is_err());
 }
 
@@ -1503,7 +1503,7 @@ async fn test_fund_portfolio_bond_hold_em() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html>mock portfolio</html>").await;
     let client = mock_client(&server);
-    let result = client.fund_portfolio_bond_hold_em("000001").await;
+    let result = client.fund_portfolio_bond_hold("000001").await;
     assert!(result.is_err());
 }
 
@@ -1512,7 +1512,7 @@ async fn test_fund_portfolio_asset_allocation_em() {
     let server = MockServer::start().await;
     mock_any_get_text(&server, ".*", "<html>mock portfolio</html>").await;
     let client = mock_client(&server);
-    let result = client.fund_portfolio_asset_allocation_em("000001").await;
+    let result = client.fund_portfolio_asset_allocation("000001").await;
     assert!(result.is_err());
 }
 

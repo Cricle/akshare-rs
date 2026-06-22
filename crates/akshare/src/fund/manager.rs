@@ -5,8 +5,8 @@ use crate::error::{Error, Result};
 use crate::types::FundManagerItem;
 
 impl AkShareClient {
-    /// Fetch fund manager list (Python: fund_manager_em).
-    pub async fn fund_manager_em(&self) -> Result<Vec<FundManagerItem>> {
+    /// Fetch fund manager list (Python: fund_manager).
+    pub async fn fund_manager(&self) -> Result<Vec<FundManagerItem>> {
         let response = self
             .get("https://fund.eastmoney.com/Data/FundDataPortfolio_Interface.aspx")
             .query(&[
