@@ -18,12 +18,11 @@ struct CflpEnvelope {
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
 struct CflpChart {
-    #[serde(default)]
-    xLebal: Vec<String>,
-    #[serde(default)]
-    yLebal: Vec<serde_json::Value>,
+    #[serde(default, rename = "xLebal")]
+    x_lebal: Vec<String>,
+    #[serde(default, rename = "yLebal")]
+    y_lebal: Vec<serde_json::Value>,
 }
 
 // ---------------------------------------------------------------------------
@@ -116,31 +115,31 @@ async fn parse_cflp_response(response: reqwest::Response) -> Result<Vec<CflpInde
         .chart1
         .ok_or_else(|| Error::upstream("cflp response missing chart1"))?;
     let chart2 = payload.chart2.unwrap_or(CflpChart {
-        xLebal: vec![],
-        yLebal: vec![],
+        x_lebal: vec![],
+        y_lebal: vec![],
     });
     let chart3 = payload.chart3.unwrap_or(CflpChart {
-        xLebal: vec![],
-        yLebal: vec![],
+        x_lebal: vec![],
+        y_lebal: vec![],
     });
 
-    let len = chart1.xLebal.len();
+    let len = chart1.x_lebal.len();
     let mut points = Vec::with_capacity(len);
 
     for i in 0..len {
-        let date = chart1.xLebal.get(i).cloned().unwrap_or_default();
+        let date = chart1.x_lebal.get(i).cloned().unwrap_or_default();
         let base = chart1
-            .yLebal
+            .y_lebal
             .get(i)
             .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
         let mom = chart2
-            .yLebal
+            .y_lebal
             .get(i)
             .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
         let yoy = chart3
-            .yLebal
+            .y_lebal
             .get(i)
             .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);

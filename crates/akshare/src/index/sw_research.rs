@@ -64,8 +64,6 @@ struct SwCurrentEnvelope {
 
 #[derive(Debug, Deserialize)]
 struct SwCurrentData {
-    #[allow(dead_code)]
-    count: Option<i64>,
     results: Option<Vec<Vec<serde_json::Value>>>,
 }
 
@@ -76,8 +74,6 @@ struct SwAnalysisEnvelope {
 
 #[derive(Debug, Deserialize)]
 struct SwAnalysisData {
-    #[allow(dead_code)]
-    count: Option<i64>,
     results: Option<Vec<SwAnalysisItem>>,
 }
 
@@ -124,18 +120,17 @@ struct SwPageListData {
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
 struct SwPageListItem {
-    #[serde(default)]
-    swIndexCode: String,
-    #[serde(default)]
-    swIndexName: String,
-    #[serde(default)]
-    lastCloseIndex: Option<f64>,
-    #[serde(default)]
-    lastMarkup: Option<f64>,
-    #[serde(default)]
-    yearMarkup: Option<f64>,
+    #[serde(default, rename = "swIndexCode")]
+    sw_index_code: String,
+    #[serde(default, rename = "swIndexName")]
+    sw_index_name: String,
+    #[serde(default, rename = "lastCloseIndex")]
+    last_close_index: Option<f64>,
+    #[serde(default, rename = "lastMarkup")]
+    last_markup: Option<f64>,
+    #[serde(default, rename = "yearMarkup")]
+    year_markup: Option<f64>,
 }
 
 // ---------------------------------------------------------------------------
@@ -462,11 +457,11 @@ impl AkShareClient {
         let result: Vec<SwResearchRealtime> = items
             .into_iter()
             .map(|item| SwResearchRealtime {
-                code: item.swIndexCode,
-                name: item.swIndexName,
-                prev_close: item.lastCloseIndex.unwrap_or(0.0),
-                change_pct: item.lastMarkup.unwrap_or(0.0),
-                year_change_pct: item.yearMarkup.unwrap_or(0.0),
+                code: item.sw_index_code,
+                name: item.sw_index_name,
+                prev_close: item.last_close_index.unwrap_or(0.0),
+                change_pct: item.last_markup.unwrap_or(0.0),
+                year_change_pct: item.year_markup.unwrap_or(0.0),
             })
             .collect();
 

@@ -21,12 +21,11 @@ impl AkShareClient {
         }
 
         #[derive(Deserialize)]
-        #[allow(non_snake_case)]
         struct FashionItem {
-            #[serde(default)]
-            publishTime: String,
-            #[serde(default)]
-            indexValue: Option<f64>,
+            #[serde(default, rename = "publishTime")]
+            publish_time: String,
+            #[serde(default, rename = "indexValue")]
+            index_value: Option<f64>,
         }
 
         let struct_code = match symbol {
@@ -68,8 +67,8 @@ impl AkShareClient {
         let mut points: Vec<KqFashionPoint> = items
             .into_iter()
             .map(|item| KqFashionPoint {
-                date: item.publishTime,
-                index: item.indexValue.unwrap_or(0.0),
+                date: item.publish_time,
+                index: item.index_value.unwrap_or(0.0),
                 change_value: 0.0,
                 change_pct: 0.0,
             })

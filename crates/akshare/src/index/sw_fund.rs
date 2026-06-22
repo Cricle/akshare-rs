@@ -21,18 +21,17 @@ struct SwFundPageData {
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
 struct SwFundPageItem {
-    #[serde(default)]
-    swIndexCode: String,
-    #[serde(default)]
-    swIndexName: String,
-    #[serde(default)]
-    lastCloseIndex: Option<f64>,
-    #[serde(default)]
-    lastMarkup: Option<f64>,
-    #[serde(default)]
-    yearMarkup: Option<f64>,
+    #[serde(default, rename = "swIndexCode")]
+    sw_index_code: String,
+    #[serde(default, rename = "swIndexName")]
+    sw_index_name: String,
+    #[serde(default, rename = "lastCloseIndex")]
+    last_close_index: Option<f64>,
+    #[serde(default, rename = "lastMarkup")]
+    last_markup: Option<f64>,
+    #[serde(default, rename = "yearMarkup")]
+    year_markup: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -87,11 +86,11 @@ impl AkShareClient {
         let result: Vec<SwFundRealtime> = items
             .into_iter()
             .map(|item| SwFundRealtime {
-                code: item.swIndexCode,
-                name: item.swIndexName,
-                prev_close: item.lastCloseIndex.unwrap_or(0.0),
-                change_pct: item.lastMarkup.unwrap_or(0.0),
-                year_change_pct: item.yearMarkup.unwrap_or(0.0),
+                code: item.sw_index_code,
+                name: item.sw_index_name,
+                prev_close: item.last_close_index.unwrap_or(0.0),
+                change_pct: item.last_markup.unwrap_or(0.0),
+                year_change_pct: item.year_markup.unwrap_or(0.0),
             })
             .collect();
 

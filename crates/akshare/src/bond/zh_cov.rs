@@ -386,9 +386,6 @@ impl AkShareClient {
 
 #[cfg(test)]
 mod tests {
-    #[allow(unused_imports)]
-    use serde_json::json;
-
     #[test]
     fn test_cov_info_indicator_map() {
         let indicators = ["基本信息", "中签号", "筹资用途", "重要日期"];

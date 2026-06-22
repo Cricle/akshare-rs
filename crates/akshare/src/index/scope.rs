@@ -11,14 +11,13 @@ use crate::types::NewsSentimentPoint;
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, Deserialize)]
-#[allow(non_snake_case)]
 struct ScopeRow {
-    #[serde(default)]
-    tradeDate: String,
-    #[serde(default)]
-    maIndex1: Option<f64>,
-    #[serde(default)]
-    marketClose: Option<f64>,
+    #[serde(default, rename = "tradeDate")]
+    trade_date: String,
+    #[serde(default, rename = "maIndex1")]
+    ma_index1: Option<f64>,
+    #[serde(default, rename = "marketClose")]
+    market_close: Option<f64>,
 }
 
 // ---------------------------------------------------------------------------
@@ -42,9 +41,9 @@ impl AkShareClient {
         let points: Vec<NewsSentimentPoint> = rows
             .into_iter()
             .map(|r| NewsSentimentPoint {
-                date: r.tradeDate,
-                sentiment_index: r.maIndex1.unwrap_or(0.0),
-                csi300: r.marketClose.unwrap_or(0.0),
+                date: r.trade_date,
+                sentiment_index: r.ma_index1.unwrap_or(0.0),
+                csi300: r.market_close.unwrap_or(0.0),
             })
             .collect();
 
