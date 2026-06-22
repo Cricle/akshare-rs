@@ -7,6 +7,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -386,8 +387,7 @@ impl AkShareClient {
         .await?;
 
         data.first()
-            .and_then(|v| v.get("SECUCODE"))
-            .and_then(|v| v.as_str())
+            .and_then(|v| v.str_field(&["SECUCODE"]))
             .map(std::string::ToString::to_string)
             .ok_or_else(|| Error::not_found(format!("US stock {symbol} not found")))
     }
@@ -1302,10 +1302,8 @@ impl AkShareClient {
                     let codes = map.remove("codes").unwrap_or_default();
                     let stock_code = if let Some(arr) = codes.as_array() {
                         arr.first()
-                            .and_then(|c| c.get("stock_code"))
-                            .and_then(|v| v.as_str())
-                            .unwrap_or("")
-                            .to_string()
+                            .map(|c| c.str_or(&["stock_code"], ""))
+                            .unwrap_or_default()
                     } else {
                         String::new()
                     };
@@ -1314,10 +1312,8 @@ impl AkShareClient {
                     let columns = map.remove("columns").unwrap_or_default();
                     let column_name = if let Some(arr) = columns.as_array() {
                         arr.first()
-                            .and_then(|c| c.get("column_name"))
-                            .and_then(|v| v.as_str())
-                            .unwrap_or("")
-                            .to_string()
+                            .map(|c| c.str_or(&["column_name"], ""))
+                            .unwrap_or_default()
                     } else {
                         String::new()
                     };
@@ -1374,13 +1370,12 @@ fn group_by_report_date(
 fn pivot_amount(rows: &[&HashMap<String, serde_json::Value>], names: &[&str]) -> Option<f64> {
     for name in names {
         for row in rows {
-            if let Some(item_name) = row.get("STD_ITEM_NAME").and_then(|v| v.as_str())
-                && item_name.contains(name)
-            {
-                return row.get("AMOUNT").and_then(serde_json::Value::as_f64);
-            }
-            // US reports use ITEM_NAME instead of STD_ITEM_NAME
-            if let Some(item_name) = row.get("ITEM_NAME").and_then(|v| v.as_str())
+            // HK reports use STD_ITEM_NAME, US reports use ITEM_NAME
+            let item_name = row
+                .get("STD_ITEM_NAME")
+                .or_else(|| row.get("ITEM_NAME"))
+                .and_then(|v| v.as_str());
+            if let Some(item_name) = item_name
                 && item_name.contains(name)
             {
                 return row.get("AMOUNT").and_then(serde_json::Value::as_f64);

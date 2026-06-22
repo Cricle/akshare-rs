@@ -8,6 +8,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::CapitalFlowPoint;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::{ClistResp, KlineResp};
 use crate::util::{parse_csv_line, parse_f64_safe};
 
@@ -190,18 +191,18 @@ impl AkShareClient {
                 Some(FundFlowRank {
                     symbol,
                     name,
-                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
-                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
-                    main_net_inflow: item.get("f62").and_then(serde_json::Value::as_f64),
-                    main_net_inflow_pct: item.get("f184").and_then(serde_json::Value::as_f64),
-                    super_large_net_inflow: item.get("f66").and_then(serde_json::Value::as_f64),
-                    super_large_net_inflow_pct: item.get("f69").and_then(serde_json::Value::as_f64),
-                    large_net_inflow: item.get("f72").and_then(serde_json::Value::as_f64),
-                    large_net_inflow_pct: item.get("f75").and_then(serde_json::Value::as_f64),
-                    medium_net_inflow: item.get("f78").and_then(serde_json::Value::as_f64),
-                    medium_net_inflow_pct: item.get("f81").and_then(serde_json::Value::as_f64),
-                    small_net_inflow: item.get("f84").and_then(serde_json::Value::as_f64),
-                    small_net_inflow_pct: item.get("f87").and_then(serde_json::Value::as_f64),
+                    latest_price: item.f64_field(&["f2"]),
+                    change_pct: item.f64_field(&["f3"]),
+                    main_net_inflow: item.f64_field(&["f62"]),
+                    main_net_inflow_pct: item.f64_field(&["f184"]),
+                    super_large_net_inflow: item.f64_field(&["f66"]),
+                    super_large_net_inflow_pct: item.f64_field(&["f69"]),
+                    large_net_inflow: item.f64_field(&["f72"]),
+                    large_net_inflow_pct: item.f64_field(&["f75"]),
+                    medium_net_inflow: item.f64_field(&["f78"]),
+                    medium_net_inflow_pct: item.f64_field(&["f81"]),
+                    small_net_inflow: item.f64_field(&["f84"]),
+                    small_net_inflow_pct: item.f64_field(&["f87"]),
                 })
             })
             .collect();

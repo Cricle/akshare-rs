@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 // ---------------------------------------------------------------------------
 // Implementation
@@ -91,15 +92,8 @@ impl AkShareClient {
                     let json_str = &trimmed[start + 1..=end];
                     if let Ok(arr) = serde_json::from_str::<Vec<serde_json::Value>>(json_str) {
                         for entry in &arr {
-                            let date = entry
-                                .get("riqi")
-                                .and_then(|v| v.as_str())
-                                .unwrap_or("")
-                                .to_string();
-                            let price = entry
-                                .get("cjj")
-                                .and_then(serde_json::Value::as_f64)
-                                .unwrap_or(0.0);
+                            let date = entry.str_or(&["riqi"], "");
+                            let price = entry.f64_or(&["cjj"], 0.0);
                             if !date.is_empty() {
                                 items.push(MacroDataPoint {
                                     date: date.get(..10).unwrap_or(&date).to_string(),
@@ -164,24 +158,15 @@ impl AkShareClient {
             .await?;
 
         let data = resp
-            .get("result")
-            .and_then(|r| r.get("data"))
+            .nested(&["result", "data"])
             .and_then(|d| d.as_array())
             .cloned()
             .unwrap_or_default();
 
         let mut items = Vec::new();
         for v in &data {
-            let region = v
-                .get("cityname")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
-            let price_92 = v
-                .get("v_92")
-                .or_else(|| v.get("V_92"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let region = v.str_or(&["cityname"], "");
+            let price_92 = v.f64_or(&["v_92", "V_92"], 0.0);
             if !region.is_empty() {
                 items.push(MacroDataPoint {
                     date: formatted_date.clone(),

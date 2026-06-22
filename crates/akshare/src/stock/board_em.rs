@@ -11,6 +11,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::KlineResp;
 
 use serde::{Deserialize, Serialize};
@@ -277,14 +278,14 @@ impl AkShareClient {
                 Some(BoardChangeRow {
                     code,
                     name,
-                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
-                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
-                    change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
-                    volume: item.get("f5").and_then(serde_json::Value::as_f64),
-                    amount: item.get("f6").and_then(serde_json::Value::as_f64),
-                    turnover_rate: item.get("f8").and_then(serde_json::Value::as_f64),
-                    main_net_inflow: item.get("f62").and_then(serde_json::Value::as_f64),
-                    main_net_inflow_ratio: item.get("f184").and_then(serde_json::Value::as_f64),
+                    latest_price: item.f64_field(&["f2"]),
+                    change_pct: item.f64_field(&["f3"]),
+                    change_amount: item.f64_field(&["f4"]),
+                    volume: item.f64_field(&["f5"]),
+                    amount: item.f64_field(&["f6"]),
+                    turnover_rate: item.f64_field(&["f8"]),
+                    main_net_inflow: item.f64_field(&["f62"]),
+                    main_net_inflow_ratio: item.f64_field(&["f184"]),
                 })
             })
             .collect();
@@ -350,7 +351,7 @@ impl AkShareClient {
             .ok_or_else(|| Error::upstream("eastmoney board list missing data"))?;
 
         for item in &diff {
-            let name = item.get("f14").and_then(|v| v.as_str()).unwrap_or("");
+            let name = item.str_or(&["f14"], "");
             if name == symbol {
                 let code = item.get("f12").and_then(|v| v.as_str()).ok_or_else(|| {
                     Error::not_found(format!("board code not found for: {symbol}"))

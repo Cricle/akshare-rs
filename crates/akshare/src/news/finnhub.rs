@@ -61,7 +61,7 @@ impl AkShareClient {
                 let url = item.get("url").and_then(|v| v.as_str()).map(str::to_string);
                 let published_at = item
                     .get("datetime")
-                    .and_then(|v| v.as_i64())
+                    .and_then(serde_json::Value::as_i64)
                     .map(timestamp_to_date)
                     .unwrap_or_default();
 

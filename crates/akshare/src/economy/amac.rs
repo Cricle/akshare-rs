@@ -4,6 +4,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::Result;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 use crate::types::{MacroDataPoint, Row};
 
@@ -56,23 +57,11 @@ impl AkShareClient {
         let data = fetch_amac_data(&self.http, "RPT_FUND_INDUSTRY_STAT").await?;
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let date = v
-                .get("REPORT_DATE")
-                .or_else(|| v.get("REPORT_PERIOD"))
-                .or_else(|| v.get("DATE"))
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = v.str_or(&["REPORT_DATE", "REPORT_PERIOD", "DATE"], "");
             if date.is_empty() {
                 continue;
             }
-            let value = v
-                .get("INDICATOR_VALUE")
-                .or_else(|| v.get("VALUE"))
-                .or_else(|| v.get("AUM"))
-                .or_else(|| v.get("TOTAL_AUM"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let value = v.f64_or(&["INDICATOR_VALUE", "VALUE", "AUM", "TOTAL_AUM"], 0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value,

@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::ForexRate;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
@@ -31,37 +32,15 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let currency_pair = v
-                .get("CURRENCY_NAME")
-                .or_else(|| v.get("CURRENCY_CODE"))
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let currency_pair = v.str_or(&["CURRENCY_NAME", "CURRENCY_CODE"], "");
             if currency_pair.is_empty() {
                 continue;
             }
 
-            let buy_rate = v
-                .get("BUYING_RATE")
-                .or_else(|| v.get("BUY_RATE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            let sell_rate = v
-                .get("SELLING_RATE")
-                .or_else(|| v.get("SELL_RATE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            let middle_rate = v
-                .get("MIDDLE_RATE")
-                .or_else(|| v.get("CENTRAL_RATE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            let date = v
-                .get("DATE")
-                .or_else(|| v.get("REPORT_DATE"))
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let buy_rate = v.f64_or(&["BUYING_RATE", "BUY_RATE"], 0.0);
+            let sell_rate = v.f64_or(&["SELLING_RATE", "SELL_RATE"], 0.0);
+            let middle_rate = v.f64_or(&["MIDDLE_RATE", "CENTRAL_RATE"], 0.0);
+            let date = v.str_or(&["DATE", "REPORT_DATE"], "");
 
             items.push(ForexRate {
                 currency_pair,

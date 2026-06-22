@@ -6,6 +6,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 use serde::{Deserialize, Serialize};
 
@@ -146,11 +147,7 @@ impl AkShareClient {
 
             for tick in &ticks {
                 all_ticks.push(SinaIntradayTick {
-                    ticktime: tick
-                        .get("ticktime")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                    ticktime: tick.str_or(&["ticktime"], ""),
                     price: tick
                         .get("price")
                         .and_then(|v| v.as_str())

@@ -34,9 +34,8 @@ impl AkShareClient {
         // Try market prefixes in order: 1 (SH), 0 (SZ), 2 (CSI), 47
         for market in &["1", "0", "2", "47"] {
             let secid = format!("{market}.{symbol}");
-            let klines = match self.kline_fetch(&secid, klt, "0", usize::MAX, &[]).await {
-                Ok(k) => k,
-                Err(_) => continue,
+            let Ok(klines) = self.kline_fetch(&secid, klt, "0", usize::MAX, &[]).await else {
+                continue;
             };
             let points: Vec<IndexZhAHistPoint> = klines
                 .iter()

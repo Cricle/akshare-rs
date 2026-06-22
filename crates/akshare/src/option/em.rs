@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::OptionSnapshot;
+use crate::types::value_ext::ValueExt;
 use crate::util::{parse_csv_line, parse_f64_safe, today_iso};
 
 // ---------------------------------------------------------------------------
@@ -67,61 +68,29 @@ impl AkShareClient {
 
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let option_code = v
-                .get("SECURITY_CODE")
-                .or_else(|| v.get("CONTRACT_CODE"))
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let option_code = v.str_or(&["SECURITY_CODE", "CONTRACT_CODE"], "");
             if option_code.is_empty() {
                 continue;
             }
 
-            let name = v
-                .get("SECURITY_NAME_ABBR")
-                .or_else(|| v.get("CONTRACT_NAME"))
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let name = v.str_or(&["SECURITY_NAME_ABBR", "CONTRACT_NAME"], "");
 
             let date = v
-                .get("TRADE_DATE")
-                .and_then(|x| x.as_str())
+                .str_field(&["TRADE_DATE"])
                 .map_or_else(|| today.clone(), |s| s.get(..10).unwrap_or(s).to_string());
 
-            let close = v
-                .get("CLOSE_PRICE")
-                .or_else(|| v.get("LATEST_PRICE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let close = v.f64_or(&["CLOSE_PRICE", "LATEST_PRICE"], 0.0);
 
-            let change_pct = v
-                .get("CHANGE_RATE")
-                .or_else(|| v.get("CHANGE_PCT"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let change_pct = v.f64_or(&["CHANGE_RATE", "CHANGE_PCT"], 0.0);
 
-            let volume = v
-                .get("VOLUME")
-                .or_else(|| v.get("TRADE_VOLUME"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let volume = v.f64_or(&["VOLUME", "TRADE_VOLUME"], 0.0);
 
-            let open_interest = v
-                .get("OPEN_INTEREST")
-                .or_else(|| v.get("HOLD_VOLUME"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let open_interest = v.f64_or(&["OPEN_INTEREST", "HOLD_VOLUME"], 0.0);
 
-            let strike_price = v
-                .get("STRIKE_PRICE")
-                .or_else(|| v.get("EXERCISE_PRICE"))
-                .and_then(serde_json::Value::as_f64);
+            let strike_price = v.f64_field(&["STRIKE_PRICE", "EXERCISE_PRICE"]);
 
             let expiry_date = v
-                .get("EXPIRE_DATE")
-                .or_else(|| v.get("EXPIRATION_DATE"))
-                .and_then(|x| x.as_str())
+                .str_field(&["EXPIRE_DATE", "EXPIRATION_DATE"])
                 .map(|s| s.get(..10).unwrap_or(s).to_string());
 
             items.push(OptionSnapshot {

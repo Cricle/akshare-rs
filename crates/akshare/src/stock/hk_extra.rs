@@ -27,6 +27,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 static RE_TR: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"<tr[^>]*>([\s\S]*?)</tr>").unwrap());
@@ -259,19 +260,10 @@ impl AkShareClient {
             }
 
             for item in &data {
-                let code = item
-                    .get("symbol")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let cname = item
-                    .get("cname")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
+                let code = item.str_or(&["symbol"], "");
+                let cname = item.str_or(&["cname"], "");
                 let ename = item
-                    .get("name")
-                    .and_then(|v| v.as_str())
+                    .str_field(&["name"])
                     .map(std::string::ToString::to_string);
 
                 all_quotes.push(HkSpotQuote {
@@ -405,24 +397,21 @@ impl AkShareClient {
         };
 
         for val in entries {
-            if let (Some(code), Some(name)) = (
-                val.get("f12").and_then(|v| v.as_str()),
-                val.get("f14").and_then(|v| v.as_str()),
-            ) {
+            if let (Some(code), Some(name)) = (val.str_field(&["f12"]), val.str_field(&["f14"])) {
                 items.push(HkFamousStock {
                     code: code.to_string(),
                     name: name.to_string(),
-                    latest_price: val.get("f2").and_then(serde_json::Value::as_f64),
-                    change_pct: val.get("f3").and_then(serde_json::Value::as_f64),
-                    change_amount: val.get("f4").and_then(serde_json::Value::as_f64),
-                    volume: val.get("f5").and_then(serde_json::Value::as_f64),
-                    amount: val.get("f6").and_then(serde_json::Value::as_f64),
-                    open: val.get("f17").and_then(serde_json::Value::as_f64),
-                    high: val.get("f15").and_then(serde_json::Value::as_f64),
-                    low: val.get("f16").and_then(serde_json::Value::as_f64),
-                    prev_close: val.get("f18").and_then(serde_json::Value::as_f64),
-                    market_cap: val.get("f20").and_then(serde_json::Value::as_f64),
-                    pe_ratio: val.get("f9").and_then(serde_json::Value::as_f64),
+                    latest_price: val.f64_field(&["f2"]),
+                    change_pct: val.f64_field(&["f3"]),
+                    change_amount: val.f64_field(&["f4"]),
+                    volume: val.f64_field(&["f5"]),
+                    amount: val.f64_field(&["f6"]),
+                    open: val.f64_field(&["f17"]),
+                    high: val.f64_field(&["f15"]),
+                    low: val.f64_field(&["f16"]),
+                    prev_close: val.f64_field(&["f18"]),
+                    market_cap: val.f64_field(&["f20"]),
+                    pe_ratio: val.f64_field(&["f9"]),
                 });
             }
         }
@@ -567,25 +556,21 @@ impl AkShareClient {
             .iter()
             .filter_map(|item| {
                 let code = item.get("f12")?.as_str()?.to_string();
-                let internal_id = item
-                    .get("f13")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
+                let internal_id = item.str_or(&["f13"], "");
                 let name = item.get("f14")?.as_str()?.to_string();
                 Some(HkIndexSpotEm {
                     code,
                     internal_id,
                     name,
-                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
-                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
-                    change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
-                    volume: item.get("f5").and_then(serde_json::Value::as_f64),
-                    amount: item.get("f6").and_then(serde_json::Value::as_f64),
-                    high: item.get("f15").and_then(serde_json::Value::as_f64),
-                    low: item.get("f16").and_then(serde_json::Value::as_f64),
-                    open: item.get("f17").and_then(serde_json::Value::as_f64),
-                    prev_close: item.get("f18").and_then(serde_json::Value::as_f64),
+                    latest_price: item.f64_field(&["f2"]),
+                    change_pct: item.f64_field(&["f3"]),
+                    change_amount: item.f64_field(&["f4"]),
+                    volume: item.f64_field(&["f5"]),
+                    amount: item.f64_field(&["f6"]),
+                    high: item.f64_field(&["f15"]),
+                    low: item.f64_field(&["f16"]),
+                    open: item.f64_field(&["f17"]),
+                    prev_close: item.f64_field(&["f18"]),
                 })
             })
             .collect();

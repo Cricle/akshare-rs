@@ -8,6 +8,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 #[derive(Debug, Deserialize)]
 struct ChinaMoneyResp {
@@ -92,11 +93,8 @@ impl AkShareClient {
         let items: Vec<MacroDataPoint> = records
             .into_iter()
             .filter_map(|v| {
-                let date = v.get("newDateValue").or_else(|| v.get("date"))?.as_str()?;
-                let yield_val = v
-                    .get("yield")
-                    .or_else(|| v.get("closeYield"))
-                    .and_then(serde_json::Value::as_f64)?;
+                let date = v.str_field(&["newDateValue", "date"])?;
+                let yield_val = v.f64_field(&["yield", "closeYield"])?;
                 Some(MacroDataPoint {
                     date: date.get(..10).unwrap_or(date).to_string(),
                     value: yield_val,

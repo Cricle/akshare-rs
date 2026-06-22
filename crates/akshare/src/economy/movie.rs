@@ -8,6 +8,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
@@ -254,23 +255,14 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let date = v
-                .get("REPORT_DATE")
-                .or_else(|| v.get("DATE"))
-                .or_else(|| v.get("TRADE_DATE"))
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = v.str_or(&["REPORT_DATE", "DATE", "TRADE_DATE"], "");
             if date.is_empty() {
                 continue;
             }
-            let value = v
-                .get("BOX_OFFICE")
-                .or_else(|| v.get("INDICATOR_VALUE"))
-                .or_else(|| v.get("VALUE"))
-                .or_else(|| v.get("TOTAL_BOX_OFFICE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let value = v.f64_or(
+                &["BOX_OFFICE", "INDICATOR_VALUE", "VALUE", "TOTAL_BOX_OFFICE"],
+                0.0,
+            );
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value,
@@ -286,25 +278,9 @@ fn parse_movie_response(resp: EmDatacenterResp, label: &str) -> Vec<MacroDataPoi
     let data = resp.result.map(|r| r.data).unwrap_or_default();
     let mut items = Vec::with_capacity(data.len());
     for v in &data {
-        let date = v
-            .get("TRADE_DATE")
-            .or_else(|| v.get("REPORT_DATE"))
-            .or_else(|| v.get("DATE"))
-            .and_then(|x| x.as_str())
-            .unwrap_or("")
-            .to_string();
-        let value = v
-            .get("BOX_OFFICE")
-            .or_else(|| v.get("INDICATOR_VALUE"))
-            .or_else(|| v.get("VALUE"))
-            .and_then(serde_json::Value::as_f64)
-            .unwrap_or(0.0);
-        let name = v
-            .get("MOVIE_NAME")
-            .or_else(|| v.get("NAME"))
-            .and_then(|x| x.as_str())
-            .unwrap_or(label)
-            .to_string();
+        let date = v.str_or(&["TRADE_DATE", "REPORT_DATE", "DATE"], "");
+        let value = v.f64_or(&["BOX_OFFICE", "INDICATOR_VALUE", "VALUE"], 0.0);
+        let name = v.str_or(&["MOVIE_NAME", "NAME"], label);
         items.push(MacroDataPoint {
             date: date.get(..10).unwrap_or(&date).to_string(),
             value,

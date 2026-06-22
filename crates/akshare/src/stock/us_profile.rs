@@ -156,32 +156,34 @@ impl AkShareClient {
             sector: profile
                 .get("sector")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
+                .map(std::string::ToString::to_string),
             industry: profile
                 .get("industry")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
-            full_time_employees: profile.get("fullTimeEmployees").and_then(|v| v.as_i64()),
+                .map(std::string::ToString::to_string),
+            full_time_employees: profile
+                .get("fullTimeEmployees")
+                .and_then(serde_json::Value::as_i64),
             long_business_summary: profile
                 .get("longBusinessSummary")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
+                .map(std::string::ToString::to_string),
             website: profile
                 .get("website")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
+                .map(std::string::ToString::to_string),
             city: profile
                 .get("city")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
+                .map(std::string::ToString::to_string),
             state: profile
                 .get("state")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
+                .map(std::string::ToString::to_string),
             country: profile
                 .get("country")
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string()),
+                .map(std::string::ToString::to_string),
         })
     }
 
@@ -253,7 +255,9 @@ impl AkShareClient {
 
         // Helper to extract raw value from Yahoo Finance nested format
         // Yahoo returns {"raw": 123.45, "fmt": "123.45"} for numeric fields
-        let raw = |v: &serde_json::Value| -> Option<f64> { v.get("raw").and_then(|r| r.as_f64()) };
+        let raw = |v: &serde_json::Value| -> Option<f64> {
+            v.get("raw").and_then(serde_json::Value::as_f64)
+        };
 
         Ok(UsKeyStats {
             symbol: symbol.to_uppercase(),
@@ -320,222 +324,153 @@ impl AkShareClient {
 fn static_us_sector(symbol: &str) -> Option<(&str, &str)> {
     let upper = symbol.to_uppercase();
     match upper.as_str() {
-        // Technology
+        // Technology — Consumer Electronics
         "AAPL" => Some(("Technology", "Consumer Electronics")),
-        "MSFT" => Some(("Technology", "Software—Infrastructure")),
-        "GOOG" | "GOOGL" => Some(("Communication Services", "Internet Content & Information")),
-        "META" => Some(("Communication Services", "Internet Content & Information")),
-        "NVDA" => Some(("Technology", "Semiconductors")),
-        "AMD" => Some(("Technology", "Semiconductors")),
-        "INTC" => Some(("Technology", "Semiconductors")),
-        "TSM" => Some(("Technology", "Semiconductors")),
-        "AVGO" => Some(("Technology", "Semiconductors")),
-        "QCOM" => Some(("Technology", "Semiconductors")),
-        "ORCL" => Some(("Technology", "Software—Infrastructure")),
-        "CRM" => Some(("Technology", "Software—Application")),
-        "ADBE" => Some(("Technology", "Software—Application")),
-        "NOW" => Some(("Technology", "Software—Application")),
-        "INTU" => Some(("Technology", "Software—Application")),
+        // Technology — Software—Infrastructure
+        "MSFT" | "ORCL" | "SNPS" | "PANW" | "CRWD" | "ZS" | "NET" | "SQ" | "TWLO" => {
+            Some(("Technology", "Software—Infrastructure"))
+        }
+        // Technology — Software—Application
+        "CRM" | "ADBE" | "NOW" | "INTU" | "CDNS" | "DDOG" | "SNOW" | "PLTR" | "SHOP" | "UBER"
+        | "ABNB" | "GRAB" => Some(("Technology", "Software—Application")),
+        // Technology — Semiconductors
+        "NVDA" | "AMD" | "INTC" | "TSM" | "AVGO" | "QCOM" | "TXN" | "MU" | "MRVL" => {
+            Some(("Technology", "Semiconductors"))
+        }
+        // Technology — Semiconductor Equipment & Materials
+        "AMAT" | "LRCX" | "KLAC" => Some(("Technology", "Semiconductor Equipment & Materials")),
+        // Technology — Communication Equipment
         "CSCO" => Some(("Technology", "Communication Equipment")),
+        // Technology — Information Technology Services
         "IBM" => Some(("Technology", "Information Technology Services")),
-        "TXN" => Some(("Technology", "Semiconductors")),
-        "MU" => Some(("Technology", "Semiconductors")),
-        "AMAT" => Some(("Technology", "Semiconductor Equipment & Materials")),
-        "LRCX" => Some(("Technology", "Semiconductor Equipment & Materials")),
-        "KLAC" => Some(("Technology", "Semiconductor Equipment & Materials")),
-        "MRVL" => Some(("Technology", "Semiconductors")),
-        "SNPS" => Some(("Technology", "Software—Infrastructure")),
-        "CDNS" => Some(("Technology", "Software—Application")),
-        "PANW" => Some(("Technology", "Software—Infrastructure")),
-        "CRWD" => Some(("Technology", "Software—Infrastructure")),
-        "ZS" => Some(("Technology", "Software—Infrastructure")),
-        "NET" => Some(("Technology", "Software—Infrastructure")),
-        "DDOG" => Some(("Technology", "Software—Application")),
-        "SNOW" => Some(("Technology", "Software—Application")),
-        "PLTR" => Some(("Technology", "Software—Application")),
-        "SQ" => Some(("Technology", "Software—Infrastructure")),
-        "SHOP" => Some(("Technology", "Software—Application")),
-        "UBER" => Some(("Technology", "Software—Application")),
-        "ABNB" => Some(("Technology", "Software—Application")),
-        "NFLX" => Some(("Communication Services", "Entertainment")),
-        "DIS" => Some(("Communication Services", "Entertainment")),
-        "SPOT" => Some(("Communication Services", "Internet Content & Information")),
-
-        // Consumer
-        "AMZN" => Some(("Consumer Cyclical", "Internet Retail")),
-        "TSLA" => Some(("Consumer Cyclical", "Auto Manufacturers")),
-        "WMT" => Some(("Consumer Defensive", "Discount Stores")),
-        "COST" => Some(("Consumer Defensive", "Discount Stores")),
-        "HD" => Some(("Consumer Cyclical", "Home Improvement Retail")),
-        "NKE" => Some(("Consumer Cyclical", "Footwear & Accessories")),
-        "MCD" => Some(("Consumer Cyclical", "Restaurants")),
-        "SBUX" => Some(("Consumer Cyclical", "Restaurants")),
-        "TGT" => Some(("Consumer Defensive", "Discount Stores")),
-        "LOW" => Some(("Consumer Cyclical", "Home Improvement Retail")),
-        "TJX" => Some(("Consumer Cyclical", "Apparel Retail")),
-        "BKNG" => Some(("Consumer Cyclical", "Travel Services")),
-        "GM" => Some(("Consumer Cyclical", "Auto Manufacturers")),
-        "F" => Some(("Consumer Cyclical", "Auto Manufacturers")),
-        "STZ" => Some(("Consumer Defensive", "Beverages—Brewers")),
-        "KO" => Some(("Consumer Defensive", "Beverages—Non-Alcoholic")),
-        "PEP" => Some(("Consumer Defensive", "Beverages—Non-Alcoholic")),
-        "PM" => Some(("Consumer Defensive", "Tobacco")),
-        "MO" => Some(("Consumer Defensive", "Tobacco")),
-        "CL" => Some(("Consumer Defensive", "Household & Personal Products")),
-        "PG" => Some(("Consumer Defensive", "Household & Personal Products")),
-        "EL" => Some(("Consumer Defensive", "Household & Personal Products")),
-
-        // Healthcare
-        "JNJ" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "UNH" => Some(("Healthcare", "Healthcare Plans")),
-        "PFE" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "ABBV" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "MRK" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "TMO" => Some(("Healthcare", "Diagnostics & Research")),
-        "ABT" => Some(("Healthcare", "Medical Devices")),
-        "LLY" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "BMY" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "AMGN" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "GILD" => Some(("Healthcare", "Drug Manufacturers—General")),
-        "ISRG" => Some(("Healthcare", "Medical Instruments & Supplies")),
-        "MDT" => Some(("Healthcare", "Medical Devices")),
-        "SYK" => Some(("Healthcare", "Medical Devices")),
-        "BSX" => Some(("Healthcare", "Medical Devices")),
-        "ZTS" => Some(("Healthcare", "Drug Manufacturers—Specialty & Generic")),
-        "REGN" => Some(("Healthcare", "Biotechnology")),
-        "VRTX" => Some(("Healthcare", "Biotechnology")),
-        "MRNA" => Some(("Healthcare", "Biotechnology")),
-        "BIIB" => Some(("Healthcare", "Biotechnology")),
-        "HCA" => Some(("Healthcare", "Medical Care Facilities")),
-
-        // Financials
-        "BRK-B" | "BRK.A" | "BRK_A" => Some(("Financials", "Insurance—Diversified")),
-        "JPM" => Some(("Financials", "Banks—Diversified")),
-        "V" => Some(("Financials", "Credit Services")),
-        "MA" => Some(("Financials", "Credit Services")),
-        "BAC" => Some(("Financials", "Banks—Diversified")),
-        "WFC" => Some(("Financials", "Banks—Diversified")),
-        "GS" => Some(("Financials", "Capital Markets")),
-        "MS" => Some(("Financials", "Capital Markets")),
-        "C" => Some(("Financials", "Banks—Diversified")),
-        "AXP" => Some(("Financials", "Credit Services")),
-        "BLK" => Some(("Financials", "Asset Management")),
-        "SCHW" => Some(("Financials", "Capital Markets")),
-        "CB" => Some(("Financials", "Insurance—Property & Casualty")),
-        "AIG" => Some(("Financials", "Insurance—Diversified")),
-        "MET" => Some(("Financials", "Insurance—Life")),
-        "AFL" => Some(("Financials", "Insurance—Life")),
-        "PGR" => Some(("Financials", "Insurance—Property & Casualty")),
-        "TRV" => Some(("Financials", "Insurance—Property & Casualty")),
-        "CME" => Some(("Financials", "Financial Data & Stock Exchanges")),
-        "ICE" => Some(("Financials", "Financial Data & Stock Exchanges")),
-        "MCO" => Some(("Financials", "Financial Data & Stock Exchanges")),
-        "SPGI" => Some(("Financials", "Financial Data & Stock Exchanges")),
-
-        // Energy
-        "XOM" => Some(("Energy", "Oil & Gas Integrated")),
-        "CVX" => Some(("Energy", "Oil & Gas Integrated")),
-        "COP" => Some(("Energy", "Oil & Gas E&P")),
-        "EOG" => Some(("Energy", "Oil & Gas E&P")),
-        "SLB" => Some(("Energy", "Oil & Gas Equipment & Services")),
-        "MPC" => Some(("Energy", "Oil & Gas Refining & Marketing")),
-        "PSX" => Some(("Energy", "Oil & Gas Refining & Marketing")),
-        "VLO" => Some(("Energy", "Oil & Gas Refining & Marketing")),
-        "OXY" => Some(("Energy", "Oil & Gas E&P")),
-        "HAL" => Some(("Energy", "Oil & Gas Equipment & Services")),
-        "DVN" => Some(("Energy", "Oil & Gas E&P")),
-        "FANG" => Some(("Energy", "Oil & Gas E&P")),
-
-        // Industrials
-        "CAT" => Some(("Industrials", "Farm & Heavy Construction Machinery")),
-        "BA" => Some(("Industrials", "Aerospace & Defense")),
-        "HON" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "UPS" => Some(("Industrials", "Integrated Freight & Logistics")),
-        "RTX" => Some(("Industrials", "Aerospace & Defense")),
-        "DE" => Some(("Industrials", "Farm & Heavy Construction Machinery")),
-        "LMT" => Some(("Industrials", "Aerospace & Defense")),
-        "GE" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "MMM" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "GD" => Some(("Industrials", "Aerospace & Defense")),
-        "NOC" => Some(("Industrials", "Aerospace & Defense")),
-        "FDX" => Some(("Industrials", "Integrated Freight & Logistics")),
-        "WM" => Some(("Industrials", "Waste Management")),
-        "ETN" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "EMR" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "ITW" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "ROK" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "PH" => Some(("Industrials", "Specialty Industrial Machinery")),
-        "TDG" => Some(("Industrials", "Aerospace & Defense")),
-
-        // Communication Services
-        "T" => Some(("Communication Services", "Telecom Services")),
-        "VZ" => Some(("Communication Services", "Telecom Services")),
-        "CMCSA" => Some(("Communication Services", "Entertainment")),
-        "TMUS" => Some(("Communication Services", "Telecom Services")),
-        "CHTR" => Some(("Communication Services", "Entertainment")),
-        "EA" => Some(("Communication Services", "Electronic Gaming & Multimedia")),
-        "TTWO" => Some(("Communication Services", "Electronic Gaming & Multimedia")),
-        "ATVI" => Some(("Communication Services", "Electronic Gaming & Multimedia")),
+        // Communication Services — Internet Content & Information
+        "GOOG" | "GOOGL" | "META" | "SPOT" | "PINS" | "SNAP" | "BIDU" | "BILI" | "ZH" => {
+            Some(("Communication Services", "Internet Content & Information"))
+        }
+        // Communication Services — Entertainment
+        "NFLX" | "DIS" | "CMCSA" | "CHTR" | "IQ" | "TME" => {
+            Some(("Communication Services", "Entertainment"))
+        }
+        // Communication Services — Telecom Services
+        "T" | "VZ" | "TMUS" => Some(("Communication Services", "Telecom Services")),
+        // Communication Services — Electronic Gaming & Multimedia
+        "EA" | "TTWO" | "ATVI" | "NTES" => {
+            Some(("Communication Services", "Electronic Gaming & Multimedia"))
+        }
+        // Communication Services — Consumer Electronics
         "ROKU" => Some(("Communication Services", "Consumer Electronics")),
-        "PINS" => Some(("Communication Services", "Internet Content & Information")),
-        "SNAP" => Some(("Communication Services", "Internet Content & Information")),
-        "TWLO" => Some(("Technology", "Software—Infrastructure")),
-
-        // Real Estate
-        "PLD" => Some(("Real Estate", "REIT—Industrial")),
-        "AMT" => Some(("Real Estate", "REIT—Specialty")),
-        "CCI" => Some(("Real Estate", "REIT—Specialty")),
-        "EQIX" => Some(("Real Estate", "REIT—Data Center")),
-        "SPG" => Some(("Real Estate", "REIT—Retail")),
-        "O" => Some(("Real Estate", "REIT—Retail")),
-        "WELL" => Some(("Real Estate", "REIT—Healthcare Facilities")),
-        "DLR" => Some(("Real Estate", "REIT—Data Center")),
-
-        // Utilities
-        "NEE" => Some(("Utilities", "Utilities—Renewable")),
-        "DUK" => Some(("Utilities", "Utilities—Regulated Electric")),
-        "SO" => Some(("Utilities", "Utilities—Regulated Electric")),
-        "D" => Some(("Utilities", "Utilities—Regulated Electric")),
-        "AEP" => Some(("Utilities", "Utilities—Regulated Electric")),
-        "SRE" => Some(("Utilities", "Utilities—Diversified")),
-        "EXC" => Some(("Utilities", "Utilities—Regulated Electric")),
-        "XEL" => Some(("Utilities", "Utilities—Regulated Electric")),
-
-        // Materials
-        "LIN" => Some(("Basic Materials", "Specialty Chemicals")),
-        "APD" => Some(("Basic Materials", "Specialty Chemicals")),
-        "SHW" => Some(("Basic Materials", "Specialty Chemicals")),
-        "ECL" => Some(("Basic Materials", "Specialty Chemicals")),
-        "FCX" => Some(("Basic Materials", "Copper")),
-        "NEM" => Some(("Basic Materials", "Gold")),
-        "NUE" => Some(("Basic Materials", "Steel")),
-        "DOW" => Some(("Basic Materials", "Specialty Chemicals")),
-        "DD" => Some(("Basic Materials", "Specialty Chemicals")),
-        "PPG" => Some(("Basic Materials", "Specialty Chemicals")),
-
-        // Chinese ADRs (common US-listed)
-        "BABA" => Some(("Consumer Cyclical", "Internet Retail")),
-        "JD" => Some(("Consumer Cyclical", "Internet Retail")),
-        "PDD" => Some(("Consumer Cyclical", "Internet Retail")),
-        "BIDU" => Some(("Communication Services", "Internet Content & Information")),
-        "NIO" => Some(("Consumer Cyclical", "Auto Manufacturers")),
-        "XPEV" => Some(("Consumer Cyclical", "Auto Manufacturers")),
-        "LI" => Some(("Consumer Cyclical", "Auto Manufacturers")),
-        "NTES" => Some(("Communication Services", "Electronic Gaming & Multimedia")),
-        "BILI" => Some(("Communication Services", "Internet Content & Information")),
-        "IQ" => Some(("Communication Services", "Entertainment")),
-        "TME" => Some(("Communication Services", "Entertainment")),
-        "VIPS" => Some(("Consumer Cyclical", "Internet Retail")),
-        "MNSO" => Some(("Consumer Cyclical", "Discount Stores")),
-        "FUTU" => Some(("Financials", "Capital Markets")),
-        "TIGR" => Some(("Financials", "Capital Markets")),
-        "ZH" => Some(("Communication Services", "Internet Content & Information")),
-        "LULU" => Some(("Consumer Cyclical", "Apparel Retail")),
-        "MELI" => Some(("Consumer Cyclical", "Internet Retail")),
-        "SE" => Some(("Consumer Cyclical", "Internet Retail")),
-        "GRAB" => Some(("Technology", "Software—Application")),
-        "CPNG" => Some(("Consumer Cyclical", "Internet Retail")),
+        // Consumer Cyclical — Internet Retail
+        "AMZN" | "BABA" | "JD" | "PDD" | "VIPS" | "MELI" | "SE" | "CPNG" => {
+            Some(("Consumer Cyclical", "Internet Retail"))
+        }
+        // Consumer Cyclical — Auto Manufacturers
+        "TSLA" | "GM" | "F" | "NIO" | "XPEV" | "LI" => {
+            Some(("Consumer Cyclical", "Auto Manufacturers"))
+        }
+        // Consumer Cyclical — Home Improvement Retail
+        "HD" | "LOW" => Some(("Consumer Cyclical", "Home Improvement Retail")),
+        // Consumer Cyclical — Restaurants
+        "MCD" | "SBUX" => Some(("Consumer Cyclical", "Restaurants")),
+        // Consumer Cyclical — Apparel Retail
+        "TJX" | "LULU" => Some(("Consumer Cyclical", "Apparel Retail")),
+        // Consumer Cyclical — Footwear & Accessories
+        "NKE" => Some(("Consumer Cyclical", "Footwear & Accessories")),
+        // Consumer Cyclical — Travel Services
+        "BKNG" => Some(("Consumer Cyclical", "Travel Services")),
+        // Consumer Cyclical — Gambling
         "DKNG" => Some(("Consumer Cyclical", "Gambling")),
+        // Consumer Defensive — Discount Stores
+        "WMT" | "COST" | "TGT" | "MNSO" => Some(("Consumer Defensive", "Discount Stores")),
+        // Consumer Defensive — Beverages—Brewers
+        "STZ" => Some(("Consumer Defensive", "Beverages—Brewers")),
+        // Consumer Defensive — Beverages—Non-Alcoholic
+        "KO" | "PEP" => Some(("Consumer Defensive", "Beverages—Non-Alcoholic")),
+        // Consumer Defensive — Tobacco
+        "PM" | "MO" => Some(("Consumer Defensive", "Tobacco")),
+        // Consumer Defensive — Household & Personal Products
+        "CL" | "PG" | "EL" => Some(("Consumer Defensive", "Household & Personal Products")),
+        // Healthcare — Drug Manufacturers—General
+        "JNJ" | "PFE" | "ABBV" | "MRK" | "LLY" | "BMY" | "AMGN" | "GILD" => {
+            Some(("Healthcare", "Drug Manufacturers—General"))
+        }
+        // Healthcare — Drug Manufacturers—Specialty & Generic
+        "ZTS" => Some(("Healthcare", "Drug Manufacturers—Specialty & Generic")),
+        // Healthcare — Healthcare Plans
+        "UNH" => Some(("Healthcare", "Healthcare Plans")),
+        // Healthcare — Diagnostics & Research
+        "TMO" => Some(("Healthcare", "Diagnostics & Research")),
+        // Healthcare — Medical Devices
+        "ABT" | "MDT" | "SYK" | "BSX" => Some(("Healthcare", "Medical Devices")),
+        // Healthcare — Medical Instruments & Supplies
+        "ISRG" => Some(("Healthcare", "Medical Instruments & Supplies")),
+        // Healthcare — Biotechnology
+        "REGN" | "VRTX" | "MRNA" | "BIIB" => Some(("Healthcare", "Biotechnology")),
+        // Healthcare — Medical Care Facilities
+        "HCA" => Some(("Healthcare", "Medical Care Facilities")),
+        // Financials — Insurance—Diversified
+        "BRK-B" | "BRK.A" | "BRK_A" | "AIG" => Some(("Financials", "Insurance—Diversified")),
+        // Financials — Banks—Diversified
+        "JPM" | "BAC" | "WFC" | "C" => Some(("Financials", "Banks—Diversified")),
+        // Financials — Credit Services
+        "V" | "MA" | "AXP" => Some(("Financials", "Credit Services")),
+        // Financials — Capital Markets
+        "GS" | "MS" | "SCHW" | "FUTU" | "TIGR" => Some(("Financials", "Capital Markets")),
+        // Financials — Asset Management
+        "BLK" => Some(("Financials", "Asset Management")),
+        // Financials — Insurance—Property & Casualty
+        "CB" | "PGR" | "TRV" => Some(("Financials", "Insurance—Property & Casualty")),
+        // Financials — Insurance—Life
+        "MET" | "AFL" => Some(("Financials", "Insurance—Life")),
+        // Financials — Financial Data & Stock Exchanges
+        "CME" | "ICE" | "MCO" | "SPGI" => Some(("Financials", "Financial Data & Stock Exchanges")),
+        // Energy — Oil & Gas Integrated
+        "XOM" | "CVX" => Some(("Energy", "Oil & Gas Integrated")),
+        // Energy — Oil & Gas E&P
+        "COP" | "EOG" | "OXY" | "DVN" | "FANG" => Some(("Energy", "Oil & Gas E&P")),
+        // Energy — Oil & Gas Equipment & Services
+        "SLB" | "HAL" => Some(("Energy", "Oil & Gas Equipment & Services")),
+        // Energy — Oil & Gas Refining & Marketing
+        "MPC" | "PSX" | "VLO" => Some(("Energy", "Oil & Gas Refining & Marketing")),
+        // Industrials — Farm & Heavy Construction Machinery
+        "CAT" | "DE" => Some(("Industrials", "Farm & Heavy Construction Machinery")),
+        // Industrials — Aerospace & Defense
+        "BA" | "RTX" | "LMT" | "GD" | "NOC" | "TDG" => Some(("Industrials", "Aerospace & Defense")),
+        // Industrials — Specialty Industrial Machinery
+        "HON" | "GE" | "MMM" | "ETN" | "EMR" | "ITW" | "ROK" | "PH" => {
+            Some(("Industrials", "Specialty Industrial Machinery"))
+        }
+        // Industrials — Integrated Freight & Logistics
+        "UPS" | "FDX" => Some(("Industrials", "Integrated Freight & Logistics")),
+        // Industrials — Waste Management
+        "WM" => Some(("Industrials", "Waste Management")),
+        // Real Estate — REIT—Industrial
+        "PLD" => Some(("Real Estate", "REIT—Industrial")),
+        // Real Estate — REIT—Specialty
+        "AMT" | "CCI" => Some(("Real Estate", "REIT—Specialty")),
+        // Real Estate — REIT—Data Center
+        "EQIX" | "DLR" => Some(("Real Estate", "REIT—Data Center")),
+        // Real Estate — REIT—Retail
+        "SPG" | "O" => Some(("Real Estate", "REIT—Retail")),
+        // Real Estate — REIT—Healthcare Facilities
+        "WELL" => Some(("Real Estate", "REIT—Healthcare Facilities")),
+        // Utilities — Utilities—Renewable
+        "NEE" => Some(("Utilities", "Utilities—Renewable")),
+        // Utilities — Utilities—Regulated Electric
+        "DUK" | "SO" | "D" | "AEP" | "EXC" | "XEL" => {
+            Some(("Utilities", "Utilities—Regulated Electric"))
+        }
+        // Utilities — Utilities—Diversified
+        "SRE" => Some(("Utilities", "Utilities—Diversified")),
+        // Basic Materials — Specialty Chemicals
+        "LIN" | "APD" | "SHW" | "ECL" | "DOW" | "DD" | "PPG" => {
+            Some(("Basic Materials", "Specialty Chemicals"))
+        }
+        // Basic Materials — Copper
+        "FCX" => Some(("Basic Materials", "Copper")),
+        // Basic Materials — Gold
+        "NEM" => Some(("Basic Materials", "Gold")),
+        // Basic Materials — Steel
+        "NUE" => Some(("Basic Materials", "Steel")),
 
         _ => None,
     }

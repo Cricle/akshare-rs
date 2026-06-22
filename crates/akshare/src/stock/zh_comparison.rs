@@ -8,6 +8,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 use serde::{Deserialize, Serialize};
 
@@ -249,18 +250,14 @@ impl AkShareClient {
 
             if let Some(arr) = vote_res {
                 for item in arr {
-                    let item_type = item.get("type").and_then(|v| v.as_str()).unwrap_or("");
+                    let item_type = item.str_or(&["type"], "");
                     if item_type == *period {
                         votes.push(BaiduVote {
                             period: period.to_string(),
                             bullish: item.get("bullCount").and_then(serde_json::Value::as_i64),
                             bearish: item.get("bearCount").and_then(serde_json::Value::as_i64),
-                            bullish_ratio: item
-                                .get("bullRatio")
-                                .and_then(serde_json::Value::as_f64),
-                            bearish_ratio: item
-                                .get("bearRatio")
-                                .and_then(serde_json::Value::as_f64),
+                            bullish_ratio: item.f64_field(&["bullRatio"]),
+                            bearish_ratio: item.f64_field(&["bearRatio"]),
                         });
                     }
                 }

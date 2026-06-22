@@ -4,6 +4,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::BondSnapshot;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
@@ -46,25 +47,16 @@ impl AkShareClient {
             .into_iter()
             .take(limit)
             .filter_map(|v| {
-                let symbol = v.get("SECURITY_CODE").and_then(|x| x.as_str())?;
-                let name = v
-                    .get("SECURITY_NAME_ABBR")
-                    .and_then(|x| x.as_str())
-                    .unwrap_or(symbol);
-                let close = v
-                    .get("CURRENT_BOND_PRICE")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(100.0);
-                let premium = v
-                    .get("TRANSFER_PREMIUM_RATIO")
-                    .and_then(serde_json::Value::as_f64);
+                let symbol = v.str_field(&["SECURITY_CODE"])?;
+                let name = v.str_or(&["SECURITY_NAME_ABBR"], symbol);
+                let close = v.f64_or(&["CURRENT_BOND_PRICE"], 100.0);
+                let premium = v.f64_field(&["TRANSFER_PREMIUM_RATIO"]);
                 let credit_rating = v
-                    .get("RATING")
-                    .and_then(|x| x.as_str())
+                    .str_field(&["RATING"])
                     .map(std::string::ToString::to_string);
                 Some(BondSnapshot {
                     symbol: symbol.to_string(),
-                    name: name.to_string(),
+                    name,
                     date: today.clone(),
                     close,
                     change_pct: 0.0,
@@ -107,8 +99,7 @@ impl AkShareClient {
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let items = payload
-            .get("data")
-            .and_then(|d| d.get("diff"))
+            .nested(&["data", "diff"])
             .and_then(|d| d.as_array())
             .cloned()
             .unwrap_or_default();

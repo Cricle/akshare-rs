@@ -8,9 +8,9 @@ impl AkShareClient {
         // Normalize symbol to 5-digit format
         let code = symbol.trim().trim_start_matches('0');
         let code = if code.is_empty() { "0" } else { code };
-        let code = format!("{:0>5}", code);
+        let code = format!("{code:0>5}");
 
-        let url = format!("https://qt.gtimg.cn/q=r_hk{}", code);
+        let url = format!("https://qt.gtimg.cn/q=r_hk{code}");
         let resp = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")

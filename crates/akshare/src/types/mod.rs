@@ -3,6 +3,7 @@
 //! Core data structures: [`QuoteSnapshot`], [`CandlePoint`], [`MacroDataPoint`],
 //! [`Row`] (flexible key-value map), [`MarketKind`], and more.
 
+pub mod value_ext;
 pub mod wire;
 
 use serde::{Deserialize, Serialize};

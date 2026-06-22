@@ -11,6 +11,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
@@ -42,22 +43,11 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let date = v
-                .get("REPORT_DATE")
-                .or_else(|| v.get("DATE"))
-                .or_else(|| v.get("TRADE_DATE"))
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = v.str_or(&["REPORT_DATE", "DATE", "TRADE_DATE"], "");
             if date.is_empty() {
                 continue;
             }
-            let value = v
-                .get("AQI")
-                .or_else(|| v.get("INDICATOR_VALUE"))
-                .or_else(|| v.get("VALUE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let value = v.f64_or(&["AQI", "INDICATOR_VALUE", "VALUE"], 0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value,
@@ -181,15 +171,8 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut items = Vec::new();
         for (i, v) in data.iter().enumerate() {
-            let city = v
-                .get("CITY")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
-            let aqi = v
-                .get("AQI")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let city = v.str_or(&["CITY"], "");
+            let aqi = v.f64_or(&["AQI"], 0.0);
             if !city.is_empty() {
                 items.push(MacroDataPoint {
                     date: (i + 1).to_string(),

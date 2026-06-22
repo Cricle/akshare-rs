@@ -87,104 +87,63 @@ async fn fetch_cx_index(
 }
 
 // ---------------------------------------------------------------------------
-// Public API (19 functions)
+// Public API — macro-generated (19 functions)
 // ---------------------------------------------------------------------------
 
+macro_rules! cx_index {
+    ($(#[$meta:meta])* $name:ident, $code:expr) => {
+        $(#[$meta])*
+        pub async fn $name(&self) -> Result<Vec<CxIndexPoint>> {
+            fetch_cx_index(self, $code, &[]).await
+        }
+    };
+    ($(#[$meta:meta])* $name:ident, $code:expr, $extra:expr) => {
+        $(#[$meta])*
+        pub async fn $name(&self) -> Result<Vec<CxIndexPoint>> {
+            fetch_cx_index(self, $code, $extra).await
+        }
+    };
+}
+
 impl AkShareClient {
-    /// 财新中国 PMI — 综合 PMI.
-    pub async fn index_pmi_com_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "com", &[]).await
-    }
-
-    /// 财新中国 PMI — 制造业 PMI.
-    pub async fn index_pmi_man_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "man", &[]).await
-    }
-
-    /// 财新中国 PMI — 服务业 PMI.
-    pub async fn index_pmi_ser_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "ser", &[]).await
-    }
-
-    /// 数字经济指数.
-    pub async fn index_dei_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "dei", &[]).await
-    }
-
-    /// 产业指数.
-    pub async fn index_ii_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "ii", &[]).await
-    }
-
-    /// 溢出指数.
-    pub async fn index_si_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "si", &[]).await
-    }
-
-    /// 融合指数.
-    pub async fn index_fi_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "fi", &[]).await
-    }
-
-    /// 基础指数.
-    pub async fn index_bi_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "bi", &[]).await
-    }
-
-    /// 中国新经济指数.
-    pub async fn index_nei_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "nei", &[]).await
-    }
-
-    /// 劳动力投入指数.
-    pub async fn index_li_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "li", &[]).await
-    }
-
-    /// 资本投入指数.
-    pub async fn index_ci_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "ci", &[]).await
-    }
-
-    /// 科技投入指数.
-    pub async fn index_ti_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "ti", &[]).await
-    }
-
-    /// 新经济行业入职平均工资水平.
-    pub async fn index_neaw_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "neaw", &[]).await
-    }
-
-    /// 新经济入职工资溢价水平.
-    pub async fn index_awpr_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "awpr", &[]).await
-    }
-
-    /// 大宗商品指数.
-    pub async fn index_cci_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "cci", &[("code", "1000050"), ("month", "-1")]).await
-    }
-
-    /// 高质量因子指数.
-    pub async fn index_qli_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "qli", &[("code", "1000050"), ("month", "-1")]).await
-    }
-
-    /// AI 策略指数.
-    pub async fn index_ai_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "ai", &[("code", "1000050"), ("month", "-1")]).await
-    }
-
-    /// 基石经济指数.
-    pub async fn index_bei_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "ind", &[("code", "930927"), ("month", "-1")]).await
-    }
-
-    /// 新动能指数.
-    pub async fn index_neei_cx(&self) -> Result<Vec<CxIndexPoint>> {
-        fetch_cx_index(self, "ind", &[("code", "930928"), ("month", "1")]).await
-    }
+    cx_index!(/// 财新中国 PMI — 综合 PMI.
+        index_pmi_com_cx, "com");
+    cx_index!(/// 财新中国 PMI — 制造业 PMI.
+        index_pmi_man_cx, "man");
+    cx_index!(/// 财新中国 PMI — 服务业 PMI.
+        index_pmi_ser_cx, "ser");
+    cx_index!(/// 数字经济指数.
+        index_dei_cx, "dei");
+    cx_index!(/// 产业指数.
+        index_ii_cx, "ii");
+    cx_index!(/// 溢出指数.
+        index_si_cx, "si");
+    cx_index!(/// 融合指数.
+        index_fi_cx, "fi");
+    cx_index!(/// 基础指数.
+        index_bi_cx, "bi");
+    cx_index!(/// 中国新经济指数.
+        index_nei_cx, "nei");
+    cx_index!(/// 劳动力投入指数.
+        index_li_cx, "li");
+    cx_index!(/// 资本投入指数.
+        index_ci_cx, "ci");
+    cx_index!(/// 科技投入指数.
+        index_ti_cx, "ti");
+    cx_index!(/// 新经济行业入职平均工资水平.
+        index_neaw_cx, "neaw");
+    cx_index!(/// 新经济入职工资溢价水平.
+        index_awpr_cx, "awpr");
+    cx_index!(/// 大宗商品指数.
+        index_cci_cx, "cci", &[("code", "1000050"), ("month", "-1")]);
+    cx_index!(/// 高质量因子指数.
+        index_qli_cx, "qli", &[("code", "1000050"), ("month", "-1")]);
+    cx_index!(/// AI 策略指数.
+        index_ai_cx, "ai", &[("code", "1000050"), ("month", "-1")]);
+    cx_index!(/// 基石经济指数.
+        index_bei_cx, "ind", &[("code", "930927"), ("month", "-1")]);
+    cx_index!(/// 新动能指数.
+        index_neei_cx, "ind", &[("code", "930928"), ("month", "1")]);
 }
 
 #[cfg(test)]

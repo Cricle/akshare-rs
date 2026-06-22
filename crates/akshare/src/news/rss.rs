@@ -144,7 +144,7 @@ impl AkShareClient {
     /// Returns up to 30 recent articles with title, link, and date.
     /// No API key required.
     pub async fn seeking_alpha_news(&self, symbol: &str) -> Result<Vec<NewsItem>> {
-        let url = format!("https://seekingalpha.com/api/sa/combined/{}.xml", symbol);
+        let url = format!("https://seekingalpha.com/api/sa/combined/{symbol}.xml");
         let body = self
             .get(&url)
             .send()
@@ -204,11 +204,11 @@ mod tests {
 
     #[test]
     fn test_parse_rss_items_basic() {
-        let body = r#"
+        let body = r"
 <channel>
 <item><title>T1</title><link>http://a.com</link><description>D1</description><pubDate>Wed, 03 Jun 2026 00:00:00 GMT</pubDate></item>
 <item><title>T2</title><link>http://b.com</link><description>D2</description></item>
-</channel>"#;
+</channel>";
         let items = parse_rss_items(body, "test", &[]);
         assert_eq!(items.len(), 2);
         assert_eq!(items[0].title, "T1");
@@ -218,11 +218,11 @@ mod tests {
 
     #[test]
     fn test_parse_rss_items_excludes_filtered_titles() {
-        let body = r#"
+        let body = r"
 <channel>
 <item><title>必应 News</title><link>http://a.com</link></item>
 <item><title>Real News</title><link>http://b.com</link></item>
-</channel>"#;
+</channel>";
         let items = parse_rss_items(body, "test", &["必应", "Bing"]);
         assert_eq!(items.len(), 1);
         assert_eq!(items[0].title, "Real News");

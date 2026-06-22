@@ -14,6 +14,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::market::eastmoney_secid;
+use crate::types::value_ext::ValueExt;
 
 use serde::{Deserialize, Serialize};
 
@@ -200,21 +201,9 @@ impl AkShareClient {
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
 
             for item in &data {
-                let symbol = item
-                    .get("symbol")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let code = item
-                    .get("code")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let name = item
-                    .get("name")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
+                let symbol = item.str_or(&["symbol"], "");
+                let code = item.str_or(&["code"], "");
+                let name = item.str_or(&["name"], "");
 
                 all_quotes.push(ZhASpotQuote {
                     symbol,
@@ -432,21 +421,9 @@ impl AkShareClient {
 
             for item in &data {
                 all_stocks.push(ZhANewStock {
-                    symbol: item
-                        .get("symbol")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                    code: item
-                        .get("code")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                    name: item
-                        .get("name")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                    symbol: item.str_or(&["symbol"], ""),
+                    code: item.str_or(&["code"], ""),
+                    name: item.str_or(&["name"], ""),
                     open: parse_json_f64(item, "open"),
                     high: parse_json_f64(item, "high"),
                     low: parse_json_f64(item, "low"),
@@ -510,15 +487,15 @@ impl AkShareClient {
                 Some(ZhAStopStock {
                     code,
                     name,
-                    latest_price: item.get("f2").and_then(serde_json::Value::as_f64),
-                    change_pct: item.get("f3").and_then(serde_json::Value::as_f64),
-                    change_amount: item.get("f4").and_then(serde_json::Value::as_f64),
-                    volume: item.get("f5").and_then(serde_json::Value::as_f64),
-                    amount: item.get("f6").and_then(serde_json::Value::as_f64),
-                    high: item.get("f15").and_then(serde_json::Value::as_f64),
-                    low: item.get("f16").and_then(serde_json::Value::as_f64),
-                    open: item.get("f17").and_then(serde_json::Value::as_f64),
-                    prev_close: item.get("f18").and_then(serde_json::Value::as_f64),
+                    latest_price: item.f64_field(&["f2"]),
+                    change_pct: item.f64_field(&["f3"]),
+                    change_amount: item.f64_field(&["f4"]),
+                    volume: item.f64_field(&["f5"]),
+                    amount: item.f64_field(&["f6"]),
+                    high: item.f64_field(&["f15"]),
+                    low: item.f64_field(&["f16"]),
+                    open: item.f64_field(&["f17"]),
+                    prev_close: item.f64_field(&["f18"]),
                 })
             })
             .collect();

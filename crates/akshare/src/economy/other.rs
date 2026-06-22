@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -314,18 +315,8 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for entry in &data {
-            let name = entry
-                .get("Name")
-                .or_else(|| entry.get("name"))
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let value = entry
-                .get("SalesVolume")
-                .or_else(|| entry.get("salesVolume"))
-                .or_else(|| entry.get("Sales"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let name = entry.str_or(&["Name", "name"], "");
+            let value = entry.f64_or(&["SalesVolume", "salesVolume", "Sales"], 0.0);
             if !name.is_empty() {
                 items.push(MacroDataPoint {
                     date: date.to_string(),

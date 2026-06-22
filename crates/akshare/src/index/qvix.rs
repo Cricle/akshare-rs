@@ -110,103 +110,69 @@ async fn fetch_qvix_min(client: &AkShareClient, url: &str) -> Result<Vec<QvixMin
 }
 
 // ---------------------------------------------------------------------------
-// Public API (18 functions)
+// Public API — macro-generated (18 functions: 9 daily + 9 intraday)
 // ---------------------------------------------------------------------------
+
+macro_rules! qvix_daily {
+    ($(#[$meta:meta])* $name:ident, $cols:expr) => {
+        $(#[$meta])*
+        pub async fn $name(&self) -> Result<Vec<QvixDailyPoint>> {
+            fetch_qvix_daily(self, $cols).await
+        }
+    };
+}
+
+macro_rules! qvix_min {
+    ($(#[$meta:meta])* $name:ident, $url:expr) => {
+        $(#[$meta])*
+        pub async fn $name(&self) -> Result<Vec<QvixMinPoint>> {
+            fetch_qvix_min(self, $url).await
+        }
+    };
+}
 
 impl AkShareClient {
     // -- Daily (9) --
 
-    /// 50ETF 期权波动率指数 QVIX (daily).
-    pub async fn index_option_50etf_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_50ETF).await
-    }
-
-    /// 300ETF 期权波动率指数 QVIX (daily).
-    pub async fn index_option_300etf_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_300ETF).await
-    }
-
-    /// 500ETF 期权波动率指数 QVIX (daily).
-    pub async fn index_option_500etf_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_500ETF).await
-    }
-
-    /// 创业板期权波动率指数 QVIX (daily).
-    pub async fn index_option_cyb_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_CYB).await
-    }
-
-    /// 科创板期权波动率指数 QVIX (daily).
-    pub async fn index_option_kcb_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_KCB).await
-    }
-
-    /// 深证100ETF 期权波动率指数 QVIX (daily).
-    pub async fn index_option_100etf_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_100ETF).await
-    }
-
-    /// 中证300股指期权波动率指数 QVIX (daily).
-    pub async fn index_option_300index_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_300INDEX).await
-    }
-
-    /// 中证1000股指期权波动率指数 QVIX (daily).
-    pub async fn index_option_1000index_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_1000INDEX).await
-    }
-
-    /// 上证50股指期权波动率指数 QVIX (daily).
-    pub async fn index_option_50index_qvix(&self) -> Result<Vec<QvixDailyPoint>> {
-        fetch_qvix_daily(self, &COLS_50INDEX).await
-    }
+    qvix_daily!(/// 50ETF 期权波动率指数 QVIX (daily).
+        index_option_50etf_qvix, &COLS_50ETF);
+    qvix_daily!(/// 300ETF 期权波动率指数 QVIX (daily).
+        index_option_300etf_qvix, &COLS_300ETF);
+    qvix_daily!(/// 500ETF 期权波动率指数 QVIX (daily).
+        index_option_500etf_qvix, &COLS_500ETF);
+    qvix_daily!(/// 创业板期权波动率指数 QVIX (daily).
+        index_option_cyb_qvix, &COLS_CYB);
+    qvix_daily!(/// 科创板期权波动率指数 QVIX (daily).
+        index_option_kcb_qvix, &COLS_KCB);
+    qvix_daily!(/// 深证100ETF 期权波动率指数 QVIX (daily).
+        index_option_100etf_qvix, &COLS_100ETF);
+    qvix_daily!(/// 中证300股指期权波动率指数 QVIX (daily).
+        index_option_300index_qvix, &COLS_300INDEX);
+    qvix_daily!(/// 中证1000股指期权波动率指数 QVIX (daily).
+        index_option_1000index_qvix, &COLS_1000INDEX);
+    qvix_daily!(/// 上证50股指期权波动率指数 QVIX (daily).
+        index_option_50index_qvix, &COLS_50INDEX);
 
     // -- Intraday (9) --
 
-    /// 50ETF 期权波动率指数 QVIX (intraday).
-    pub async fn index_option_50etf_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vix50.csv").await
-    }
-
-    /// 300ETF 期权波动率指数 QVIX (intraday).
-    pub async fn index_option_300etf_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vix300.csv").await
-    }
-
-    /// 500ETF 期权波动率指数 QVIX (intraday).
-    pub async fn index_option_500etf_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vix500.csv").await
-    }
-
-    /// 创业板期权波动率指数 QVIX (intraday).
-    pub async fn index_option_cyb_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vixcyb.csv").await
-    }
-
-    /// 科创板期权波动率指数 QVIX (intraday).
-    pub async fn index_option_kcb_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vixkcb.csv").await
-    }
-
-    /// 深证100ETF 期权波动率指数 QVIX (intraday).
-    pub async fn index_option_100etf_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vix100.csv").await
-    }
-
-    /// 中证300股指期权波动率指数 QVIX (intraday).
-    pub async fn index_option_300index_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vixindex.csv").await
-    }
-
-    /// 中证1000股指期权波动率指数 QVIX (intraday).
-    pub async fn index_option_1000index_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vixindex1000.csv").await
-    }
-
-    /// 上证50股指期权波动率指数 QVIX (intraday).
-    pub async fn index_option_50index_min_qvix(&self) -> Result<Vec<QvixMinPoint>> {
-        fetch_qvix_min(self, "http://1.optbbs.com/d/csv/d/vix50index.csv").await
-    }
+    qvix_min!(/// 50ETF 期权波动率指数 QVIX (intraday).
+        index_option_50etf_min_qvix, "http://1.optbbs.com/d/csv/d/vix50.csv");
+    qvix_min!(/// 300ETF 期权波动率指数 QVIX (intraday).
+        index_option_300etf_min_qvix, "http://1.optbbs.com/d/csv/d/vix300.csv");
+    qvix_min!(/// 500ETF 期权波动率指数 QVIX (intraday).
+        index_option_500etf_min_qvix, "http://1.optbbs.com/d/csv/d/vix500.csv");
+    qvix_min!(/// 创业板期权波动率指数 QVIX (intraday).
+        index_option_cyb_min_qvix, "http://1.optbbs.com/d/csv/d/vixcyb.csv");
+    qvix_min!(/// 科创板期权波动率指数 QVIX (intraday).
+        index_option_kcb_min_qvix, "http://1.optbbs.com/d/csv/d/vixkcb.csv");
+    qvix_min!(/// 深证100ETF 期权波动率指数 QVIX (intraday).
+        index_option_100etf_min_qvix, "http://1.optbbs.com/d/csv/d/vix100.csv");
+    qvix_min!(/// 中证300股指期权波动率指数 QVIX (intraday).
+        index_option_300index_min_qvix, "http://1.optbbs.com/d/csv/d/vixindex.csv");
+    qvix_min!(/// 中证1000股指期权波动率指数 QVIX (intraday).
+        index_option_1000index_min_qvix, "http://1.optbbs.com/d/csv/d/vixindex1000.csv");
+    qvix_min!(/// 上证50股指期权波动率指数 QVIX (intraday).
+        index_option_50index_min_qvix, "http://1.optbbs.com/d/csv/d/vix50index.csv");
 }
 
 #[cfg(test)]

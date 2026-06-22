@@ -4,6 +4,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 // ---------------------------------------------------------------------------
@@ -112,18 +113,11 @@ impl AkShareClient {
         let mut items = Vec::new();
 
         for v in &data {
-            let date = v
-                .get("REPORT_DATE")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = v.str_or(&["REPORT_DATE"], "");
             if date.is_empty() {
                 continue;
             }
-            let rate = v
-                .get("IR_RATE")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let rate = v.f64_or(&["IR_RATE"], 0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value: rate,

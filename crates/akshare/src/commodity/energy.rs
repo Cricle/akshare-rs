@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
@@ -29,21 +30,14 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let date = v
-                .get("REPORT_DATE")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = v.str_or(&["REPORT_DATE"], "");
             if date.is_empty() {
                 continue;
             }
-            let value = v
-                .get("INDICATOR_VALUE")
-                .or_else(|| v.get("VALUE"))
-                .or_else(|| v.get("BRENT_PRICE"))
-                .or_else(|| v.get("WTI_PRICE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let value = v.f64_or(
+                &["INDICATOR_VALUE", "VALUE", "BRENT_PRICE", "WTI_PRICE"],
+                0.0,
+            );
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value,
@@ -76,19 +70,11 @@ impl AkShareClient {
         let data = resp.result.map(|r| r.data).unwrap_or_default();
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let date = v
-                .get("TRADE_DATE")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = v.str_or(&["TRADE_DATE"], "");
             if date.is_empty() {
                 continue;
             }
-            let value = v
-                .get("CLOSE_PRICE")
-                .or_else(|| v.get("PRICE"))
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let value = v.f64_or(&["CLOSE_PRICE", "PRICE"], 0.0);
             items.push(MacroDataPoint {
                 date: date.get(..10).unwrap_or(&date).to_string(),
                 value,

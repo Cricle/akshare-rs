@@ -2,6 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 use crate::types::{
     FundSnapshot, XqAchievementItem, XqAnalysisItem, XqBasicInfo, XqDetailHoldItem,
     XqProfitProbabilityItem,
@@ -24,20 +25,9 @@ impl AkShareClient {
             .get("data")
             .ok_or_else(|| Error::decode("xueqiu fund response missing data"))?;
 
-        let fd_code = data
-            .get("fd_code")
-            .and_then(|v| v.as_str())
-            .unwrap_or(symbol);
-        let fd_name = data
-            .get("fd_name")
-            .and_then(|v| v.as_str())
-            .unwrap_or("未知基金");
-        let update_date = data
-            .get("update_date")
-            .or_else(|| data.get("found_date"))
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
+        let fd_code = data.str_or(&["fd_code"], symbol);
+        let fd_name = data.str_or(&["fd_name"], "未知基金");
+        let update_date = data.str_or(&["update_date", "found_date"], "");
         let nav = data
             .get("nav")
             .or_else(|| data.get("unit_nav"))
@@ -71,8 +61,8 @@ impl AkShareClient {
             .unwrap_or(0.0);
 
         Ok(FundSnapshot {
-            symbol: fd_code.to_string(),
-            name: fd_name.to_string(),
+            symbol: fd_code,
+            name: fd_name,
             date: update_date,
             nav,
             acc_nav,
@@ -169,30 +159,18 @@ impl AkShareClient {
             for item in list {
                 result.push(XqAchievementItem {
                     achievement_type: type_name.to_string(),
-                    period: item
-                        .get("period_time")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                    period: item.str_or(&["period_time"], ""),
                     return_pct: item
-                        .get("self_nav")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("0")
+                        .str_or(&["self_nav"], "0")
                         .replace('%', "")
                         .parse()
                         .unwrap_or(0.0),
                     max_drawdown: item
-                        .get("self_max_draw_down")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("0")
+                        .str_or(&["self_max_draw_down"], "0")
                         .replace('%', "")
                         .parse()
                         .unwrap_or(0.0),
-                    rank: item
-                        .get("self_nav_rank")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                    rank: item.str_or(&["self_nav_rank"], ""),
                 });
             }
         }
@@ -220,33 +198,20 @@ impl AkShareClient {
         let mut result = Vec::new();
         for item in list {
             result.push(XqAnalysisItem {
-                period: item
-                    .get("index_time_period")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string(),
-                risk_return_ratio: item
-                    .get("investment_cost_performance")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0),
-                risk_control: item
-                    .get("risk_control")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0),
+                period: item.str_or(&["index_time_period"], ""),
+                risk_return_ratio: item.f64_or(&["investment_cost_performance"], 0.0),
+                risk_control: item.f64_or(&["risk_control"], 0.0),
                 volatility: item
-                    .get("self_index")
-                    .and_then(|s| s.get("volatility_rank"))
-                    .and_then(serde_json::Value::as_f64)
+                    .nested(&["self_index"])
+                    .and_then(|s| s.f64_field(&["volatility_rank"]))
                     .unwrap_or(0.0),
                 sharpe: item
-                    .get("self_index")
-                    .and_then(|s| s.get("sharpe_rank"))
-                    .and_then(serde_json::Value::as_f64)
+                    .nested(&["self_index"])
+                    .and_then(|s| s.f64_field(&["sharpe_rank"]))
                     .unwrap_or(0.0),
                 max_drawdown: item
-                    .get("self_index")
-                    .and_then(|s| s.get("max_draw_down"))
-                    .and_then(serde_json::Value::as_f64)
+                    .nested(&["self_index"])
+                    .and_then(|s| s.f64_field(&["max_draw_down"]))
                     .unwrap_or(0.0),
             });
         }
@@ -276,22 +241,14 @@ impl AkShareClient {
         let mut result = Vec::new();
         for item in list {
             result.push(XqProfitProbabilityItem {
-                holding_period: item
-                    .get("holding_time")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string(),
+                holding_period: item.str_or(&["holding_time"], ""),
                 profit_ratio: item
-                    .get("profit_ratio")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("0")
+                    .str_or(&["profit_ratio"], "0")
                     .replace('%', "")
                     .parse()
                     .unwrap_or(0.0),
                 avg_return: item
-                    .get("average_income")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("0")
+                    .str_or(&["average_income"], "0")
                     .replace('%', "")
                     .parse()
                     .unwrap_or(0.0),
@@ -343,15 +300,8 @@ impl AkShareClient {
         let mut result = Vec::new();
         for item in list {
             result.push(XqDetailHoldItem {
-                asset_type: item
-                    .get("type_desc")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string(),
-                percent: item
-                    .get("percent")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0),
+                asset_type: item.str_or(&["type_desc"], ""),
+                percent: item.f64_or(&["percent"], 0.0),
             });
         }
         Ok(result)

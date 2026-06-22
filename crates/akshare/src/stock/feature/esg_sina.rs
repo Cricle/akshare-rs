@@ -2,6 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::Result;
+use crate::types::value_ext::ValueExt;
 
 use super::types::EsgRating;
 
@@ -21,10 +22,8 @@ impl AkShareClient {
             .await?;
 
         let total: i64 = first
-            .get("result")
-            .and_then(|r| r.get("data"))
-            .and_then(|d| d.get("total"))
-            .and_then(|t| t.as_str())
+            .nested(&["result", "data", "total"])
+            .and_then(|v| v.as_str())
             .and_then(|s| s.parse().ok())
             .unwrap_or(0);
         let page_count = (total + 99) / 100;
@@ -42,39 +41,20 @@ impl AkShareClient {
                 .json::<serde_json::Value>()
                 .await?;
             let data = resp
-                .get("result")
-                .and_then(|r| r.get("data"))
-                .and_then(|d| d.get("data"))
-                .and_then(|d| d.as_array())
+                .nested(&["result", "data", "data"])
+                .and_then(|v| v.as_array())
                 .cloned()
                 .unwrap_or_default();
             for v in &data {
                 all.push(EsgRating {
-                    code: v
-                        .get("symbol")
-                        .and_then(|x| x.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                    name: v
-                        .get("name")
-                        .and_then(|x| x.as_str())
-                        .map(std::string::ToString::to_string),
-                    esg_score: v
-                        .get("esg_score")
-                        .or_else(|| v.get("total_score"))
-                        .and_then(serde_json::Value::as_f64),
-                    env_score: v
-                        .get("environment_score")
-                        .or_else(|| v.get("env_score"))
-                        .and_then(serde_json::Value::as_f64),
-                    social_score: v.get("social_score").and_then(serde_json::Value::as_f64),
-                    governance_score: v
-                        .get("governance_score")
-                        .and_then(serde_json::Value::as_f64),
+                    code: v.str_or(&["symbol"], ""),
+                    name: v.str_field(&["name"]).map(std::string::ToString::to_string),
+                    esg_score: v.f64_field(&["esg_score", "total_score"]),
+                    env_score: v.f64_field(&["environment_score", "env_score"]),
+                    social_score: v.f64_field(&["social_score"]),
+                    governance_score: v.f64_field(&["governance_score"]),
                     rating_date: v
-                        .get("rating_date")
-                        .or_else(|| v.get("update_date"))
-                        .and_then(|x| x.as_str())
+                        .str_field(&["rating_date", "update_date"])
                         .map(std::string::ToString::to_string),
                     market: Some("CN".to_string()),
                 });

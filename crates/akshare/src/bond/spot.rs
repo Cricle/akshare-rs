@@ -6,6 +6,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::BondSnapshot;
+use crate::types::value_ext::ValueExt;
 
 impl AkShareClient {
     /// Bond spot deal data (现券成交数据).
@@ -100,8 +101,7 @@ impl AkShareClient {
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
-            .get("result")
-            .and_then(|r| r.get("data"))
+            .nested(&["result", "data"])
             .and_then(|d| d.as_array())
             .cloned()
             .unwrap_or_default();
@@ -122,14 +122,14 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for v in &data {
-            let date = v.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
+            let date = v.str_or(&["SOLAR_DATE"], "");
             if date.is_empty() {
                 continue;
             }
-            let date_short = date.get(..10).unwrap_or(date).to_string();
+            let date_short = date.get(..10).unwrap_or(&date).to_string();
 
             for (field, tenor_label) in &tenors {
-                let yield_rate = v.get(*field).and_then(serde_json::Value::as_f64);
+                let yield_rate = v.f64_field(&[*field]);
                 if let Some(rate) = yield_rate {
                     items.push(BondSnapshot {
                         symbol: format!("CNBD{tenor_label}"),
@@ -157,6 +157,8 @@ impl AkShareClient {
 mod tests {
     use serde_json::json;
 
+    use crate::types::value_ext::ValueExt;
+
     #[test]
     fn test_yield_extraction() {
         // Simulate an Eastmoney response row
@@ -168,8 +170,8 @@ mod tests {
             "EMM00166469": 2.80
         });
 
-        let date = row.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
-        assert_eq!(date.get(..10).unwrap_or(date), "2025-01-15");
+        let date = row.str_or(&["SOLAR_DATE"], "");
+        assert_eq!(date.get(..10).unwrap_or(&date), "2025-01-15");
 
         let tenors = [
             ("EMM00588704", "2Y"),
@@ -179,7 +181,7 @@ mod tests {
         ];
 
         for (field, label) in &tenors {
-            let rate = row.get(*field).and_then(serde_json::Value::as_f64);
+            let rate = row.f64_field(&[*field]);
             assert!(rate.is_some(), "missing yield for {label}");
             assert!(rate.unwrap() > 0.0);
         }
@@ -191,7 +193,7 @@ mod tests {
             "SOLAR_DATE": "",
             "EMM00588704": 1.85
         });
-        let date = row.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
+        let date = row.str_or(&["SOLAR_DATE"], "");
         assert!(date.is_empty());
     }
 }

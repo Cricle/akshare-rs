@@ -6,6 +6,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -46,24 +47,15 @@ impl AkShareClient {
             .await?;
 
         let data = resp
-            .get("result")
-            .and_then(|r| r.get("data"))
+            .nested(&["result", "data"])
             .and_then(|d| d.as_array())
             .cloned()
             .unwrap_or_default();
 
         let mut items = Vec::new();
         for v in &data {
-            let name = v
-                .get("CURRENCY_NAME")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
-            let code = v
-                .get("CURRENCY_CODE")
-                .and_then(|x| x.as_str())
-                .unwrap_or("")
-                .to_string();
+            let name = v.str_or(&["CURRENCY_NAME"], "");
+            let code = v.str_or(&["CURRENCY_CODE"], "");
             if !name.is_empty() {
                 items.push(MacroDataPoint {
                     date: code,
@@ -96,16 +88,8 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for record in &records {
-            let date = record
-                .get("startDate")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let pair = record
-                .get("ccyPair")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
+            let date = record.str_or(&["startDate"], "");
+            let pair = record.str_or(&["ccyPair"], "");
 
             // Extract swap points for different tenors
             for tenor in &["ON", "1W", "2W", "1M", "3M", "6M", "1Y"] {
@@ -143,15 +127,8 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for record in &records {
-            let date = record
-                .get("startDate")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let bid = record
-                .get("bidPips")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let date = record.str_or(&["startDate"], "");
+            let bid = record.f64_or(&["bidPips"], 0.0);
             items.push(MacroDataPoint {
                 date,
                 value: bid,
@@ -182,20 +159,9 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for record in &records {
-            let date = record
-                .get("startDate")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let pair = record
-                .get("ccyPair")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let spot = record
-                .get("spotMid")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let date = record.str_or(&["startDate"], "");
+            let pair = record.str_or(&["ccyPair"], "");
+            let spot = record.f64_or(&["spotMid"], 0.0);
             items.push(MacroDataPoint {
                 date,
                 value: spot,
@@ -226,20 +192,9 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for record in &records {
-            let date = record
-                .get("startDate")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let pair = record
-                .get("ccyPair")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-            let swap_pips = record
-                .get("swapPoint")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
+            let date = record.str_or(&["startDate"], "");
+            let pair = record.str_or(&["ccyPair"], "");
+            let swap_pips = record.f64_or(&["swapPoint"], 0.0);
             items.push(MacroDataPoint {
                 date,
                 value: swap_pips,
@@ -268,16 +223,8 @@ impl AkShareClient {
             && let Some(arr) = result.as_array()
         {
             for entry in arr {
-                let name = entry
-                    .get("name")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let price = entry
-                    .get("price")
-                    .or_else(|| entry.get("currentPrice"))
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
+                let name = entry.str_or(&["name"], "");
+                let price = entry.f64_or(&["price", "currentPrice"], 0.0);
                 if !name.is_empty() {
                     items.push(MacroDataPoint {
                         date: pair.to_string(),

@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 use super::shared::{fetch_em_industry_index, fetch_em_report, fetch_jin10_report};
 
@@ -1148,15 +1149,14 @@ impl AkShareClient {
             .iter()
             .map(|v| {
                 let date = v
-                    .get("wds")
+                    .nested(&["wds"])
                     .and_then(|w| w.as_array())
                     .and_then(|a| a.get(2))
                     .and_then(|w| w.get("valuecode"))
                     .and_then(|v| v.as_str())
                     .unwrap_or("");
                 let value = v
-                    .get("data")
-                    .and_then(|d| d.get("data"))
+                    .nested(&["data", "data"])
                     .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0);
                 MacroDataPoint {
@@ -1217,15 +1217,14 @@ impl AkShareClient {
             .iter()
             .map(|v| {
                 let date = v
-                    .get("wds")
+                    .nested(&["wds"])
                     .and_then(|w| w.as_array())
                     .and_then(|a| a.get(2))
                     .and_then(|w| w.get("valuecode"))
                     .and_then(|v| v.as_str())
                     .unwrap_or("");
                 let value = v
-                    .get("data")
-                    .and_then(|d| d.get("data"))
+                    .nested(&["data", "data"])
                     .and_then(serde_json::Value::as_f64)
                     .unwrap_or(0.0);
                 MacroDataPoint {
@@ -1269,15 +1268,8 @@ impl AkShareClient {
         Ok(items
             .iter()
             .map(|v| {
-                let date = v
-                    .get("date")
-                    .and_then(|d| d.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let value = v
-                    .get("value")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
+                let date = v.str_or(&["date"], "");
+                let value = v.f64_or(&["value"], 0.0);
                 MacroDataPoint {
                     date,
                     value,

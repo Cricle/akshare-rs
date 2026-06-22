@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
 
 // ---------------------------------------------------------------------------
@@ -55,24 +56,11 @@ pub(crate) async fn fetch_em_report(
     let data = resp.result.map(|r| r.data).unwrap_or_default();
     let mut items = Vec::with_capacity(data.len());
     for v in &data {
-        let date = v
-            .get("REPORT_DATE")
-            .or_else(|| v.get("REPORT_PERIOD"))
-            .or_else(|| v.get("DATE"))
-            .and_then(|x| x.as_str())
-            .unwrap_or("")
-            .to_string();
-
-        let value = v
-            .get("INDICATOR_VALUE")
-            .or_else(|| v.get("VALUE"))
-            .or_else(|| v.get("GDP"))
-            .or_else(|| v.get("CPI"))
-            .or_else(|| v.get("PPI"))
-            .or_else(|| v.get("PMI"))
-            .or_else(|| v.get("M2"))
-            .and_then(serde_json::Value::as_f64)
-            .unwrap_or(0.0);
+        let date = v.str_or(&["REPORT_DATE", "REPORT_PERIOD", "DATE"], "");
+        let value = v.f64_or(
+            &["INDICATOR_VALUE", "VALUE", "GDP", "CPI", "PPI", "PMI", "M2"],
+            0.0,
+        );
 
         if date.is_empty() {
             continue;
@@ -118,18 +106,8 @@ pub(crate) async fn fetch_em_indicator(
     let data = resp.result.map(|r| r.data).unwrap_or_default();
     let mut items = Vec::with_capacity(data.len());
     for v in &data {
-        let date = v
-            .get("REPORT_DATE")
-            .or_else(|| v.get("REPORT_DATE_CH"))
-            .and_then(|x| x.as_str())
-            .unwrap_or("")
-            .to_string();
-
-        let value = v
-            .get("VALUE")
-            .or_else(|| v.get("INDICATOR_VALUE"))
-            .and_then(serde_json::Value::as_f64)
-            .unwrap_or(0.0);
+        let date = v.str_or(&["REPORT_DATE", "REPORT_DATE_CH"], "");
+        let value = v.f64_or(&["VALUE", "INDICATOR_VALUE"], 0.0);
 
         if date.is_empty() {
             continue;

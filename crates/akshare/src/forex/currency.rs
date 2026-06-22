@@ -5,6 +5,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 // ---------------------------------------------------------------------------
 // Implementation
@@ -40,11 +41,7 @@ impl AkShareClient {
             .and_then(|r| r.as_object())
             .ok_or_else(|| Error::decode("currency_latest: no rates"))?;
 
-        let date = response
-            .get("date")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
+        let date = response.str_or(&["date"], "");
 
         let mut items = Vec::new();
         for (currency, rate) in rates {
@@ -175,11 +172,7 @@ impl AkShareClient {
         let mut items = Vec::new();
         if let Some(obj) = response.as_object() {
             for (code, info) in obj {
-                let name = info
-                    .get("currency_name")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
+                let name = info.str_or(&["currency_name"], "");
                 items.push(MacroDataPoint {
                     date: code.clone(),
                     value: 0.0,
@@ -216,10 +209,7 @@ impl AkShareClient {
             .get("response")
             .ok_or_else(|| Error::decode("currency_convert: no response"))?;
 
-        let value = response
-            .get("value")
-            .and_then(serde_json::Value::as_f64)
-            .unwrap_or(0.0);
+        let value = response.f64_or(&["value"], 0.0);
 
         let timestamp = response
             .get("timestamp")

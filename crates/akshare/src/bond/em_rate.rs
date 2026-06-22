@@ -6,6 +6,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 #[derive(Debug, Deserialize)]
 struct EmRateResp {
@@ -55,11 +56,11 @@ impl AkShareClient {
             }
 
             for v in &data {
-                let date = v.get("SOLAR_DATE").and_then(|x| x.as_str()).unwrap_or("");
+                let date = v.str_or(&["SOLAR_DATE"], "");
                 if date.is_empty() {
                     continue;
                 }
-                let date_short = date.get(..10).unwrap_or(date).to_string();
+                let date_short = date.get(..10).unwrap_or(&date).to_string();
 
                 // Stop early if we've reached the start_date
                 let sd = format!(
@@ -79,7 +80,7 @@ impl AkShareClient {
                     ("EMM00166466", "中国国债收益率10年"),
                     ("EMM00166469", "中国国债收益率30年"),
                 ] {
-                    if let Some(val) = v.get(*field).and_then(serde_json::Value::as_f64) {
+                    if let Some(val) = v.f64_field(&[*field]) {
                         all_items.push(MacroDataPoint {
                             date: date_short.clone(),
                             value: val,
@@ -95,7 +96,7 @@ impl AkShareClient {
                     ("EMG00001310", "美国国债收益率10年"),
                     ("EMG00001312", "美国国债收益率30年"),
                 ] {
-                    if let Some(val) = v.get(*field).and_then(serde_json::Value::as_f64) {
+                    if let Some(val) = v.f64_field(&[*field]) {
                         all_items.push(MacroDataPoint {
                             date: date_short.clone(),
                             value: val,
@@ -119,6 +120,8 @@ impl AkShareClient {
 mod tests {
     use serde_json::json;
 
+    use crate::types::value_ext::ValueExt;
+
     #[test]
     fn test_rate_row_extraction() {
         let row = json!({
@@ -132,8 +135,8 @@ mod tests {
             "EMG00001310": 4.50,
             "EMG00001312": 4.70
         });
-        let date = row.get("SOLAR_DATE").and_then(|v| v.as_str()).unwrap();
+        let date = row.str_field(&["SOLAR_DATE"]).unwrap();
         assert_eq!(&date[..10], "2025-01-15");
-        assert!(row.get("EMM00166466").unwrap().as_f64().unwrap() > 0.0);
+        assert!(row.f64_field(&["EMM00166466"]).unwrap() > 0.0);
     }
 }

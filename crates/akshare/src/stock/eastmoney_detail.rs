@@ -10,6 +10,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 use serde::{Deserialize, Serialize};
 
@@ -245,77 +246,43 @@ impl AkShareClient {
 
         Ok(BidAskData {
             symbol: symbol.to_string(),
-            name: data
-                .get("f58")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string(),
-            latest: data.get("f43").and_then(serde_json::Value::as_f64),
-            avg_price: data.get("f71").and_then(serde_json::Value::as_f64),
-            change_pct: data.get("f170").and_then(serde_json::Value::as_f64),
-            change_amount: data.get("f169").and_then(serde_json::Value::as_f64),
-            volume: data.get("f47").and_then(serde_json::Value::as_f64),
-            amount: data.get("f48").and_then(serde_json::Value::as_f64),
-            turnover_rate: data.get("f168").and_then(serde_json::Value::as_f64),
-            volume_ratio: data.get("f50").and_then(serde_json::Value::as_f64),
-            high: data.get("f44").and_then(serde_json::Value::as_f64),
-            low: data.get("f45").and_then(serde_json::Value::as_f64),
-            open: data.get("f46").and_then(serde_json::Value::as_f64),
-            prev_close: data.get("f60").and_then(serde_json::Value::as_f64),
-            limit_up: data.get("f51").and_then(serde_json::Value::as_f64),
-            limit_down: data.get("f52").and_then(serde_json::Value::as_f64),
-            buy_1_price: data.get("f19").and_then(serde_json::Value::as_f64),
-            buy_1_vol: data
-                .get("f20")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            buy_2_price: data.get("f17").and_then(serde_json::Value::as_f64),
-            buy_2_vol: data
-                .get("f18")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            buy_3_price: data.get("f15").and_then(serde_json::Value::as_f64),
-            buy_3_vol: data
-                .get("f16")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            buy_4_price: data.get("f13").and_then(serde_json::Value::as_f64),
-            buy_4_vol: data
-                .get("f14")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            buy_5_price: data.get("f11").and_then(serde_json::Value::as_f64),
-            buy_5_vol: data
-                .get("f12")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            sell_1_price: data.get("f39").and_then(serde_json::Value::as_f64),
-            sell_1_vol: data
-                .get("f40")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            sell_2_price: data.get("f37").and_then(serde_json::Value::as_f64),
-            sell_2_vol: data
-                .get("f38")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            sell_3_price: data.get("f35").and_then(serde_json::Value::as_f64),
-            sell_3_vol: data
-                .get("f36")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            sell_4_price: data.get("f33").and_then(serde_json::Value::as_f64),
-            sell_4_vol: data
-                .get("f34")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            sell_5_price: data.get("f31").and_then(serde_json::Value::as_f64),
-            sell_5_vol: data
-                .get("f32")
-                .and_then(serde_json::Value::as_f64)
-                .map(|v| v * 100.0),
-            outer_vol: data.get("f49").and_then(serde_json::Value::as_f64),
-            inner_vol: data.get("f161").and_then(serde_json::Value::as_f64),
+            name: data.str_or(&["f58"], ""),
+            latest: data.f64_field(&["f43"]),
+            avg_price: data.f64_field(&["f71"]),
+            change_pct: data.f64_field(&["f170"]),
+            change_amount: data.f64_field(&["f169"]),
+            volume: data.f64_field(&["f47"]),
+            amount: data.f64_field(&["f48"]),
+            turnover_rate: data.f64_field(&["f168"]),
+            volume_ratio: data.f64_field(&["f50"]),
+            high: data.f64_field(&["f44"]),
+            low: data.f64_field(&["f45"]),
+            open: data.f64_field(&["f46"]),
+            prev_close: data.f64_field(&["f60"]),
+            limit_up: data.f64_field(&["f51"]),
+            limit_down: data.f64_field(&["f52"]),
+            buy_1_price: data.f64_field(&["f19"]),
+            buy_1_vol: data.f64_field(&["f20"]).map(|v| v * 100.0),
+            buy_2_price: data.f64_field(&["f17"]),
+            buy_2_vol: data.f64_field(&["f18"]).map(|v| v * 100.0),
+            buy_3_price: data.f64_field(&["f15"]),
+            buy_3_vol: data.f64_field(&["f16"]).map(|v| v * 100.0),
+            buy_4_price: data.f64_field(&["f13"]),
+            buy_4_vol: data.f64_field(&["f14"]).map(|v| v * 100.0),
+            buy_5_price: data.f64_field(&["f11"]),
+            buy_5_vol: data.f64_field(&["f12"]).map(|v| v * 100.0),
+            sell_1_price: data.f64_field(&["f39"]),
+            sell_1_vol: data.f64_field(&["f40"]).map(|v| v * 100.0),
+            sell_2_price: data.f64_field(&["f37"]),
+            sell_2_vol: data.f64_field(&["f38"]).map(|v| v * 100.0),
+            sell_3_price: data.f64_field(&["f35"]),
+            sell_3_vol: data.f64_field(&["f36"]).map(|v| v * 100.0),
+            sell_4_price: data.f64_field(&["f33"]),
+            sell_4_vol: data.f64_field(&["f34"]).map(|v| v * 100.0),
+            sell_5_price: data.f64_field(&["f31"]),
+            sell_5_vol: data.f64_field(&["f32"]).map(|v| v * 100.0),
+            outer_vol: data.f64_field(&["f49"]),
+            inner_vol: data.f64_field(&["f161"]),
         })
     }
 
@@ -506,11 +473,10 @@ impl AkShareClient {
             .map_err(Error::from)?;
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let industry = payload
-            .get("data")
-            .and_then(|d| d.get("f127"))
+            .nested(&["data", "f127"])
             .and_then(|v| v.as_str())
             .filter(|s| !s.trim().is_empty())
-            .map(|s| s.to_string());
+            .map(std::string::ToString::to_string);
         Ok(industry)
     }
 

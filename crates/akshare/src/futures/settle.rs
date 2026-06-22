@@ -10,6 +10,7 @@ use serde_json;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::Row;
+use crate::types::value_ext::ValueExt;
 
 static RE_ALPHA: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z]+").unwrap());
@@ -153,12 +154,7 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for row in rows {
-            let sym = row
-                .get("INSTRUMENTID")
-                .or_else(|| row.get("symbol"))
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
+            let sym = row.str_or(&["INSTRUMENTID", "symbol"], "");
             if sym.is_empty() {
                 continue;
             }
@@ -201,12 +197,7 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         for row in rows {
-            let sym = row
-                .get("INSTRUMENTID")
-                .or_else(|| row.get("symbol"))
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
+            let sym = row.str_or(&["INSTRUMENTID", "symbol"], "");
             if sym.is_empty() {
                 continue;
             }

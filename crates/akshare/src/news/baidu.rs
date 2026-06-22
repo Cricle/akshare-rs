@@ -14,8 +14,7 @@ impl AkShareClient {
         }
         let encoded_query = percent_encode(query);
         let search_url = format!(
-            "https://www.baidu.com/s?wd={}&tn=news&rtt=4&bsst=1&cl=2&medium=0",
-            encoded_query
+            "https://www.baidu.com/s?wd={encoded_query}&tn=news&rtt=4&bsst=1&cl=2&medium=0"
         );
         let body = tokio::time::timeout(
             std::time::Duration::from_secs(timeout_secs),
@@ -103,21 +102,21 @@ fn extract_baidu_link(html: &str) -> Option<(String, String)> {
     let url = if href.starts_with("http") {
         href
     } else {
-        format!("https://www.baidu.com{}", href)
+        format!("https://www.baidu.com{href}")
     };
     Some((title, url))
 }
 
 fn extract_baidu_text_between(html: &str, class_names: &[&str]) -> Option<String> {
     for class_name in class_names {
-        let marker = format!("class=\"{}\"", class_name);
+        let marker = format!("class=\"{class_name}\"");
         if let Some(pos) = html.find(&marker) {
             let after = &html[pos..];
             let tag_end = after.find('>')? + 1;
             let content_start = &after[tag_end..];
             let close_div = content_start
                 .find("</div>")
-                .unwrap_or(content_start.len().min(800));
+                .unwrap_or_else(|| content_start.len().min(800));
             let text = strip_html_tags(&content_start[..close_div]);
             let text = decode_html_entities(&text);
             if !text.trim().is_empty() {
@@ -131,7 +130,7 @@ fn extract_baidu_text_between(html: &str, class_names: &[&str]) -> Option<String
 fn extract_baidu_source(html: &str) -> Option<(String, String)> {
     let source_markers = ["c-color-gray", "c-gap-right-small", "news-source", "source"];
     for marker in &source_markers {
-        let class_attr = format!("class=\"{}\"", marker);
+        let class_attr = format!("class=\"{marker}\"");
         if let Some(pos) = html.find(&class_attr) {
             let after = &html[pos..];
             let tag_end = after.find('>')? + 1;
@@ -139,7 +138,7 @@ fn extract_baidu_source(html: &str) -> Option<(String, String)> {
             let span_close = content
                 .find("</span>")
                 .or_else(|| content.find("</a>"))
-                .unwrap_or(content.len().min(200));
+                .unwrap_or_else(|| content.len().min(200));
             let text = strip_html_tags(&content[..span_close]);
             let text = decode_html_entities(&text);
             if !text.trim().is_empty() {
@@ -199,7 +198,10 @@ fn percent_encode(input: &str) -> String {
                 encoded.push(byte as char);
             }
             b' ' => encoded.push('+'),
-            _ => encoded.push_str(&format!("%{:02X}", byte)),
+            _ => {
+                use std::fmt::Write as _;
+                let _ = write!(encoded, "%{byte:02X}");
+            }
         }
     }
     encoded
