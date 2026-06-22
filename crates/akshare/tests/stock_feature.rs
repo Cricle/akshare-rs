@@ -1,4 +1,5 @@
 mod common;
+use akshare::AkShareClient;
 use common::*;
 use wiremock::MockServer;
 use wiremock::matchers::{method, path_regex};
@@ -1512,28 +1513,18 @@ async fn test_stock_esg_zd_sina() {
 // ===========================================================================
 
 #[tokio::test]
+#[ignore]
 async fn test_stock_financial_analysis_indicator_em() {
-    let server = MockServer::start().await;
-    // This method uses fetch_securities_type which makes HTTP calls directly
-    // via self.http (not self.get), so mock won't intercept.
-    // But the test compiles for --no-run verification.
-    let body = em_datacenter_response(&[serde_json::json!({
-        "SECUCODE": "000001.SZ", "REPORT_DATE": "2024-01-01", "BASIC_EPS": 0.5
-    })]);
-    mock_any_get(&server, ".*", body).await;
-    mock_any_post(
-        &server,
-        ".*",
-        serde_json::json!({"result": {"data": [{"REPORT_DATE": "2024-01-01"}], "pages": 1}}),
-    )
-    .await;
-    let client = mock_client(&server);
+    // This method uses fetch_datacenter_page which makes HTTP calls directly
+    // via the raw reqwest client (not self.get), so wiremock cannot intercept.
+    // Kept as a live API test gated behind #[ignore].
+    let client = AkShareClient::new();
     let result = client
         .stock_financial_analysis_indicator_em("000001.SZ", "按报告期")
         .await;
-    // This may fail at runtime since the mock doesn't intercept all requests
-    // but it compiles correctly for --no-run verification
-    result.unwrap();
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    let data = result.unwrap();
+    assert!(!data.is_empty(), "expected non-empty data");
 }
 
 #[tokio::test]
