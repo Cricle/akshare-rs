@@ -2549,3 +2549,277 @@ async fn test_mock_client_has_mock_uri() {
     assert!(client.mock_uri.is_some());
     assert_eq!(client.mock_uri.unwrap(), server.uri());
 }
+
+// =========================================================================
+// hk_extra.rs — HK index spot, hot rank, valuation, financial, etc.
+// =========================================================================
+
+/// Helper: HK index spot row for Eastmoney push2 API.
+fn hk_index_spot_em_row() -> serde_json::Value {
+    serde_json::json!({
+        "f2": 20050.0, "f3": 0.25, "f4": 50.0, "f5": 500_000_000,
+        "f6": 10_000_000_000.0, "f12": "HSI", "f13": "100",
+        "f14": "恒生指数", "f15": 20100.0, "f16": 19800.0,
+        "f17": 19900.0, "f18": 20000.0
+    })
+}
+
+#[tokio::test]
+async fn test_stock_hk_index_spot_em() {
+    let server = MockServer::start().await;
+    mount_catch_all_json(
+        &server,
+        em_push2_response(&[hk_index_spot_em_row()]),
+    )
+    .await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_index_spot_em().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "HSI");
+    assert_eq!(items[0].name, "恒生指数");
+    assert_eq!(items[0].internal_id, "100");
+}
+
+/// Sina-style HK index spot text response.
+fn hk_index_spot_sina_text() -> String {
+    "var hq_str_hkHSI=\"恒生指数,20000.00,19900.00,20000.00,20100.00,19800.00,20050.00,50.00,0.25\";\nvar hq_str_hkHSCEI=\"恒生国企,7000.00,6950.00,7000.00,7100.00,6900.00,7050.00,50.00,0.71\";\n".to_string()
+}
+
+#[tokio::test]
+async fn test_stock_hk_index_spot_sina() {
+    let server = MockServer::start().await;
+    mount_catch_all_text(&server, &hk_index_spot_sina_text()).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_index_spot_sina().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "hkHSI");
+    assert_eq!(items[0].name, "恒生指数");
+    assert!(items[0].latest_price.is_some());
+}
+
+#[tokio::test]
+async fn test_stock_hk_hot_rank() {
+    let server = MockServer::start().await;
+    // POST to emappdata returns rank data; mock catch-all covers it
+    let post_body = serde_json::json!({
+        "data": [
+            {"sc": "HK|00700|00700", "rk": 1},
+            {"sc": "HK|09988|09988", "rk": 2}
+        ]
+    });
+    mount_catch_all_json(&server, post_body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_hot_rank().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "00700");
+    assert_eq!(items[0].rank, Some(1));
+}
+
+#[tokio::test]
+async fn test_stock_hk_hot_rank_latest() {
+    let server = MockServer::start().await;
+    let post_body = serde_json::json!({
+        "data": {
+            "2024-01-01": 5,
+            "2024-01-02": 3,
+            "2024-01-03": 8
+        }
+    });
+    mount_catch_all_json(&server, post_body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_hot_rank_latest("00700").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert!(items.iter().any(|i| i.time == "2024-01-01"));
+    assert!(items.iter().any(|i| i.rank == 5));
+}
+
+#[tokio::test]
+async fn test_stock_hk_hot_rank_detail() {
+    let server = MockServer::start().await;
+    let post_body = serde_json::json!({
+        "data": [
+            {"dt": "2024-01-01", "rk": 5},
+            {"dt": "2024-01-02", "rk": 3}
+        ]
+    });
+    mount_catch_all_json(&server, post_body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_hot_rank_detail("00700").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].time, "2024-01-01");
+    assert_eq!(items[0].rank, 5);
+    assert_eq!(items[0].code, Some("00700".to_string()));
+}
+
+#[tokio::test]
+async fn test_stock_hk_hot_rank_detail_realtime() {
+    let server = MockServer::start().await;
+    let post_body = serde_json::json!({
+        "data": [
+            {"dt": "09:30", "rk": 1},
+            {"dt": "10:00", "rk": 2}
+        ]
+    });
+    mount_catch_all_json(&server, post_body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_hot_rank_detail_realtime("00700").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].time, "09:30");
+    assert_eq!(items[0].rank, 1);
+    assert_eq!(items[0].code, Some("00700".to_string()));
+}
+
+/// Baidu finance valuation response (deeply nested).
+fn hk_valuation_baidu_body() -> serde_json::Value {
+    serde_json::json!({
+        "Result": [{
+            "DisplayData": {
+                "resultData": {
+                    "tplData": {
+                        "result": {
+                            "chartInfo": [{
+                                "body": [
+                                    ["2024-01-01", 15.5],
+                                    ["2024-02-01", 16.0],
+                                    ["2024-03-01", 15.8]
+                                ]
+                            }]
+                        }
+                    }
+                }
+            }
+        }]
+    })
+}
+
+#[tokio::test]
+async fn test_stock_hk_valuation() {
+    let server = MockServer::start().await;
+    mount_catch_all_json(&server, hk_valuation_baidu_body()).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_hk_valuation("00700", "pe_ttm", "近一年")
+        .await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].date, "2024-01-01");
+    assert!((items[0].value - 15.5).abs() < 1e-6);
+}
+
+#[tokio::test]
+async fn test_stock_hk_scale_comparison() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECUCODE": "00700.HK",
+        "SECURITY_CODE": "00700",
+        "TOTAL_MARKET_CAP": 3_500_000_000_000_i64,
+        "FLOAT_MARKET_CAP": 3_200_000_000_000_i64
+    })]);
+    mount_catch_all_json(&server, body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_scale_comparison("00700").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_hk_dividend_payout() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECURITY_CODE": "00700",
+        "SECURITY_NAME_ABBR": "腾讯控股",
+        "EX_DIVIDEND_DATE": "2024-01-15",
+        "DIVIDEND_PER_SHARE": 1.5
+    })]);
+    mount_catch_all_json(&server, body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_dividend_payout("00700").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+}
+
+/// THS HTML with bonus/dividend table rows (7+ columns per row).
+fn hk_fhpx_html() -> String {
+    r#"<!DOCTYPE html><html><body>
+<table>
+<tr><td>2024-01-15</td><td>派息1.5元</td><td>2024-01-20</td><td>2024-02-01</td><td>2024-01-20</td><td>2024-01-19</td><td>现金</td><td>已实施</td></tr>
+<tr><td>2023-06-10</td><td>派息1.0元</td><td>2023-06-15</td><td>2023-07-01</td><td>2023-06-15</td><td>2023-06-14</td><td>现金</td><td>已实施</td></tr>
+</table>
+</body></html>"#
+        .to_string()
+}
+
+#[tokio::test]
+async fn test_stock_hk_fhpx_detail() {
+    let server = MockServer::start().await;
+    mount_catch_all_text(&server, &hk_fhpx_html()).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_fhpx_detail("00700").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].announce_date, "2024-01-15");
+    assert_eq!(items[0].scheme.as_deref(), Some("派息1.5元"));
+    assert_eq!(items[0].dividend_type.as_deref(), Some("现金"));
+}
+
+#[tokio::test]
+async fn test_stock_hk_financial_indicator() {
+    let server = MockServer::start().await;
+    let body = em_datacenter_response(&[serde_json::json!({
+        "SECUCODE": "00700.HK",
+        "SECURITY_CODE": "00700",
+        "REPORT_DATE": "2023-12-31",
+        "BASIC_EPS": 12.50,
+        "TOTAL_OPERATE_INCOME": 600_000_000_000_i64,
+        "NETPROFIT": 150_000_000_000_i64
+    })]);
+    mount_catch_all_json(&server, body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_financial_indicator("00700").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_hk_gxl_lg() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!([
+        {"date": "2024-01-01", "dvRatio": 3.5},
+        {"date": "2024-02-01", "dvRatio": 3.6},
+        {"date": "2024-03-01", "dvRatio": 3.4}
+    ]);
+    mount_catch_all_json(&server, body).await;
+    let client = mock_client(&server);
+    let result = client.stock_hk_gxl_lg().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].date, "2024-01-01");
+    assert!((items[0].dividend_yield - 3.5).abs() < 1e-6);
+}
+
+#[tokio::test]
+async fn test_stock_hk_indicator_eniu() {
+    let server = MockServer::start().await;
+    let client = mock_client(&server);
+    // This method always returns an error (requires auth, not implemented)
+    let result = client.stock_hk_indicator_eniu("00700").await;
+    assert!(result.is_err());
+}

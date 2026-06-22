@@ -2,7 +2,6 @@
 //! CBond indices, ChinaMoney yields, Sina/THS sources, SSE summaries,
 //! CNINFO issuance, NAFMII, and Eastmoney rates.
 
-pub mod bond_info_cm;
 pub mod buyback;
 pub mod cb_sina;
 pub mod cb_ths;

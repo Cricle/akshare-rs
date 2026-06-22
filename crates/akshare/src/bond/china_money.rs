@@ -194,32 +194,6 @@ impl AkShareClient {
     }
 }
 
-/// Fetches the current yield curve snapshot from ChinaMoney.
-/// Returns the latest yield curve data points.
-pub async fn bond_china_close_return_map() -> crate::error::Result<Vec<serde_json::Value>> {
-    use reqwest::Client;
-    let client = Client::new();
-    let resp = client
-        .get("https://www.chinamoney.com.cn/ags/ms/cm-u-bk-currency/ClsYldCurvCurvGO")
-        .header(
-            "User-Agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        )
-        .header(
-            "Referer",
-            "https://www.chinamoney.com.cn/chinese/bkcurvclosedyhis/",
-        )
-        .send()
-        .await?
-        .json::<serde_json::Value>()
-        .await?;
-    let records = resp
-        .get("records")
-        .and_then(|r| r.as_array())
-        .cloned()
-        .unwrap_or_default();
-    Ok(records)
-}
 #[cfg(test)]
 mod tests {
     use super::*;

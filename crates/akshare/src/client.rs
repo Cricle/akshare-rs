@@ -105,9 +105,6 @@ impl AkShareClient {
         }
     }
 
-    pub fn with_tushare_token(token: impl Into<String>) -> Self {
-        Self::builder().tushare_token(token).build()
-    }
 }
 
 impl Default for AkShareClient {

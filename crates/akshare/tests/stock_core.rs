@@ -1766,3 +1766,199 @@ async fn test_stock_hk_index_daily_sina_hsi() {
     let client = mock_client(&server);
     let _ = client.stock_hk_index_daily_sina("HSI").await;
 }
+
+// =========================================================================
+// zh_comparison.rs tests (4 methods)
+// =========================================================================
+
+#[tokio::test]
+async fn test_stock_zh_dupont_comparison() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_dupont_dc_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_zh_dupont_comparison("SZ000895").await;
+    assert!(result.is_ok());
+    let data = result.unwrap();
+    assert!(!data.is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_scale_comparison() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_scale_dc_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_zh_scale_comparison("SZ000895").await;
+    assert!(result.is_ok());
+    let data = result.unwrap();
+    assert!(!data.is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_valuation() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_zh_valuation("002044", "市盈率(TTM)", "近一年")
+        .await;
+    assert!(result.is_ok());
+    let data = result.unwrap();
+    assert!(!data.is_empty());
+}
+
+#[tokio::test]
+async fn test_stock_zh_vote() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_baidu_vote_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_zh_vote("000001", "股票").await;
+    assert!(result.is_ok());
+    let data = result.unwrap();
+    assert!(!data.is_empty());
+}
+
+// =========================================================================
+// spot_em.rs tests (4 methods)
+// =========================================================================
+
+#[tokio::test]
+async fn test_stock_sz_a_spot() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_sz_a_spot().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "000001");
+    assert_eq!(items[0].name, "Test Stock");
+}
+
+#[tokio::test]
+async fn test_stock_bj_a_spot() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_bj_a_spot().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "000001");
+    assert_eq!(items[0].name, "Test Stock");
+}
+
+#[tokio::test]
+async fn test_stock_cy_a_spot() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_cy_a_spot().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "000001");
+    assert_eq!(items[0].name, "Test Stock");
+}
+
+#[tokio::test]
+async fn test_stock_kc_a_spot() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_kc_a_spot().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "000001");
+    assert_eq!(items[0].name, "Test Stock");
+}
+
+// =========================================================================
+// us_extra.rs tests (5 methods)
+// =========================================================================
+
+#[tokio::test]
+async fn test_stock_us_daily() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_kline_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_us_daily("AAPL", "20240101", "20241231").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].date, "2024-01-02");
+    assert!(items[0].open > 0.0);
+    assert!(items[0].close > 0.0);
+    assert!(items[0].volume > 0.0);
+}
+
+#[tokio::test]
+async fn test_stock_us_spot() {
+    let server = MockServer::start().await;
+    let body = serde_json::json!({
+        "data": {
+            "total": 1,
+            "diff": [
+                {
+                    "f2": 180.0, "f3": 2.5, "f4": 4.5, "f5": 50_000_000, "f6": 9_000_000_000.0,
+                    "f12": "AAPL", "f14": "Apple Inc"
+                }
+            ]
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
+    let client = mock_client(&server);
+    let result = client.stock_us_spot().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].symbol, "AAPL");
+    assert_eq!(items[0].name, "Apple Inc");
+    assert!(items[0].latest_price.is_some());
+}
+
+#[tokio::test]
+async fn test_stock_us_famous_spot() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_us_famous_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_us_famous_spot("科技类").await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "AAPL");
+    assert_eq!(items[0].name, "Apple Inc");
+    assert!(items[0].latest_price.is_some());
+    assert!(items[0].market_cap.is_some());
+}
+
+#[tokio::test]
+async fn test_stock_us_pink_spot() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_us_pink_body()).await;
+    let client = mock_client(&server);
+    let result = client.stock_us_pink_spot().await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].code, "PINK001");
+    assert_eq!(items[0].name, "Pink Stock");
+    assert!(items[0].latest_price.is_some());
+}
+
+#[tokio::test]
+async fn test_stock_us_valuation() {
+    let server = MockServer::start().await;
+    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
+    let client = mock_client(&server);
+    let result = client
+        .stock_us_valuation("NVDA", "总市值", "近一年")
+        .await;
+    assert!(result.is_ok());
+    let items = result.unwrap();
+    assert!(!items.is_empty());
+    assert_eq!(items[0].date, "2024-01-01");
+    assert_eq!(items[0].value, 100.0);
+    assert_eq!(items[1].date, "2024-02-01");
+    assert_eq!(items[1].value, 105.0);
+}
