@@ -18,17 +18,22 @@ use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 
 static RE_BOARD_HREF: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r#"href="[^"]*?(?:gn|thshy)/detail/code/(\d+)/"[^>]*>([^<]+)</a>"#).unwrap()
+    regex::Regex::new(r#"href="[^"]*?(?:gn|thshy)/detail/code/(\d+)/"[^>]*>([^<]+)</a>"#)
+        .expect("valid regex: board href")
 });
 static RE_BOARD_HREF_FALLBACK: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r#"<a[^>]+href="[^"]*?/code/(\d+)/?"[^>]*>([^<]+)</a>"#).unwrap()
+    regex::Regex::new(r#"<a[^>]+href="[^"]*?/code/(\d+)/?"[^>]*>([^<]+)</a>"#)
+        .expect("valid regex: board href fallback")
 });
-static RE_DT: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"<dt[^>]*>([^<]+)</dt>").unwrap());
-static RE_DD: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"<dd[^>]*>([\s\S]*?)</dd>").unwrap());
-static RE_DATE: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"(\d{4}-\d{2}-\d{2})").unwrap());
+static RE_DT: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"<dt[^>]*>([^<]+)</dt>").expect("valid regex: dt tag")
+});
+static RE_DD: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"<dd[^>]*>([\s\S]*?)</dd>").expect("valid regex: dd tag")
+});
+static RE_DATE: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"(\d{4}-\d{2}-\d{2})").expect("valid regex: date")
+});
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -277,18 +282,18 @@ impl AkShareClient {
         // Parse dt/dd pairs from board-infos div
         let dt_matches: Vec<&str> = RE_DT
             .captures_iter(&html)
-            .map(|c| c.get(1).unwrap().as_str().trim())
+            .filter_map(|c| c.get(1).map(|m| m.as_str().trim()))
             .collect();
         let dd_matches: Vec<String> = RE_DD
             .captures_iter(&html)
-            .map(|c| {
-                c.get(1)
-                    .unwrap()
-                    .as_str()
-                    .replace("<br>", "/")
-                    .replace("<br/>", "/")
-                    .trim()
-                    .to_string()
+            .filter_map(|c| {
+                c.get(1).map(|m| {
+                    m.as_str()
+                        .replace("<br>", "/")
+                        .replace("<br/>", "/")
+                        .trim()
+                        .to_string()
+                })
             })
             .collect();
 

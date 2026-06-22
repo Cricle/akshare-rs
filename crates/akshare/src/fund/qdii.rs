@@ -91,6 +91,8 @@ impl AkShareClient {
                     .unwrap_or(0.0);
 
                 if !fund_id.is_empty() {
+                    let base_date = fund_id.clone();
+                    let base_name = fund_name.clone();
                     items.push(MacroDataPoint {
                         date: fund_id,
                         value: price,
@@ -98,15 +100,15 @@ impl AkShareClient {
                     });
                     // Also add NAV as a separate data point
                     items.push(MacroDataPoint {
-                        date: format!("{}_nav", items.last().unwrap().date),
+                        date: format!("{base_date}_nav"),
                         value: nav,
-                        name: format!("{} NAV", items.last().unwrap().name),
+                        name: format!("{base_name} NAV"),
                     });
                     // Add discount rate
                     items.push(MacroDataPoint {
-                        date: format!("{}_discount", items[items.len() - 2].date),
+                        date: format!("{base_date}_discount"),
                         value: discount_rt,
-                        name: format!("{} Discount%", items[items.len() - 2].name),
+                        name: format!("{base_name} Discount%"),
                     });
                 }
             }

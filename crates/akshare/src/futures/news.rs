@@ -6,8 +6,9 @@ use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::Row;
 
-static UTC_PLUS_8: LazyLock<chrono::FixedOffset> =
-    LazyLock::new(|| chrono::FixedOffset::east_opt(8 * 3600).unwrap());
+static UTC_PLUS_8: LazyLock<chrono::FixedOffset> = LazyLock::new(|| {
+    chrono::FixedOffset::east_opt(8 * 3600).expect("valid UTC+8 offset")
+});
 
 impl AkShareClient {
     /// SHMET news flash (上海金属网快讯).
