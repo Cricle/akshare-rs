@@ -1,8 +1,8 @@
 //! Integration tests for ALL index module methods.
 //!
-//! Covers: a_share, cflp, cni, cons, csindex, cx, drewry, eri, global,
-//! global_em, global_sina, hf, hk, hog, kq_fz, kq_ss, qvix, scope, spot,
-//! sugar, sw, sw_fund, sw_research, us_sina, yw, zh_em.
+//! Covers: `a_share`, cflp, cni, cons, csindex, cx, drewry, eri, global,
+//! `global_em`, `global_sina`, hf, hk, hog, `kq_fz`, `kq_ss`, qvix, scope, spot,
+//! sugar, sw, `sw_fund`, `sw_research`, `us_sina`, yw, `zh_em`.
 
 #![allow(dead_code, unused_variables)]
 //!
@@ -27,7 +27,7 @@ async fn test_index_a_share_candles() {
     mock_any_get(
         &server,
         "/api/qt/stock/kline/get",
-        em_kline_response(klines),
+        em_kline_response(&klines),
     )
     .await;
     let client = mock_client(&server);
@@ -49,7 +49,7 @@ async fn test_index_a_share_candles_invalid_symbol() {
 async fn test_index_stock_zh_spot_em() {
     let server = MockServer::start().await;
     let rows = vec![sample_em_stock_row("000001", "上证指数")];
-    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(rows)).await;
+    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.index_stock_zh_spot_em("沪深重要指数").await;
     assert!(result.is_ok());
@@ -144,10 +144,10 @@ async fn test_index_all_cni() {
     row[13] = serde_json::json!(10000.0);
     row[14] = serde_json::json!(0.5);
     row[16] = serde_json::json!(20.0);
-    row[18] = serde_json::json!(100000000.0);
-    row[19] = serde_json::json!(50000000000.0);
-    row[20] = serde_json::json!(100000000000.0);
-    row[21] = serde_json::json!(80000000000.0);
+    row[18] = serde_json::json!(100_000_000.0);
+    row[19] = serde_json::json!(50_000_000_000.0);
+    row[20] = serde_json::json!(100_000_000_000.0);
+    row[21] = serde_json::json!(80_000_000_000.0);
     let body = serde_json::json!({"data": {"rows": [row]}});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -167,8 +167,8 @@ async fn test_index_hist_cni() {
         serde_json::json!(10050.0),
         serde_json::json!(null),
         serde_json::json!("0.50%"),
-        serde_json::json!(50000000.0),
-        serde_json::json!(300000000.0),
+        serde_json::json!(50_000_000.0),
+        serde_json::json!(300_000_000.0),
         serde_json::json!(null),
     ];
     let body = serde_json::json!({"data": {"data": [row]}});
@@ -212,8 +212,8 @@ async fn test_index_detail_hist_cni() {
         serde_json::json!(10050.0),
         serde_json::json!(null),
         serde_json::json!("0.50%"),
-        serde_json::json!(50000000.0),
-        serde_json::json!(300000000.0),
+        serde_json::json!(50_000_000.0),
+        serde_json::json!(300_000_000.0),
         serde_json::json!(null),
     ];
     let body = serde_json::json!({"data": {"data": [row]}});
@@ -329,8 +329,8 @@ async fn test_stock_zh_index_hist_csindex() {
     row[9] = serde_json::json!(3360.0);
     row[10] = serde_json::json!(10.0);
     row[11] = serde_json::json!(0.3);
-    row[12] = serde_json::json!(100000000.0);
-    row[13] = serde_json::json!(50000000000.0);
+    row[12] = serde_json::json!(100_000_000.0);
+    row[13] = serde_json::json!(50_000_000_000.0);
     row[14] = serde_json::json!(300.0);
     row[15] = serde_json::json!(12.5);
     let body = serde_json::json!({"data": [row]});
@@ -538,11 +538,11 @@ async fn test_index_hk_spot_sina() {
 async fn test_index_hk_spot_em() {
     let server = MockServer::start().await;
     let rows = vec![serde_json::json!({
-        "f12": "HSI", "f14": "恒生指数", "f2": 1800000, "f3": 5000,
-        "f4": 100, "f7": 200, "f15": 1810000, "f16": 1790000,
-        "f17": 1800000, "f18": 1799900, "f124": 1704067200000_i64
+        "f12": "HSI", "f14": "恒生指数", "f2": 1_800_000, "f3": 5000,
+        "f4": 100, "f7": 200, "f15": 1_810_000, "f16": 1_790_000,
+        "f17": 1_800_000, "f18": 1_799_900, "f124": 1_704_067_200_000_i64
     })];
-    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(rows)).await;
+    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.index_hk_spot_em().await;
     let _ = result;
@@ -556,7 +556,7 @@ async fn test_index_hk_daily_em() {
     mock_any_get(
         &server,
         "/api/qt/stock/kline/get",
-        em_kline_response(klines),
+        em_kline_response(&klines),
     )
     .await;
     let client = mock_client(&server);
@@ -757,7 +757,7 @@ async fn test_sw_index_first_info() {
 async fn test_sw_index_second_info() {
     let server = MockServer::start().await;
     let rows = vec![serde_json::json!({"f12": "801011", "f14": "林业", "f2": 100.0, "f3": 0.5})];
-    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(rows)).await;
+    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.sw_index_second_info().await;
     assert!(result.is_ok());
@@ -767,7 +767,7 @@ async fn test_sw_index_second_info() {
 async fn test_sw_index_third_cons() {
     let server = MockServer::start().await;
     let rows = vec![serde_json::json!({"f12": "000001", "f14": "平安银行", "f2": 10.5, "f3": 1.0})];
-    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(rows)).await;
+    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.sw_index_third_cons("801010").await;
     assert!(result.is_ok());
@@ -777,7 +777,7 @@ async fn test_sw_index_third_cons() {
 async fn test_sw_index_third_info() {
     let server = MockServer::start().await;
     let rows = vec![serde_json::json!({"f12": "801013", "f14": "种子", "f2": 200.0, "f3": -0.3})];
-    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(rows)).await;
+    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.sw_index_third_info("801010").await;
     assert!(result.is_ok());
@@ -787,9 +787,9 @@ async fn test_sw_index_third_info() {
 async fn test_sw_index_list() {
     let server = MockServer::start().await;
     let rows = vec![
-        serde_json::json!({"f12": "801010", "f14": "农林牧渔", "f2": 3000.0, "f3": 0.5, "f5": 1000000.0, "f6": 5000000000.0}),
+        serde_json::json!({"f12": "801010", "f14": "农林牧渔", "f2": 3000.0, "f3": 0.5, "f5": 1_000_000.0, "f6": 5_000_000_000.0}),
     ];
-    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(rows)).await;
+    mock_any_get(&server, "/api/qt/clist/get", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.sw_index_list().await;
     assert!(result.is_ok());
@@ -803,7 +803,7 @@ async fn test_sw_index_candles() {
     mock_any_get(
         &server,
         "/api/qt/stock/kline/get",
-        em_kline_response(klines),
+        em_kline_response(&klines),
     )
     .await;
     let client = mock_client(&server);

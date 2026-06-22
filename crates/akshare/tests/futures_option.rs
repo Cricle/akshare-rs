@@ -58,8 +58,8 @@ async fn test_futures_spot_prices() {
                     "f14": "螺纹钢2405",
                     "f2": 3800.0,
                     "f3": 1.5,
-                    "f5": 200000.0,
-                    "f10": 150000.0
+                    "f5": 200_000.0,
+                    "f10": 150_000.0
                 }
             ]
         }
@@ -176,9 +176,9 @@ async fn test_futures_daily_shfe() {
                 "HIGHESTPRICE": 3900,
                 "LOWESTPRICE": 3750,
                 "CLOSEPRICE": 3850,
-                "VOLUME": 200000,
-                "OPENINTEREST": 150000,
-                "TURNOVER": 760000000,
+                "VOLUME": 200_000,
+                "OPENINTEREST": 150_000,
+                "TURNOVER": 760_000_000,
                 "SETTLEMENTPRICE": 3840,
                 "PRESETTLEMENTPRICE": 3800
             }
@@ -203,9 +203,9 @@ async fn test_futures_daily_ine() {
                 "HIGHESTPRICE": 510,
                 "LOWESTPRICE": 495,
                 "CLOSEPRICE": 505,
-                "VOLUME": 100000,
+                "VOLUME": 100_000,
                 "OPENINTEREST": 50000,
-                "TURNOVER": 50000000,
+                "TURNOVER": 50_000_000,
                 "SETTLEMENTPRICE": 503,
                 "PRESETTLEMENTPRICE": 500
             }
@@ -229,9 +229,9 @@ async fn test_futures_daily_dce() {
                 "high": 4850,
                 "low": 4750,
                 "close": 4820,
-                "volumn": 100000,
+                "volumn": 100_000,
                 "openInterest": 50000,
-                "turnover": 480000000,
+                "turnover": 480_000_000,
                 "clearPrice": 4810,
                 "lastClear": 4800
             }
@@ -270,7 +270,7 @@ async fn test_futures_daily_gfex() {
                 "close": 12100,
                 "volumn": 50000,
                 "openInterest": 30000,
-                "turnover": 600000000,
+                "turnover": 600_000_000,
                 "clearPrice": 12050,
                 "lastClear": 12000
             }
@@ -461,8 +461,8 @@ async fn test_match_main_contract() {
     let body = serde_json::json!({
         "data": {
             "diff": [
-                { "f12": "RB2405", "f14": "螺纹钢2405", "f2": 3800, "f3": 1.5, "f5": 200000, "f10": 150000 },
-                { "f12": "RB2410", "f14": "螺纹钢2410", "f2": 3850, "f3": 1.2, "f5": 100000, "f10": 80000 }
+                { "f12": "RB2405", "f14": "螺纹钢2405", "f2": 3800, "f3": 1.5, "f5": 200_000, "f10": 150_000 },
+                { "f12": "RB2410", "f14": "螺纹钢2410", "f2": 3850, "f3": 1.2, "f5": 100_000, "f10": 80000 }
             ]
         }
     });
@@ -869,7 +869,7 @@ async fn test_futures_news() {
         "data": {
             "dataList": [
                 [
-                    1, "title", "summary", 1704153600000_i64, "tag", "content text"
+                    1, "title", "summary", 1_704_153_600_000_i64, "tag", "content text"
                 ]
             ]
         }
@@ -920,7 +920,7 @@ async fn test_option_finance_board() {
         "date": "20240102",
         "time": "150000",
         "total": 1,
-        "list": [[1, "10003720", 0.05, 0.06, 0.04, 0.055, 100000, 5000]]
+        "list": [[1, "10003720", 0.05, 0.06, 0.04, 0.055, 100_000, 5000]]
     });
     mock_any_get_text(&server, ".*", &body.to_string()).await;
     let client = mock_client(&server);
@@ -931,13 +931,13 @@ async fn test_option_finance_board() {
 #[tokio::test]
 async fn test_option_chain() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({
+    let body = em_datacenter_response(&[serde_json::json!({
         "SECURITY_CODE": "10003720",
         "SECURITY_NAME_ABBR": "50ETF购1月2500",
         "TRADE_DATE": "2024-01-02",
         "CLOSE_PRICE": 0.055,
         "CHANGE_RATE": 5.0,
-        "VOLUME": 100000.0,
+        "VOLUME": 100_000.0,
         "OPEN_INTEREST": 50000.0,
         "STRIKE_PRICE": 2.50,
         "EXPIRE_DATE": "2024-01-24"
@@ -1164,13 +1164,13 @@ async fn test_option_daily_stats() {
                 "SECURITY_CODE": "510050",
                 "SECURITY_NAME": "50ETF",
                 "CONTRACT_COUNT": 100,
-                "TOTAL_AMOUNT": 5000000,
-                "TOTAL_VOLUME": 100000,
+                "TOTAL_AMOUNT": 5_000_000,
+                "TOTAL_VOLUME": 100_000,
                 "CALL_VOLUME": 60000,
                 "PUT_VOLUME": 40000,
                 "PUT_CALL_RATIO": 0.67,
-                "TOTAL_OPEN_INTEREST": 200000,
-                "CALL_OPEN_INTEREST": 120000,
+                "TOTAL_OPEN_INTEREST": 200_000,
+                "CALL_OPEN_INTEREST": 120_000,
                 "PUT_OPEN_INTEREST": 80000,
                 "TRADE_DATE": "2024-01-02"
             }
@@ -1310,7 +1310,7 @@ async fn test_option_current_sse() {
                 "END_DATE": "2024-01-24",
                 "LATEST_PRICE": 0.055,
                 "CHANGE_RATE": 5.0,
-                "VOLUME": 100000,
+                "VOLUME": 100_000,
                 "OPEN_INTEREST": 50000
             }
         ]

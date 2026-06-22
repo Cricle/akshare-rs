@@ -11,7 +11,7 @@ async fn test_mock_eastmoney_datacenter() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(common::em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(common::em_datacenter_response(&[
                 common::sample_em_stock_row("000001", "平安银行"),
                 common::sample_em_stock_row("600000", "浦发银行"),
             ])),
@@ -31,7 +31,7 @@ async fn test_mock_em_push2() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(common::em_push2_response(vec![
+            ResponseTemplate::new(200).set_body_json(common::em_push2_response(&[
                 common::sample_em_stock_row("000001", "平安银行"),
             ])),
         )
@@ -48,7 +48,7 @@ async fn test_mock_em_kline() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(common::em_kline_response(vec![
+            ResponseTemplate::new(200).set_body_json(common::em_kline_response(&[
                 &common::sample_kline_str("2024-01-02"),
                 &common::sample_kline_str("2024-01-03"),
             ])),
@@ -61,7 +61,7 @@ async fn test_mock_em_kline() {
 
 #[tokio::test]
 async fn test_em_datacenter_response_format() {
-    let resp = common::em_datacenter_response(vec![]);
+    let resp = common::em_datacenter_response(&[]);
     assert_eq!(resp["success"], true);
     assert_eq!(resp["code"], 0);
     assert_eq!(resp["result"]["count"], 0);
@@ -69,7 +69,7 @@ async fn test_em_datacenter_response_format() {
 
 #[tokio::test]
 async fn test_em_push2_response_format() {
-    let resp = common::em_push2_response(vec![]);
+    let resp = common::em_push2_response(&[]);
     assert_eq!(resp["rc"], 0);
     assert_eq!(resp["data"]["total"], 0);
 }

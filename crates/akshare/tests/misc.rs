@@ -3,7 +3,7 @@
 //! Covers: forex (boc, currency, em, fx, sina), crypto (bitcoin, js),
 //! commodity (carbon, energy, spot), reits (em), economy (air, article,
 //! fortune, movie, nlp, amac, event, car, other), news (cctv, search),
-//! spot (hog_soozhu, price_qh, sge), bank (fjcf), tool (trade_date, pro),
+//! spot (`hog_soozhu`, `price_qh`, sge), bank (fjcf), tool (`trade_date`, pro),
 //! cal (rv), market (detect, normalize, tencent, eastmoney).
 
 mod common;
@@ -18,7 +18,7 @@ use wiremock::{Mock, MockServer, ResponseTemplate};
 #[tokio::test]
 async fn test_forex_boc_rates() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({
+    let body = em_datacenter_response(&[serde_json::json!({
         "CURRENCY_NAME": "USD/CNY",
         "BUYING_RATE": 7.10,
         "SELLING_RATE": 7.13,
@@ -43,7 +43,7 @@ async fn test_forex_em_rates() {
     let rows = vec![serde_json::json!({
         "f12": "USDCNY", "f14": "美元/人民币", "f2": 71100, "f3": 0.05
     })];
-    mock_any_get(&server, ".*", em_push2_response(rows)).await;
+    mock_any_get(&server, ".*", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.forex_em_rates().await;
     let _ = result;
@@ -55,7 +55,7 @@ async fn test_forex_spot_em() {
     let rows = vec![serde_json::json!({
         "f12": "USDCNY", "f14": "美元/人民币", "f2": 71100, "f3": 0.05
     })];
-    mock_any_get(&server, ".*", em_push2_response(rows)).await;
+    mock_any_get(&server, ".*", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.forex_spot().await;
     let _ = result;
@@ -65,7 +65,7 @@ async fn test_forex_spot_em() {
 async fn test_forex_hist_em() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
     let client = mock_client(&server);
     let result = client
         .forex_hist("USDCNY", "day", "2024-01-01", "2024-01-31", "qfq")
@@ -77,7 +77,7 @@ async fn test_forex_hist_em() {
 async fn test_forex_em_hist() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
     let client = mock_client(&server);
     let result = client.forex_em_hist("USDCNY", 10).await;
     let _ = result;
@@ -219,7 +219,7 @@ async fn test_currency_boc_safe() {
 #[tokio::test]
 async fn test_currency_pair_map() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"CURRENCY_NAME": "USD/CNY", "CURRENCY_CODE": "USDCNY"}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -417,7 +417,7 @@ async fn test_energy_carbon_gz() {
 #[tokio::test]
 async fn test_energy_oil_detail() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "CLOSE_PRICE": 75.0, "PRODUCT_NAME": "Brent"}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -429,7 +429,7 @@ async fn test_energy_oil_detail() {
 #[tokio::test]
 async fn test_energy_oil_hist() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "CLOSE_PRICE": 75.0, "PRODUCT_NAME": "Brent"}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -441,7 +441,7 @@ async fn test_energy_oil_hist() {
 #[tokio::test]
 async fn test_energy_carbon_domestic() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "CLOSE_PRICE": 50.0, "PRODUCT_NAME": "Carbon"}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -457,7 +457,7 @@ async fn test_energy_carbon_domestic() {
 #[tokio::test]
 async fn test_commodity_spot_prices() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "CLOSE_PRICE": 580.5, "COMMODITY_NAME": "Au99.99"}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -483,9 +483,9 @@ async fn test_commodity_spot_prices_zero() {
 async fn test_reits_list() {
     let server = MockServer::start().await;
     let rows = vec![serde_json::json!({
-        "f12": "508000", "f14": "华安张江光大REIT", "f2": 35000, "f3": 0.5, "f5": 100000
+        "f12": "508000", "f14": "华安张江光大REIT", "f2": 35000, "f3": 0.5, "f5": 100_000
     })];
-    mock_any_get(&server, ".*", em_push2_response(rows)).await;
+    mock_any_get(&server, ".*", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.reits_list(10).await;
     let _ = result;
@@ -495,9 +495,9 @@ async fn test_reits_list() {
 async fn test_reits_realtime_em() {
     let server = MockServer::start().await;
     let rows = vec![serde_json::json!({
-        "f12": "508000", "f14": "华安张江光大REIT", "f2": 35000, "f3": 0.5, "f5": 100000
+        "f12": "508000", "f14": "华安张江光大REIT", "f2": 35000, "f3": 0.5, "f5": 100_000
     })];
-    mock_any_get(&server, ".*", em_push2_response(rows)).await;
+    mock_any_get(&server, ".*", em_push2_response(&rows)).await;
     let client = mock_client(&server);
     let result = client.reits_realtime().await;
     let _ = result;
@@ -507,7 +507,7 @@ async fn test_reits_realtime_em() {
 async fn test_reits_hist_em() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
     let client = mock_client(&server);
     let result = client
         .reits_hist_em("508000", "day", "2024-01-01", "2024-01-31", "qfq")
@@ -519,7 +519,7 @@ async fn test_reits_hist_em() {
 async fn test_reits_hist_min_em() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
     let client = mock_client(&server);
     let result = client.reits_hist_min("508000", "5").await;
     let _ = result;
@@ -529,7 +529,7 @@ async fn test_reits_hist_min_em() {
 async fn test_reits_hist() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
     let client = mock_client(&server);
     let result = client.reits_hist("508000", 10).await;
     let _ = result;
@@ -542,7 +542,7 @@ async fn test_reits_hist() {
 #[tokio::test]
 async fn test_economy_air_quality() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 50.0, "CITY": "北京"}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -554,7 +554,7 @@ async fn test_economy_air_quality() {
 #[tokio::test]
 async fn test_air_quality_hebei() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 50.0}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -566,7 +566,7 @@ async fn test_air_quality_hebei() {
 #[tokio::test]
 async fn test_air_city_table() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({"CITY": "北京", "AQI": 50})]);
+    let body = em_datacenter_response(&[serde_json::json!({"CITY": "北京", "AQI": 50})]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.air_city_table().await;
@@ -576,7 +576,7 @@ async fn test_air_city_table() {
 #[tokio::test]
 async fn test_air_quality_hist() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 50.0}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -590,7 +590,7 @@ async fn test_air_quality_hist() {
 #[tokio::test]
 async fn test_air_quality_rank() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({"CITY": "北京", "AQI": 50})]);
+    let body = em_datacenter_response(&[serde_json::json!({"CITY": "北京", "AQI": 50})]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.air_quality_rank().await;
@@ -668,7 +668,7 @@ async fn test_article_oman_rv() {
         "var data = {};",
         serde_json::json!({
             ".FTSE": {
-                "dates": [1704067200000_i64],
+                "dates": [1_704_067_200_000_i64],
                 "rv5": {"data": [0.15]}
             }
         })
@@ -686,7 +686,7 @@ async fn test_article_oman_rv_short() {
         "var data = {};",
         serde_json::json!({
             ".FTSE": {
-                "data": [[1704067200000_i64, 0.15]]
+                "data": [[1_704_067_200_000_i64, 0.15]]
             }
         })
     );
@@ -772,8 +772,8 @@ async fn test_xincaifu_rank() {
 #[tokio::test]
 async fn test_movie_boxoffice_realtime() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 5000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 5_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -784,8 +784,8 @@ async fn test_movie_boxoffice_realtime() {
 #[tokio::test]
 async fn test_movie_boxoffice_daily() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 5000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 5_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -796,8 +796,8 @@ async fn test_movie_boxoffice_daily() {
 #[tokio::test]
 async fn test_economy_box_office() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 5000000.0}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 5_000_000.0}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -812,7 +812,7 @@ async fn test_economy_box_office() {
 #[tokio::test]
 async fn test_economy_sentiment_index() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 55.0}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -847,7 +847,7 @@ async fn test_nlp_answer() {
 #[tokio::test]
 async fn test_economy_amac_stats() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 100.0}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -889,8 +889,8 @@ async fn test_migration_scale_baidu() {
 #[tokio::test]
 async fn test_car_market_country_cpca() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 100000.0}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 100_000.0}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -901,8 +901,8 @@ async fn test_car_market_country_cpca() {
 #[tokio::test]
 async fn test_economy_auto_sales() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 100000.0}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 100_000.0}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1188,7 +1188,7 @@ async fn test_bank_fjcf_table_detail() {
     let body = serde_json::json!({
         "data": {
             "total": 1,
-            "rows": [{"PENALTY_DATE": "2024-01-02", "AMOUNT": 100000.0}]
+            "rows": [{"PENALTY_DATE": "2024-01-02", "AMOUNT": 100_000.0}]
         }
     });
     mock_any_get(&server, ".*", body).await;
@@ -1314,7 +1314,7 @@ async fn test_rv_from_futures_zh_minute_sina() {
 async fn test_rv_from_stock_zh_a_hist_min_em() {
     let server = MockServer::start().await;
     let k1 = sample_kline_str("2024-01-02");
-    mock_any_get(&server, ".*", em_kline_response(vec![&k1])).await;
+    mock_any_get(&server, ".*", em_kline_response(&[&k1])).await;
     let client = mock_client(&server);
     let result = client.rv_from_stock_zh_a_hist_min("600000").await;
     let _ = result;
@@ -1418,8 +1418,8 @@ fn test_eastmoney_secid_invalid() {
 #[tokio::test]
 async fn test_movie_boxoffice_cinema_daily() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 5000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 5_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1430,8 +1430,8 @@ async fn test_movie_boxoffice_cinema_daily() {
 #[tokio::test]
 async fn test_movie_boxoffice_cinema_weekly() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 35000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 35_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1442,8 +1442,8 @@ async fn test_movie_boxoffice_cinema_weekly() {
 #[tokio::test]
 async fn test_movie_boxoffice_monthly() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 150000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 150_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1454,8 +1454,8 @@ async fn test_movie_boxoffice_monthly() {
 #[tokio::test]
 async fn test_movie_boxoffice_weekly() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 35000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 35_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1466,8 +1466,8 @@ async fn test_movie_boxoffice_weekly() {
 #[tokio::test]
 async fn test_movie_boxoffice_yearly() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 5000000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 5_000_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1478,8 +1478,8 @@ async fn test_movie_boxoffice_yearly() {
 #[tokio::test]
 async fn test_movie_boxoffice_yearly_first_week() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
-        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 500000000.0, "MOVIE_NAME": "Test"}),
+    let body = em_datacenter_response(&[
+        serde_json::json!({"TRADE_DATE": "2024-01-02T00:00:00", "BOX_OFFICE": 500_000_000.0, "MOVIE_NAME": "Test"}),
     ]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1576,8 +1576,8 @@ async fn test_car_market_man_rank_cpca() {
             {
                 "month": [],
                 "data_list": [
-                    ["比亚迪", 200000.0],
-                    ["一汽大众", 150000.0]
+                    ["比亚迪", 200_000.0],
+                    ["一汽大众", 150_000.0]
                 ]
             }
         ]
@@ -1727,7 +1727,7 @@ async fn test_spot_mixed_feed_soozhu() {
 #[tokio::test]
 async fn test_air_quality_watch_point() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![
+    let body = em_datacenter_response(&[
         serde_json::json!({"REPORT_DATE": "2024-01-02", "INDICATOR_VALUE": 50.0, "CITY": "北京"}),
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -1770,7 +1770,7 @@ async fn test_amac_manager_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestManager"}),
             ])),
         )
@@ -1779,7 +1779,7 @@ async fn test_amac_manager_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestManager"}),
             ])),
         )
@@ -1796,7 +1796,7 @@ async fn test_amac_manager_classify_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestClassify"}),
             ])),
         )
@@ -1805,7 +1805,7 @@ async fn test_amac_manager_classify_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestClassify"}),
             ])),
         )
@@ -1822,7 +1822,7 @@ async fn test_amac_manager_cancelled_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestCancelled"}),
             ])),
         )
@@ -1831,7 +1831,7 @@ async fn test_amac_manager_cancelled_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestCancelled"}),
             ])),
         )
@@ -1848,7 +1848,7 @@ async fn test_amac_member_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestMember"}),
             ])),
         )
@@ -1857,7 +1857,7 @@ async fn test_amac_member_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestMember"}),
             ])),
         )
@@ -1874,7 +1874,7 @@ async fn test_amac_member_sub_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestMemberSub"}),
             ])),
         )
@@ -1883,7 +1883,7 @@ async fn test_amac_member_sub_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestMemberSub"}),
             ])),
         )
@@ -1900,7 +1900,7 @@ async fn test_amac_fund_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFund"}),
             ])),
         )
@@ -1909,7 +1909,7 @@ async fn test_amac_fund_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFund"}),
             ])),
         )
@@ -1926,7 +1926,7 @@ async fn test_amac_fund_sub_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFundSub"}),
             ])),
         )
@@ -1935,7 +1935,7 @@ async fn test_amac_fund_sub_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFundSub"}),
             ])),
         )
@@ -1952,7 +1952,7 @@ async fn test_amac_fund_abs() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFundABS"}),
             ])),
         )
@@ -1961,7 +1961,7 @@ async fn test_amac_fund_abs() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFundABS"}),
             ])),
         )
@@ -1978,7 +1978,7 @@ async fn test_amac_fund_account_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFundAccount"}),
             ])),
         )
@@ -1987,7 +1987,7 @@ async fn test_amac_fund_account_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFundAccount"}),
             ])),
         )
@@ -2004,7 +2004,7 @@ async fn test_amac_futures_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFutures"}),
             ])),
         )
@@ -2013,7 +2013,7 @@ async fn test_amac_futures_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestFutures"}),
             ])),
         )
@@ -2030,7 +2030,7 @@ async fn test_amac_securities_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestSecurities"}),
             ])),
         )
@@ -2039,7 +2039,7 @@ async fn test_amac_securities_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestSecurities"}),
             ])),
         )
@@ -2056,7 +2056,7 @@ async fn test_amac_aoin_info() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestAOIN"}),
             ])),
         )
@@ -2065,7 +2065,7 @@ async fn test_amac_aoin_info() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestAOIN"}),
             ])),
         )
@@ -2082,7 +2082,7 @@ async fn test_amac_person_fund_org_list() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestPersonFundOrg"}),
             ])),
         )
@@ -2091,7 +2091,7 @@ async fn test_amac_person_fund_org_list() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestPersonFundOrg"}),
             ])),
         )
@@ -2108,7 +2108,7 @@ async fn test_amac_person_bond_org_list() {
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestPersonBondOrg"}),
             ])),
         )
@@ -2117,7 +2117,7 @@ async fn test_amac_person_bond_org_list() {
     Mock::given(method("POST"))
         .and(path_regex(".*"))
         .respond_with(
-            ResponseTemplate::new(200).set_body_json(em_datacenter_response(vec![
+            ResponseTemplate::new(200).set_body_json(em_datacenter_response(&[
                 serde_json::json!({"NAME": "TestPersonBondOrg"}),
             ])),
         )

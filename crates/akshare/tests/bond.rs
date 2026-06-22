@@ -53,7 +53,7 @@ async fn test_bond_cov_issue_cninfo() {
 #[tokio::test]
 async fn test_bond_zh_cov() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(vec![serde_json::json!({
+    let body = em_datacenter_response(&[serde_json::json!({
         "SECURITY_CODE": "123121",
         "SECURITY_NAME_ABBR": "TestBond",
         "CURRENT_BOND_PRICE": 105.5,
@@ -101,7 +101,7 @@ async fn test_bond_convertible_list() {
 #[tokio::test]
 async fn test_bond_convertible_hist() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02,100.50,101.20,102.00,99.80,50000,5050000.00,2.20,0.70,0.70,1.50",
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -407,7 +407,7 @@ async fn test_bond_cb_redeem_jsl() {
 async fn test_bond_composite_index_cbond() {
     let server = MockServer::start().await;
     // CBond returns a map keyed by "{ind_code}_{per_code}" with timestamp->value entries
-    let ts: f64 = 1704153600000.0; // 2024-01-02 in millis
+    let ts: f64 = 1_704_153_600_000.0; // 2024-01-02 in millis
     let body = serde_json::json!({
         "CFZS_00": { ts.to_string(): 105.5 }
     });
@@ -491,7 +491,7 @@ async fn test_bond_zh_hs_cov_spot() {
             "f45": 99.80,
             "f46": 100.50,
             "f47": 50000,
-            "f48": 5050000.0,
+            "f48": 5_050_000.0,
             "f170": 0.70
         }
     });
@@ -572,7 +572,7 @@ async fn test_bond_sh_buy_back_em() {
 #[tokio::test]
 async fn test_bond_buy_back_hist_em() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02,2.50,2.55,2.60,2.45,100000,250000.0,2.0,0.50,0.01,1.0",
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -692,7 +692,7 @@ async fn test_bond_cov_stock_issue_cninfo() {
 #[tokio::test]
 async fn test_bond_index_general_cbond() {
     let server = MockServer::start().await;
-    let ts: f64 = 1704153600000.0;
+    let ts: f64 = 1_704_153_600_000.0;
     let body = serde_json::json!({
         "CFZS_00": { ts.to_string(): 105.5 }
     });
@@ -705,7 +705,7 @@ async fn test_bond_index_general_cbond() {
 #[tokio::test]
 async fn test_bond_treasury_index_cbond() {
     let server = MockServer::start().await;
-    let ts: f64 = 1704153600000.0;
+    let ts: f64 = 1_704_153_600_000.0;
     let body = serde_json::json!({
         "CFZS_00": { ts.to_string(): 105.5 }
     });
@@ -718,7 +718,7 @@ async fn test_bond_treasury_index_cbond() {
 #[tokio::test]
 async fn test_bond_new_composite_index_cbond() {
     let server = MockServer::start().await;
-    let ts: f64 = 1704153600000.0;
+    let ts: f64 = 1_704_153_600_000.0;
     let body = serde_json::json!({
         "CFZS_00": { ts.to_string(): 105.5 }
     });

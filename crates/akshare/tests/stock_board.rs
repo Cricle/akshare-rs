@@ -1,8 +1,8 @@
 //! Comprehensive tests for all stock board, eastmoney, xueqiu, jin10,
 //! and fundamental methods in the akshare crate.
 //!
-//! Each test creates a wiremock MockServer, registers a plausible response,
-//! creates an AkShareClient pointing at the mock, calls the method, and
+//! Each test creates a wiremock `MockServer`, registers a plausible response,
+//! creates an `AkShareClient` pointing at the mock, calls the method, and
 
 #![allow(dead_code)]
 //! checks the result.
@@ -24,7 +24,7 @@ fn board_spot_body() -> serde_json::Value {
     serde_json::json!({
         "data": {
             "f43": 1050, "f44": 1080, "f45": 1020, "f46": 1030,
-            "f47": 100000, "f48": 10500000, "f170": 150, "f171": 200,
+            "f47": 100_000, "f48": 10_500_000, "f170": 150, "f171": 200,
             "f168": 120, "f169": 15
         }
     })
@@ -45,7 +45,7 @@ fn board_resolve_body() -> serde_json::Value {
 
 /// Board kline response for daily/weekly/monthly.
 fn board_kline_body() -> serde_json::Value {
-    em_kline_response(vec![
+    em_kline_response(&[
         &sample_kline_str("2024-01-02"),
         &sample_kline_str("2024-01-03"),
     ])
@@ -118,17 +118,17 @@ fn bid_ask_body() -> serde_json::Value {
         ("f44", 1080.0),
         ("f45", 1020.0),
         ("f46", 1030.0),
-        ("f47", 100000.0),
-        ("f48", 10500000.0),
+        ("f47", 100_000.0),
+        ("f48", 10_500_000.0),
         ("f50", 1.1),
         ("f51", 1155.0),
         ("f52", 935.0),
         ("f60", 1035.0),
         ("f71", 1040.0),
-        ("f116", 100000000.0),
-        ("f117", 50000000.0),
-        ("f120", 100000000.0),
-        ("f121", 50000000.0),
+        ("f116", 100_000_000.0),
+        ("f117", 50_000_000.0),
+        ("f120", 100_000_000.0),
+        ("f121", 50_000_000.0),
         ("f161", 50000.0),
         ("f162", 15.0),
         ("f163", 1.0),
@@ -176,8 +176,8 @@ fn intraday_sse_body() -> String {
 fn individual_info_body() -> serde_json::Value {
     serde_json::json!({
         "f57": "000001", "f58": "平安银行",
-        "f84": 10000000000_i64, "f85": 5000000000_i64,
-        "f127": "银行", "f116": 105000000000_i64, "f117": 52500000000_i64,
+        "f84": 10_000_000_000_i64, "f85": 5_000_000_000_i64,
+        "f127": "银行", "f116": 105_000_000_000_i64, "f117": 52_500_000_000_i64,
         "f189": "1991-04-03", "f43": 1050
     })
 }
@@ -231,9 +231,9 @@ fn fund_flow_rank_body() -> serde_json::Value {
             "total": 1,
             "diff": [{
                 "f12": "000001", "f14": "平安银行", "f2": 10.50, "f3": 1.5,
-                "f62": 1000000, "f184": 5.0, "f66": 500000, "f69": 2.5,
-                "f72": 300000, "f75": 1.5, "f78": 200000, "f81": 1.0,
-                "f84": 100000, "f87": 0.5
+                "f62": 1_000_000, "f184": 5.0, "f66": 500_000, "f69": 2.5,
+                "f72": 300_000, "f75": 1.5, "f78": 200_000, "f81": 1.0,
+                "f84": 100_000, "f87": 0.5
             }]
         }
     })
@@ -348,8 +348,8 @@ fn hsgt_flow_body() -> serde_json::Value {
     serde_json::json!({
         "data": {
             "s2n": [
-                ["2024-01-02", 1000000, 500000, 3200, 1.5],
-                ["2024-01-03", 800000, 600000, 3210, 0.3]
+                ["2024-01-02", 1_000_000, 500_000, 3200, 1.5],
+                ["2024-01-03", 800_000, 600_000, 3210, 0.3]
             ]
         }
     })
@@ -357,29 +357,29 @@ fn hsgt_flow_body() -> serde_json::Value {
 
 /// Eastmoney datacenter datacenter response for misc methods.
 fn misc_datacenter_body() -> serde_json::Value {
-    em_datacenter_response(vec![serde_json::json!({
+    em_datacenter_response(&[serde_json::json!({
         "TRADE_DATE": "2024-01-02",
         "SZ_INDEX": 3200.0,
         "SZ_CHANGE_RATE": 1.5,
-        "BLOCKTRADE_DEAL_AMT": 1000000.0,
-        "PREMIUM_DEAL_AMT": 500000.0,
+        "BLOCKTRADE_DEAL_AMT": 1_000_000.0,
+        "PREMIUM_DEAL_AMT": 500_000.0,
         "PREMIUM_RATIO": 2.0,
-        "DISCOUNT_DEAL_AMT": 300000.0,
+        "DISCOUNT_DEAL_AMT": 300_000.0,
         "DISCOUNT_RATIO": 1.0
     })])
 }
 
 /// Block trade detail datacenter response.
 fn block_trade_detail_body() -> serde_json::Value {
-    em_datacenter_response(vec![serde_json::json!({
+    em_datacenter_response(&[serde_json::json!({
         "TRADE_DATE": "2024-01-02",
         "SECURITY_CODE": "000001",
         "SECURITY_NAME_ABBR": "平安银行",
         "CHANGE_RATE": 1.5,
         "CLOSE_PRICE": 10.50,
         "DEAL_PRICE": 10.60,
-        "DEAL_VOLUME": 100000.0,
-        "DEAL_AMT": 1060000.0,
+        "DEAL_VOLUME": 100_000.0,
+        "DEAL_AMT": 1_060_000.0,
         "PREMIUM_RATIO": 0.95,
         "BUYER_NAME": "Test Broker Buy",
         "SELLER_NAME": "Test Broker Sell"
@@ -388,26 +388,26 @@ fn block_trade_detail_body() -> serde_json::Value {
 
 /// Repurchase datacenter response.
 fn repurchase_body() -> serde_json::Value {
-    em_datacenter_response(vec![serde_json::json!({
+    em_datacenter_response(&[serde_json::json!({
         "DIM_SCODE": "000001",
         "SECURITYSHORTNAME": "平安银行",
         "NEWPRICE": 10.50,
         "REPURPRICECAP": 12.00,
-        "REPURNUMLOWER": 1000000.0,
-        "REPURNUMCAP": 5000000.0,
-        "JEXX": 10500000.0,
-        "JESX": 52500000.0,
+        "REPURNUMLOWER": 1_000_000.0,
+        "REPURNUMCAP": 5_000_000.0,
+        "JEXX": 10_500_000.0,
+        "JESX": 52_500_000.0,
         "DIM_TRADEDATE": "2024-01-02",
         "REPURPROGRESS": "进行中",
-        "REPURNUM": 2000000.0,
-        "REPURAMOUNT": 21000000.0,
+        "REPURNUM": 2_000_000.0,
+        "REPURAMOUNT": 21_000_000.0,
         "UPDATEDATE": "2024-01-15"
     })])
 }
 
 /// Company events datacenter response.
 fn company_events_body() -> serde_json::Value {
-    em_datacenter_response(vec![serde_json::json!({
+    em_datacenter_response(&[serde_json::json!({
         "SECURITY_CODE": "000001",
         "SECUCODE": "000001.SZ",
         "SECURITY_NAME_ABBR": "平安银行",
@@ -426,9 +426,9 @@ fn fund_hold_body() -> serde_json::Value {
             "SCODE": "000001",
             "SNAME": "平安银行",
             "HOULD_NUM": 100,
-            "HOLD_NUM": 50000000.0,
-            "HOLD_MARKET_CAP": 525000000.0,
-            "HOLDCHANGE": 5000000.0,
+            "HOLD_NUM": 50_000_000.0,
+            "HOLD_MARKET_CAP": 525_000_000.0,
+            "HOLDCHANGE": 5_000_000.0,
             "HOLD_RATIO_CHANGE": 0.5
         }]
     })
@@ -440,9 +440,9 @@ fn sse_summary_body() -> serde_json::Value {
         "result": [{
             "STAT_NAME": "主板",
             "STAT_NUM": 1500,
-            "TRADE_AMOUNT": 100000000000_i64,
-            "TOTAL_MARKET_CAP": 50000000000000_i64,
-            "FLOAT_MARKET_CAP": 30000000000000_i64
+            "TRADE_AMOUNT": 100_000_000_000_i64,
+            "TOTAL_MARKET_CAP": 50_000_000_000_000_i64,
+            "FLOAT_MARKET_CAP": 30_000_000_000_000_i64
         }]
     })
 }
@@ -464,10 +464,10 @@ fn peer_comparison_body() -> serde_json::Value {
 /// Spot row for eastmoney spot methods.
 fn sample_spot_row_em() -> serde_json::Value {
     serde_json::json!({
-        "f2": 10.50, "f3": 1.5, "f4": 0.15, "f5": 1000000, "f6": 10500000.0,
+        "f2": 10.50, "f3": 1.5, "f4": 0.15, "f5": 1_000_000, "f6": 10_500_000.0,
         "f7": 2.0, "f8": 1.2, "f9": 15.0, "f10": 1.1, "f12": "000001",
         "f13": "0", "f14": "平安银行", "f15": 10.80, "f16": 10.20,
-        "f17": 10.30, "f18": 10.35, "f20": 100000000.0, "f21": 50000000.0,
+        "f17": 10.30, "f18": 10.35, "f20": 100_000_000.0, "f21": 50_000_000.0,
         "f23": 1.5, "f62": 0.1
     })
 }
@@ -495,8 +495,8 @@ fn xueqiu_quote_body() -> serde_json::Value {
                 "high": 10.80,
                 "low": 10.20,
                 "last_close": 10.35,
-                "volume": 1000000,
-                "amount": 10500000.0,
+                "volume": 1_000_000,
+                "amount": 10_500_000.0,
                 "amplitude": 2.0,
                 "avg_price": 10.45,
                 "turnover_rate": 1.2,
@@ -504,10 +504,10 @@ fn xueqiu_quote_body() -> serde_json::Value {
                 "pe_lyr": 14.5,
                 "pb": 1.5,
                 "psr": 2.0,
-                "market_capital": 105000000000_i64,
-                "float_market_capital": 52500000000_i64,
-                "total_shares": 10000000000_i64,
-                "float_shares": 5000000000_i64,
+                "market_capital": 105_000_000_000_i64,
+                "float_market_capital": 52_500_000_000_i64,
+                "total_shares": 10_000_000_000_i64,
+                "float_shares": 5_000_000_000_i64,
                 "limit_up": 11.39,
                 "limit_down": 9.32,
                 "eps": 0.70,
@@ -519,7 +519,7 @@ fn xueqiu_quote_body() -> serde_json::Value {
                 "currency": "CNY",
                 "exchange": "SH",
                 "lot_size": 100,
-                "time": 1704182400000_i64
+                "time": 1_704_182_400_000_i64
             }
         }
     })
@@ -531,7 +531,7 @@ fn xueqiu_basic_info_body() -> serde_json::Value {
         "data": {
             "name": "浦发银行",
             "industry": "银行",
-            "market_capital": 105000000000_i64
+            "market_capital": 105_000_000_000_i64
         }
     })
 }
@@ -698,14 +698,14 @@ fn em_hk_report_body() -> serde_json::Value {
                 "SECURITY_CODE": "00700",
                 "REPORT_DATE": "2023-12-31",
                 "STD_ITEM_NAME": "总资产",
-                "AMOUNT": 1000000000000_i64
+                "AMOUNT": 1_000_000_000_000_i64
             }],
             "pages": 1
         }
     })
 }
 
-/// Eastmoney HK summary response (for hk_report_em first step).
+/// Eastmoney HK summary response (for `hk_report_em` first step).
 fn em_hk_summary_body() -> serde_json::Value {
     serde_json::json!({
         "result": {
@@ -722,7 +722,7 @@ fn em_hk_summary_body() -> serde_json::Value {
     })
 }
 
-/// Eastmoney US org profile (for us_resolve_secucode).
+/// Eastmoney US org profile (for `us_resolve_secucode`).
 fn em_us_org_profile_body() -> serde_json::Value {
     serde_json::json!({
         "result": {
@@ -740,7 +740,7 @@ fn em_zygc_body() -> serde_json::Value {
     serde_json::json!({
         "zygcfx": [{
             "ITEM_NAME": "利息收入",
-            "MAIN_BUSINESS_INCOME": 100000000.0,
+            "MAIN_BUSINESS_INCOME": 100_000_000.0,
             "INCOME_RATIO": 80.0
         }]
     })
@@ -912,7 +912,7 @@ async fn test_stock_board_change_em_industry() {
     let server = MockServer::start().await;
     mount_catch_all_json(
         &server,
-        em_push2_response(vec![sample_em_stock_row("BK0001", "银行")]),
+        em_push2_response(&[sample_em_stock_row("BK0001", "银行")]),
     )
     .await;
     let client = mock_client(&server);
@@ -925,7 +925,7 @@ async fn test_stock_board_change_em_concept() {
     let server = MockServer::start().await;
     mount_catch_all_json(
         &server,
-        em_push2_response(vec![sample_em_stock_row("BK0002", "人工智能")]),
+        em_push2_response(&[sample_em_stock_row("BK0002", "人工智能")]),
     )
     .await;
     let client = mock_client(&server);
@@ -1422,7 +1422,7 @@ async fn test_stock_hk_valuation_comparison_em() {
 #[tokio::test]
 async fn test_stock_zh_a_spot_em_flex() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_zh_a_spot_em_flex(100).await;
     let _ = result;
@@ -1431,7 +1431,7 @@ async fn test_stock_zh_a_spot_em_flex() {
 #[tokio::test]
 async fn test_stock_zh_a_st_em() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_zh_a_st(100).await;
     let _ = result;
@@ -1440,7 +1440,7 @@ async fn test_stock_zh_a_st_em() {
 #[tokio::test]
 async fn test_stock_zh_a_new_em() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_zh_a_new_em(100).await;
     let _ = result;
@@ -1449,7 +1449,7 @@ async fn test_stock_zh_a_new_em() {
 #[tokio::test]
 async fn test_stock_staq_net_stop() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_staq_net_stop(100).await;
     let _ = result;
@@ -1462,7 +1462,7 @@ async fn test_stock_staq_net_stop() {
 #[tokio::test]
 async fn test_stock_hk_spot_em_flex() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_hk_spot_em_flex(100).await;
     let _ = result;
@@ -1471,7 +1471,7 @@ async fn test_stock_hk_spot_em_flex() {
 #[tokio::test]
 async fn test_stock_us_spot_em_flex() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_us_spot_em_flex(100).await;
     let _ = result;
@@ -1487,12 +1487,12 @@ async fn test_stock_board_concept_name_em() {
     let row = serde_json::json!({
         "f2": 1050.0, "f3": 1.5, "f4": 0.15, "f8": 1.2, "f12": "BK0715",
         "f14": "绿色电力", "f15": 1080.0, "f16": 1020.0, "f17": 1030.0,
-        "f18": 1035.0, "f20": 100000000.0, "f21": 50000000.0,
+        "f18": 1035.0, "f20": 100_000_000.0, "f21": 50_000_000.0,
         "f24": 5.0, "f25": 10.0, "f22": 0.5, "f33": 1.5,
         "f11": 50, "f62": 0.1, "f128": "龙头股份", "f124": 1,
         "f107": 1, "f104": 30, "f105": 20, "f136": 3.5
     });
-    mount_catch_all_json(&server, em_push2_response(vec![row])).await;
+    mount_catch_all_json(&server, em_push2_response(&[row])).await;
     let client = mock_client(&server);
     let result = client.stock_board_concept_name_em(10).await;
     let _ = result;
@@ -1501,7 +1501,7 @@ async fn test_stock_board_concept_name_em() {
 #[tokio::test]
 async fn test_stock_board_concept_cons_em() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_board_concept_cons("BK0715", 10).await;
     let _ = result;
@@ -1513,12 +1513,12 @@ async fn test_stock_board_industry_name_em() {
     let row = serde_json::json!({
         "f2": 1050.0, "f3": 1.5, "f4": 0.15, "f8": 1.2, "f12": "BK1027",
         "f14": "小金属", "f15": 1080.0, "f16": 1020.0, "f17": 1030.0,
-        "f18": 1035.0, "f20": 100000000.0, "f21": 50000000.0,
+        "f18": 1035.0, "f20": 100_000_000.0, "f21": 50_000_000.0,
         "f24": 5.0, "f25": 10.0, "f22": 0.5, "f33": 1.5,
         "f11": 50, "f62": 0.1, "f128": "龙头股份", "f124": 1,
         "f107": 1, "f104": 30, "f105": 20, "f136": 3.5
     });
-    mount_catch_all_json(&server, em_push2_response(vec![row])).await;
+    mount_catch_all_json(&server, em_push2_response(&[row])).await;
     let client = mock_client(&server);
     let result = client.stock_board_industry_name_em(10).await;
     let _ = result;
@@ -1527,7 +1527,7 @@ async fn test_stock_board_industry_name_em() {
 #[tokio::test]
 async fn test_stock_board_industry_cons_em() {
     let server = MockServer::start().await;
-    mount_catch_all_json(&server, em_push2_response(vec![sample_spot_row_em()])).await;
+    mount_catch_all_json(&server, em_push2_response(&[sample_spot_row_em()])).await;
     let client = mock_client(&server);
     let result = client.stock_board_industry_cons("BK1027", 10).await;
     let _ = result;
@@ -1567,7 +1567,7 @@ async fn test_stock_hsgt_sh_hk_spot_em() {
         "f12": "600000", "f13": "1", "f14": "浦发银行",
         "f19": 1050, "f1": 1035, "f2": 10500, "f4": 15,
         "f3": 150, "f152": 1, "f17": 10300, "f18": 10350,
-        "f15": 10800, "f16": 10200, "f5": 100000, "f6": 1050000000
+        "f15": 10800, "f16": 10200, "f5": 100_000, "f6": 1_050_000_000
     });
     mount_catch_all_json(
         &server,
@@ -1592,7 +1592,7 @@ async fn test_stock_hsgt_sz_hk_spot_em() {
         "f12": "000001", "f13": "0", "f14": "平安银行",
         "f19": 1050, "f1": 1035, "f2": 10500, "f4": 15,
         "f3": 150, "f152": 1, "f17": 10300, "f18": 10350,
-        "f15": 10800, "f16": 10200, "f5": 100000, "f6": 1050000000
+        "f15": 10800, "f16": 10200, "f5": 100_000, "f6": 1_050_000_000
     });
     mount_catch_all_json(
         &server,
@@ -2423,7 +2423,7 @@ async fn test_stock_board_change_em_custom_fs() {
     let server = MockServer::start().await;
     mount_catch_all_json(
         &server,
-        em_push2_response(vec![sample_em_stock_row("BK0001", "Test")]),
+        em_push2_response(&[sample_em_stock_row("BK0001", "Test")]),
     )
     .await;
     let client = mock_client(&server);

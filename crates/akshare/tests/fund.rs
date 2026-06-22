@@ -62,7 +62,7 @@ async fn test_fund_etf_fund_info_em() {
 #[tokio::test]
 async fn test_fund_etf_hist_em() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02,10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -76,7 +76,7 @@ async fn test_fund_etf_hist_em() {
 #[tokio::test]
 async fn test_fund_etf_hist_min_em_5min() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02 09:35,10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -153,14 +153,14 @@ async fn test_fund_etf_scale_szse() {
 async fn test_fund_etf_spot_em() {
     let server = MockServer::start().await;
     let row = serde_json::json!({
-        "f2": 1.50, "f3": 0.5, "f4": 0.01, "f5": 50000.0, "f6": 75000000.0,
+        "f2": 1.50, "f3": 0.5, "f4": 0.01, "f5": 50000.0, "f6": 75_000_000.0,
         "f7": 1.2, "f12": "159707", "f14": "测试ETF",
         "f15": 1.52, "f16": 1.48, "f17": 1.49, "f18": 1.49,
-        "f20": 1000000000.0, "f21": 500000000.0, "f38": 0.5,
-        "f62": 1000000.0, "f184": 0.1, "f402": 0.01, "f441": 1.50,
+        "f20": 1_000_000_000.0, "f21": 500_000_000.0, "f38": 0.5,
+        "f62": 1_000_000.0, "f184": 0.1, "f402": 0.01, "f441": 1.50,
         "f297": "2024-01-02"
     });
-    let body = em_push2_response(vec![row]);
+    let body = em_push2_response(&[row]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.fund_etf_spot_em().await;
@@ -186,7 +186,7 @@ async fn test_fund_etf_spot_ths() {
 #[tokio::test]
 async fn test_fund_lof_hist_em() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02,10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -200,7 +200,7 @@ async fn test_fund_lof_hist_em() {
 #[tokio::test]
 async fn test_fund_lof_hist_min_em_5min() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02 09:35,10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2",
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -247,12 +247,12 @@ async fn test_fund_lof_hist_min_em_1min() {
 async fn test_fund_lof_spot_em() {
     let server = MockServer::start().await;
     let row = serde_json::json!({
-        "f2": 1.50, "f3": 0.5, "f4": 0.01, "f5": 50000.0, "f6": 75000000.0,
+        "f2": 1.50, "f3": 0.5, "f4": 0.01, "f5": 50000.0, "f6": 75_000_000.0,
         "f7": 1.2, "f12": "160105", "f14": "南方LOF",
         "f15": 1.52, "f16": 1.48, "f17": 1.49, "f18": 1.49,
-        "f20": 1000000000.0, "f21": 500000000.0
+        "f20": 1_000_000_000.0, "f21": 500_000_000.0
     });
-    let body = em_push2_response(vec![row]);
+    let body = em_push2_response(&[row]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.fund_lof_spot().await;
@@ -508,7 +508,7 @@ async fn test_fund_aum_trend_em() {
     let server = MockServer::start().await;
     let body = serde_json::json!({
         "x": ["2024-01-01", "2024-02-01"],
-        "y": [250000.0, 260000.0]
+        "y": [250_000.0, 260_000.0]
     });
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1147,7 +1147,7 @@ async fn test_fund_etf_fund_daily_em() {
     let row = serde_json::json!({
         "f12": "510050", "f14": "华夏上证50ETF", "f2": 3.0000, "f3": 0.50
     });
-    let body = em_push2_response(vec![row]);
+    let body = em_push2_response(&[row]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.fund_etf_fund_daily(10).await;
@@ -1157,7 +1157,7 @@ async fn test_fund_etf_fund_daily_em() {
 #[tokio::test]
 async fn test_fund_etf_hist() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02,1.50,1.52,1.55,1.48,50000,75000.0,2.0,1.3,0.02,1.0",
     ]);
     mock_any_get(&server, ".*", body).await;
@@ -1185,7 +1185,7 @@ async fn test_fund_lof_list() {
 #[tokio::test]
 async fn test_fund_lof_hist() {
     let server = MockServer::start().await;
-    let body = em_kline_response(vec![
+    let body = em_kline_response(&[
         "2024-01-02,1.50,1.52,1.55,1.48,50000,75000.0,2.0,1.3,0.02,1.0",
     ]);
     mock_any_get(&server, ".*", body).await;

@@ -145,7 +145,7 @@ mod tests {
         assert_eq!(&date[..10], "2025-05-30");
 
         let value = v.f64_or(&["CLOSE_PRICE", "LATEST_PRICE"], 0.0);
-        assert_eq!(value, 1024.0);
+        assert!((value - 1024.0).abs() < f64::EPSILON);
 
         let name = v.str_or(&["COMMODITY_NAME", "NAME"], "Commodity Spot");
         assert_eq!(name, "Copper");

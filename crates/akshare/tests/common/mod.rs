@@ -8,7 +8,7 @@ use akshare::AkShareClient;
 use wiremock::matchers::{method, path_regex};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-/// Create an AkShareClient that talks to a local mock server.
+/// Create an `AkShareClient` that talks to a local mock server.
 pub fn mock_client(server: &MockServer) -> AkShareClient {
     let mut client = AkShareClient::new();
     client.mock_uri = Some(server.uri());
@@ -16,7 +16,7 @@ pub fn mock_client(server: &MockServer) -> AkShareClient {
 }
 
 /// Generic Eastmoney datacenter response wrapper.
-pub fn em_datacenter_response(data: Vec<serde_json::Value>) -> serde_json::Value {
+pub fn em_datacenter_response(data: &[serde_json::Value]) -> serde_json::Value {
     serde_json::json!({
         "success": true,
         "message": "ok",
@@ -30,7 +30,7 @@ pub fn em_datacenter_response(data: Vec<serde_json::Value>) -> serde_json::Value
 }
 
 /// Generic Eastmoney push2 list response.
-pub fn em_push2_response(rows: Vec<serde_json::Value>) -> serde_json::Value {
+pub fn em_push2_response(rows: &[serde_json::Value]) -> serde_json::Value {
     serde_json::json!({
         "rc": 0,
         "data": {
@@ -41,7 +41,7 @@ pub fn em_push2_response(rows: Vec<serde_json::Value>) -> serde_json::Value {
 }
 
 /// Generic Eastmoney push2his kline response.
-pub fn em_kline_response(klines: Vec<&str>) -> serde_json::Value {
+pub fn em_kline_response(klines: &[&str]) -> serde_json::Value {
     serde_json::json!({
         "rc": 0,
         "data": {
@@ -79,8 +79,8 @@ pub async fn mock_any_get_text(server: &MockServer, path_pattern: &str, body: &s
 }
 
 /// Sample Eastmoney stock row (f2=price, f3=change%, f4=change, f5=volume, f6=amount,
-/// f7=amplitude%, f8=turnover%, f9=PE, f10=volume_ratio, f12=code, f14=name, f15=high,
-/// f16=low, f17=open, f18=prev_close).
+/// f7=amplitude%, f8=turnover%, f9=PE, `f10=volume_ratio`, f12=code, f14=name, f15=high,
+/// f16=low, f17=open, `f18=prev_close`).
 pub fn sample_em_stock_row(code: &str, name: &str) -> serde_json::Value {
     serde_json::json!({
         "f2": 10.50, "f3": 1.5, "f4": 0.15, "f5": 1_000_000, "f6": 10_500_000.0,
@@ -111,7 +111,7 @@ pub async fn mount_em_mocks(server: &MockServer) {
     mount_em_kline(server).await;
 
     // Catch-all for anything else (Sina, Tencent, etc.)
-    let body = em_datacenter_response(vec![sample_macro_row("2024-01-01", 123.45, "GDP")]);
+    let body = em_datacenter_response(&[sample_macro_row("2024-01-01", 123.45, "GDP")]);
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body.clone()))
@@ -127,7 +127,7 @@ pub async fn mount_em_mocks(server: &MockServer) {
 /// Mount mock for Eastmoney datacenter API (datacenter-web.eastmoney.com).
 pub async fn mount_em_datacenter(server: &MockServer) {
     let row = sample_macro_row("2024-01-01", 123.45, "GDP");
-    let body = em_datacenter_response(vec![row]);
+    let body = em_datacenter_response(&[row]);
     Mock::given(method("GET"))
         .and(path_regex("/api/data/v1/get"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body))
@@ -138,7 +138,7 @@ pub async fn mount_em_datacenter(server: &MockServer) {
 /// Mount mock for Eastmoney push2 clist API (push2.eastmoney.com).
 pub async fn mount_em_push2(server: &MockServer) {
     let row = sample_em_stock_row("000001", "平安银行");
-    let body = em_push2_response(vec![row]);
+    let body = em_push2_response(&[row]);
     Mock::given(method("GET"))
         .and(path_regex("/api/qt/clist/get"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body))
@@ -149,7 +149,7 @@ pub async fn mount_em_push2(server: &MockServer) {
 /// Mount mock for Eastmoney push2his kline API (push2his.eastmoney.com).
 pub async fn mount_em_kline(server: &MockServer) {
     let kline = sample_kline_str("2024-01-02");
-    let body = em_kline_response(vec![&kline]);
+    let body = em_kline_response(&[&kline]);
     Mock::given(method("GET"))
         .and(path_regex("/api/qt/stock/kline/get"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body))

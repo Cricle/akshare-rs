@@ -1,7 +1,7 @@
 //! Comprehensive tests for all stock core methods in the akshare crate.
 //!
-//! Each test creates a wiremock MockServer, registers a plausible response,
-//! creates an AkShareClient pointing at the mock, calls the method, and
+//! Each test creates a wiremock `MockServer`, registers a plausible response,
+//! creates an `AkShareClient` pointing at the mock, calls the method, and
 //! asserts the result is Ok with non-empty data.
 
 #![allow(dead_code)]
@@ -23,10 +23,10 @@ fn sample_clist_spot_body() -> serde_json::Value {
             "total": 1,
             "diff": [
                 {
-                    "f2": 10.50, "f3": 1.5, "f4": 0.15, "f5": 1000000, "f6": 10500000.0,
+                    "f2": 10.50, "f3": 1.5, "f4": 0.15, "f5": 1_000_000, "f6": 10_500_000.0,
                     "f7": 2.0, "f8": 1.2, "f9": 15.0, "f10": 1.1, "f12": "000001", "f13": "0",
                     "f14": "Test Stock", "f15": 10.80, "f16": 10.20, "f17": 10.30, "f18": 10.35,
-                    "f20": 100000000.0, "f21": 50000000.0, "f22": 0.5, "f23": 1.5,
+                    "f20": 100_000_000.0, "f21": 50_000_000.0, "f22": 0.5, "f23": 1.5,
                     "f24": 5.0, "f25": 10.0, "f62": 0.1
                 }
             ]
@@ -53,13 +53,13 @@ fn sample_ah_clist_body() -> serde_json::Value {
 
 /// Eastmoney kline response with one kline string.
 fn sample_kline_body() -> serde_json::Value {
-    em_kline_response(vec![
+    em_kline_response(&[
         &sample_kline_str("2024-01-02"),
         &sample_kline_str("2024-01-03"),
     ])
 }
 
-/// Sina spot list item (used for stock_zh_a_spot, stock_zh_b_spot, stock_zh_a_new, stock_zh_kcb_spot).
+/// Sina spot list item (used for `stock_zh_a_spot`, `stock_zh_b_spot`, `stock_zh_a_new`, `stock_zh_kcb_spot`).
 fn sample_sina_spot_item() -> serde_json::Value {
     serde_json::json!({
         "symbol": "sh600000",
@@ -74,13 +74,13 @@ fn sample_sina_spot_item() -> serde_json::Value {
         "open": 10.30,
         "high": 10.80,
         "low": 10.20,
-        "volume": 1000000,
-        "amount": 10500000.0,
-        "mktcap": 100000000.0,
+        "volume": 1_000_000,
+        "amount": 10_500_000.0,
+        "mktcap": 100_000_000.0,
         "turnoverratio": 1.2,
         "per": 15.0,
         "pb": 1.5,
-        "nmc": 50000000.0
+        "nmc": 50_000_000.0
     })
 }
 
@@ -93,7 +93,7 @@ fn sample_sina_list_body() -> serde_json::Value {
 const SINA_COUNT_TEXT: &str = "1";
 
 /// Eastmoney datacenter response for announcements / billboard / search.
-fn sample_dc_body(data: Vec<serde_json::Value>) -> serde_json::Value {
+fn sample_dc_body(data: &[serde_json::Value]) -> serde_json::Value {
     serde_json::json!({
         "success": true,
         "message": "ok",
@@ -123,8 +123,8 @@ fn sample_tencent_kline_body(symbol: &str) -> serde_json::Value {
         "data": {
             format!("hk{}", symbol): {
                 "day": [
-                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100000],
-                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120000]
+                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100_000],
+                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120_000]
                 ]
             }
         }
@@ -161,7 +161,7 @@ fn sample_legulegu_body() -> serde_json::Value {
     ])
 }
 
-/// Eastmoney datacenter "result.data" response for hk_dividend, hk_financial, etc.
+/// Eastmoney datacenter "result.data" response for `hk_dividend`, `hk_financial`, etc.
 fn sample_em_dc_list_body() -> serde_json::Value {
     serde_json::json!({
         "result": {
@@ -180,8 +180,8 @@ fn sample_tushare_daily_body() -> serde_json::Value {
     serde_json::json!({
         "data": {
             "items": [
-                ["000001.SZ", "20240102", 10.0, 10.5, 10.8, 9.9, 100000, 10500000.0, 2.0, 1.5, 0.15, 1.2],
-                ["000001.SZ", "20240103", 10.5, 11.0, 11.2, 10.3, 120000, 13200000.0, 1.8, 4.76, 0.5, 1.4]
+                ["000001.SZ", "20240102", 10.0, 10.5, 10.8, 9.9, 100_000, 10_500_000.0, 2.0, 1.5, 0.15, 1.2],
+                ["000001.SZ", "20240103", 10.5, 11.0, 11.2, 10.3, 120_000, 13_200_000.0, 1.8, 4.76, 0.5, 1.4]
             ]
         }
     })
@@ -235,7 +235,7 @@ fn sample_hot_rank_latest_body() -> serde_json::Value {
     })
 }
 
-/// Emappdata hot rank POST response (for hk_hot_rank_em).
+/// Emappdata hot rank POST response (for `hk_hot_rank_em`).
 fn sample_emappdata_rank_body() -> serde_json::Value {
     serde_json::json!({
         "data": [
@@ -257,25 +257,25 @@ fn sample_trends2_body() -> serde_json::Value {
     })
 }
 
-/// Tencent A-share kline response (for stock_zh_a_hist_tx).
+/// Tencent A-share kline response (for `stock_zh_a_hist_tx`).
 fn sample_tx_kline_body() -> serde_json::Value {
     serde_json::json!({
         "data": {
             "sz000001": {
                 "qfqday": [
-                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100000],
-                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120000]
+                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100_000],
+                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120_000]
                 ],
                 "day": [
-                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100000],
-                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120000]
+                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100_000],
+                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120_000]
                 ]
             }
         }
     })
 }
 
-/// Tencent tick data response (for stock_zh_a_tick_tx_js).
+/// Tencent tick data response (for `stock_zh_a_tick_tx_js`).
 fn sample_tx_tick_body() -> String {
     r#"v_sz000001=["1|09:30:00|10.50|0.15|10000|1050000|B","1|09:31:00|10.51|0.16|8000|840080|S"];"#
         .to_string()
@@ -294,21 +294,21 @@ fn sample_sina_sector_body() -> String {
     r#"{"BK0001":"测试板块,测试板块,10,10.50,0.15,1.5,1000000,10500000,sh600000,1.5,10.50,10.35,测试股票"}"#.to_string()
 }
 
-/// Tencent index kline response (for stock_zh_index_daily_tx).
+/// Tencent index kline response (for `stock_zh_index_daily_tx`).
 fn sample_tx_index_kline_body() -> serde_json::Value {
     serde_json::json!({
         "data": {
             "sh000001": {
                 "day": [
-                    ["2024-01-02", 3000.0, 3050.0, 3080.0, 2980.0, 100000000],
-                    ["2024-01-03", 3050.0, 3100.0, 3120.0, 3020.0, 120000000]
+                    ["2024-01-02", 3000.0, 3050.0, 3080.0, 2980.0, 100_000_000],
+                    ["2024-01-03", 3050.0, 3100.0, 3120.0, 3020.0, 120_000_000]
                 ]
             }
         }
     })
 }
 
-/// Sina index HQ response (for stock_zh_index_spot_sina).
+/// Sina index HQ response (for `stock_zh_index_spot_sina`).
 fn sample_sina_index_hq_body() -> serde_json::Value {
     serde_json::json!([
         {
@@ -321,18 +321,18 @@ fn sample_sina_index_hq_body() -> serde_json::Value {
             "open": 3010.0,
             "high": 3080.0,
             "low": 2980.0,
-            "volume": 100000000,
-            "amount": 300000000000.0
+            "volume": 100_000_000,
+            "amount": 300_000_000_000.0
         }
     ])
 }
 
-/// CSIndex value response.
+/// `CSIndex` value response.
 fn sample_csindex_body() -> serde_json::Value {
     serde_json::json!({
         "data": [
-            ["2024-01-02", "H30374", null, "中证全指", null, null, 5000.0, 5100.0, 4950.0, 5050.0, 50.0, 1.0, 100000000, 500000000000.0, 3000, 15.0],
-            ["2024-01-03", "H30374", null, "中证全指", null, null, 5050.0, 5150.0, 5000.0, 5100.0, 50.0, 0.99, 110000000, 550000000000.0, 3000, 15.2]
+            ["2024-01-02", "H30374", null, "中证全指", null, null, 5000.0, 5100.0, 4950.0, 5050.0, 50.0, 1.0, 100_000_000, 500_000_000_000.0, 3000, 15.0],
+            ["2024-01-03", "H30374", null, "中证全指", null, null, 5050.0, 5150.0, 5000.0, 5100.0, 50.0, 0.99, 110_000_000, 550_000_000_000.0, 3000, 15.2]
         ]
     })
 }
@@ -393,9 +393,9 @@ fn sample_hk_famous_body() -> serde_json::Value {
             "total": 1,
             "diff": [
                 {
-                    "f2": 120.0, "f3": 1.5, "f4": 1.5, "f5": 500000, "f6": 60000000.0,
+                    "f2": 120.0, "f3": 1.5, "f4": 1.5, "f5": 500_000, "f6": 60_000_000.0,
                     "f9": 15.0, "f12": "00593", "f14": "Test HK",
-                    "f15": 121.0, "f16": 118.0, "f17": 119.0, "f18": 118.5, "f20": 5000000000.0
+                    "f15": 121.0, "f16": 118.0, "f17": 119.0, "f18": 118.5, "f20": 5_000_000_000.0
                 }
             ]
         }
@@ -410,9 +410,9 @@ fn sample_us_pink_body() -> serde_json::Value {
             "total": 1,
             "diff": [
                 {
-                    "f2": 0.50, "f3": -2.0, "f4": -0.01, "f5": 100000, "f6": 50000.0,
+                    "f2": 0.50, "f3": -2.0, "f4": -0.01, "f5": 100_000, "f6": 50000.0,
                     "f9": 0.0, "f12": "PINK001", "f14": "Pink Stock",
-                    "f15": 0.55, "f16": 0.45, "f17": 0.52, "f18": 0.51, "f20": 1000000.0
+                    "f15": 0.55, "f16": 0.45, "f17": 0.52, "f18": 0.51, "f20": 1_000_000.0
                 }
             ]
         }
@@ -457,14 +457,14 @@ fn sample_yahoo_chart_body() -> serde_json::Value {
     serde_json::json!({
         "chart": {
             "result": [{
-                "timestamp": [1704153600, 1704240000],
+                "timestamp": [1_704_153_600, 1_704_240_000],
                 "indicators": {
                     "quote": [{
                         "open": [10.0, 10.5],
                         "high": [10.8, 11.2],
                         "low": [9.9, 10.3],
                         "close": [10.5, 11.0],
-                        "volume": [100000, 120000]
+                        "volume": [100_000, 120_000]
                     }]
                 }
             }]
@@ -734,10 +734,10 @@ fn sample_scale_dc_body() -> serde_json::Value {
             "data": [{
                 "SECUCODE": "000895.SZ",
                 "SECURITY_NAME_ABBR": "Test Stock",
-                "TOTAL_MARKET_CAP": 1000000000.0,
-                "FREE_CAP": 500000000.0,
-                "TOTAL_SHARES": 100000000.0,
-                "FREE_SHARES": 50000000.0,
+                "TOTAL_MARKET_CAP": 1_000_000_000.0,
+                "FREE_CAP": 500_000_000.0,
+                "TOTAL_SHARES": 100_000_000.0,
+                "FREE_SHARES": 50_000_000.0,
                 "PAIMING": 1
             }],
             "count": 1
@@ -778,7 +778,7 @@ fn sample_hk_scale_result_body() -> serde_json::Value {
     serde_json::json!({
         "result": {
             "data": [
-                {"SECUCODE": "00593.HK", "SECURITY_NAME_ABBR": "Test HK", "TOTAL_MARKET_CAP": 5000000000.0}
+                {"SECUCODE": "00593.HK", "SECURITY_NAME_ABBR": "Test HK", "TOTAL_MARKET_CAP": 5_000_000_000.0}
             ],
             "pages": 1,
             "count": 1
@@ -792,19 +792,19 @@ fn sample_tx_a_hist_body(symbol: &str) -> serde_json::Value {
         "data": {
             symbol: {
                 "qfqday": [
-                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100000],
-                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120000]
+                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100_000],
+                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120_000]
                 ],
                 "day": [
-                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100000],
-                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120000]
+                    ["2024-01-02", 10.0, 10.5, 10.8, 9.9, 100_000],
+                    ["2024-01-03", 10.5, 11.0, 11.2, 10.3, 120_000]
                 ]
             }
         }
     })
 }
 
-/// Index spot clist body with f13 field for internal_id.
+/// Index spot clist body with f13 field for `internal_id`.
 fn sample_index_spot_body() -> serde_json::Value {
     serde_json::json!({
         "rc": 0,
@@ -812,7 +812,7 @@ fn sample_index_spot_body() -> serde_json::Value {
             "total": 1,
             "diff": [
                 {
-                    "f2": 3050.0, "f3": 1.67, "f4": 50.0, "f5": 100000000, "f6": 300000000000.0,
+                    "f2": 3050.0, "f3": 1.67, "f4": 50.0, "f5": 100_000_000, "f6": 300_000_000_000.0,
                     "f12": "000001", "f13": "1", "f14": "上证指数",
                     "f15": 3080.0, "f16": 2980.0, "f17": 3010.0, "f18": 3000.0
                 }
@@ -829,7 +829,7 @@ fn sample_hk_index_spot_body() -> serde_json::Value {
             "total": 1,
             "diff": [
                 {
-                    "f2": 30500.0, "f3": 1.33, "f4": 400.0, "f5": 100000000, "f6": 9876543210.0,
+                    "f2": 30500.0, "f3": 1.33, "f4": 400.0, "f5": 100_000_000, "f6": 9_876_543_210.0,
                     "f12": "HSI", "f13": "100", "f14": "恒生指数",
                     "f15": 30800.0, "f16": 29800.0, "f17": 30100.0, "f18": 30100.0
                 }
@@ -846,9 +846,9 @@ fn sample_us_famous_body() -> serde_json::Value {
             "total": 1,
             "diff": [
                 {
-                    "f2": 180.0, "f3": 2.5, "f4": 4.5, "f5": 50000000, "f6": 9000000000.0,
+                    "f2": 180.0, "f3": 2.5, "f4": 4.5, "f5": 50_000_000, "f6": 9_000_000_000.0,
                     "f9": 25.0, "f12": "AAPL", "f14": "Apple Inc",
-                    "f15": 182.0, "f16": 176.0, "f17": 177.0, "f18": 175.5, "f20": 2800000000000.0
+                    "f15": 182.0, "f16": 176.0, "f17": 177.0, "f18": 175.5, "f20": 2_800_000_000_000.0
                 }
             ]
         }
@@ -1690,7 +1690,7 @@ async fn test_stock_hk_spot() {
         "symbol": "00593", "cname": "Test HK", "name": "Test HK Stock",
         "trade": 120.0, "pricechange": 1.5, "changepercent": 1.25,
         "settlement": 118.5, "open": 119.0, "high": 121.0, "low": 118.0,
-        "volume": 500000, "amount": 60000000.0, "buy": 119.9, "sell": 120.1
+        "volume": 500_000, "amount": 60_000_000.0, "buy": 119.9, "sell": 120.1
     }]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
@@ -1765,1096 +1765,4 @@ async fn test_stock_hk_index_daily_sina_hsi() {
     mock_any_get_text(&server, ".*", &sample_sina_hk_index_js_body()).await;
     let client = mock_client(&server);
     let _ = client.stock_hk_index_daily_sina("HSI").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_index_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_hk_index_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_index_spot_em().await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_index_spot_sina() {
-    let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", &sample_sina_hk_index_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_index_spot_sina().await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_hot_rank_em() {
-    let server = MockServer::start().await;
-    mock_any_post(&server, ".*", sample_emappdata_rank_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_hot_rank().await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_hot_rank_latest_em() {
-    let server = MockServer::start().await;
-    mock_any_post(&server, ".*", sample_hot_rank_latest_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_hot_rank_latest("00593").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_hot_rank_detail_em() {
-    let server = MockServer::start().await;
-    mock_any_post(&server, ".*", sample_hot_rank_detail_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_hot_rank_detail("00593").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_hot_rank_detail_realtime_em() {
-    let server = MockServer::start().await;
-    mock_any_post(&server, ".*", sample_hot_rank_detail_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_hot_rank_detail_realtime("00593").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_valuation_baidu() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_hk_valuation(
-            "00593",
-            "\u{5e02}\u{76c8}\u{7387}(TTM)",
-            "\u{8fd1}\u{4e00}\u{5e74}",
-        )
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_valuation_baidu_mv() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_hk_valuation(
-            "00593",
-            "\u{603b}\u{5e02}\u{503c}",
-            "\u{8fd1}\u{4e09}\u{5e74}",
-        )
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_scale_comparison_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_hk_scale_result_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_scale_comparison("00593").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_dividend_payout_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_em_dc_list_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_dividend_payout("00593").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_fhpx_detail_ths() {
-    let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", &sample_ths_fhpx_html()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_fhpx_detail("00593").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_financial_indicator_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_em_dc_list_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_financial_indicator("00593").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_gxl_lg() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_legulegu_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_gxl_lg().await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_indicator_eniu() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", serde_json::json!({})).await;
-    let client = mock_client(&server);
-    // This method always returns an unsupported_market error.
-    let result = client.stock_hk_indicator_eniu("00593").await;
-    assert!(result.is_err());
-}
-
-// =========================================================================
-// us_extra.rs tests (5 methods)
-// =========================================================================
-
-#[tokio::test]
-async fn test_stock_us_daily() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_us_daily("AAPL", "20240101", "20241231").await;
-}
-
-#[tokio::test]
-async fn test_stock_us_daily_with_prefix() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_daily("105.AAPL", "20240101", "20241231")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_daily_nvda() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_us_daily("NVDA", "20240101", "20241231").await;
-}
-
-#[tokio::test]
-async fn test_stock_us_spot() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_us_spot().await;
-}
-
-#[tokio::test]
-async fn test_stock_us_famous_spot_em_tech() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_famous_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_famous_spot("\u{79d1}\u{6280}\u{7c7b}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_famous_spot_em_finance() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_famous_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_famous_spot("\u{91d1}\u{878d}\u{7c7b}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_famous_spot_em_pharma() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_famous_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_famous_spot("\u{533b}\u{836f}\u{98df}\u{54c1}\u{7c7b}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_famous_spot_em_media() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_famous_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_famous_spot("\u{5a92}\u{4f53}\u{7c7b}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_famous_spot_em_auto() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_famous_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_famous_spot("\u{6c7d}\u{8f66}\u{80fd}\u{6e90}\u{7c7b}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_famous_spot_em_retail() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_famous_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_famous_spot("\u{5236}\u{9020}\u{96f6}\u{552e}\u{7c7b}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_pink_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_pink_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_us_pink_spot().await;
-}
-
-#[tokio::test]
-async fn test_stock_us_valuation_baidu_mv() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_valuation(
-            "NVDA",
-            "\u{603b}\u{5e02}\u{503c}",
-            "\u{8fd1}\u{4e00}\u{5e74}",
-        )
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_valuation_baidu_pe() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_valuation(
-            "AAPL",
-            "\u{5e02}\u{76c8}\u{7387}(TTM)",
-            "\u{8fd1}\u{4e09}\u{5e74}",
-        )
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_us_valuation_baidu_pb() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_valuation("MSFT", "\u{5e02}\u{51c0}\u{7387}", "\u{5168}\u{90e8}")
-        .await;
-}
-
-// =========================================================================
-// zh_comparison.rs tests (4 methods)
-// =========================================================================
-
-#[tokio::test]
-async fn test_stock_zh_dupont_comparison_em_sz() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_dupont_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_dupont_comparison("SZ000895").await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_dupont_comparison_em_sh() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_dupont_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_dupont_comparison("SH600000").await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_scale_comparison_em_sz() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_scale_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_scale_comparison("SZ000895").await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_scale_comparison_em_sh() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_scale_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_scale_comparison("SH600000").await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_valuation_baidu_mv() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_valuation(
-            "002044",
-            "\u{603b}\u{5e02}\u{503c}",
-            "\u{8fd1}\u{4e00}\u{5e74}",
-        )
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_valuation_baidu_pe() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_valuation(
-            "002044",
-            "\u{5e02}\u{76c8}\u{7387}(TTM)",
-            "\u{8fd1}\u{4e09}\u{5e74}",
-        )
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_valuation_baidu_pb() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_valuation(
-            "000001",
-            "\u{5e02}\u{51c0}\u{7387}",
-            "\u{8fd1}\u{4e94}\u{5e74}",
-        )
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_valuation_baidu_pcf() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_valuation("600000", "\u{5e02}\u{73b0}\u{7387}", "\u{5168}\u{90e8}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_vote_baidu_stock() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_vote_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_vote("000001", "\u{80a1}\u{7968}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_vote_baidu_index() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_vote_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_vote("000001", "\u{6307}\u{6570}")
-        .await;
-}
-
-// =========================================================================
-// eastmoney_spot.rs tests (stock_zh_a_spot_em_flex, boards, AH)
-// =========================================================================
-
-#[tokio::test]
-async fn test_stock_zh_a_spot_em_flex() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_a_spot_em_flex(100).await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_a_spot_em_flex_large() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_a_spot_em_flex(5000).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_concept_name_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_concept_name_em(10).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_concept_name_em_large() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_concept_name_em(100).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_industry_name_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_industry_name_em(10).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_industry_name_em_large() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_industry_name_em(100).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_concept_cons_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_concept_cons("BK0001", 10).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_industry_cons_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_industry_cons("BK0001", 10).await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_ah_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_ah_clist_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_ah_spot_em(10).await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_ah_spot_em_large() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_ah_clist_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_ah_spot_em(100).await;
-}
-
-// =========================================================================
-// feature/spot_em.rs tests
-// =========================================================================
-
-#[tokio::test]
-async fn test_stock_zh_a_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_a_spot_em().await;
-}
-
-#[tokio::test]
-async fn test_stock_sh_a_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_sh_a_spot().await;
-}
-
-#[tokio::test]
-async fn test_stock_sz_a_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_sz_a_spot().await;
-}
-
-#[tokio::test]
-async fn test_stock_bj_a_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_bj_a_spot().await;
-}
-
-#[tokio::test]
-async fn test_stock_cy_a_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_cy_a_spot().await;
-}
-
-#[tokio::test]
-async fn test_stock_kc_a_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_kc_a_spot().await;
-}
-
-#[tokio::test]
-async fn test_feature_stock_hk_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_spot_em().await;
-}
-
-#[tokio::test]
-async fn test_feature_stock_us_spot_em() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_us_spot_em().await;
-}
-
-// =========================================================================
-// Additional variant tests to reach 200+ coverage
-// =========================================================================
-
-// --- a_share.rs additional variants ---
-
-#[tokio::test]
-async fn test_a_share_candles_sz_tencent() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_tx_candles_body()).await;
-    mock_any_post(&server, ".*", sample_tushare_daily_body()).await;
-    let client = mock_client(&server);
-    let _ = client.a_share_candles("000001", "qfq", 120).await;
-}
-
-#[tokio::test]
-async fn test_a_share_capital_flow_sz() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_capital_flow_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.a_share_capital_flow("000001", 20).await;
-}
-
-#[tokio::test]
-async fn test_a_share_sector_constituents_bk0475() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_sector_constituents_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.a_share_sector_constituents("BK0475", 30).await;
-}
-
-#[tokio::test]
-async fn test_a_share_sector_capital_flow_large_limit() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_capital_flow_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.a_share_sector_capital_flow("BK0001", 50).await;
-}
-
-#[tokio::test]
-async fn test_a_share_announcements_large_limit() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_announcements_body()).await;
-    let client = mock_client(&server);
-    let _ = client.a_share_announcements("000001", 50).await;
-}
-
-// --- hk.rs additional variants ---
-
-#[tokio::test]
-async fn test_hk_candles_5digit() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_tx_hk_candles_body()).await;
-    mock_any_get(&server, ".*", sample_yahoo_chart_body()).await;
-    let client = mock_client(&server);
-    let _ = client.hk_candles("09988", 30).await;
-}
-
-#[tokio::test]
-async fn test_hk_quote_single_digit() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_tx_hk_quote_body()).await;
-    let client = mock_client(&server);
-    let _ = client.hk_quote("1").await;
-}
-
-// --- us.rs additional variants ---
-
-#[tokio::test]
-async fn test_us_candles_msft() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    mock_any_get(&server, ".*", sample_yahoo_chart_body()).await;
-    mock_any_post(&server, ".*", sample_tushare_daily_body()).await;
-    let client = mock_client(&server);
-    let _ = client.us_candles("MSFT", 10).await;
-}
-
-#[tokio::test]
-async fn test_us_quote_tsla() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    mock_any_get(&server, ".*", sample_yahoo_chart_body()).await;
-    mock_any_post(&server, ".*", sample_tushare_daily_body()).await;
-    let client = mock_client(&server);
-    let _ = client.us_quote("TSLA").await;
-}
-
-// --- zh_a.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_zh_a_daily_short_date_range() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_a_daily("600000", "20240102", "20240103", "qfq")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_a_minute_with_numeric_code() {
-    let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", &sample_jsonp_minute_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_a_minute("600000", "5").await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_a_hist_pre_min_em_sz() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_trends2_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_a_hist_pre_min("000001", "09:15", "09:25")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_a_cdr_daily_sz() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_a_cdr_daily("000001", "20240601", "20240630")
-        .await;
-}
-
-// --- zh_b.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_zh_b_daily_200xxx() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_b_daily("200001", "20240101", "20241231", "qfq")
-        .await;
-}
-
-// --- zh_ah.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_zh_ah_daily_02318() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_tencent_kline_body("02318")).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_ah_daily("02318", "2023", "2024", "qfq")
-        .await;
-}
-
-// --- zh_index.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_zh_index_daily_em_399006() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_index_daily_em("399006", "20240101", "20241231")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_index_daily_tx_sz() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_tx_index_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_index_daily_tx("sz399001", "20240101", "20241231")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_index_value_csindex_000300() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_csindex_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_index_value_csindex("000300").await;
-}
-
-// --- zh_kcb.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_zh_kcb_daily_688001() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_kcb_daily("688001", "20240101", "20241231", "qfq")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_kcb_report_em_page2() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kcb_report_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_kcb_report(2, 2).await;
-}
-
-// --- sina_stock.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_intraday_sina_limit_120() {
-    let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", SINA_COUNT_TEXT).await;
-    mock_any_get(&server, ".*", sample_sina_tick_list()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_intraday_sina("sz000001", "20240321", 120)
-        .await;
-}
-
-// --- hk_extra.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_hk_daily_long_range() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_hk_daily("00593", "20200101", "20241231", "qfq")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_index_daily_em_hscei() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_hsi_daily_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_index_daily_em("HSCEI").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_index_daily_sina_ces280() {
-    let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", &sample_sina_hk_index_js_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_index_daily_sina("CES280").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_hot_rank_latest_em_09988() {
-    let server = MockServer::start().await;
-    mock_any_post(&server, ".*", sample_hot_rank_latest_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_hot_rank_latest("09988").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_hot_rank_detail_em_09988() {
-    let server = MockServer::start().await;
-    mock_any_post(&server, ".*", sample_hot_rank_detail_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_hot_rank_detail("09988").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_hot_rank_detail_realtime_em_09988() {
-    let server = MockServer::start().await;
-    mock_any_post(&server, ".*", sample_hot_rank_detail_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_hot_rank_detail_realtime("09988").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_valuation_baidu_pb() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_hk_valuation("00593", "\u{5e02}\u{51c0}\u{7387}", "\u{5168}\u{90e8}")
-        .await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_scale_comparison_em_09988() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_hk_scale_result_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_scale_comparison("09988").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_dividend_payout_em_09988() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_em_dc_list_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_dividend_payout("09988").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_fhpx_detail_ths_09988() {
-    let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", &sample_ths_fhpx_html()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_fhpx_detail("09988").await;
-}
-
-#[tokio::test]
-async fn test_stock_hk_financial_indicator_em_09988() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_em_dc_list_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_hk_financial_indicator("09988").await;
-}
-
-// --- us_extra.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_us_daily_goog() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_us_daily("GOOG", "20240101", "20241231").await;
-}
-
-#[tokio::test]
-async fn test_stock_us_valuation_baidu_pcf() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_us_valuation(
-            "GOOG",
-            "\u{5e02}\u{73b0}\u{7387}",
-            "\u{8fd1}\u{4e94}\u{5e74}",
-        )
-        .await;
-}
-
-// --- zh_comparison.rs additional variants ---
-
-#[tokio::test]
-async fn test_stock_zh_dupont_comparison_em_bj() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_dupont_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_dupont_comparison("BJ430047").await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_scale_comparison_em_bj() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_scale_dc_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_scale_comparison("BJ430047").await;
-}
-
-#[tokio::test]
-async fn test_stock_zh_valuation_baidu_all() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_valuation_body()).await;
-    let client = mock_client(&server);
-    let _ = client
-        .stock_zh_valuation("600000", "\u{603b}\u{5e02}\u{503c}", "\u{5168}\u{90e8}")
-        .await;
-}
-
-// --- additional feature/spot_em.rs variants ---
-
-#[tokio::test]
-async fn test_stock_zh_a_spot_em_flex_small() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_zh_a_spot_em_flex(10).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_concept_cons_em_bk0475() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_concept_cons("BK0475", 20).await;
-}
-
-#[tokio::test]
-async fn test_stock_board_industry_cons_em_bk0475() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_clist_spot_body()).await;
-    let client = mock_client(&server);
-    let _ = client.stock_board_industry_cons("BK0475", 20).await;
-}
-
-// =========================================================================
-// Edge-case / negative tests
-// =========================================================================
-
-#[tokio::test]
-async fn test_stock_hk_daily_invalid_adjust() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let result = client
-        .stock_hk_daily("00593", "20240101", "20241231", "invalid")
-        .await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_zh_a_daily_invalid_adjust() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let result = client
-        .stock_zh_a_daily("600000", "20240101", "20241231", "bad")
-        .await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_zh_b_daily_invalid_adjust() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let result = client
-        .stock_zh_b_daily("sh900901", "20240101", "20241231", "bad")
-        .await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_zh_kcb_daily_invalid_adjust() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_kline_body()).await;
-    let client = mock_client(&server);
-    let result = client
-        .stock_zh_kcb_daily("688399", "20240101", "20241231", "bad")
-        .await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_zh_a_hist_tx_invalid_adjust() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_tx_a_hist_body("sz000001")).await;
-    let client = mock_client(&server);
-    let result = client
-        .stock_zh_a_hist_tx("sz000001", "20240101", "20241231", "bad")
-        .await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_zh_dupont_comparison_em_short_symbol() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_dupont_dc_body()).await;
-    let client = mock_client(&server);
-    let result = client.stock_zh_dupont_comparison("X").await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_zh_scale_comparison_em_short_symbol() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_scale_dc_body()).await;
-    let client = mock_client(&server);
-    let result = client.stock_zh_scale_comparison("X").await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_zh_vote_baidu_invalid_indicator() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_baidu_vote_body()).await;
-    let client = mock_client(&server);
-    let result = client.stock_zh_vote("000001", "invalid").await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_sector_spot_invalid_indicator() {
-    let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", &sample_sina_sector_body()).await;
-    let client = mock_client(&server);
-    let result = client.stock_sector_spot("invalid_indicator").await;
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_stock_us_famous_spot_em_invalid_category() {
-    let server = MockServer::start().await;
-    mock_any_get(&server, ".*", sample_us_famous_body()).await;
-    let client = mock_client(&server);
-    let result = client.stock_us_famous_spot("\u{65e0}\u{6548}").await;
-    assert!(result.is_err());
-}
-
-// =========================================================================
-// Compile-only type assertions (ensures public types are accessible)
-// =========================================================================
-
-#[tokio::test]
-async fn test_types_compile() {
-    // Verify all public stock types are accessible
-    let _q: akshare::QuoteSnapshot;
-    let _c: akshare::CandlePoint;
-    let _s: akshare::StockSearchResult;
-    let _cf: akshare::CapitalFlowPoint;
-    let _ss: akshare::SectorSnapshot;
-    let _sc: akshare::SectorConstituent;
-    let _bb: akshare::BillboardEntry;
-    let _bs: akshare::BillboardSeatDetail;
-    let _ai: akshare::AnnouncementItem;
-    let _ad: akshare::AnnouncementDetail;
-    let _tc: akshare::TradeCalendarItem;
-    // zh_a types
-    let _za: akshare::stock::zh_a::ZhASpotQuote;
-    let _zd: akshare::stock::zh_a::ZhADailyCandle;
-    let _zm: akshare::stock::zh_a::ZhAMinuteCandle;
-    let _zn: akshare::stock::zh_a::ZhANewStock;
-    let _zs: akshare::stock::zh_a::ZhAStopStock;
-    let _zt: akshare::stock::zh_a::ZhATickTx;
-    let _zh: akshare::stock::zh_a::ZhAHistTx;
-    // zh_b types
-    let _bq: akshare::stock::zh_b::ZhBSpotQuote;
-    let _bd: akshare::stock::zh_b::ZhBDailyCandle;
-    let _bm: akshare::stock::zh_b::ZhBMinuteCandle;
-    // zh_ah types
-    let _aq: akshare::stock::zh_ah::AhSpotQuote;
-    let _ad2: akshare::stock::zh_ah::AhDailyCandle;
-    let _an: akshare::stock::zh_ah::AhStockName;
-    // zh_index types
-    let _ie: akshare::stock::zh_index::IndexSpotEm;
-    let _id: akshare::stock::zh_index::IndexDailyCandle;
-    let _is: akshare::stock::zh_index::IndexSpotSina;
-    let _cv: akshare::stock::zh_index::CsIndexValue;
-    // zh_kcb types
-    let _ks: akshare::stock::zh_kcb::KcbSpotQuote;
-    let _kd: akshare::stock::zh_kcb::KcbDailyCandle;
-    let _kr: akshare::stock::zh_kcb::KcbReport;
-    // sina_stock types
-    let _si: akshare::stock::sina_stock::SinaIntradayTick;
-    let _ss2: akshare::stock::sina_stock::SinaSectorSpot;
-    // hk_extra types
-    let _hq: akshare::stock::hk_extra::HkSpotQuote;
-    let _hd: akshare::stock::hk_extra::HkDailyCandle;
-    let _hf: akshare::stock::hk_extra::HkFamousStock;
-    let _hid: akshare::stock::hk_extra::HkIndexDailyCandle;
-    let _hie: akshare::stock::hk_extra::HkIndexSpotEm;
-    let _his: akshare::stock::hk_extra::HkIndexSpotSina;
-    let _hr: akshare::stock::hk_extra::HkHotRank;
-    let _hrd: akshare::stock::hk_extra::HkHotRankDetail;
-    let _hv: akshare::stock::hk_extra::HkValuationBaidu;
-    let _hg: akshare::stock::hk_extra::HkGxlLg;
-    let _hf2: akshare::stock::hk_extra::HkFhpxDetailThs;
-    // us_extra types
-    let _ud: akshare::stock::us_extra::UsDailyCandle;
-    let _us: akshare::stock::us_extra::UsSpotSina;
-    let _uf: akshare::stock::us_extra::UsFamousStock;
-    let _up: akshare::stock::us_extra::UsPinkStock;
-    let _uv: akshare::stock::us_extra::UsValuationBaidu;
-    // zh_comparison types
-    let _dc: akshare::stock::zh_comparison::DupontComparison;
-    let _sc2: akshare::stock::zh_comparison::ScaleComparison;
-    let _bv: akshare::stock::zh_comparison::BaiduValuation;
-    let _bv2: akshare::stock::zh_comparison::BaiduVote;
 }

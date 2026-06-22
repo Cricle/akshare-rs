@@ -51,7 +51,7 @@ async fn test_option_chain_kline_fallback() {
     let empty_body = serde_json::json!({
         "result": { "data": [], "pages": 0 }
     });
-    let kline_body = em_kline_response(vec![
+    let kline_body = em_kline_response(&[
         "2024-01-02,0.05,0.06,0.07,0.04,10000,500.0,2.0,20.0,0.01,1.0",
     ]);
     // Mount both: datacenter pattern first, then kline
@@ -76,7 +76,7 @@ async fn test_option_current_cffex_em() {
                 "zde": 5.0,
                 "zdf": 4.35,
                 "vol": 1000.0,
-                "cje": 120000.0,
+                "cje": 120_000.0,
                 "ccl": 5000.0,
                 "xqj": 4450.0,
                 "syr": 15.0,
@@ -530,7 +530,7 @@ async fn test_option_hist_dce() {
                 "volumn": 10000.0,
                 "openInterest": 50000.0,
                 "diffI": 500.0,
-                "turnover": 520000.0,
+                "turnover": 520_000.0,
                 "matchQtySum": 10.0
             }
         ]
@@ -571,7 +571,7 @@ async fn test_option_hist_shfe() {
                 "VOLUME": 10000.0,
                 "OPENINTEREST": 50000.0,
                 "OPENINTERESTCHG": 500.0,
-                "TURNOVER": 5200000.0,
+                "TURNOVER": 5_200_000.0,
                 "DELTA": 0.5,
                 "EXECVOLUME": 10.0
             },
@@ -615,7 +615,7 @@ async fn test_option_vol_shfe() {
                 "VOLUME": 10000.0,
                 "OPENINTEREST": 50000.0,
                 "OPENINTERESTCHG": 500.0,
-                "TURNOVER": 5200000.0,
+                "TURNOVER": 5_200_000.0,
                 "EXECVOLUME": 10.0,
                 "SIGMA": 0.25
             }
@@ -650,7 +650,7 @@ async fn test_option_hist_gfex() {
                 "volumn": 10000.0,
                 "openInterest": 50000.0,
                 "diffI": 500.0,
-                "turnover": 102000000.0,
+                "turnover": 102_000_000.0,
                 "matchQtySum": 10.0,
                 "impliedVolatility": 0.30
             }
@@ -820,12 +820,12 @@ async fn test_option_daily_stats_sse() {
                 "SECURITY_CODE": "510050",
                 "SECURITY_ABBR": "50ETF",
                 "CONTRACT_VOLUME": 100,
-                "TOTAL_MONEY": 5000000.0,
+                "TOTAL_MONEY": 5_000_000.0,
                 "TOTAL_VOLUME": 50000.0,
                 "CALL_VOLUME": 30000.0,
                 "PUT_VOLUME": 20000.0,
                 "CP_RATE": 0.67,
-                "LEAVES_QTY": 100000.0,
+                "LEAVES_QTY": 100_000.0,
                 "LEAVES_CALL_QTY": 60000.0,
                 "LEAVES_PUT_QTY": 40000.0,
                 "TRADE_DATE": "2024-01-02"
@@ -855,7 +855,7 @@ async fn test_option_daily_stats_szse() {
                     "rccjl": 30000.0,
                     "rpcjl": 20000.0,
                     "rcrpccb": 0.67,
-                    "wpchyzs": 100000.0,
+                    "wpchyzs": 100_000.0,
                     "wpcrchys": 60000.0,
                     "wpcrphys": 40000.0
                 }
@@ -910,7 +910,7 @@ async fn test_option_finance_sse_underlying() {
         "date": "20240102",
         "time": "15:00:00",
         "list": [
-            ["510050", "50ETF", 2.50, 0.03, 1.2, 2.0, 100000, 250000.0, 2.47]
+            ["510050", "50ETF", 2.50, 0.03, 1.2, 2.0, 100_000, 250_000.0, 2.47]
         ]
     });
     mock_any_get(&server, ".*", body).await;

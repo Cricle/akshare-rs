@@ -303,6 +303,6 @@ mod tests {
             fund_type: Some("open_end".to_string()),
         };
         assert_eq!(snap.symbol, "000001");
-        assert_eq!(snap.nav, 1.234);
+        assert!((snap.nav - 1.234).abs() < f64::EPSILON);
     }
 }

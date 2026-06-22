@@ -67,7 +67,7 @@ async fn test_mock_error_em_datacenter_malformed_json() {
 #[tokio::test]
 async fn test_mock_error_em_datacenter_empty_data() {
     let server = MockServer::start().await;
-    let body = common::em_datacenter_response(vec![]);
+    let body = common::em_datacenter_response(&[]);
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body.clone()))
@@ -127,7 +127,7 @@ async fn test_mock_error_push2_http_404() {
 #[tokio::test]
 async fn test_mock_error_push2_empty_diff() {
     let server = MockServer::start().await;
-    let body = common::em_push2_response(vec![]);
+    let body = common::em_push2_response(&[]);
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body))

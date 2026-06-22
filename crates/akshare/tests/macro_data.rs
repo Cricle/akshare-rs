@@ -9,7 +9,7 @@ use wiremock::{Mock, MockServer, ResponseTemplate};
 
 async fn mount_em_mocks(server: &MockServer) {
     let body =
-        common::em_datacenter_response(vec![common::sample_macro_row("2024-01-01", 123.45, "GDP")]);
+        common::em_datacenter_response(&[common::sample_macro_row("2024-01-01", 123.45, "GDP")]);
     Mock::given(method("GET"))
         .and(path_regex(".*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body.clone()))
