@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::NewsItem;
+use crate::types::value_ext::ValueExt;
 
 /// Strip `<em>` / `</em>` highlight tags and other HTML tags from text.
 pub(crate) fn strip_em_tags(text: &str) -> String {
@@ -33,27 +34,17 @@ pub(crate) fn parse_search_entries(list: &[serde_json::Value], limit: usize) -> 
         if items.len() >= limit {
             break;
         }
-        let title_raw = entry.get("title").and_then(|v| v.as_str()).unwrap_or("");
-        let content_raw = entry.get("content").and_then(|v| v.as_str()).unwrap_or("");
-        let date = entry
-            .get("date")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-        let media = entry
-            .get("mediaName")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
+        let title_raw = entry.str_field(&["title"]).unwrap_or("");
+        let content_raw = entry.str_field(&["content"]).unwrap_or("");
+        let date = entry.str_or(&["date"], "");
+        let media = entry.str_or(&["mediaName"], "");
 
         let url = entry
-            .get("articleUrl")
-            .and_then(|v| v.as_str())
+            .str_field(&["articleUrl"])
             .map(std::string::ToString::to_string)
             .or_else(|| {
                 entry
-                    .get("code")
-                    .and_then(|v| v.as_str())
+                    .str_field(&["code"])
                     .map(|code| format!("http://finance.eastmoney.com/a/{code}.html"))
             });
 

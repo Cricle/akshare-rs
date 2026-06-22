@@ -591,7 +591,7 @@ impl AkShareClient {
                     .str_field(&["SECURITY_NAME_ABBR"])
                     .or_else(|| v.str_field(&["SNAME"]))
                     .map(std::string::ToString::to_string),
-                holder_count: v.get("HOULD_NUM").and_then(serde_json::Value::as_i64),
+                holder_count: v.i64_field(&["HOULD_NUM"]),
                 hold_shares: v.f64_field(&["HOLD_NUM"]),
                 hold_market_value: v.f64_field(&["HOLD_MARKET_CAP"]),
                 change: v
@@ -642,7 +642,7 @@ impl AkShareClient {
                 category: v
                     .str_field(&["STAT_NAME"])
                     .map(std::string::ToString::to_string),
-                count: v.get("STAT_NUM").and_then(serde_json::Value::as_i64),
+                count: v.i64_field(&["STAT_NUM"]),
                 trade_amount: v.f64_field(&["TRADE_AMOUNT"]),
                 total_market_cap: v.f64_field(&["TOTAL_MARKET_CAP"]),
                 float_market_cap: v.f64_field(&["FLOAT_MARKET_CAP"]),
@@ -877,9 +877,12 @@ impl AkShareClient {
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 
-        let data = match payload.get("result").and_then(|r| r.get("data")) {
-            Some(val) if val.is_array() => val.as_array().unwrap(),
-            _ => return Ok(vec![]),
+        let Some(data) = payload
+            .get("result")
+            .and_then(|r| r.get("data"))
+            .and_then(|v| v.as_array())
+        else {
+            return Ok(vec![]);
         };
 
         let items: Vec<PeerComparison> = data

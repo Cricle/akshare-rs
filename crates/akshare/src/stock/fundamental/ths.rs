@@ -9,42 +9,52 @@ use std::sync::LazyLock;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 static RE_HTML_TAG: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"<[^>]+>").unwrap());
-static RE_TABLE: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"(?is)<table[^>]*>(.*?)</table>").unwrap());
-static RE_TR: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"(?is)<tr[^>]*>(.*?)</tr>").unwrap());
-static RE_TH: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"(?is)<th[^>]*>(.*?)</th>").unwrap());
-static RE_TD: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"(?is)<td[^>]*>(.*?)</td>").unwrap());
-static RE_JSON_P: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r#"(?s)<p\s+id="main"[^>]*>(.*?)</p>"#).unwrap());
+    LazyLock::new(|| regex::Regex::new(r"<[^>]+>").expect("valid regex: html tag"));
+static RE_TABLE: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"(?is)<table[^>]*>(.*?)</table>").expect("valid regex: table")
+});
+static RE_TR: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"(?is)<tr[^>]*>(.*?)</tr>").expect("valid regex: tr")
+});
+static RE_TH: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"(?is)<th[^>]*>(.*?)</th>").expect("valid regex: th")
+});
+static RE_TD: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"(?is)<td[^>]*>(.*?)</td>").expect("valid regex: td")
+});
+static RE_JSON_P: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r#"(?s)<p\s+id="main"[^>]*>(.*?)</p>"#).expect("valid regex: json p")
+});
 static RE_TABLE_DATA_HL: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(
         r#"(?is)<table[^>]*class="[^"]*data_table_1\s+m_table\s+m_hl[^"]*"[^>]*>(.*?)</table>"#,
     )
-    .unwrap()
+    .expect("valid regex: data_table_1 m_table m_hl")
 });
 static RE_TABLE_M_DATA_HL: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(
         r#"(?is)<table[^>]*class="[^"]*m_table\s+data_table_1\s+m_hl[^"]*"[^>]*>(.*?)</table>"#,
     )
-    .unwrap()
+    .expect("valid regex: m_table data_table_1 m_hl")
 });
 static RE_TABLE_MAINTABLE: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r#"(?is)<table[^>]*id="maintable"[^>]*>(.*?)</table>"#).unwrap()
+    regex::Regex::new(r#"(?is)<table[^>]*id="maintable"[^>]*>(.*?)</table>"#)
+        .expect("valid regex: maintable")
 });
 static RE_TABLE_M_TABLE: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r#"(?is)<table[^>]*class="[^"]*m_table[^"]*"[^>]*>(.*?)</table>"#).unwrap()
+    regex::Regex::new(r#"(?is)<table[^>]*class="[^"]*m_table[^"]*"[^>]*>(.*?)</table>"#)
+        .expect("valid regex: m_table")
 });
 static RE_UL_MAIN_INTRO: LazyLock<regex::Regex> = LazyLock::new(|| {
-    regex::Regex::new(r#"(?is)<ul[^>]*class="[^"]*main_intro_list[^"]*"[^>]*>(.*?)</ul>"#).unwrap()
+    regex::Regex::new(r#"(?is)<ul[^>]*class="[^"]*main_intro_list[^"]*"[^>]*>(.*?)</ul>"#)
+        .expect("valid regex: main_intro_list")
 });
-static RE_LI: LazyLock<regex::Regex> =
-    LazyLock::new(|| regex::Regex::new(r"(?is)<li[^>]*>(.*?)</li>").unwrap());
+static RE_LI: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"(?is)<li[^>]*>(.*?)</li>").expect("valid regex: li")
+});
 
 // ---------------------------------------------------------------------------
 // Shared THS headers
@@ -56,7 +66,7 @@ fn ths_headers() -> reqwest::header::HeaderMap {
         reqwest::header::USER_AGENT,
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
             .parse()
-            .unwrap(),
+            .expect("valid User-Agent header value"),
     );
     headers
 }
@@ -458,16 +468,10 @@ impl AkShareClient {
 
         let mut all_records = Vec::new();
         for report in &financial_data {
-            let report_date = report.get("date").and_then(|v| v.as_str()).unwrap_or("");
-            let report_name = report
-                .get("report_name")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
-            let report_period = report.get("report").and_then(|v| v.as_str()).unwrap_or("");
-            let quarter_name = report
-                .get("quarter_name")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let report_date = report.str_or(&["date"], "");
+            let report_name = report.str_or(&["report_name"], "");
+            let report_period = report.str_or(&["report"], "");
+            let quarter_name = report.str_or(&["quarter_name"], "");
 
             let Some(serde_json::Value::Object(index_list)) = report.get("index_list") else {
                 continue;

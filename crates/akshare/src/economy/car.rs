@@ -123,9 +123,7 @@ mod tests {
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
         assert_eq!(
-            data[0]
-                .get("SALES_VOLUME")
-                .and_then(serde_json::Value::as_f64),
+            data[0].f64_field(&["SALES_VOLUME"]),
             Some(269.4)
         );
     }

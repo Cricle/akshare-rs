@@ -4,6 +4,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 use crate::util::{parse_csv_line, parse_f64_safe};
 
 // ---------------------------------------------------------------------------
@@ -188,8 +189,8 @@ impl AkShareClient {
         let mut map = std::collections::HashMap::new();
         for item in &items {
             if let (Some(code), Some(id)) = (
-                item.get("f12").and_then(|v| v.as_str()),
-                item.get("f13").and_then(serde_json::Value::as_i64),
+                item.str_field(&["f12"]),
+                item.i64_field(&["f13"]),
             ) {
                 map.insert(code.to_string(), id);
             }

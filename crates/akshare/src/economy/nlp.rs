@@ -200,7 +200,7 @@ mod tests {
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 2);
         assert_eq!(
-            data[0].get("EPU_INDEX").and_then(serde_json::Value::as_f64),
+            data[0].f64_field(&["EPU_INDEX"]),
             Some(152.3)
         );
     }

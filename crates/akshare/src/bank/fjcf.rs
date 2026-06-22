@@ -123,6 +123,7 @@ impl AkShareClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::value_ext::ValueExt;
 
     #[test]
     fn test_cbirc_response_structure() {
@@ -148,7 +149,7 @@ mod tests {
         assert_eq!(data.total, 2);
         assert_eq!(data.rows.len(), 2);
         assert_eq!(
-            data.rows[0].get("docTitle").and_then(|v| v.as_str()),
+            data.rows[0].str_field(&["docTitle"]),
             Some("Test Penalty 1")
         );
     }

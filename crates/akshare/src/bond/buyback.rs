@@ -5,6 +5,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::BondSnapshot;
+use crate::types::value_ext::ValueExt;
 use crate::types::wire::ClistResp;
 
 impl AkShareClient {
@@ -72,20 +73,10 @@ impl AkShareClient {
             .into_iter()
             .take(limit)
             .filter_map(|v| {
-                let code = v.get("f12")?.as_str()?.to_string();
-                let name = v
-                    .get("f14")
-                    .and_then(|x| x.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let price = v
-                    .get("f2")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
-                let change_pct = v
-                    .get("f3")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
+                let code = v.str_field(&["f12"])?.to_string();
+                let name = v.str_or(&["f14"], "");
+                let price = v.f64_or(&["f2"], 0.0);
+                let change_pct = v.f64_or(&["f3"], 0.0);
                 Some(BondSnapshot {
                     symbol: code,
                     name,

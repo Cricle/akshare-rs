@@ -6,6 +6,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 use serde::{Deserialize, Serialize};
 
@@ -256,7 +257,7 @@ impl AkShareClient {
         // Helper to extract raw value from Yahoo Finance nested format
         // Yahoo returns {"raw": 123.45, "fmt": "123.45"} for numeric fields
         let raw = |v: &serde_json::Value| -> Option<f64> {
-            v.get("raw").and_then(serde_json::Value::as_f64)
+            v.f64_field(&["raw"])
         };
 
         Ok(UsKeyStats {

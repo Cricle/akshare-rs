@@ -166,8 +166,7 @@ impl AkShareClient {
                         .and_then(|s| s.parse().ok())
                         .or_else(|| tick.get("prev_price").and_then(serde_json::Value::as_f64)),
                     buy_or_sell: tick
-                        .get("type")
-                        .and_then(|v| v.as_str())
+                        .str_field(&["type"])
                         .map(std::string::ToString::to_string),
                 });
             }

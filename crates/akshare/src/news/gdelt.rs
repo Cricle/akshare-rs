@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::NewsItem;
+use crate::types::value_ext::ValueExt;
 
 impl AkShareClient {
     /// Search news from GDELT API.
@@ -76,20 +77,18 @@ impl AkShareClient {
             .into_iter()
             .flatten()
             .filter_map(|item| {
-                let title = item.get("title").and_then(|v| v.as_str())?.trim();
+                let title = item.str_field(&["title"])?.trim();
                 if title.is_empty() {
                     return None;
                 }
-                let url = item.get("url").and_then(|v| v.as_str()).map(str::to_string);
+                let url = item.str_field(&["url"]).map(str::to_string);
                 let source = item
-                    .get("sourceCommonName")
-                    .and_then(|v| v.as_str())
+                    .str_field(&["sourceCommonName"])
                     .filter(|v| !v.trim().is_empty())
                     .unwrap_or("GDELT")
                     .to_string();
                 let published_at = item
-                    .get("seendate")
-                    .and_then(|v| v.as_str())
+                    .str_field(&["seendate"])
                     .map(gdelt_timestamp_to_date)
                     .unwrap_or_default();
                 Some(NewsItem {

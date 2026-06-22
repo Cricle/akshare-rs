@@ -149,7 +149,7 @@ mod tests {
         let data = resp.result.unwrap().data;
         assert_eq!(data.len(), 1);
         assert_eq!(
-            data[0].get("IR_RATE").and_then(serde_json::Value::as_f64),
+            data[0].f64_field(&["IR_RATE"]),
             Some(1.5)
         );
     }

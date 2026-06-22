@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::NewsItem;
+use crate::types::value_ext::ValueExt;
 
 impl AkShareClient {
     /// Fetch stock news from Marketaux.
@@ -44,24 +45,15 @@ impl AkShareClient {
         let items: Vec<NewsItem> = arr
             .iter()
             .filter_map(|item| {
-                let title = item.get("title")?.as_str()?;
+                let title = item.str_field(&["title"])?;
                 if title.is_empty() {
                     return None;
                 }
-                let description = item
-                    .get("description")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let url = item.get("url").and_then(|v| v.as_str()).map(str::to_string);
-                let source = item
-                    .get("source")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("Marketaux")
-                    .to_string();
+                let description = item.str_or(&["description"], "");
+                let url = item.str_field(&["url"]).map(str::to_string);
+                let source = item.str_or(&["source"], "Marketaux");
                 let published_at = item
-                    .get("published_at")
-                    .and_then(|v| v.as_str())
+                    .str_field(&["published_at"])
                     .map(|s| s[..10.min(s.len())].to_string())
                     .unwrap_or_default();
 

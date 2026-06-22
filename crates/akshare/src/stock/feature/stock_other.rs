@@ -17,6 +17,7 @@ use super::types::{
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 impl AkShareClient {
     /// 东方财富-股票账户统计
@@ -1589,11 +1590,8 @@ impl AkShareClient {
         Ok(items
             .iter()
             .map(|v| {
-                let date = v.get("date").and_then(|d| d.as_str()).unwrap_or("");
-                let value = v
-                    .get("pb")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
+                let date = v.str_or(&["date"], "");
+                let value = v.f64_or(&["pb"], 0.0);
                 MacroDataPoint {
                     date: date.to_string(),
                     value,
@@ -1639,11 +1637,8 @@ impl AkShareClient {
         Ok(items
             .iter()
             .map(|v| {
-                let date = v.get("date").and_then(|d| d.as_str()).unwrap_or("");
-                let value = v
-                    .get("pe")
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(0.0);
+                let date = v.str_or(&["date"], "");
+                let value = v.f64_or(&["pe"], 0.0);
                 MacroDataPoint {
                     date: date.to_string(),
                     value,

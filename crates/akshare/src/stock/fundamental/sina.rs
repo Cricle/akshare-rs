@@ -12,6 +12,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::value_ext::ValueExt;
 
 static RE_TABLE: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"(?is)<table[^>]*>(.*?)</table>").unwrap());
@@ -230,31 +231,31 @@ impl AkShareClient {
                 );
 
                 // Add metadata
-                if let Some(ds) = report.get("data_source").and_then(|v| v.as_str()) {
+                if let Some(ds) = report.str_field(&["data_source"]) {
                     row.insert(
                         "数据源".to_string(),
                         serde_json::Value::String(ds.to_string()),
                     );
                 }
-                if let Some(audit) = report.get("is_audit").and_then(|v| v.as_str()) {
+                if let Some(audit) = report.str_field(&["is_audit"]) {
                     row.insert(
                         "是否审计".to_string(),
                         serde_json::Value::String(audit.to_string()),
                     );
                 }
-                if let Some(pd) = report.get("publish_date").and_then(|v| v.as_str()) {
+                if let Some(pd) = report.str_field(&["publish_date"]) {
                     row.insert(
                         "公告日期".to_string(),
                         serde_json::Value::String(pd.to_string()),
                     );
                 }
-                if let Some(currency) = report.get("rCurrency").and_then(|v| v.as_str()) {
+                if let Some(currency) = report.str_field(&["rCurrency"]) {
                     row.insert(
                         "币种".to_string(),
                         serde_json::Value::String(currency.to_string()),
                     );
                 }
-                if let Some(rtype) = report.get("rType").and_then(|v| v.as_str()) {
+                if let Some(rtype) = report.str_field(&["rType"]) {
                     row.insert(
                         "类型".to_string(),
                         serde_json::Value::String(rtype.to_string()),
@@ -263,7 +264,7 @@ impl AkShareClient {
 
                 for item in items {
                     if let (Some(title), Some(value)) = (
-                        item.get("item_title").and_then(|v| v.as_str()),
+                        item.str_field(&["item_title"]),
                         item.get("item_value"),
                     ) {
                         row.insert(title.to_string(), value.clone());

@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
+use crate::types::value_ext::ValueExt;
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -47,13 +48,10 @@ impl AkShareClient {
         let data = resp.data.unwrap_or_default();
         let mut items = Vec::with_capacity(data.len());
         for v in &data {
-            let market = v.get("market").and_then(|x| x.as_str()).unwrap_or("");
-            let symbol = v.get("symbol").and_then(|x| x.as_str()).unwrap_or("");
-            let price = v
-                .get("price")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            let updated = v.get("reported_at").and_then(|x| x.as_str()).unwrap_or("");
+            let market = v.str_or(&["market"], "");
+            let symbol = v.str_or(&["symbol"], "");
+            let price = v.f64_or(&["price"], 0.0);
+            let updated = v.str_field(&["reported_at"]).unwrap_or("");
 
             items.push(MacroDataPoint {
                 date: updated.get(..10).unwrap_or(updated).to_string(),
@@ -136,7 +134,7 @@ impl AkShareClient {
             && let Some(macro_items) = data.items
         {
             for item in &macro_items {
-                let title = item.get("title").and_then(|v| v.as_str()).unwrap_or("");
+                let title = item.str_or(&["title"], "");
                 let actual = item
                     .get("actual")
                     .and_then(serde_json::Value::as_f64)

@@ -3,6 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::NewsItem;
+use crate::types::value_ext::ValueExt;
 
 impl AkShareClient {
     /// Fetch company-specific news from Finnhub.
@@ -44,24 +45,15 @@ impl AkShareClient {
         let items: Vec<NewsItem> = arr
             .iter()
             .filter_map(|item| {
-                let headline = item.get("headline")?.as_str()?;
+                let headline = item.str_field(&["headline"])?;
                 if headline.is_empty() {
                     return None;
                 }
-                let summary = item
-                    .get("summary")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let source = item
-                    .get("source")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("Finnhub")
-                    .to_string();
-                let url = item.get("url").and_then(|v| v.as_str()).map(str::to_string);
+                let summary = item.str_or(&["summary"], "");
+                let source = item.str_or(&["source"], "Finnhub");
+                let url = item.str_field(&["url"]).map(str::to_string);
                 let published_at = item
-                    .get("datetime")
-                    .and_then(serde_json::Value::as_i64)
+                    .i64_field(&["datetime"])
                     .map(timestamp_to_date)
                     .unwrap_or_default();
 

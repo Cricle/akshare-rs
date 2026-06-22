@@ -254,8 +254,8 @@ impl AkShareClient {
                     if item_type == *period {
                         votes.push(BaiduVote {
                             period: period.to_string(),
-                            bullish: item.get("bullCount").and_then(serde_json::Value::as_i64),
-                            bearish: item.get("bearCount").and_then(serde_json::Value::as_i64),
+                            bullish: item.i64_field(&["bullCount"]),
+                            bearish: item.i64_field(&["bearCount"]),
                             bullish_ratio: item.f64_field(&["bullRatio"]),
                             bearish_ratio: item.f64_field(&["bearRatio"]),
                         });
