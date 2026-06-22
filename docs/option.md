@@ -10,19 +10,22 @@ The `option` module provides options market data.
 - **option_current_day_szse** — SZSE current day options
 
 ### Option Data
-- **option_sse_sina** — SSE options from Sina
-- **option_cffex_sina** — CFFEX options from Sina
-- **option_commodity_sina** — Commodity options from Sina
+- **option_sse_list** — SSE option contract list
+- **option_sse_daily** — SSE option daily bars
+- **option_sse_spot_price** — SSE option spot prices
+- **option_cffex_sz50_list** — CFFEX SZ50 option list
+- **option_cffex_hs300_list** — CFFEX HS300 option list
+- **option_commodity_contract** — Commodity option contracts
+- **option_commodity_hist** — Commodity option history
 - **option_comm_qihuo** — Commodity options from Qihuo
 - **option_comm_info** — Commodity option info
 - **option_comm_symbol** — Commodity option symbols
 
 ### Option Analysis
-- **option_analysis_em** — Option analysis from Eastmoney
 - **option_risk_indicator** — Risk indicators
 
 ### Option Billboard
-- **option_lhb_em** — Option billboard data
+- **option_lhb** — Option billboard data
 
 ### Margin
 - **option_margin** — Option margin data
@@ -46,6 +49,6 @@ let client = AkShareClient::new();
 // SSE options
 let opts = client.option_current_day_sse("510050").await?;
 
-// Option analysis
-let analysis = client.option_analysis_em("510050", "认购").await?;
+// SSE option daily bars
+let opts = client.option_sse_daily("510050").await?;
 ```

@@ -5,9 +5,9 @@ The `forex` module provides foreign exchange rate data.
 ## Functions (19 total)
 
 ### Exchange Rates
-- **forex_spot_em** — Real-time forex spot from Eastmoney
-- **forex_hist_em** — Historical forex data from Eastmoney
-- **currency_boc_sina** — BOC exchange rates from Sina
+- **forex_spot** — Real-time forex spot from Eastmoney
+- **forex_hist** — Historical forex data from Eastmoney
+- **currency_boc** — BOC exchange rates from Sina
 - **currency_boc_safe** — SAFE exchange rates
 - **currency_convert** — Currency conversion
 - **currency_currencies** — Available currencies
@@ -18,7 +18,7 @@ The `forex` module provides foreign exchange rate data.
 
 ### FX Data
 - **fx_quote** — FX quotes
-- **fx_quote_baidu** — FX quotes from Baidu
+- **fx_quote** — FX quotes from Baidu
 - **fx_c_swap_cm** — FX swap from ChinaMoney
 
 ## Usage Examples
@@ -29,11 +29,11 @@ use akshare::AkShareClient;
 let client = AkShareClient::new();
 
 // Forex spot
-let spot = client.forex_spot_em().await?;
+let spot = client.forex_spot().await?;
 
 // Historical forex
-let hist = client.forex_hist_em("USD/CNY", "20240101", "20241231").await?;
+let hist = client.forex_hist("USD/CNY", "20240101", "20241231").await?;
 
 // BOC rates
-let boc = client.currency_boc_sina().await?;
+let boc = client.currency_boc().await?;
 ```

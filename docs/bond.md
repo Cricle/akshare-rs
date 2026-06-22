@@ -2,7 +2,7 @@
 
 The `bond` module provides bond market data from multiple sources.
 
-## Functions (51 total)
+## Functions (47 total)
 
 ### Government Bonds
 - **bond_zh_us_rate** — China/US government bond yields
@@ -16,7 +16,7 @@ The `bond` module provides bond market data from multiple sources.
 - **bond_zh_cov_value_analysis** — Convertible bond valuation
 
 ### Corporate Bonds
-- **bond_corporate_issue_cninfo** — Corporate bond issuance
+- **bond_corporate_issue** — Corporate bond issuance
 - **bond_info_cm** — ChinaMoney bond info query
 - **bond_info_cm_query** — ChinaMoney query parameters
 - **bond_info_detail_cm** — ChinaMoney bond details
@@ -30,23 +30,22 @@ The `bond` module provides bond market data from multiple sources.
 - **bond_cb_jsl** — Convertible bond data from JSL
 
 ### Bond Buyback
-- **bond_sh_buy_back_em** — Shanghai bond buyback
-- **bond_sz_buy_back_em** — Shenzhen bond buyback
-- **bond_buy_back_hist_em** — Buyback history
+- **bond_sh_buy_back** — Shanghai bond buyback
+- **bond_sz_buy_back** — Shenzhen bond buyback
+- **bond_buy_back_hist** — Buyback history
 
 ### Bond Summary
-- **bond_cash_summary_sse** — SSE cash bond summary
-- **bond_deal_summary_sse** — SSE bond deal summary
+- **bond_cash_summary** — SSE cash bond summary
+- **bond_deal_summary** — SSE bond deal summary
 
 ### Bond Issuance
 - **bond_treasury_index_cbond** — Treasury index from CBond
-- **bond_local_government_issue_cninfo** — Local government bonds
+- **bond_local_government_issue** — Local government bonds
 
 ### Other Bond Data
-- **bond_zh_sina** — Sina bond data
-- **bond_gb_sina** — Sina government bond data
-- **bond_cb_sina** — Sina convertible bond data
-- **bond_cb_ths** — THS convertible bond data
+- **bond_gb_zh** — Chinese government bond data
+- **bond_cb_profile** — Convertible bond profile from Sina
+- **bond_cb_summary** — Convertible bond summary from Sina
 - **bond_nafmii** — NAFMII data
 - **bond_em_rate** — Eastmoney rate data
 

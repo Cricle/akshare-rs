@@ -2,20 +2,20 @@
 
 The `index` module provides index data from multiple sources.
 
-## Functions (97 total)
+## Functions (64 total)
 
 ### A-share Indices
 - **index_zh_a_hist** — A-share index historical data
 - **index_zh_a_hist_min_em** — A-share index minute data
-- **index_zh_a_spot_em** — A-share index real-time
-- **index_code_id_map_em** — Code-to-ID mapping
+- **index_code_id_map** — Code-to-ID mapping
 
 ### HK Indices
 - **index_hk_spot_em** — HK index real-time
-- **index_hk_hist_em** — HK index historical
+- **index_hk_spot_sina** — HK index real-time from Sina
+- **index_hk_daily** — HK index daily data
 
 ### Global Indices
-- **index_global_spot_em** — Global index real-time
+- **index_global_spot** — Global index real-time
 - **index_global_hist_em** — Global index historical
 - **index_global_hist_sina** — Global index from Sina
 - **index_global_name_table** — Global index name table
@@ -40,11 +40,12 @@ The `index` module provides index data from multiple sources.
 - **index_cx** — Caixin index data
 
 ### QVIX
-- **index_option_qvix_sse** — QVIX daily
-- **index_option_qvix_sse_min** — QVIX minute
+- **index_option_50etf_qvix** — 50ETF QVIX daily
+- **index_option_300etf_qvix** — 300ETF QVIX daily
+- **index_option_500etf_qvix** — 500ETF QVIX daily
+- **index_option_50etf_qvix_min** — 50ETF QVIX minute
 
 ### Other Indices
-- **index_stock_us_sina** — US stock index from Sina
 - **index_stock_hk** — HK stock index
 - **index_cflp** — CFLP logistics index
 - **index_sugar** — Sugar price index
@@ -67,7 +68,7 @@ let client = AkShareClient::new();
 let hist = client.index_zh_a_hist("000001", "daily", "20240101", "20241231").await?;
 
 // Global index spot
-let spot = client.index_global_spot_em().await?;
+let spot = client.index_global_spot().await?;
 
 // Shenwan index info
 let sw = client.sw_index_first_info().await?;

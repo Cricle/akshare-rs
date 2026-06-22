@@ -48,8 +48,8 @@ Economic data: air quality, AMAC fund industry, articles/research, automotive, b
 - **fred_qd** — FRED Quarterly Data
 
 ### Migration
-- **migration_area_baidu** — 百度迁徙-城市间迁徙
-- **migration_scale_baidu** — 百度迁徙-迁徙规模
+- **migration_area** — 百度迁徙-城市间迁徙
+- **migration_scale** — 百度迁徙-迁徙规模
 
 ### NLP
 - **nlp_answer** — NLP问答

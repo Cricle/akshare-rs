@@ -8,7 +8,7 @@
 - **Async/await** — built on tokio for high-performance concurrent requests
 - **Type-safe** — strong typing with serde for all API responses
 - **Mock-friendly** — built-in mock server support for testing
-- **1096 functions** — covers 100% of akshare's public API
+- **1407 functions** — covers 100% of akshare's public API
 
 ## Quick Start
 
@@ -23,7 +23,7 @@ async fn main() -> Result<(), akshare::Error> {
     let quote = client.a_share_quote("600000").await?;
     
     // Fund NAV history
-    let nav = client.fund_etf_spot_em().await?;
+    let nav = client.fund_etf_spot().await?;
     
     Ok(())
 }
@@ -32,7 +32,7 @@ async fn main() -> Result<(), akshare::Error> {
 ## Modules
 
 ### Stock Data
-- **stock** — A-share, HK, US stock data (433 functions)
+- **stock** — A-share, HK, US stock data (469 functions)
   - Real-time quotes, historical candles, sector rankings
   - Billboards, shareholder analysis, capital flow
   - HK/US stock data with multiple fallback sources
@@ -43,18 +43,18 @@ async fn main() -> Result<(), akshare::Error> {
   - Fund manager info, ratings, scale changes
 
 ### Bond Data
-- **bond** — Government, convertible, corporate bonds (51 functions)
+- **bond** — Government, convertible, corporate bonds (47 functions)
   - ChinaMoney yield curves, Sina/THS sources
   - SSE summaries, CNINFO issuance data
 
 ### Futures & Options
-- **futures** — Futures daily bars, realtime quotes (109 functions)
+- **futures** — Futures daily bars, realtime quotes (110 functions)
   - Sina, Eastmoney, exchange-specific data
   - Inventory, delivery, settlement data
 - **option** — Option chains, billboard data (48 functions)
 
 ### Index Data
-- **index** — A-share, HK, global indices (97 functions)
+- **index** — A-share, HK, global indices (64 functions)
   - Shenwan, CNIndex, CX, QVIX indices
   - Real-time and historical data
 
@@ -68,13 +68,13 @@ async fn main() -> Result<(), akshare::Error> {
 - **crypto** — Cryptocurrency spot data (4 functions)
 - **commodity** — Commodity prices, carbon trading (9 functions)
 - **economy** — Economic events, news, articles (62 functions)
-- **news** — Financial news from multiple sources (6 functions)
+- **news** — Financial news from multiple sources (17 functions)
 - **spot** — Spot market prices (14 functions)
 - **reits** — REITs data (5 functions)
 - **bank** — Banking data (1 function)
 - **cal** — Calendar, volatility calculations (2 functions)
 - **tool** — Trade calendar, utilities (2 functions)
-- **provider** — Data provider abstractions (12 functions)
+- **provider** — Data provider abstractions (13 functions)
 
 ## Testing
 

@@ -12,7 +12,7 @@ The `commodity` module provides commodity market data.
 - **energy_carbon_hb** — Hubei carbon trading
 
 ### Energy
-- **energy_oil_em** — Oil prices from Eastmoney
+- **energy_oil_hist** — Oil price history
 - **energy_oil_detail** — Oil detail data
 
 ### Spot
@@ -29,5 +29,5 @@ let client = AkShareClient::new();
 let carbon = client.energy_carbon_bj().await?;
 
 // Oil prices
-let oil = client.energy_oil_em("布伦特").await?;
+let oil = client.energy_oil_hist().await?;
 ```
