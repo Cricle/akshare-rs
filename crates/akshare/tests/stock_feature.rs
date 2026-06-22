@@ -4165,10 +4165,7 @@ async fn test_stock_financial_abstract_ths_mock() {
             ["200", "180"]
         ]
     });
-    let html = format!(
-        r#"<html><body><p id="main">{}</p></body></html>"#,
-        ths_json
-    );
+    let html = format!(r#"<html><body><p id="main">{}</p></body></html>"#, ths_json);
     mock_any_get_text(&server, ".*", &html).await;
     let client = mock_client(&server);
     let result = client
@@ -4184,7 +4181,12 @@ async fn test_stock_financial_analysis_indicator_mock() {
     let server = MockServer::start().await;
     // Return HTML without the expected year table structure;
     // method will return Ok(vec![]) when no year links found
-    mock_any_get_text(&server, ".*", "<html><body><div id='con02-1'></div></body></html>").await;
+    mock_any_get_text(
+        &server,
+        ".*",
+        "<html><body><div id='con02-1'></div></body></html>",
+    )
+    .await;
     let client = mock_client(&server);
     let result = client
         .stock_financial_analysis_indicator("600000", "2020")
@@ -4362,12 +4364,7 @@ async fn test_stock_balance_sheet_by_report_em_typed_mock() {
         {"SECURITY_CODE": "000001", "SECURITY_NAME_ABBR": "Test", "TOTAL_ASSETS": 1000000.0}
     ]});
     // Index HTML page
-    mock_any_get_text(
-        &server,
-        "PC_HSF10/NewFinanceAnalysis/Index",
-        index_html,
-    )
-    .await;
+    mock_any_get_text(&server, "PC_HSF10/NewFinanceAnalysis/Index", index_html).await;
     // Date list
     Mock::given(method("GET"))
         .and(path_regex(".*DateAjaxNew.*"))
@@ -4397,12 +4394,7 @@ async fn test_stock_cash_flow_sheet_by_report_em_typed_mock() {
     let data_json = serde_json::json!({"data": [
         {"SECURITY_CODE": "000001", "SECURITY_NAME_ABBR": "Test", "SALES_SERVICES": 500000.0}
     ]});
-    mock_any_get_text(
-        &server,
-        "PC_HSF10/NewFinanceAnalysis/Index",
-        index_html,
-    )
-    .await;
+    mock_any_get_text(&server, "PC_HSF10/NewFinanceAnalysis/Index", index_html).await;
     Mock::given(method("GET"))
         .and(path_regex(".*DateAjaxNew.*"))
         .respond_with(ResponseTemplate::new(200).set_body_json(dates_json))
@@ -4425,7 +4417,8 @@ async fn test_stock_cash_flow_sheet_by_report_em_typed_mock() {
 #[tokio::test]
 async fn test_stock_profit_sheet_by_report_delisted_mock() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"TOTAL_OPERATE_INCOME": 500000.0, "NETPROFIT": 50000.0}]});
+    let body =
+        serde_json::json!({"data": [{"TOTAL_OPERATE_INCOME": 500000.0, "NETPROFIT": 50000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
@@ -4439,7 +4432,8 @@ async fn test_stock_profit_sheet_by_report_delisted_mock() {
 #[tokio::test]
 async fn test_stock_balance_sheet_by_report_delisted_mock() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
+    let body =
+        serde_json::json!({"data": [{"TOTAL_ASSETS": 1000000.0, "TOTAL_LIABILITIES": 500000.0}]});
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client

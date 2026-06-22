@@ -351,7 +351,9 @@ async fn e2e_spot_quotations_sge() {
 #[ignore]
 async fn e2e_fund_etf_hist() {
     let client = require_e2e();
-    let result = client.fund_etf_hist_em("510300", "daily", "20240101", "20240110", "qfq").await;
+    let result = client
+        .fund_etf_hist_em("510300", "daily", "20240101", "20240110", "qfq")
+        .await;
     assert!(result.is_ok(), "API failed: {:?}", result.err());
     let data = result.unwrap();
     assert!(!data.is_empty(), "expected non-empty data");

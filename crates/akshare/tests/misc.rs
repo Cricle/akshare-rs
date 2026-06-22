@@ -2655,11 +2655,34 @@ async fn test_option_lhb_misc() {
     let mut data = Vec::new();
     for _ in 0..28 {
         data.push(serde_json::json!([
-            "期权交易", "2024-01-02", "510050", "50ETF",
-            null, "某券商", 1, 1000.0, 500.0, 200.0, 100.0,
-            50.0, 300.0, 150.0, 100.0, 50.0, 25.0, 800.0,
-            400.0, 200.0, 100.0, 50.0, 25.0, 12.5, 600.0,
-            300.0, 150.0, 75.0
+            "期权交易",
+            "2024-01-02",
+            "510050",
+            "50ETF",
+            null,
+            "某券商",
+            1,
+            1000.0,
+            500.0,
+            200.0,
+            100.0,
+            50.0,
+            300.0,
+            150.0,
+            100.0,
+            50.0,
+            25.0,
+            800.0,
+            400.0,
+            200.0,
+            100.0,
+            50.0,
+            25.0,
+            12.5,
+            600.0,
+            300.0,
+            150.0,
+            75.0
         ]));
     }
     let body = serde_json::json!({ "result": { "data": data } });
@@ -2788,13 +2811,11 @@ async fn test_macro_china_nbs_region_misc() {
 #[tokio::test]
 async fn test_rate_interbank_misc() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(&[
-        serde_json::json!({
-            "REPORT_DATE": "2024-01-02",
-            "INDICATOR_VALUE": 1.50,
-            "INDICATOR_NAME": "Shibor隔夜"
-        }),
-    ]);
+    let body = em_datacenter_response(&[serde_json::json!({
+        "REPORT_DATE": "2024-01-02",
+        "INDICATOR_VALUE": 1.50,
+        "INDICATOR_NAME": "Shibor隔夜"
+    })]);
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client
