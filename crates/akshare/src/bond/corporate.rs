@@ -37,15 +37,22 @@ impl AkShareClient {
                 if symbol.is_empty() {
                     return None;
                 }
-                let name = v
-                    .str_or(&["SECURITY_NAME_ABBR", "BOND_NAME", "SECNAME", "SHORT_NAME"], &symbol);
+                let name = v.str_or(
+                    &["SECURITY_NAME_ABBR", "BOND_NAME", "SECNAME", "SHORT_NAME"],
+                    &symbol,
+                );
 
                 let date = v
                     .str_field(&["ISSUE_DATE", "DECLAREDATE"])
                     .unwrap_or(&today);
 
                 let close = v
-                    .f64_field(&["ISSUE_PRICE", "PAR_VALUE", "FACE_VALUE", "CURRENT_BOND_PRICE"])
+                    .f64_field(&[
+                        "ISSUE_PRICE",
+                        "PAR_VALUE",
+                        "FACE_VALUE",
+                        "CURRENT_BOND_PRICE",
+                    ])
                     .unwrap_or(100.0);
 
                 let yield_rate =
@@ -66,4 +73,3 @@ impl AkShareClient {
         Ok(items)
     }
 }
-
