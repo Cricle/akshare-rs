@@ -110,7 +110,7 @@ fn hk_query_allowed_terms(value: &str) -> Vec<String> {
     let tokens: Vec<&str> = value.split_whitespace().collect();
     let mut kept = Vec::new();
     for token in tokens {
-        if token.chars().any(|ch| is_cjk(ch)) {
+        if token.chars().any(is_cjk) {
             kept.push(token.to_string());
             continue;
         }
@@ -185,7 +185,8 @@ fn normalize_hkex_release_date(value: &str) -> Option<String> {
 }
 
 pub(super) fn hkex_item_is_high_value(item: &NewsItem) -> bool {
-    let combined = super::super::news_filter::normalize_news_text(&format!("{} {}", item.title, item.summary));
+    let combined =
+        super::super::news_filter::normalize_news_text(&format!("{} {}", item.title, item.summary));
     let positive_markers = [
         "annualresults",
         "interimresults",

@@ -90,8 +90,8 @@ pub(crate) fn is_preferred_equity_listing(item: &StockSearchResult) -> bool {
     let upper_name = item.name.to_ascii_uppercase();
 
     let market = search_market_kind(&item.market);
-    if market == MarketKind::HongKong {
-        if upper_name.contains(" WR")
+    if market == MarketKind::HongKong
+        && (upper_name.contains(" WR")
             || upper_name.ends_with("-WR")
             || upper_name.contains(" BULL")
             || upper_name.contains(" BEAR")
@@ -103,10 +103,9 @@ pub(crate) fn is_preferred_equity_listing(item: &StockSearchResult) -> bool {
             || upper_name.contains(" N2")
             || upper_name.contains(" N3")
             || upper_name.contains(" N4")
-            || upper_name.contains(" N5")
-        {
-            return false;
-        }
+            || upper_name.contains(" N5"))
+    {
+        return false;
     }
     true
 }
@@ -236,10 +235,11 @@ impl MarketDataClient {
         // Direct lookup fallback for codes not found in suggest API (e.g. certain indices)
         if merged.is_empty() {
             let trimmed_query = query.trim();
-            if !trimmed_query.is_empty() && trimmed_query.chars().all(|c| c.is_ascii_digit()) {
-                if let Some(direct) = self.search_eastmoney_direct_lookup(trimmed_query).await {
-                    merged.push(direct);
-                }
+            if !trimmed_query.is_empty()
+                && trimmed_query.chars().all(|c| c.is_ascii_digit())
+                && let Some(direct) = self.search_eastmoney_direct_lookup(trimmed_query).await
+            {
+                merged.push(direct);
             }
         }
 
@@ -514,7 +514,6 @@ impl MarketDataClient {
             })
             .collect())
     }
-
 }
 
 #[cfg(test)]

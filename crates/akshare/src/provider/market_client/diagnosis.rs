@@ -57,11 +57,13 @@ impl DataFetchDiagnosis {
     }
 }
 
+type FetcherFn<T> =
+    Box<dyn Fn() -> Pin<Box<dyn Future<Output = anyhow::Result<T>> + Send>> + Send + Sync>;
+
 /// A named provider that can attempt to fetch data.
 pub struct NamedProvider<T> {
     pub name: String,
-    pub fetcher:
-        Box<dyn Fn() -> Pin<Box<dyn Future<Output = anyhow::Result<T>> + Send>> + Send + Sync>,
+    pub fetcher: FetcherFn<T>,
 }
 
 impl<T> NamedProvider<T> {

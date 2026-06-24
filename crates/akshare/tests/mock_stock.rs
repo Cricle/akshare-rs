@@ -241,18 +241,32 @@ async fn test_mock_stock_zh_a_hist_min_em() {
 
 // No-arg stock_other methods
 macro_test!(test_mock_stock_a_all_pb, stock_a_all_pb);
-macro_test!(test_mock_stock_a_below_net_asset_statistics, stock_a_below_net_asset_statistics);
+macro_test!(
+    test_mock_stock_a_below_net_asset_statistics,
+    stock_a_below_net_asset_statistics
+);
 macro_test!(test_mock_stock_account_statistics, stock_account_statistics);
 macro_test!(test_mock_stock_a_congestion_lg, stock_a_congestion_lg);
 macro_test!(test_mock_stock_a_gxl_lg, stock_a_gxl_lg);
-macro_test!(test_mock_stock_a_high_low_statistics, stock_a_high_low_statistics);
+macro_test!(
+    test_mock_stock_a_high_low_statistics,
+    stock_a_high_low_statistics
+);
 macro_test!(test_mock_stock_a_ttm_lyr, stock_a_ttm_lyr);
 macro_test!(test_mock_stock_buffett_index_lg, stock_buffett_index_lg);
-macro_test_arg1!(test_mock_stock_cg_equity_mortgage, stock_cg_equity_mortgage, "600000");
+macro_test_arg1!(
+    test_mock_stock_cg_equity_mortgage,
+    stock_cg_equity_mortgage,
+    "600000"
+);
 macro_test_arg1!(test_mock_stock_cg_guarantee, stock_cg_guarantee, "600000");
 macro_test_arg1!(test_mock_stock_cg_lawsuit, stock_cg_lawsuit, "600000");
 macro_test_arg1!(test_mock_stock_classify, stock_classify, "600000");
-macro_test_arg1!(test_mock_stock_concept_cons_futu, stock_concept_cons_futu, "600000");
+macro_test_arg1!(
+    test_mock_stock_concept_cons_futu,
+    stock_concept_cons_futu,
+    "600000"
+);
 macro_test_arg1!(test_mock_stock_dividend, stock_dividend, "600000");
 macro_test!(test_mock_stock_ebs_lg, stock_ebs_lg);
 macro_test_arg1!(test_mock_stock_esg_rate, stock_esg_rate, "600000");
@@ -261,7 +275,10 @@ macro_test_arg1!(test_mock_stock_index_pb_lg, stock_index_pb_lg, "000001");
 macro_test_arg1!(test_mock_stock_index_pe_lg, stock_index_pe_lg, "000001");
 macro_test!(test_mock_stock_ipo_benefit, stock_ipo_benefit);
 macro_test!(test_mock_stock_ipo_summary, stock_ipo_summary);
-macro_test!(test_mock_stock_market_activity_legu, stock_market_activity_legu);
+macro_test!(
+    test_mock_stock_market_activity_legu,
+    stock_market_activity_legu
+);
 macro_test!(test_mock_stock_market_pb_lg, stock_market_pb_lg);
 macro_test!(test_mock_stock_market_pe_lg, stock_market_pe_lg);
 macro_test!(test_mock_stock_new_gh, stock_new_gh);
@@ -269,39 +286,116 @@ macro_test!(test_mock_stock_new_ipo, stock_new_ipo);
 macro_test_arg1!(test_mock_stock_news_main_cx, stock_news_main_cx, "600000");
 macro_test_arg1!(test_mock_stock_profile, stock_profile, "600000");
 macro_test_arg1!(test_mock_stock_qsjy, stock_qsjy, "2024-01-02");
-macro_test_arg1!(test_mock_stock_report_disclosure, stock_report_disclosure, "600000");
-macro_test_arg1!(test_mock_stock_report_fund_hold_detail, stock_report_fund_hold_detail, "600000");
-macro_test_arg1!(test_mock_stock_research_report, stock_research_report, "600000");
+macro_test_arg1!(
+    test_mock_stock_report_disclosure,
+    stock_report_disclosure,
+    "600000"
+);
+macro_test_arg1!(
+    test_mock_stock_report_fund_hold_detail,
+    stock_report_fund_hold_detail,
+    "600000"
+);
+macro_test_arg1!(
+    test_mock_stock_research_report,
+    stock_research_report,
+    "600000"
+);
 macro_test_arg1!(test_mock_stock_sector_detail, stock_sector_detail, "600000");
-macro_test!(test_mock_stock_sgt_reference_exchange_rate_sse, stock_sgt_reference_exchange_rate_sse);
-macro_test!(test_mock_stock_sgt_reference_exchange_rate_szse, stock_sgt_reference_exchange_rate_szse);
-macro_test!(test_mock_stock_sgt_settlement_exchange_rate_sse, stock_sgt_settlement_exchange_rate_sse);
-macro_test!(test_mock_stock_sgt_settlement_exchange_rate_szse, stock_sgt_settlement_exchange_rate_szse);
+macro_test!(
+    test_mock_stock_sgt_reference_exchange_rate_sse,
+    stock_sgt_reference_exchange_rate_sse
+);
+macro_test!(
+    test_mock_stock_sgt_reference_exchange_rate_szse,
+    stock_sgt_reference_exchange_rate_szse
+);
+macro_test!(
+    test_mock_stock_sgt_settlement_exchange_rate_sse,
+    stock_sgt_settlement_exchange_rate_sse
+);
+macro_test!(
+    test_mock_stock_sgt_settlement_exchange_rate_szse,
+    stock_sgt_settlement_exchange_rate_szse
+);
 macro_test_arg1!(test_mock_stock_share_change, stock_share_change, "600000");
 macro_test_arg1!(test_mock_stock_sns_sseinfo, stock_sns_sseinfo, "600000");
-macro_test_arg1!(test_mock_stock_sse_deal_daily, stock_sse_deal_daily, "2024-01-02");
+macro_test_arg1!(
+    test_mock_stock_sse_deal_daily,
+    stock_sse_deal_daily,
+    "2024-01-02"
+);
 macro_test!(test_mock_stock_sy_hy, stock_sy_hy);
-macro_test_arg1!(test_mock_stock_szse_area_summary, stock_szse_area_summary, "2024-01-02");
-macro_test_arg1!(test_mock_stock_szse_sector_summary, stock_szse_sector_summary, "2024-01-02");
-macro_test_arg1!(test_mock_stock_szse_summary, stock_szse_summary, "2024-01-02");
+macro_test_arg1!(
+    test_mock_stock_szse_area_summary,
+    stock_szse_area_summary,
+    "2024-01-02"
+);
+macro_test_arg1!(
+    test_mock_stock_szse_sector_summary,
+    stock_szse_sector_summary,
+    "2024-01-02"
+);
+macro_test_arg1!(
+    test_mock_stock_szse_summary,
+    stock_szse_summary,
+    "2024-01-02"
+);
 macro_test_arg1!(test_mock_stock_tfp, stock_tfp, "2024-01-02");
 macro_test_arg1!(test_mock_stock_value, stock_value, "600000");
 macro_test_arg1!(test_mock_stock_xgsr, stock_xgsr, "600000");
 macro_test_arg1!(test_mock_stock_yzxdr, stock_yzxdr, "2024-01-02");
 macro_test_arg1!(test_mock_stock_zcfz_bj, stock_zcfz_bj, "600000");
-macro_test_arg2!(test_mock_stock_zdhtmx, stock_zdhtmx, "2024-01-01", "2024-01-31");
+macro_test_arg2!(
+    test_mock_stock_zdhtmx,
+    stock_zdhtmx,
+    "2024-01-01",
+    "2024-01-31"
+);
 
 // Single-arg stock_other methods
-macro_test_arg1!(test_mock_stock_a_code_to_symbol, stock_a_code_to_symbol, "600000");
+macro_test_arg1!(
+    test_mock_stock_a_code_to_symbol,
+    stock_a_code_to_symbol,
+    "600000"
+);
 macro_test_arg1!(test_mock_stock_allotment, stock_allotment, "600000");
 macro_test_arg2!(test_mock_stock_cyq, stock_cyq, "600000", "qfq");
-macro_test_arg1!(test_mock_stock_fhps_detail_ths, stock_fhps_detail_ths, "600000");
+macro_test_arg1!(
+    test_mock_stock_fhps_detail_ths,
+    stock_fhps_detail_ths,
+    "600000"
+);
 macro_test_arg1!(test_mock_stock_price_js, stock_price_js, "600000");
-macro_test_arg1!(test_mock_stock_share_hold_change_bse, stock_share_hold_change_bse, "2024-01-01");
-macro_test_arg1!(test_mock_stock_share_hold_change_sse, stock_share_hold_change_sse, "2024-01-01");
-macro_test_arg1!(test_mock_stock_share_hold_change_szse, stock_share_hold_change_szse, "2024-01-01");
+macro_test_arg1!(
+    test_mock_stock_share_hold_change_bse,
+    stock_share_hold_change_bse,
+    "2024-01-01"
+);
+macro_test_arg1!(
+    test_mock_stock_share_hold_change_sse,
+    stock_share_hold_change_sse,
+    "2024-01-01"
+);
+macro_test_arg1!(
+    test_mock_stock_share_hold_change_szse,
+    stock_share_hold_change_szse,
+    "2024-01-01"
+);
 
 // Single-arg stock_other methods (delisted reports)
-macro_test_arg1!(test_mock_stock_balance_sheet_by_report_delisted, stock_balance_sheet_by_report_delisted, "600000");
-macro_test_arg1!(test_mock_stock_cash_flow_sheet_by_report_delisted, stock_cash_flow_sheet_by_report_delisted, "600000");
-macro_test_arg1!(test_mock_stock_profit_sheet_by_report_delisted, stock_profit_sheet_by_report_delisted, "600000");
+macro_test_arg1!(
+    test_mock_stock_balance_sheet_by_report_delisted,
+    stock_balance_sheet_by_report_delisted,
+    "600000"
+);
+macro_test_arg1!(
+    test_mock_stock_cash_flow_sheet_by_report_delisted,
+    stock_cash_flow_sheet_by_report_delisted,
+    "600000"
+);
+macro_test_arg1!(
+    test_mock_stock_profit_sheet_by_report_delisted,
+    stock_profit_sheet_by_report_delisted,
+    "600000"
+);

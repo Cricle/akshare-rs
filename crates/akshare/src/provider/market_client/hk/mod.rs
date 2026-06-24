@@ -2,11 +2,11 @@ mod news;
 mod tencent;
 mod test_helpers;
 
+use super::news_filter::{build_dated_news_query, merge_ranked_news};
 use super::{
     FundamentalsSnapshot, GeneralSearchIntent, MarketDataClient, NewsItem, QuoteSnapshot,
     SearchProviderKind, StockSearchResult,
 };
-use super::news_filter::{build_dated_news_query, merge_ranked_news};
 use anyhow::{Context, bail};
 use chrono::{Days, NaiveDate};
 use regex::Regex;
@@ -88,10 +88,7 @@ impl MarketDataClient {
             .search_stocks_from_eastmoney(standard_code, Some("港股"), 8)
             .await
             .unwrap_or_default();
-        let matched = items
-            .drain(..)
-            .find(|item| item.symbol == standard_code)
-            .or_else(|| None);
+        let matched = items.drain(..).find(|item| item.symbol == standard_code);
         let matched = if matched.is_some() {
             matched
         } else {
@@ -227,7 +224,7 @@ impl MarketDataClient {
             .filter(|item| {
                 item.item_name
                     .as_deref()
-                    .is_some_and(|name| names.iter().any(|candidate| name == *candidate))
+                    .is_some_and(|name| names.contains(&name))
             })
             .max_by(|left, right| left.std_report_date.cmp(&right.std_report_date))
             .and_then(|item| item.amount)
@@ -305,8 +302,7 @@ impl MarketDataClient {
             .await?;
         let matched = items
             .drain(..)
-            .find(|item| item.symbol.eq_ignore_ascii_case(&search_code))
-            .or_else(|| None);
+            .find(|item| item.symbol.eq_ignore_ascii_case(&search_code));
 
         let company_name = matched
             .as_ref()
@@ -385,48 +381,44 @@ impl MarketDataClient {
             net_income_usd: eastmoney_main.as_ref().and_then(|item| item.holder_profit),
             revenues_usd: eastmoney_main.as_ref().and_then(|item| item.operate_income),
             assets_usd: eastmoney_main.as_ref().and_then(|item| item.total_assets),
-            liabilities_usd: 
-                eastmoney_main
-                    .as_ref()
-                    .and_then(|item| item.total_liabilities),
-            stockholders_equity_usd: 
-                eastmoney_main
-                    .as_ref()
-                    .and_then(|item| item.total_parent_equity),
+            liabilities_usd: eastmoney_main
+                .as_ref()
+                .and_then(|item| item.total_liabilities),
+            stockholders_equity_usd: eastmoney_main
+                .as_ref()
+                .and_then(|item| item.total_parent_equity),
             cash_and_equivalents_usd: cash_and_equivalents,
             gross_profit_usd: eastmoney_main.as_ref().and_then(|item| item.gross_profit),
             operating_income_usd: operating_income,
             operating_expenses_usd: operating_expenses,
-            operating_cash_flow_usd: 
-                eastmoney_main
-                    .as_ref()
-                    .and_then(|item| item.netcash_operate)
-                    .or_else(|| {
-                        hk_cashflow_items.as_ref().and_then(|items| {
-                            Self::latest_hk_statement_amount(
-                                items,
-                                &["经营活动产生的现金流量净额", "经营业务现金流量净额"],
-                            )
-                        })
-                    }),
-            capital_expenditure_usd: 
-                eastmoney_main
-                    .as_ref()
-                    .and_then(|item| item.capital_expenditure)
-                    .map(f64::abs)
-                    .or_else(|| {
-                        hk_cashflow_items.as_ref().and_then(|items| {
-                            // "购建固定资产、无形资产和其他长期资产支付的现金" is the
-                            // standard CAPEX line on the HK cashflow statement.
-                            Self::latest_hk_statement_amount(
-                                items,
-                                &[
-                                    "购建固定资产、无形资产和其他长期资产支付的现金",
-                                    "购买固定资产、无形资产及其他长期资产的款项",
-                                ],
-                            )
-                        })
-                    }),
+            operating_cash_flow_usd: eastmoney_main
+                .as_ref()
+                .and_then(|item| item.netcash_operate)
+                .or_else(|| {
+                    hk_cashflow_items.as_ref().and_then(|items| {
+                        Self::latest_hk_statement_amount(
+                            items,
+                            &["经营活动产生的现金流量净额", "经营业务现金流量净额"],
+                        )
+                    })
+                }),
+            capital_expenditure_usd: eastmoney_main
+                .as_ref()
+                .and_then(|item| item.capital_expenditure)
+                .map(f64::abs)
+                .or_else(|| {
+                    hk_cashflow_items.as_ref().and_then(|items| {
+                        // "购建固定资产、无形资产和其他长期资产支付的现金" is the
+                        // standard CAPEX line on the HK cashflow statement.
+                        Self::latest_hk_statement_amount(
+                            items,
+                            &[
+                                "购建固定资产、无形资产和其他长期资产支付的现金",
+                                "购买固定资产、无形资产及其他长期资产的款项",
+                            ],
+                        )
+                    })
+                }),
             free_cash_flow_usd: {
                 let ocf = eastmoney_main
                     .as_ref()
@@ -460,30 +452,28 @@ impl MarketDataClient {
                 }
             },
             long_term_debt_usd: long_term_debt,
-            current_debt_usd: 
-                eastmoney_main
-                    .as_ref()
-                    .and_then(|item| item.current_liability)
-                    .or(short_term_debt),
-            total_debt_usd: 
-                eastmoney_main
-                    .as_ref()
-                    .and_then(
-                        |item| match (item.current_liability, item.noncurrent_liab_1year) {
-                            (Some(current), Some(noncurrent)) => Some(current + noncurrent),
-                            (Some(current), None) => Some(current),
-                            (None, Some(noncurrent)) => Some(noncurrent),
-                            (None, None) => None,
-                        },
-                    )
-                    .or_else(|| {
-                        match (short_term_debt, long_term_debt.or(noncurrent_liabilities)) {
-                            (Some(current), Some(noncurrent)) => Some(current + noncurrent),
-                            (Some(current), None) => Some(current),
-                            (None, Some(noncurrent)) => Some(noncurrent),
-                            (None, None) => None,
-                        }
-                    }),
+            current_debt_usd: eastmoney_main
+                .as_ref()
+                .and_then(|item| item.current_liability)
+                .or(short_term_debt),
+            total_debt_usd: eastmoney_main
+                .as_ref()
+                .and_then(
+                    |item| match (item.current_liability, item.noncurrent_liab_1year) {
+                        (Some(current), Some(noncurrent)) => Some(current + noncurrent),
+                        (Some(current), None) => Some(current),
+                        (None, Some(noncurrent)) => Some(noncurrent),
+                        (None, None) => None,
+                    },
+                )
+                .or_else(
+                    || match (short_term_debt, long_term_debt.or(noncurrent_liabilities)) {
+                        (Some(current), Some(noncurrent)) => Some(current + noncurrent),
+                        (Some(current), None) => Some(current),
+                        (None, Some(noncurrent)) => Some(noncurrent),
+                        (None, None) => None,
+                    },
+                ),
             diluted_shares_outstanding: eastmoney_main
                 .as_ref()
                 .and_then(|item| item.total_share)
@@ -579,30 +569,29 @@ impl MarketDataClient {
                 if let Ok(Ok(response)) =
                     tokio::time::timeout(Duration::from_secs(10), self.http.get(&rss_url).send())
                         .await
+                    && let Ok(body) = response.text().await
                 {
-                    if let Ok(body) = response.text().await {
-                        for item_xml in body.split("<item>").skip(1) {
-                            let end = item_xml.find("</item>").unwrap_or(item_xml.len());
-                            let xml = &item_xml[..end];
-                            let title = extract_rss_field(xml, "title")
-                                .filter(|t| !t.contains("必应") && !t.contains("Bing"));
-                            let link = extract_rss_field(xml, "link");
-                            let desc = extract_rss_field(xml, "description");
-                            let date = extract_rss_field(xml, "pubDate")
-                                .map(|d| normalize_rss_date_simple(&d))
-                                .unwrap_or_default();
-                            if let (Some(title), Some(url)) = (title, link) {
-                                if !existing_titles.contains(&title.to_lowercase()) {
-                                    merged.push(crate::NewsItem {
-                                        published_at: date,
-                                        title: title.clone(),
-                                        summary: desc.unwrap_or_default(),
-                                        source: "bing_rss".to_string(),
-                                        url: Some(url),
-                                    });
-                                    bing_added += 1;
-                                }
-                            }
+                    for item_xml in body.split("<item>").skip(1) {
+                        let end = item_xml.find("</item>").unwrap_or(item_xml.len());
+                        let xml = &item_xml[..end];
+                        let title = extract_rss_field(xml, "title")
+                            .filter(|t| !t.contains("必应") && !t.contains("Bing"));
+                        let link = extract_rss_field(xml, "link");
+                        let desc = extract_rss_field(xml, "description");
+                        let date = extract_rss_field(xml, "pubDate")
+                            .map(|d| normalize_rss_date_simple(&d))
+                            .unwrap_or_default();
+                        if let (Some(title), Some(url)) = (title, link)
+                            && !existing_titles.contains(&title.to_lowercase())
+                        {
+                            merged.push(crate::NewsItem {
+                                published_at: date,
+                                title: title.clone(),
+                                summary: desc.unwrap_or_default(),
+                                source: "bing_rss".to_string(),
+                                url: Some(url),
+                            });
+                            bing_added += 1;
                         }
                     }
                 }
@@ -864,6 +853,7 @@ impl MarketDataClient {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn hk_company_news_queries(
         &self,
         standard_code: &str,
@@ -1039,7 +1029,9 @@ impl MarketDataClient {
             .context("failed to read HKEX title search results")?;
         Ok(news::parse_hkex_title_search_results(&response)
             .into_iter()
-            .filter(|item| super::news_filter::within_date_window(&item.published_at, start_date, end_date))
+            .filter(|item| {
+                super::news_filter::within_date_window(&item.published_at, start_date, end_date)
+            })
             .take(limit)
             .collect())
     }
@@ -1131,10 +1123,10 @@ impl MarketDataClient {
         if code != standard_code {
             bail!("HKEX stock id response mismatched stock code");
         }
-        Ok(captures
+        captures
             .get(1)
             .map(|value| value.as_str().to_string())
-            .context("HKEX stock id response missing stock id capture")?)
+            .context("HKEX stock id response missing stock id capture")
     }
 
     async fn fetch_hk_eastmoney_announcements(

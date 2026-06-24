@@ -3,7 +3,7 @@
 //! Each function classifies a news item or text snippet by content type
 //! (e.g., investment research, SEC filing, market wrap, competitor mention).
 
-use super::{normalize_news_text, NewsItem};
+use super::{NewsItem, normalize_news_text};
 
 pub(crate) fn title_is_reference_or_overview_page(
     normalized_title: &str,
@@ -577,7 +577,11 @@ mod tests {
             title: title.to_string(),
             summary: summary.to_string(),
             source: source.to_string(),
-            url: if url.is_empty() { None } else { Some(url.to_string()) },
+            url: if url.is_empty() {
+                None
+            } else {
+                Some(url.to_string())
+            },
         }
     }
 
@@ -585,7 +589,10 @@ mod tests {
 
     #[test]
     fn title_ref_stockoverview() {
-        assert!(title_is_reference_or_overview_page("stockoverview page", ""));
+        assert!(title_is_reference_or_overview_page(
+            "stockoverview page",
+            ""
+        ));
     }
 
     #[test]
@@ -595,29 +602,41 @@ mod tests {
 
     #[test]
     fn title_ref_normal_title() {
-        assert!(!title_is_reference_or_overview_page("Apple beats earnings", ""));
+        assert!(!title_is_reference_or_overview_page(
+            "Apple beats earnings",
+            ""
+        ));
     }
 
     #[test]
     fn title_ref_summary_engages() {
-        assert!(title_is_reference_or_overview_page("", "engagesinthedesigndevelopmentmanufactureandsale"));
+        assert!(title_is_reference_or_overview_page(
+            "",
+            "engagesinthedesigndevelopmentmanufactureandsale"
+        ));
     }
 
     // --- url_is_quote_or_overview_page ---
 
     #[test]
     fn url_quote_yahoo() {
-        assert!(url_is_quote_or_overview_page("https://finance.yahoo.com/quote/AAPL"));
+        assert!(url_is_quote_or_overview_page(
+            "https://finance.yahoo.com/quote/AAPL"
+        ));
     }
 
     #[test]
     fn url_quote_nasdaq() {
-        assert!(url_is_quote_or_overview_page("https://www.nasdaq.com/market-activity/stocks/AAPL"));
+        assert!(url_is_quote_or_overview_page(
+            "https://www.nasdaq.com/market-activity/stocks/AAPL"
+        ));
     }
 
     #[test]
     fn url_quote_baidu() {
-        assert!(url_is_quote_or_overview_page("https://finance.baidu.com/stock/sh600519"));
+        assert!(url_is_quote_or_overview_page(
+            "https://finance.baidu.com/stock/sh600519"
+        ));
     }
 
     #[test]
@@ -627,7 +646,9 @@ mod tests {
 
     #[test]
     fn url_quote_news_article() {
-        assert!(!url_is_quote_or_overview_page("https://reuters.com/news/article123"));
+        assert!(!url_is_quote_or_overview_page(
+            "https://reuters.com/news/article123"
+        ));
     }
 
     // --- url_is_ir_landing_page ---
@@ -639,7 +660,9 @@ mod tests {
 
     #[test]
     fn url_ir_default_aspx() {
-        assert!(url_is_ir_landing_page("https://ir.company.com/default.aspx"));
+        assert!(url_is_ir_landing_page(
+            "https://ir.company.com/default.aspx"
+        ));
     }
 
     #[test]
@@ -651,39 +674,60 @@ mod tests {
 
     #[test]
     fn high_value_earnings() {
-        assert!(title_or_summary_has_high_value_company_event("earnings report", ""));
+        assert!(title_or_summary_has_high_value_company_event(
+            "earnings report",
+            ""
+        ));
     }
 
     #[test]
     fn high_value_chinese_earnings() {
-        assert!(title_or_summary_has_high_value_company_event("", "业绩公告"));
+        assert!(title_or_summary_has_high_value_company_event(
+            "",
+            "业绩公告"
+        ));
     }
 
     #[test]
     fn high_value_delivery() {
-        assert!(title_or_summary_has_high_value_company_event("Q2 deliveries", ""));
+        assert!(title_or_summary_has_high_value_company_event(
+            "Q2 deliveries",
+            ""
+        ));
     }
 
     #[test]
     fn high_value_none() {
-        assert!(!title_or_summary_has_high_value_company_event("random news", "nothing special"));
+        assert!(!title_or_summary_has_high_value_company_event(
+            "random news",
+            "nothing special"
+        ));
     }
 
     // --- title_or_summary_has_low_value_corporate_filing_noise ---
 
     #[test]
     fn low_value_proxy_form() {
-        assert!(title_or_summary_has_low_value_corporate_filing_noise("proxy form", ""));
+        assert!(title_or_summary_has_low_value_corporate_filing_noise(
+            "proxy form",
+            ""
+        ));
     }
 
     #[test]
     fn low_value_agm() {
-        assert!(title_or_summary_has_low_value_corporate_filing_noise("", "annualgeneralmeeting"));
+        assert!(title_or_summary_has_low_value_corporate_filing_noise(
+            "",
+            "annualgeneralmeeting"
+        ));
     }
 
     #[test]
     fn low_value_none() {
-        assert!(!title_or_summary_has_low_value_corporate_filing_noise("earnings beat", "strong results"));
+        assert!(!title_or_summary_has_low_value_corporate_filing_noise(
+            "earnings beat",
+            "strong results"
+        ));
     }
 
     // --- is_sec_filing_item ---
@@ -737,7 +781,9 @@ mod tests {
 
     #[test]
     fn market_wrap_normal() {
-        assert!(!title_is_generic_market_wrap("Apple reports strong earnings"));
+        assert!(!title_is_generic_market_wrap(
+            "Apple reports strong earnings"
+        ));
     }
 
     // --- mentions_competitor_without_primary_company_focus ---
@@ -746,7 +792,9 @@ mod tests {
     fn competitor_without_primary() {
         let keywords = vec!["NVDA".to_string()];
         assert!(mentions_competitor_without_primary_company_focus(
-            "Apple launches new chip", "Apple competes with nvidia", &keywords
+            "Apple launches new chip",
+            "Apple competes with nvidia",
+            &keywords
         ));
     }
 
@@ -754,7 +802,9 @@ mod tests {
     fn competitor_with_primary() {
         let keywords = vec!["Apple".to_string()];
         assert!(!mentions_competitor_without_primary_company_focus(
-            "Apple launches new chip", "Apple and nvidia compete", &keywords
+            "Apple launches new chip",
+            "Apple and nvidia compete",
+            &keywords
         ));
     }
 
@@ -762,7 +812,9 @@ mod tests {
     fn no_competitor_mention() {
         let keywords = vec!["NVDA".to_string()];
         assert!(!mentions_competitor_without_primary_company_focus(
-            "NVDA reports earnings", "NVDA strong results", &keywords
+            "NVDA reports earnings",
+            "NVDA strong results",
+            &keywords
         ));
     }
 
@@ -772,7 +824,9 @@ mod tests {
     fn secondary_reference_versus() {
         let keywords = vec!["NVDA".to_string()];
         assert!(mentions_secondary_reference_only(
-            "NVDA versus AMD", "NVDA compared with AMD", &keywords
+            "NVDA versus AMD",
+            "NVDA compared with AMD",
+            &keywords
         ));
     }
 
@@ -780,7 +834,9 @@ mod tests {
     fn secondary_reference_no_keyword_in_summary() {
         let keywords = vec!["NVDA".to_string()];
         assert!(!mentions_secondary_reference_only(
-            "NVDA versus AMD", "random text", &keywords
+            "NVDA versus AMD",
+            "random text",
+            &keywords
         ));
     }
 
@@ -788,7 +844,9 @@ mod tests {
     fn secondary_reference_no_marker() {
         let keywords = vec!["NVDA".to_string()];
         assert!(!mentions_secondary_reference_only(
-            "NVDA reports earnings", "NVDA strong results", &keywords
+            "NVDA reports earnings",
+            "NVDA strong results",
+            &keywords
         ));
     }
 
@@ -796,25 +854,45 @@ mod tests {
 
     #[test]
     fn research_evidence_reuters_earnings() {
-        let item = make_item("Apple earnings beat", "strong quarterly results", "Reuters", "https://reuters.com/news/123");
+        let item = make_item(
+            "Apple earnings beat",
+            "strong quarterly results",
+            "Reuters",
+            "https://reuters.com/news/123",
+        );
         assert!(is_investment_research_evidence_page(&item));
     }
 
     #[test]
     fn research_evidence_overview_page() {
-        let item = make_item("stockoverview AAPL", "overview page", "Yahoo", "https://finance.yahoo.com/quote/AAPL");
+        let item = make_item(
+            "stockoverview AAPL",
+            "overview page",
+            "Yahoo",
+            "https://finance.yahoo.com/quote/AAPL",
+        );
         assert!(!is_investment_research_evidence_page(&item));
     }
 
     #[test]
     fn research_evidence_entertainment() {
-        let item = make_item("杨幂 new movie", "entertainment news", "Weibo", "https://weibo.com/123");
+        let item = make_item(
+            "杨幂 new movie",
+            "entertainment news",
+            "Weibo",
+            "https://weibo.com/123",
+        );
         assert!(!is_investment_research_evidence_page(&item));
     }
 
     #[test]
     fn research_evidence_eastmoney_article() {
-        let item = make_item("业绩快报", "公告内容", "eastmoney", "https://eastmoney.com/a/123.html");
+        let item = make_item(
+            "业绩快报",
+            "公告内容",
+            "eastmoney",
+            "https://eastmoney.com/a/123.html",
+        );
         assert!(is_investment_research_evidence_page(&item));
     }
 
@@ -822,7 +900,12 @@ mod tests {
 
     #[test]
     fn macro_revidence_reuters_macro() {
-        let item = make_item("Fed rate decision", "federal reserve policy", "Reuters", "https://reuters.com/markets/123");
+        let item = make_item(
+            "Fed rate decision",
+            "federal reserve policy",
+            "Reuters",
+            "https://reuters.com/markets/123",
+        );
         assert!(is_macro_research_evidence_page(&item));
     }
 

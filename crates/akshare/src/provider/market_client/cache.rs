@@ -11,9 +11,7 @@ use tokio::sync::Notify;
 use serde::{Serialize, de::DeserializeOwned};
 use sha2::{Digest, Sha256};
 
-use super::{
-    MARKET_DATA_CACHE_PREFIX, MarketDataClient, SearchProviderConfig, SearchScope,
-};
+use super::{MARKET_DATA_CACHE_PREFIX, MarketDataClient, SearchProviderConfig, SearchScope};
 
 impl MarketDataClient {
     // --- Symbol normalization ---

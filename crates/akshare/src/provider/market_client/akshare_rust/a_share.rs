@@ -1,4 +1,3 @@
-use super::types::ProviderResult;
 use super::super::{
     AnalystDetail, AnalystRank, BalanceSheet, CandlePoint, CashFlowSheet, CommentDesireIndex,
     CommentFocusIndex, CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj,
@@ -11,9 +10,9 @@ use super::super::{
     LhbStockStatistic, LhbTraderStatistic, LhbYybDetail, LhbYybph, MainFundFlow, MarginAccountInfo,
     MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary,
     MarketDataClient, NewsItem, PankouChange, ProfitSheet, QuoteSnapshot, SectorFundFlowRank,
-    StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong,
-    ZtPoolSubNew, ZtPoolZbgc,
+    StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
 };
+use super::types::ProviderResult;
 
 pub(crate) async fn fetch_quote(
     client: &MarketDataClient,

@@ -41,16 +41,16 @@ impl MarketDataClient {
         if let Some(cached) = self
             .cache_get_json_exact::<SearxngNewsQueryCacheEntry>(&stale_key)
             .await
+            && cached.cached_error.is_none()
+            && !cached.items.is_empty()
         {
-            if cached.cached_error.is_none() && !cached.items.is_empty() {
-                tracing::info!(
-                    key = %cache_key,
-                    stale_key = %stale_key,
-                    scope = %scope.as_str(),
-                    "market data stale cache hit"
-                );
-                return Ok(cached.items);
-            }
+            tracing::info!(
+                key = %cache_key,
+                stale_key = %stale_key,
+                scope = %scope.as_str(),
+                "market data stale cache hit"
+            );
+            return Ok(cached.items);
         }
 
         let rewritten_query = provider.rewrite_query(query, language);
@@ -717,29 +717,29 @@ impl MarketDataClient {
                     self.http.get(&rss_url).send(),
                 )
                 .await;
-                if let Ok(Ok(response)) = response {
-                    if let Ok(body) = response.text().await {
-                        for item_xml in body.split("<item>").skip(1) {
-                            let end = item_xml.find("</item>").unwrap_or(item_xml.len());
-                            let xml = &item_xml[..end];
-                            let title = extract_rss_tag(xml, "title")
-                                .filter(|t| !t.contains("必应") && !t.contains("Bing"));
-                            let link = extract_rss_tag(xml, "link");
-                            let desc = extract_rss_tag(xml, "description");
-                            let date = extract_rss_tag(xml, "pubDate")
-                                .map(|d| normalize_rss_date(&d))
-                                .unwrap_or_default();
-                            if let (Some(title), Some(url)) = (title, link) {
-                                if dedup.insert(url.clone()) {
-                                    merged.push(NewsItem {
-                                        published_at: date,
-                                        title,
-                                        summary: desc.unwrap_or_default(),
-                                        source: "bing_rss".to_string(),
-                                        url: Some(url),
-                                    });
-                                }
-                            }
+                if let Ok(Ok(response)) = response
+                    && let Ok(body) = response.text().await
+                {
+                    for item_xml in body.split("<item>").skip(1) {
+                        let end = item_xml.find("</item>").unwrap_or(item_xml.len());
+                        let xml = &item_xml[..end];
+                        let title = extract_rss_tag(xml, "title")
+                            .filter(|t| !t.contains("必应") && !t.contains("Bing"));
+                        let link = extract_rss_tag(xml, "link");
+                        let desc = extract_rss_tag(xml, "description");
+                        let date = extract_rss_tag(xml, "pubDate")
+                            .map(|d| normalize_rss_date(&d))
+                            .unwrap_or_default();
+                        if let (Some(title), Some(url)) = (title, link)
+                            && dedup.insert(url.clone())
+                        {
+                            merged.push(NewsItem {
+                                published_at: date,
+                                title,
+                                summary: desc.unwrap_or_default(),
+                                source: "bing_rss".to_string(),
+                                url: Some(url),
+                            });
                         }
                     }
                 }
@@ -756,28 +756,28 @@ impl MarketDataClient {
                         self.http.get(&gnews_url).send(),
                     )
                     .await;
-                    if let Ok(Ok(response)) = response {
-                        if let Ok(body) = response.text().await {
-                            for item_xml in body.split("<item>").skip(1) {
-                                let end = item_xml.find("</item>").unwrap_or(item_xml.len());
-                                let xml = &item_xml[..end];
-                                let title = extract_rss_tag(xml, "title");
-                                let link = extract_rss_tag(xml, "link");
-                                let desc = extract_rss_tag(xml, "description");
-                                let date = extract_rss_tag(xml, "pubDate")
-                                    .map(|d| normalize_rss_date(&d))
-                                    .unwrap_or_default();
-                                if let (Some(title), Some(url)) = (title, link) {
-                                    if dedup.insert(url.clone()) {
-                                        merged.push(NewsItem {
-                                            published_at: date,
-                                            title,
-                                            summary: desc.unwrap_or_default(),
-                                            source: "google_news_rss".to_string(),
-                                            url: Some(url),
-                                        });
-                                    }
-                                }
+                    if let Ok(Ok(response)) = response
+                        && let Ok(body) = response.text().await
+                    {
+                        for item_xml in body.split("<item>").skip(1) {
+                            let end = item_xml.find("</item>").unwrap_or(item_xml.len());
+                            let xml = &item_xml[..end];
+                            let title = extract_rss_tag(xml, "title");
+                            let link = extract_rss_tag(xml, "link");
+                            let desc = extract_rss_tag(xml, "description");
+                            let date = extract_rss_tag(xml, "pubDate")
+                                .map(|d| normalize_rss_date(&d))
+                                .unwrap_or_default();
+                            if let (Some(title), Some(url)) = (title, link)
+                                && dedup.insert(url.clone())
+                            {
+                                merged.push(NewsItem {
+                                    published_at: date,
+                                    title,
+                                    summary: desc.unwrap_or_default(),
+                                    source: "google_news_rss".to_string(),
+                                    url: Some(url),
+                                });
                             }
                         }
                     }
@@ -795,47 +795,44 @@ impl MarketDataClient {
                         self.http.get(&sogou_url).send(),
                     )
                     .await;
-                    if let Ok(Ok(response)) = response {
-                        if let Ok(body) = response.text().await {
-                            // Sogou returns HTML, extract links and titles from h3/a tags
-                            let mut remaining = body.as_str();
-                            while let Some(pos) = remaining.find("<h3") {
-                                let chunk = &remaining[pos..];
-                                if let Some(a_start) = chunk.find("<a href=\"") {
-                                    let after_href = &chunk[a_start + 9..];
-                                    if let Some(quote_end) = after_href.find('"') {
-                                        let url = after_href[..quote_end].to_string();
-                                        let title_start = after_href.find('>').map(|i| i + 1);
-                                        let title = title_start.and_then(|start| {
-                                            let title_chunk = &after_href[start..];
-                                            title_chunk.find("</a>").map(|end| {
-                                                let raw = &title_chunk[..end];
-                                                // Strip HTML tags
-                                                let clean = raw
-                                                    .split('<')
-                                                    .next()
-                                                    .unwrap_or(raw)
-                                                    .to_string();
-                                                clean.trim().to_string()
-                                            })
+                    if let Ok(Ok(response)) = response
+                        && let Ok(body) = response.text().await
+                    {
+                        // Sogou returns HTML, extract links and titles from h3/a tags
+                        let mut remaining = body.as_str();
+                        while let Some(pos) = remaining.find("<h3") {
+                            let chunk = &remaining[pos..];
+                            if let Some(a_start) = chunk.find("<a href=\"") {
+                                let after_href = &chunk[a_start + 9..];
+                                if let Some(quote_end) = after_href.find('"') {
+                                    let url = after_href[..quote_end].to_string();
+                                    let title_start = after_href.find('>').map(|i| i + 1);
+                                    let title = title_start.and_then(|start| {
+                                        let title_chunk = &after_href[start..];
+                                        title_chunk.find("</a>").map(|end| {
+                                            let raw = &title_chunk[..end];
+                                            // Strip HTML tags
+                                            let clean =
+                                                raw.split('<').next().unwrap_or(raw).to_string();
+                                            clean.trim().to_string()
+                                        })
+                                    });
+                                    if let (Some(title), true) =
+                                        (title, !url.is_empty() && url.starts_with("http"))
+                                        && !title.is_empty()
+                                        && dedup.insert(url.clone())
+                                    {
+                                        merged.push(NewsItem {
+                                            published_at: String::new(),
+                                            title,
+                                            summary: String::new(),
+                                            source: "sogou_news".to_string(),
+                                            url: Some(url),
                                         });
-                                        if let (Some(title), true) =
-                                            (title, !url.is_empty() && url.starts_with("http"))
-                                        {
-                                            if !title.is_empty() && dedup.insert(url.clone()) {
-                                                merged.push(NewsItem {
-                                                    published_at: String::new(),
-                                                    title,
-                                                    summary: String::new(),
-                                                    source: "sogou_news".to_string(),
-                                                    url: Some(url),
-                                                });
-                                            }
-                                        }
                                     }
                                 }
-                                remaining = &remaining[pos + 3..];
                             }
+                            remaining = &remaining[pos + 3..];
                         }
                     }
                 }
@@ -1053,6 +1050,7 @@ impl MarketDataClient {
         .await
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub(super) async fn fetch_search_evidence_with_query_locales_and_scope_mix_strategy(
         &self,
         queries: &[String],

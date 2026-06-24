@@ -1,5 +1,5 @@
-use super::types::ProviderResult;
 use super::super::{CandlePoint, FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot};
+use super::types::ProviderResult;
 
 use crate::stock::us_extra::{UsFamousStock, UsPinkStock, UsSpotSina, UsValuationBaidu};
 use crate::stock::xueqiu::XqStockSpot;

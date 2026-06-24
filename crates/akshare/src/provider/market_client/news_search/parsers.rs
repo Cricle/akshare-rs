@@ -73,11 +73,11 @@ pub(super) fn extract_baidu_source(html: &str) -> Option<(String, String)> {
             let text = decode_html_entities(&text);
             if !text.trim().is_empty() {
                 let parts: Vec<&str> = text.split_whitespace().collect();
-                if let Some(last) = parts.last().filter(|_| parts.len() >= 2) {
-                    if last.contains('-') || last.contains(':') {
-                        let source = parts[..parts.len() - 1].join(" ");
-                        return Some((source, last.to_string()));
-                    }
+                if let Some(last) = parts.last().filter(|_| parts.len() >= 2)
+                    && (last.contains('-') || last.contains(':'))
+                {
+                    let source = parts[..parts.len() - 1].join(" ");
+                    return Some((source, last.to_string()));
                 }
                 return Some((text.trim().to_string(), String::new()));
             }
@@ -198,7 +198,10 @@ mod tests {
 
     #[test]
     fn strip_html_tags_attributes() {
-        assert_eq!(strip_html_tags(r#"<a href="http://example.com">link</a>"#), "link");
+        assert_eq!(
+            strip_html_tags(r#"<a href="http://example.com">link</a>"#),
+            "link"
+        );
     }
 
     // --- decode_html_entities ---
@@ -210,7 +213,10 @@ mod tests {
 
     #[test]
     fn decode_html_entities_all_entities() {
-        assert_eq!(decode_html_entities("&amp;&lt;&gt;&quot;&#39;&nbsp;"), "&<>\"' ");
+        assert_eq!(
+            decode_html_entities("&amp;&lt;&gt;&quot;&#39;&nbsp;"),
+            "&<>\"' "
+        );
     }
 
     #[test]
@@ -251,14 +257,20 @@ mod tests {
     fn extract_baidu_link_valid() {
         let html = r#"<a href="https://example.com/news">Breaking News</a>"#;
         let result = extract_baidu_link(html);
-        assert_eq!(result, Some(("Breaking News".into(), "https://example.com/news".into())));
+        assert_eq!(
+            result,
+            Some(("Breaking News".into(), "https://example.com/news".into()))
+        );
     }
 
     #[test]
     fn extract_baidu_link_relative_url() {
         let html = r#"<a href="/news/123">Title</a>"#;
         let result = extract_baidu_link(html);
-        assert_eq!(result, Some(("Title".into(), "https://www.baidu.com/news/123".into())));
+        assert_eq!(
+            result,
+            Some(("Title".into(), "https://www.baidu.com/news/123".into()))
+        );
     }
 
     #[test]

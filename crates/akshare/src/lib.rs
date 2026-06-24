@@ -113,10 +113,10 @@
 )]
 
 // Equity Markets
-#[cfg(feature = "mod-stock")]
-pub mod stock;
 #[cfg(feature = "mod-index")]
 pub mod index;
+#[cfg(feature = "mod-stock")]
+pub mod stock;
 
 // Derivatives
 #[cfg(feature = "mod-futures")]

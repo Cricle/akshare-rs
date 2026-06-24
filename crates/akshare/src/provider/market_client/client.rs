@@ -2,18 +2,16 @@ use anyhow::Context;
 use opentelemetry::KeyValue;
 use tracing::Instrument;
 
+use super::cache::SingleflightResult;
 use super::{
     AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail,
-    CANDLES_CACHE_TTL_SECS, CANDLES_CACHE_VERSION, CandlePoint, CapitalFlowPoint,
-    DataError, DataErrorKind, FUNDAMENTALS_CACHE_TTL_SECS, FUNDAMENTALS_CACHE_VERSION,
-    FundamentalsSnapshot, GLOBAL_NEWS_CACHE_VERSION, INSIDER_CACHE_TTL_SECS,
-    MARKET_DATA_CACHE_PREFIX, MarketDataClient, MarketKind, NEWS_CACHE_TTL_SECS,
-    NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult, NewsItem, QUOTE_CACHE_TTL_SECS,
-    QUOTE_CACHE_VERSION, QuoteSnapshot, SEARCH_CACHE_TTL_SECS, SEARCH_CACHE_VERSION,
-    SectorConstituent, SectorSnapshot,
-    StockSearchResult, TradeCalendarItem,
+    CANDLES_CACHE_TTL_SECS, CANDLES_CACHE_VERSION, CandlePoint, CapitalFlowPoint, DataError,
+    DataErrorKind, FUNDAMENTALS_CACHE_TTL_SECS, FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot,
+    GLOBAL_NEWS_CACHE_VERSION, INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient,
+    MarketKind, NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult,
+    NewsItem, QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, SEARCH_CACHE_TTL_SECS,
+    SEARCH_CACHE_VERSION, SectorConstituent, SectorSnapshot, StockSearchResult, TradeCalendarItem,
 };
-use super::cache::SingleflightResult;
 
 impl MarketDataClient {
     pub async fn fetch_quote(&self, symbol: &str) -> anyhow::Result<QuoteSnapshot> {
@@ -708,7 +706,7 @@ impl MarketDataClient {
         let span = tracing::info_span!("market_data.fetch", data_type = "capital_flow", symbol);
         async {
             let start = std::time::Instant::now();
-            let result = if self.normalize_a_share_symbol(symbol).is_some() {
+            if self.normalize_a_share_symbol(symbol).is_some() {
                 let market = self.detect_market(symbol);
                 let normalized_symbol = self.cache_symbol(symbol, market);
                 let cache_key =
@@ -784,8 +782,7 @@ impl MarketDataClient {
                     format!("capital flow is unsupported for symbol {symbol}"),
                 )
                 .into())
-            };
-            result
+            }
         }
         .instrument(span)
         .await
@@ -879,7 +876,7 @@ impl MarketDataClient {
         let span = tracing::info_span!("market_data.fetch", data_type = "announcements", symbol);
         async {
             let start = std::time::Instant::now();
-            let result = if let Some(ts_code) = self.normalize_a_share_symbol(symbol) {
+            if let Some(ts_code) = self.normalize_a_share_symbol(symbol) {
                 let cache_key = format!(
                     "{MARKET_DATA_CACHE_PREFIX}:announcements:{}:{}",
                     ts_code, limit
@@ -955,8 +952,7 @@ impl MarketDataClient {
                     format!("announcements are unsupported for symbol {symbol}"),
                 )
                 .into())
-            };
-            result
+            }
         }
         .instrument(span)
         .await

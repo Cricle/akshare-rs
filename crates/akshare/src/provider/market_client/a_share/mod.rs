@@ -458,10 +458,9 @@ impl MarketDataClient {
                     || items[index].change_pct.abs() <= f64::EPSILON)
             {
                 items[index].change_amount = items[index].close - previous_close;
-                items[index].change_pct = (items[index].change_amount / previous_close
-                    * 100 as f64)
-                .to_f64()
-                .unwrap_or_default();
+                items[index].change_pct = (items[index].change_amount / previous_close * 100.0)
+                    .to_f64()
+                    .unwrap_or_default();
             }
         }
         if items.len() > limit {
@@ -515,9 +514,7 @@ impl MarketDataClient {
             volume: volume.round() as i64,
             amount: 0.0,
             amplitude_pct: if low > 0.0 {
-                ((high - low) / low * 100 as f64)
-                    .to_f64()
-                    .unwrap_or_default()
+                ((high - low) / low * 100.0).to_f64().unwrap_or_default()
             } else {
                 0.0
             },
@@ -1268,25 +1265,25 @@ impl MarketDataClient {
             shares_outstanding,
             market_cap: provisional_market_cap,
             net_income_usd: income
-                    .and_then(|row| {
-                        row.optional_f64("n_income_attr_p")
-                            .or_else(|| row.optional_f64("n_income"))
-                    })
-                    .or_else(|| {
-                        eastmoney_main
-                            .as_ref()
-                            .and_then(|item| item.parent_net_profit.or(item.holder_profit))
-                    }),
+                .and_then(|row| {
+                    row.optional_f64("n_income_attr_p")
+                        .or_else(|| row.optional_f64("n_income"))
+                })
+                .or_else(|| {
+                    eastmoney_main
+                        .as_ref()
+                        .and_then(|item| item.parent_net_profit.or(item.holder_profit))
+                }),
             revenues_usd: income
-                    .and_then(|row| {
-                        row.optional_f64("total_revenue")
-                            .or_else(|| row.optional_f64("revenue"))
-                    })
-                    .or_else(|| {
-                        eastmoney_main
-                            .as_ref()
-                            .and_then(|item| item.total_operate_reve.or(item.operate_income))
-                    }),
+                .and_then(|row| {
+                    row.optional_f64("total_revenue")
+                        .or_else(|| row.optional_f64("revenue"))
+                })
+                .or_else(|| {
+                    eastmoney_main
+                        .as_ref()
+                        .and_then(|item| item.total_operate_reve.or(item.operate_income))
+                }),
             assets_usd: balance
                 .and_then(|row| row.optional_f64("total_assets"))
                 .or_else(|| {
@@ -1312,114 +1309,113 @@ impl MarketDataClient {
                 })
                 .or(eastmoney_equity),
             cash_and_equivalents_usd: balance
-                    .and_then(|row| row.optional_f64("money_cap"))
-                    .or_else(|| {
-                        eastmoney_balance
-                            .as_ref()
-                            .and_then(|item| item.monetary_funds)
-                    })
-                    .or_else(|| eastmoney_cashflow.as_ref().and_then(|item| item.end_cce)),
+                .and_then(|row| row.optional_f64("money_cap"))
+                .or_else(|| {
+                    eastmoney_balance
+                        .as_ref()
+                        .and_then(|item| item.monetary_funds)
+                })
+                .or_else(|| eastmoney_cashflow.as_ref().and_then(|item| item.end_cce)),
             gross_profit_usd: eastmoney_main
-                    .as_ref()
-                    .and_then(|item| item.gross_profit.or(item.mlr)),
+                .as_ref()
+                .and_then(|item| item.gross_profit.or(item.mlr)),
             operating_income_usd: fina_indicator.and_then(|row| row.optional_f64("op_of_gr")),
             operating_expenses_usd: None,
             operating_cash_flow_usd: cashflow
-                    .and_then(|row| row.optional_f64("n_cashflow_act"))
-                    .or_else(|| {
-                        eastmoney_main.as_ref().and_then(|item| {
-                            item.netcash_operate.or(item.mgjyxjje.map(|per_share| {
-                                item.total_share
-                                    .map(|shares| per_share * shares)
-                                    .unwrap_or(per_share)
-                            }))
-                        })
+                .and_then(|row| row.optional_f64("n_cashflow_act"))
+                .or_else(|| {
+                    eastmoney_main.as_ref().and_then(|item| {
+                        item.netcash_operate.or(item.mgjyxjje.map(|per_share| {
+                            item.total_share
+                                .map(|shares| per_share * shares)
+                                .unwrap_or(per_share)
+                        }))
                     })
-                    .or_else(|| {
-                        eastmoney_cashflow
-                            .as_ref()
-                            .and_then(|item| item.netcash_operate)
-                    }),
+                })
+                .or_else(|| {
+                    eastmoney_cashflow
+                        .as_ref()
+                        .and_then(|item| item.netcash_operate)
+                }),
             capital_expenditure_usd: eastmoney_main
-                    .as_ref()
-                    .and_then(|item| item.capital_expenditure)
-                    .map(f64::abs)
-                    .or_else(|| {
-                        eastmoney_cashflow
-                            .as_ref()
-                            .and_then(|item| item.construct_long_asset)
-                            .map(f64::abs)
-                    }),
+                .as_ref()
+                .and_then(|item| item.capital_expenditure)
+                .map(f64::abs)
+                .or_else(|| {
+                    eastmoney_cashflow
+                        .as_ref()
+                        .and_then(|item| item.construct_long_asset)
+                        .map(f64::abs)
+                }),
             free_cash_flow_usd: cashflow
-                    .and_then(|row| row.optional_f64("free_cashflow"))
-                    .or_else(|| fina_indicator.and_then(|row| row.optional_f64("fcff")))
-                    .or_else(|| {
-                        eastmoney_main.as_ref().and_then(|item| {
-                            match (item.netcash_operate, item.capital_expenditure.map(f64::abs)) {
-                                (Some(ocf), Some(capex)) => Some(ocf - capex),
-                                _ => None,
-                            }
-                        })
+                .and_then(|row| row.optional_f64("free_cashflow"))
+                .or_else(|| fina_indicator.and_then(|row| row.optional_f64("fcff")))
+                .or_else(|| {
+                    eastmoney_main.as_ref().and_then(|item| {
+                        match (item.netcash_operate, item.capital_expenditure.map(f64::abs)) {
+                            (Some(ocf), Some(capex)) => Some(ocf - capex),
+                            _ => None,
+                        }
                     })
-                    .or_else(|| {
-                        eastmoney_cashflow.as_ref().and_then(|item| {
-                            match (
-                                item.netcash_operate,
-                                item.construct_long_asset.map(f64::abs),
-                            ) {
-                                (Some(ocf), Some(capex)) => Some(ocf - capex),
-                                _ => None,
-                            }
-                        })
-                    }),
+                })
+                .or_else(|| {
+                    eastmoney_cashflow.as_ref().and_then(|item| {
+                        match (
+                            item.netcash_operate,
+                            item.construct_long_asset.map(f64::abs),
+                        ) {
+                            (Some(ocf), Some(capex)) => Some(ocf - capex),
+                            _ => None,
+                        }
+                    })
+                }),
             long_term_debt_usd: balance.and_then(|row| row.optional_f64("lt_borr")),
             current_debt_usd: balance
-                    .and_then(|row| row.optional_f64("st_borr"))
-                    .or_else(|| {
-                        eastmoney_main
-                            .as_ref()
-                            .and_then(|item| item.current_liab.or(item.current_liability))
-                    })
-                    .or_else(|| {
-                        eastmoney_balance
-                            .as_ref()
-                            .and_then(|item| item.current_liab)
-                    }),
-            total_debt_usd:
-                balance
-                    .and_then(|row| {
-                        let current = row.optional_f64("st_borr");
-                        let long_term = row.optional_f64("lt_borr");
-                        match (current, long_term) {
-                            (Some(current), Some(long_term)) => Some(current + long_term),
+                .and_then(|row| row.optional_f64("st_borr"))
+                .or_else(|| {
+                    eastmoney_main
+                        .as_ref()
+                        .and_then(|item| item.current_liab.or(item.current_liability))
+                })
+                .or_else(|| {
+                    eastmoney_balance
+                        .as_ref()
+                        .and_then(|item| item.current_liab)
+                }),
+            total_debt_usd: balance
+                .and_then(|row| {
+                    let current = row.optional_f64("st_borr");
+                    let long_term = row.optional_f64("lt_borr");
+                    match (current, long_term) {
+                        (Some(current), Some(long_term)) => Some(current + long_term),
+                        (Some(current), None) => Some(current),
+                        (None, Some(long_term)) => Some(long_term),
+                        (None, None) => None,
+                    }
+                })
+                .or_else(|| {
+                    eastmoney_main.as_ref().and_then(|item| {
+                        match (
+                            item.current_liab.or(item.current_liability),
+                            item.totalnoncliab.or(item.noncurrent_liab_1year),
+                        ) {
+                            (Some(current), Some(noncurrent)) => Some(current + noncurrent),
                             (Some(current), None) => Some(current),
-                            (None, Some(long_term)) => Some(long_term),
+                            (None, Some(noncurrent)) => Some(noncurrent),
                             (None, None) => None,
                         }
                     })
-                    .or_else(|| {
-                        eastmoney_main.as_ref().and_then(|item| {
-                            match (
-                                item.current_liab.or(item.current_liability),
-                                item.totalnoncliab.or(item.noncurrent_liab_1year),
-                            ) {
-                                (Some(current), Some(noncurrent)) => Some(current + noncurrent),
-                                (Some(current), None) => Some(current),
-                                (None, Some(noncurrent)) => Some(noncurrent),
-                                (None, None) => None,
-                            }
-                        })
+                })
+                .or_else(|| {
+                    eastmoney_balance.as_ref().and_then(|item| {
+                        match (item.current_liab, item.totalnoncliab) {
+                            (Some(current), Some(noncurrent)) => Some(current + noncurrent),
+                            (Some(current), None) => Some(current),
+                            (None, Some(noncurrent)) => Some(noncurrent),
+                            (None, None) => None,
+                        }
                     })
-                    .or_else(|| {
-                        eastmoney_balance.as_ref().and_then(|item| {
-                            match (item.current_liab, item.totalnoncliab) {
-                                (Some(current), Some(noncurrent)) => Some(current + noncurrent),
-                                (Some(current), None) => Some(current),
-                                (None, Some(noncurrent)) => Some(noncurrent),
-                                (None, None) => None,
-                            }
-                        })
-                    }),
+                }),
             diluted_shares_outstanding: None,
         })
     }
@@ -1745,7 +1741,8 @@ impl MarketDataClient {
         }
 
         let target_limit = limit.max(8);
-        let ranked = super::news_filter::merge_ranked_news(merged, target_limit, None, None, &keywords);
+        let ranked =
+            super::news_filter::merge_ranked_news(merged, target_limit, None, None, &keywords);
         let has_official = ranked.iter().any(|item| item.source.contains("Eastmoney"));
         let web_quota = if has_official {
             ranked

@@ -60,7 +60,7 @@ pub use news_filter::normalized_news_date;
 pub use diagnosis::DataFetchDiagnosis;
 
 // Re-export singleflight types
-pub use cache::{Singleflight, SingleflightResult, SingleflightGuard};
+pub use cache::{Singleflight, SingleflightGuard, SingleflightResult};
 
 // cache, diagnosis, and qdrant stay in stock-analyzer (not data fetching concerns)
 
@@ -467,10 +467,10 @@ impl MarketDataClient {
             .or_else(|| std::env::var("https_proxy").ok())
             .map(|value| value.trim().to_string())
             .filter(|value| !value.is_empty());
-        if let Some(proxy_url) = outbound_proxy_url.as_deref() {
-            if let Ok(proxy) = reqwest::Proxy::all(proxy_url) {
-                http_builder = http_builder.proxy(proxy);
-            }
+        if let Some(proxy_url) = outbound_proxy_url.as_deref()
+            && let Ok(proxy) = reqwest::Proxy::all(proxy_url)
+        {
+            http_builder = http_builder.proxy(proxy);
         }
         let base_client = http_builder
             .build()

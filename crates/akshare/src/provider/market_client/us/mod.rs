@@ -10,12 +10,14 @@ use tokio::sync::OnceCell;
 
 pub(crate) static TICKER_CACHE: OnceCell<SecTickerLookup> = OnceCell::const_new();
 
+use super::news_filter::{
+    build_dated_news_query, latest_metric_value, merge_ranked_news, within_date_window,
+};
 use super::{
     FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot, SearchProviderKind,
     akshare_rust::us_sina,
     wire::{CompanyFactsResponse, CompanySubmissionsResponse, SecTickerEntry, SecTickerLookup},
 };
-use super::news_filter::{build_dated_news_query, latest_metric_value, merge_ranked_news, within_date_window};
 use news_filter::{is_direct_company_news_match, normalize_company_query_name};
 use yahoo_chart::YahooChartResponse;
 impl MarketDataClient {
@@ -295,51 +297,50 @@ impl MarketDataClient {
             company_facts.facts.us_gaap.as_ref().and_then(|facts| {
                 facts.annual_capital_expenditure_aligned(annual_snapshot.as_ref())
             });
-        if let (Some(revenue), Some(gross_profit)) = (revenues_usd, gross_profit_usd) {
-            if gross_profit > revenue {
-                tracing::warn!(
-                    symbol = %symbol,
-                    revenue,
-                    gross_profit,
-                    "rejecting gross profit because it exceeds revenue for aligned annual period"
-                );
-                gross_profit_usd = None;
-            }
+        if let (Some(revenue), Some(gross_profit)) = (revenues_usd, gross_profit_usd)
+            && gross_profit > revenue
+        {
+            tracing::warn!(
+                symbol = %symbol,
+                revenue,
+                gross_profit,
+                "rejecting gross profit because it exceeds revenue for aligned annual period"
+            );
+            gross_profit_usd = None;
         }
         if let (Some(gross_profit), Some(operating_income)) =
             (gross_profit_usd, operating_income_usd)
+            && operating_income > gross_profit
         {
-            if operating_income > gross_profit {
-                tracing::warn!(
-                    symbol = %symbol,
-                    gross_profit,
-                    operating_income,
-                    "rejecting operating income because it exceeds gross profit for aligned annual period"
-                );
-                operating_income_usd = None;
-            }
+            tracing::warn!(
+                symbol = %symbol,
+                gross_profit,
+                operating_income,
+                "rejecting operating income because it exceeds gross profit for aligned annual period"
+            );
+            operating_income_usd = None;
         }
-        if let (Some(revenue), Some(operating_expenses)) = (revenues_usd, operating_expenses_usd) {
-            if operating_expenses > revenue {
-                tracing::warn!(
-                    symbol = %symbol,
-                    revenue,
-                    operating_expenses,
-                    "rejecting operating expenses because they exceed revenue for aligned annual period"
-                );
-                operating_expenses_usd = None;
-            }
+        if let (Some(revenue), Some(operating_expenses)) = (revenues_usd, operating_expenses_usd)
+            && operating_expenses > revenue
+        {
+            tracing::warn!(
+                symbol = %symbol,
+                revenue,
+                operating_expenses,
+                "rejecting operating expenses because they exceed revenue for aligned annual period"
+            );
+            operating_expenses_usd = None;
         }
-        if let (Some(revenue), Some(capex)) = (revenues_usd, capital_expenditure_usd) {
-            if capex > revenue {
-                tracing::warn!(
-                    symbol = %symbol,
-                    revenue,
-                    capex,
-                    "rejecting capital expenditure because it exceeds revenue for aligned annual period"
-                );
-                capital_expenditure_usd = None;
-            }
+        if let (Some(revenue), Some(capex)) = (revenues_usd, capital_expenditure_usd)
+            && capex > revenue
+        {
+            tracing::warn!(
+                symbol = %symbol,
+                revenue,
+                capex,
+                "rejecting capital expenditure because it exceeds revenue for aligned annual period"
+            );
+            capital_expenditure_usd = None;
         }
         let free_cash_flow_usd = match (operating_cash_flow_usd, capital_expenditure_usd) {
             (Some(ocf), Some(capex)) => Some(ocf - capex),
@@ -379,21 +380,21 @@ impl MarketDataClient {
             fiscal_year_end,
             shares_outstanding,
             market_cap,
-            net_income_usd: net_income_usd,
-            revenues_usd: revenues_usd,
-            assets_usd: assets_usd,
-            liabilities_usd: liabilities_usd,
-            stockholders_equity_usd: stockholders_equity_usd,
-            cash_and_equivalents_usd: cash_and_equivalents_usd,
-            gross_profit_usd: gross_profit_usd,
-            operating_income_usd: operating_income_usd,
-            operating_expenses_usd: operating_expenses_usd,
-            operating_cash_flow_usd: operating_cash_flow_usd,
-            capital_expenditure_usd: capital_expenditure_usd,
-            free_cash_flow_usd: free_cash_flow_usd,
-            long_term_debt_usd: long_term_debt_usd,
-            current_debt_usd: current_debt_usd,
-            total_debt_usd: total_debt_usd,
+            net_income_usd,
+            revenues_usd,
+            assets_usd,
+            liabilities_usd,
+            stockholders_equity_usd,
+            cash_and_equivalents_usd,
+            gross_profit_usd,
+            operating_income_usd,
+            operating_expenses_usd,
+            operating_cash_flow_usd,
+            capital_expenditure_usd,
+            free_cash_flow_usd,
+            long_term_debt_usd,
+            current_debt_usd,
+            total_debt_usd,
             diluted_shares_outstanding,
         })
     }
@@ -592,41 +593,40 @@ impl MarketDataClient {
                 if let Ok(Ok(response)) =
                     tokio::time::timeout(Duration::from_secs(10), self.http.get(&rss_url).send())
                         .await
+                    && let Ok(body) = response.text().await
                 {
-                    if let Ok(body) = response.text().await {
-                        for item_xml in body.split("<item>").skip(1) {
-                            let end = item_xml.find("</item>").unwrap_or(item_xml.len());
-                            let xml = &item_xml[..end];
-                            let title = xml
-                                .split_once("<title>")
-                                .and_then(|(_, rest)| rest.split_once("</title>"))
-                                .map(|(s, _)| s.trim().to_string())
-                                .filter(|t| !t.contains("必应") && !t.contains("Bing"));
-                            let link = xml
-                                .split_once("<link>")
-                                .and_then(|(_, rest)| rest.split_once("</link>"))
-                                .map(|(s, _)| s.trim().to_string());
-                            let desc = xml
-                                .split_once("<description>")
-                                .and_then(|(_, rest)| rest.split_once("</description>"))
-                                .map(|(s, _)| s.trim().to_string());
-                            let date = xml
-                                .split_once("<pubDate>")
-                                .and_then(|(_, rest)| rest.split_once("</pubDate>"))
-                                .map(|(s, _)| s.trim().to_string())
-                                .unwrap_or_default();
-                            if let (Some(title), Some(url)) = (title, link) {
-                                if !existing_titles.contains(&title.to_lowercase()) {
-                                    items.push(super::NewsItem {
-                                        published_at: date,
-                                        title: title.clone(),
-                                        summary: desc.unwrap_or_default(),
-                                        source: "bing_rss".to_string(),
-                                        url: Some(url),
-                                    });
-                                    bing_added += 1;
-                                }
-                            }
+                    for item_xml in body.split("<item>").skip(1) {
+                        let end = item_xml.find("</item>").unwrap_or(item_xml.len());
+                        let xml = &item_xml[..end];
+                        let title = xml
+                            .split_once("<title>")
+                            .and_then(|(_, rest)| rest.split_once("</title>"))
+                            .map(|(s, _)| s.trim().to_string())
+                            .filter(|t| !t.contains("必应") && !t.contains("Bing"));
+                        let link = xml
+                            .split_once("<link>")
+                            .and_then(|(_, rest)| rest.split_once("</link>"))
+                            .map(|(s, _)| s.trim().to_string());
+                        let desc = xml
+                            .split_once("<description>")
+                            .and_then(|(_, rest)| rest.split_once("</description>"))
+                            .map(|(s, _)| s.trim().to_string());
+                        let date = xml
+                            .split_once("<pubDate>")
+                            .and_then(|(_, rest)| rest.split_once("</pubDate>"))
+                            .map(|(s, _)| s.trim().to_string())
+                            .unwrap_or_default();
+                        if let (Some(title), Some(url)) = (title, link)
+                            && !existing_titles.contains(&title.to_lowercase())
+                        {
+                            items.push(super::NewsItem {
+                                published_at: date,
+                                title: title.clone(),
+                                summary: desc.unwrap_or_default(),
+                                source: "bing_rss".to_string(),
+                                url: Some(url),
+                            });
+                            bing_added += 1;
                         }
                     }
                 }
@@ -969,9 +969,9 @@ impl MarketDataClient {
                 .trim()
                 .to_uppercase(),
             date: chrono::Utc::now().format("%Y%m%d").to_string(),
-            open: open,
-            high: high,
-            low: low,
+            open,
+            high,
+            low,
             close: price,
             volume,
         })
@@ -1168,10 +1168,10 @@ impl MarketDataClient {
                 .to_string();
             items.push(super::CandlePoint {
                 trade_date,
-                open: open,
-                close: close,
-                high: high,
-                low: low,
+                open,
+                close,
+                high,
+                low,
                 volume,
                 amount: 0.0,
                 amplitude_pct: if low > 0.0 {
@@ -1191,10 +1191,9 @@ impl MarketDataClient {
             let previous_close = items[index - 1].close;
             if previous_close > 0.0 {
                 items[index].change_amount = items[index].close - previous_close;
-                items[index].change_pct = (items[index].change_amount / previous_close
-                    * 100 as f64)
-                .to_f64()
-                .unwrap_or_default();
+                items[index].change_pct = (items[index].change_amount / previous_close * 100.0)
+                    .to_f64()
+                    .unwrap_or_default();
             }
         }
 
@@ -1289,10 +1288,10 @@ impl MarketDataClient {
             let volume = parts[5].parse::<i64>().unwrap_or_default();
             items.push(super::CandlePoint {
                 trade_date,
-                open: open,
-                close: close,
-                high: high,
-                low: low,
+                open,
+                close,
+                high,
+                low,
                 volume,
                 amount: 0.0,
                 amplitude_pct: if low > 0.0 {
@@ -1311,10 +1310,9 @@ impl MarketDataClient {
             let previous_close = items[index - 1].close;
             if previous_close > 0.0 {
                 items[index].change_amount = items[index].close - previous_close;
-                items[index].change_pct = (items[index].change_amount / previous_close
-                    * 100 as f64)
-                .to_f64()
-                .unwrap_or_default();
+                items[index].change_pct = (items[index].change_amount / previous_close * 100.0)
+                    .to_f64()
+                    .unwrap_or_default();
             }
         }
         if items.is_empty() {
@@ -1431,12 +1429,12 @@ impl MarketDataClient {
 
 #[cfg(test)]
 mod tests {
+    use super::super::NewsItem;
+    use super::super::news_filter::{build_dated_news_query, within_date_window};
     use super::news_filter::{
         has_meaningful_us_company_event_signal, is_direct_company_news_match,
         normalize_company_query_name,
     };
-    use super::super::NewsItem;
-    use super::super::news_filter::{build_dated_news_query, within_date_window};
 
     #[test]
     fn normalizes_company_query_name_for_search() {

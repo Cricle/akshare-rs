@@ -35,13 +35,13 @@ impl MarketDataClient {
             bail!("unexpected tencent HK quote field count");
         }
         let trade_date = normalize_hk_trade_date(fields.get(30).copied())?;
-        Ok(QuoteResponseBuilder::new(symbol.to_uppercase(), trade_date)
+        QuoteResponseBuilder::new(symbol.to_uppercase(), trade_date)
             .open(fields.get(5).copied())
             .close(fields.get(3).copied())
             .high(fields.get(33).copied())
             .low(fields.get(34).copied())
             .volume(fields.get(6).copied())
-            .build()?)
+            .build()
     }
 
     pub(crate) async fn fetch_hk_tencent_candles(
@@ -290,26 +290,22 @@ impl QuoteResponseBuilder {
     }
 
     fn open(mut self, raw: Option<&str>) -> Self {
-        self.open = raw
-            .and_then(|value| value.parse::<f64>().ok());
+        self.open = raw.and_then(|value| value.parse::<f64>().ok());
         self
     }
 
     fn close(mut self, raw: Option<&str>) -> Self {
-        self.close = raw
-            .and_then(|value| value.parse::<f64>().ok());
+        self.close = raw.and_then(|value| value.parse::<f64>().ok());
         self
     }
 
     fn high(mut self, raw: Option<&str>) -> Self {
-        self.high = raw
-            .and_then(|value| value.parse::<f64>().ok());
+        self.high = raw.and_then(|value| value.parse::<f64>().ok());
         self
     }
 
     fn low(mut self, raw: Option<&str>) -> Self {
-        self.low = raw
-            .and_then(|value| value.parse::<f64>().ok());
+        self.low = raw.and_then(|value| value.parse::<f64>().ok());
         self
     }
 

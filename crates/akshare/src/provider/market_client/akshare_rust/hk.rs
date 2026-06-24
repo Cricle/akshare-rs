@@ -1,5 +1,5 @@
-use super::types::ProviderResult;
 use super::super::{CandlePoint, FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot};
+use super::types::ProviderResult;
 
 use crate::stock::hk_extra::{
     HkFamousStock, HkFhpxDetailThs, HkGxlLg, HkHotRank, HkHotRankDetail, HkSpotQuote,
