@@ -1,1 +1,1 @@
-pub(crate) type ProviderResult<T> = (T, String);
+// ProviderResult removed — use QuoteWithProvider / CandlesWithProvider directly.

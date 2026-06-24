@@ -588,6 +588,78 @@ impl MarketDataClient {
     }
 }
 
+/// Extract text content from an XML tag (handles CDATA).
+fn extract_rss_tag(xml: &str, tag: &str) -> Option<String> {
+    let start_tag = format!("<{tag}>");
+    let end_tag = format!("</{tag}>");
+    let start = xml.find(&start_tag)? + start_tag.len();
+    let end = xml.find(&end_tag)?;
+    let value = xml[start..end].trim();
+    let value = value
+        .strip_prefix("<![CDATA[")
+        .and_then(|s| s.strip_suffix("]]>"))
+        .unwrap_or(value);
+    let value = value.trim();
+    if value.is_empty() {
+        None
+    } else {
+        Some(value.to_string())
+    }
+}
+
+/// Normalize RSS date string to YYYY-MM-DD format.
+fn normalize_rss_date(raw: &str) -> String {
+    if let Ok(dt) = chrono::DateTime::parse_from_rfc2822(raw) {
+        return dt.format("%Y-%m-%d").to_string();
+    }
+    if raw.len() >= 10 && raw.as_bytes()[4] == b'-' && raw.as_bytes()[7] == b'-' {
+        return raw[..10].to_string();
+    }
+    String::new()
+}
+
+impl MarketDataClient {
+    /// Fetch news items from Bing RSS for the given queries.
+    ///
+    /// Returns parsed `NewsItem`s. Callers are responsible for deduplication.
+    pub(crate) async fn fetch_bing_rss_news(&self, queries: &[&str], max_queries: usize) -> Vec<NewsItem> {
+        let mut items = Vec::new();
+        for query in queries.iter().take(max_queries) {
+            let rss_url = format!(
+                "https://cn.bing.com/search?q={}&format=rss",
+                query.replace(' ', "+")
+            );
+            if let Ok(Ok(response)) =
+                tokio::time::timeout(std::time::Duration::from_secs(10), self.http.get(&rss_url).send())
+                    .await
+                && let Ok(body) = response.text().await
+            {
+                for item_xml in body.split("<item>").skip(1) {
+                    let end = item_xml.find("</item>").unwrap_or(item_xml.len());
+                    let xml = &item_xml[..end];
+                    let title = extract_rss_tag(xml, "title")
+                        .filter(|t| !t.contains("必应") && !t.contains("Bing"));
+                    let link = extract_rss_tag(xml, "link");
+                    let desc = extract_rss_tag(xml, "description");
+                    let date = extract_rss_tag(xml, "pubDate")
+                        .map(|d| normalize_rss_date(&d))
+                        .unwrap_or_default();
+                    if let (Some(title), Some(url)) = (title, link) {
+                        items.push(NewsItem {
+                            published_at: date,
+                            title,
+                            summary: desc.unwrap_or_default(),
+                            source: "bing_rss".to_string(),
+                            url: Some(url),
+                        });
+                    }
+                }
+            }
+        }
+        items
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

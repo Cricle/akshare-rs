@@ -11,6 +11,7 @@ use super::{
     MarketKind, NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult,
     NewsItem, QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, SEARCH_CACHE_TTL_SECS,
     SEARCH_CACHE_VERSION, SectorConstituent, SectorSnapshot, StockSearchResult, TradeCalendarItem,
+    BatchFundamentalsResult, BatchQuoteResult, CandlesWithProvider, QuoteWithProvider,
 };
 
 impl MarketDataClient {
@@ -19,7 +20,7 @@ impl MarketDataClient {
         let result = self
             .fetch_quote_with_provider(symbol)
             .await
-            .map(|(quote, _)| quote);
+            .map(|r| r.quote);
         let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
         let meter = opentelemetry::global::meter("stock-analyzer");
         let outcome = if result.is_ok() { "success" } else { "error" };
@@ -48,7 +49,7 @@ impl MarketDataClient {
     pub async fn fetch_quote_with_provider(
         &self,
         symbol: &str,
-    ) -> anyhow::Result<(QuoteSnapshot, String)> {
+    ) -> anyhow::Result<QuoteWithProvider> {
         let span = tracing::info_span!("market_data.fetch", data_type = "quote", symbol);
         async {
             let start = std::time::Instant::now();
@@ -73,7 +74,7 @@ impl MarketDataClient {
                     .f64_histogram("market_data_fetch_duration_ms")
                     .build()
                     .record(dur_ms, &attrs);
-                return Ok((cached, "redis_cache".to_string()));
+                return Ok(QuoteWithProvider { quote: cached, provider: "redis_cache".to_string() });
             }
             // Singleflight: prevent cache stampede when multiple users request the same stock
             let sf = self.singleflight.clone();
@@ -81,7 +82,7 @@ impl MarketDataClient {
                 SingleflightResult::Leader(g) => Some(g),
                 SingleflightResult::Waiting => {
                     if let Some(cached) = self.cache_get_json::<QuoteSnapshot>(&cache_key).await {
-                        return Ok((cached, "redis_cache".to_string()));
+                        return Ok(QuoteWithProvider { quote: cached, provider: "redis_cache".to_string() });
                     }
                     None
                 }
@@ -110,10 +111,10 @@ impl MarketDataClient {
                     .build()
                     .add(1, &attrs);
             }
-            let (snapshot, provider_used) = result?;
-            self.cache_set_json(&cache_key, QUOTE_CACHE_TTL_SECS, &snapshot)
+            let qwp = result?;
+            self.cache_set_json(&cache_key, QUOTE_CACHE_TTL_SECS, &qwp.quote)
                 .await;
-            Ok((snapshot, provider_used))
+            Ok(qwp)
         }
         .instrument(span)
         .await
@@ -181,7 +182,7 @@ impl MarketDataClient {
     pub async fn fetch_quotes_batch(
         &self,
         symbols: &[&str],
-    ) -> Vec<(String, Option<QuoteSnapshot>)> {
+    ) -> Vec<BatchQuoteResult> {
         if symbols.is_empty() {
             return Vec::new();
         }
@@ -222,7 +223,7 @@ impl MarketDataClient {
                         )
                         .await;
                         let quote = match result {
-                            Ok(Ok((q, _))) => {
+                            Ok(Ok(qwp)) => {
                                 // Write to cache
                                 let market = client.detect_market(&sym);
                                 let normalized = client.cache_symbol(&sym, market);
@@ -230,9 +231,9 @@ impl MarketDataClient {
                                     "{MARKET_DATA_CACHE_PREFIX}:quote:{QUOTE_CACHE_VERSION}:{normalized}"
                                 );
                                 client
-                                    .cache_set_json(&cache_key, QUOTE_CACHE_TTL_SECS, &q)
+                                    .cache_set_json(&cache_key, QUOTE_CACHE_TTL_SECS, &qwp.quote)
                                     .await;
-                                Some(q)
+                                Some(qwp.quote)
                             }
                             _ => None,
                         };
@@ -249,7 +250,7 @@ impl MarketDataClient {
         }
         keys.into_iter()
             .zip(results)
-            .map(|((sym, _), q)| (sym, q))
+            .map(|((sym, _), q)| BatchQuoteResult { symbol: sym, quote: q })
             .collect()
     }
 
@@ -257,7 +258,7 @@ impl MarketDataClient {
     pub async fn fetch_fundamentals_batch(
         &self,
         symbols: &[&str],
-    ) -> Vec<(String, Option<FundamentalsSnapshot>)> {
+    ) -> Vec<BatchFundamentalsResult> {
         if symbols.is_empty() {
             return Vec::new();
         }
@@ -320,7 +321,7 @@ impl MarketDataClient {
         }
         keys.into_iter()
             .zip(results)
-            .map(|((sym, _), f)| (sym, f))
+            .map(|((sym, _), f)| BatchFundamentalsResult { symbol: sym, fundamentals: f })
             .collect()
     }
 
@@ -607,7 +608,7 @@ impl MarketDataClient {
             let result = self
                 .fetch_candles_with_provider(symbol, adjust, limit)
                 .await
-                .map(|(items, _)| items);
+                .map(|r| r.candles);
             let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
             let meter = opentelemetry::global::meter("stock-analyzer");
             let ok = result.is_ok();
@@ -642,7 +643,7 @@ impl MarketDataClient {
         symbol: &str,
         adjust: &str,
         limit: usize,
-    ) -> anyhow::Result<(Vec<CandlePoint>, String)> {
+    ) -> anyhow::Result<CandlesWithProvider> {
         let span = tracing::info_span!("market_data.fetch", data_type = "candles", symbol);
         async {
             let start = std::time::Instant::now();
@@ -661,7 +662,7 @@ impl MarketDataClient {
                 ];
                 meter.u64_counter("market_data_fetch_total").build().add(1, &attrs);
                 meter.f64_histogram("market_data_fetch_duration_ms").build().record(dur_ms, &attrs);
-                return Ok((cached, "redis_cache".to_string()));
+                return Ok(CandlesWithProvider { candles: cached, provider: "redis_cache".to_string() });
             }
             // Singleflight: prevent cache stampede
             let sf = self.singleflight.clone();
@@ -669,7 +670,7 @@ impl MarketDataClient {
                 SingleflightResult::Leader(g) => Some(g),
                 SingleflightResult::Waiting => {
                     if let Some(cached) = self.cache_get_json(&cache_key).await {
-                        return Ok((cached, "redis_cache".to_string()));
+                        return Ok(CandlesWithProvider { candles: cached, provider: "redis_cache".to_string() });
                     }
                     None
                 }
@@ -689,12 +690,12 @@ impl MarketDataClient {
             if !ok {
                 meter.u64_counter("market_data_fetch_errors_total").build().add(1, &attrs);
             }
-            let (items, provider_used) = result?;
-            if !items.is_empty() {
-                self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
+            let cwp = result?;
+            if !cwp.candles.is_empty() {
+                self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &cwp.candles)
                     .await;
             }
-            Ok((items, provider_used))
+            Ok(cwp)
         }.instrument(span).await
     }
 
@@ -793,20 +794,16 @@ impl MarketDataClient {
         sector_type: &str,
         limit: usize,
     ) -> anyhow::Result<Vec<SectorSnapshot>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:a-share-sector-rankings:{}:{}",
-            sector_type.trim().to_lowercase(),
-            limit
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = self
-            .fetch_a_share_sector_rankings_from_eastmoney(sector_type, limit)
-            .await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:a-share-sector-rankings:{}:{}",
+                sector_type.trim().to_lowercase(),
+                limit
+            ),
+            CANDLES_CACHE_TTL_SECS,
+            || self.fetch_a_share_sector_rankings_from_eastmoney(sector_type, limit),
+        )
+        .await
     }
 
     pub async fn fetch_a_share_sector_constituents(
@@ -814,20 +811,16 @@ impl MarketDataClient {
         sector_code: &str,
         limit: usize,
     ) -> anyhow::Result<Vec<SectorConstituent>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:a-share-sector-constituents:{}:{}",
-            sector_code.trim().to_uppercase(),
-            limit
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = self
-            .fetch_a_share_sector_constituents_from_eastmoney(sector_code, limit)
-            .await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:a-share-sector-constituents:{}:{}",
+                sector_code.trim().to_uppercase(),
+                limit
+            ),
+            CANDLES_CACHE_TTL_SECS,
+            || self.fetch_a_share_sector_constituents_from_eastmoney(sector_code, limit),
+        )
+        .await
     }
 
     pub async fn fetch_a_share_sector_capital_flow(
@@ -835,37 +828,31 @@ impl MarketDataClient {
         sector_code: &str,
         limit: usize,
     ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:a-share-sector-capital-flow:{}:{}",
-            sector_code.trim().to_uppercase(),
-            limit
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = self
-            .fetch_a_share_sector_capital_flow_from_eastmoney(sector_code, limit)
-            .await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:a-share-sector-capital-flow:{}:{}",
+                sector_code.trim().to_uppercase(),
+                limit
+            ),
+            CANDLES_CACHE_TTL_SECS,
+            || self.fetch_a_share_sector_capital_flow_from_eastmoney(sector_code, limit),
+        )
+        .await
     }
 
     pub async fn fetch_announcement_detail(
         &self,
         art_code: &str,
     ) -> anyhow::Result<AnnouncementDetail> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:announcement-detail:{}",
-            art_code.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let item = self.fetch_a_share_announcement_detail(art_code).await?;
-        self.cache_set_json(&cache_key, SEARCH_CACHE_TTL_SECS, &item)
-            .await;
-        Ok(item)
+        self.cached_fetch(
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:announcement-detail:{}",
+                art_code.trim()
+            ),
+            SEARCH_CACHE_TTL_SECS,
+            || self.fetch_a_share_announcement_detail(art_code),
+        )
+        .await
     }
 
     pub async fn fetch_announcements(
@@ -965,17 +952,16 @@ impl MarketDataClient {
     ) -> anyhow::Result<Vec<BillboardEntry>> {
         if self.normalize_a_share_symbol(symbol).is_some() {
             let normalized = self.cache_symbol(symbol, MarketKind::AShare);
-            let cache_key = format!(
-                "{MARKET_DATA_CACHE_PREFIX}:billboard-entries:{}:{}",
-                normalized, limit
-            );
-            if let Some(cached) = self.cache_get_json(&cache_key).await {
-                return Ok(cached);
-            }
-            let items = self.fetch_a_share_billboard_entries(symbol, limit).await?;
-            self.cache_set_json(&cache_key, NEWS_CACHE_TTL_SECS, &items)
+            return self
+                .cached_fetch(
+                    &format!(
+                        "{MARKET_DATA_CACHE_PREFIX}:billboard-entries:{}:{}",
+                        normalized, limit
+                    ),
+                    NEWS_CACHE_TTL_SECS,
+                    || self.fetch_a_share_billboard_entries(symbol, limit),
+                )
                 .await;
-            return Ok(items);
         }
 
         Err(DataError::new(
@@ -993,21 +979,18 @@ impl MarketDataClient {
     ) -> anyhow::Result<Vec<BillboardSeatDetail>> {
         if self.normalize_a_share_symbol(symbol).is_some() {
             let normalized = self.cache_symbol(symbol, MarketKind::AShare);
-            let cache_key = format!(
-                "{MARKET_DATA_CACHE_PREFIX}:billboard-seats:{}:{}:{}",
-                normalized,
-                side.trim().to_lowercase(),
-                limit
-            );
-            if let Some(cached) = self.cache_get_json(&cache_key).await {
-                return Ok(cached);
-            }
-            let items = self
-                .fetch_a_share_billboard_seats(symbol, side, limit)
-                .await?;
-            self.cache_set_json(&cache_key, NEWS_CACHE_TTL_SECS, &items)
+            return self
+                .cached_fetch(
+                    &format!(
+                        "{MARKET_DATA_CACHE_PREFIX}:billboard-seats:{}:{}:{}",
+                        normalized,
+                        side.trim().to_lowercase(),
+                        limit
+                    ),
+                    NEWS_CACHE_TTL_SECS,
+                    || self.fetch_a_share_billboard_seats(symbol, side, limit),
+                )
                 .await;
-            return Ok(items);
         }
 
         Err(DataError::new(
@@ -1079,38 +1062,37 @@ impl MarketDataClient {
         end_date: &str,
     ) -> anyhow::Result<Vec<TradeCalendarItem>> {
         let exchange = exchange.trim().to_uppercase();
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:trade-calendar:{}:{}:{}",
-            exchange, start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let rows = self
-            .tushare_query(
-                "trade_cal",
-                serde_json::json!({
-                    "exchange": exchange,
-                    "start_date": start_date,
-                    "end_date": end_date
-                }),
-                "exchange,cal_date,is_open,pretrade_date",
-            )
-            .await?;
-        let items = rows
-            .into_iter()
-            .map(|row| {
-                Ok(TradeCalendarItem {
-                    exchange: row.optional_string("exchange").unwrap_or_default(),
-                    calendar_date: row.string("cal_date")?,
-                    is_open: row.optional_f64("is_open").unwrap_or_default() > 0.0,
-                    previous_trade_date: row.optional_string("pretrade_date"),
-                })
-            })
-            .collect::<anyhow::Result<Vec<_>>>()?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:trade-calendar:{}:{}:{}",
+                exchange, start_date, end_date
+            ),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || async move {
+                let rows = self
+                    .tushare_query(
+                        "trade_cal",
+                        serde_json::json!({
+                            "exchange": exchange,
+                            "start_date": start_date,
+                            "end_date": end_date
+                        }),
+                        "exchange,cal_date,is_open,pretrade_date",
+                    )
+                    .await?;
+                rows.into_iter()
+                    .map(|row| {
+                        Ok(TradeCalendarItem {
+                            exchange: row.optional_string("exchange").unwrap_or_default(),
+                            calendar_date: row.string("cal_date")?,
+                            is_open: row.optional_f64("is_open").unwrap_or_default() > 0.0,
+                            previous_trade_date: row.optional_string("pretrade_date"),
+                        })
+                    })
+                    .collect::<anyhow::Result<Vec<_>>>()
+            },
+        )
+        .await
     }
 }
 impl MarketDataClient {
@@ -1232,65 +1214,44 @@ impl MarketDataClient {
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<FundFlowEntry>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:fund-flow-individual:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_fund_flow_individual(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:fund-flow-individual:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_fund_flow_individual(self, symbol),
+        ).await
     }
 
     pub async fn fetch_fund_flow_concept(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<SectorFundFlowRank>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:fund-flow-concept:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_fund_flow_concept(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:fund-flow-concept:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_fund_flow_concept(self, symbol),
+        ).await
     }
 
     pub async fn fetch_fund_flow_industry(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<SectorFundFlowRank>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:fund-flow-industry:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_fund_flow_industry(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:fund-flow-industry:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_fund_flow_industry(self, symbol),
+        ).await
     }
 
     pub async fn fetch_main_fund_flow(&self, symbol: &str) -> anyhow::Result<Vec<MainFundFlow>> {
         let normalized = self
             .normalize_a_share_symbol(symbol)
             .ok_or_else(|| anyhow::anyhow!("invalid A-share symbol for main fund flow"))?;
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:main-fund-flow:{}", normalized);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_main_fund_flow(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:main-fund-flow:{}", normalized),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_main_fund_flow(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -1302,37 +1263,22 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<LhbDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:lhb-detail:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_billboard_detail(self, start_date, end_date)
-                .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-detail:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_detail(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_lhb_stock_statistic(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<LhbStockStatistic>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:lhb-stock-stat:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_billboard_stock_statistic(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-stat:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_stock_statistic(self, symbol),
+        ).await
     }
 
     pub async fn fetch_lhb_jgmmtj(
@@ -1340,30 +1286,19 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<LhbJgmmtj>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:lhb-jgmmtj:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_billboard_jgmmtj(self, start_date, end_date)
-                .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-jgmmtj:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_jgmmtj(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_lhb_jgstatistic(&self, symbol: &str) -> anyhow::Result<Vec<LhbJgstatistic>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:lhb-jgstat:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_billboard_jgstatistic(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-jgstat:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_jgstatistic(self, symbol),
+        ).await
     }
 
     pub async fn fetch_lhb_hyyyb(
@@ -1371,62 +1306,41 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<LhbHyyyb>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:lhb-hyyyb:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_billboard_hyyyb(self, start_date, end_date).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-hyyyb:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_hyyyb(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_lhb_yybph(&self, symbol: &str) -> anyhow::Result<Vec<LhbYybph>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:lhb-yybph:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_billboard_yybph(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-yybph:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_yybph(self, symbol),
+        ).await
     }
 
     pub async fn fetch_lhb_trader_statistic(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<LhbTraderStatistic>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:lhb-trader:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_billboard_trader_statistic(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-trader:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_trader_statistic(self, symbol),
+        ).await
     }
 
     pub async fn fetch_lhb_stock_detail_date(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<LhbStockDetailDate>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:lhb-stock-date:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_billboard_stock_detail_date(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-date:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_stock_detail_date(self, symbol),
+        ).await
     }
 
     pub async fn fetch_lhb_stock_detail(
@@ -1435,35 +1349,19 @@ impl MarketDataClient {
         date: &str,
         flag: &str,
     ) -> anyhow::Result<Vec<LhbStockDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:lhb-stock-detail:{}:{}:{}",
-            symbol.trim(),
-            date,
-            flag
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_billboard_stock_detail(self, symbol, date, flag)
-                .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-detail:{}:{}:{}", symbol.trim(), date, flag),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_stock_detail(self, symbol, date, flag),
+        ).await
     }
 
     pub async fn fetch_lhb_yyb_detail(&self, symbol: &str) -> anyhow::Result<Vec<LhbYybDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:lhb-yyb-detail:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_billboard_yyb_detail(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-yyb-detail:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_billboard_yyb_detail(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -1475,47 +1373,33 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<MarginAccountInfo>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:margin-account:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_margin_account_info(self, start_date, end_date)
-                .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-account:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_margin_account_info(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_margin_sse_detail(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<MarginSseDetail>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:margin-sse-detail:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_margin_sse_detail(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-sse-detail:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_margin_sse_detail(self, date),
+        ).await
     }
 
     pub async fn fetch_margin_szse_detail(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<MarginSzseDetail>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:margin-szse-detail:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_margin_szse_detail(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-szse-detail:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_margin_szse_detail(self, date),
+        ).await
     }
 
     pub async fn fetch_margin_ratio_pa(
@@ -1523,18 +1407,11 @@ impl MarketDataClient {
         symbol: &str,
         date: &str,
     ) -> anyhow::Result<Vec<MarginRatioPa>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:margin-ratio-pa:{}:{}",
-            symbol.trim(),
-            date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_margin_ratio_pa(self, symbol, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-ratio-pa:{}:{}", symbol.trim(), date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_margin_ratio_pa(self, symbol, date),
+        ).await
     }
 
     pub async fn fetch_margin_sse_summary(
@@ -1542,33 +1419,22 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<MarginSseSummary>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:margin-sse-summary:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_margin_sse_summary(self, start_date, end_date)
-                .await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-sse-summary:{}:{}", start_date, end_date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_margin_sse_summary(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_margin_szse_summary(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<MarginSzseSummary>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:margin-szse-summary:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_margin_szse_summary(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-szse-summary:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_margin_szse_summary(self, date),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -1576,69 +1442,51 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_zt_pool(&self, date: &str) -> anyhow::Result<Vec<ZtPool>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_zt_pool(self, date).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool:{}", date),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_zt_pool(self, date),
+        ).await
     }
 
     pub async fn fetch_zt_pool_dtgc(&self, date: &str) -> anyhow::Result<Vec<ZtPoolDtgc>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-dtgc:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_zt_pool_dtgc(self, date).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-dtgc:{}", date),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_zt_pool_dtgc(self, date),
+        ).await
     }
 
     pub async fn fetch_zt_pool_previous(&self, date: &str) -> anyhow::Result<Vec<ZtPoolPrevious>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-prev:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_zt_pool_previous(self, date).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-prev:{}", date),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_zt_pool_previous(self, date),
+        ).await
     }
 
     pub async fn fetch_zt_pool_strong(&self, date: &str) -> anyhow::Result<Vec<ZtPoolStrong>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-strong:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_zt_pool_strong(self, date).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-strong:{}", date),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_zt_pool_strong(self, date),
+        ).await
     }
 
     pub async fn fetch_zt_pool_sub_new(&self, date: &str) -> anyhow::Result<Vec<ZtPoolSubNew>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-subnew:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_zt_pool_sub_new(self, date).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-subnew:{}", date),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_zt_pool_sub_new(self, date),
+        ).await
     }
 
     pub async fn fetch_zt_pool_zbgc(&self, date: &str) -> anyhow::Result<Vec<ZtPoolZbgc>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-zbgc:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_zt_pool_zbgc(self, date).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-zbgc:{}", date),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_zt_pool_zbgc(self, date),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -1649,39 +1497,30 @@ impl MarketDataClient {
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<EarningsForecast>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:earnings-forecast:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_earnings_forecast(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:earnings-forecast:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_earnings_forecast(self, date),
+        ).await
     }
 
     pub async fn fetch_earnings_quick_report(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<EarningsQuickReport>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:earnings-quick:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_earnings_quick_report(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:earnings-quick:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_earnings_quick_report(self, date),
+        ).await
     }
 
     pub async fn fetch_earnings_report(&self, date: &str) -> anyhow::Result<Vec<EarningsReport>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:earnings-report:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_earnings_report(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:earnings-report:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_earnings_report(self, date),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -1689,14 +1528,11 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_analyst_rank(&self, year: &str) -> anyhow::Result<Vec<AnalystRank>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:analyst-rank:{}", year);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_analyst_rank(self, year).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:analyst-rank:{}", year),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_analyst_rank(self, year),
+        ).await
     }
 
     pub async fn fetch_analyst_detail(
@@ -1704,18 +1540,11 @@ impl MarketDataClient {
         analyst_id: &str,
         indicator: &str,
     ) -> anyhow::Result<Vec<AnalystDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:analyst-detail:{}:{}",
-            analyst_id, indicator
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_analyst_detail(self, analyst_id, indicator).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:analyst-detail:{}:{}", analyst_id, indicator),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_analyst_detail(self, analyst_id, indicator),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -1726,58 +1555,44 @@ impl MarketDataClient {
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingStatistic>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-stat:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_gdfx_free_holding_statistics(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-stat:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_free_holding_statistics(self, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_holding_statistics(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingStatistic>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-stat:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_gdfx_holding_statistics(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-stat:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_holding_statistics(self, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_free_holding_change(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingChange>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-change:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_gdfx_free_holding_change(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-change:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_free_holding_change(self, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_holding_change(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingChange>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-change:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_gdfx_holding_change(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-change:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_holding_change(self, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_free_top10(
@@ -1785,18 +1600,11 @@ impl MarketDataClient {
         symbol: &str,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxTop10>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:gdfx-free-top10:{}:{}",
-            symbol.trim(),
-            date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_gdfx_free_top10(self, symbol, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-top10:{}:{}", symbol.trim(), date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_free_top10(self, symbol, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_top10(
@@ -1804,33 +1612,22 @@ impl MarketDataClient {
         symbol: &str,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxTop10>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:gdfx-top10:{}:{}",
-            symbol.trim(),
-            date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_gdfx_top10(self, symbol, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-top10:{}:{}", symbol.trim(), date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_top10(self, symbol, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_free_holding_detail(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingDetail>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-detail:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_gdfx_free_holding_detail(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-detail:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_free_holding_detail(self, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_holding_detail(
@@ -1839,76 +1636,52 @@ impl MarketDataClient {
         indicator: &str,
         symbol: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:gdfx-detail:{}:{}:{}",
-            date, indicator, symbol
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_gdfx_holding_detail(self, date, indicator, symbol)
-                .await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-detail:{}:{}:{}", date, indicator, symbol),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_holding_detail(self, date, indicator, symbol),
+        ).await
     }
 
     pub async fn fetch_gdfx_free_holding_analyse(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingAnalyse>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-analyse:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_gdfx_free_holding_analyse(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-analyse:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_free_holding_analyse(self, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_holding_analyse(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingAnalyse>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-analyse:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_gdfx_holding_analyse(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-analyse:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_holding_analyse(self, date),
+        ).await
     }
 
     pub async fn fetch_gdfx_free_teamwork(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<GdfxTeamwork>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:gdfx-free-team:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_gdfx_free_teamwork(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-team:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_free_teamwork(self, symbol),
+        ).await
     }
 
     pub async fn fetch_gdfx_teamwork(&self, symbol: &str) -> anyhow::Result<Vec<GdfxTeamwork>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-team:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_gdfx_teamwork(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-team:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_gdfx_teamwork(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -1920,19 +1693,11 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<DzjyMrtj>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:dzjy-mrtj:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_block_trade_daily(self, start_date, end_date)
-                .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-mrtj:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_block_trade_daily(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_block_trade_industry(
@@ -1940,19 +1705,11 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<DzjyHygtj>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:dzjy-hygtj:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_block_trade_industry(self, start_date, end_date)
-                .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-hygtj:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_block_trade_industry(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_block_trade_industry_daily(
@@ -1960,20 +1717,11 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<DzjyHyyybtj>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:dzjy-hyyybtj:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_block_trade_industry_daily(
-            self, start_date, end_date,
-        )
-        .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-hyyybtj:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_block_trade_industry_daily(self, start_date, end_date),
+        ).await
     }
 
     pub async fn fetch_block_trade_seat_ranking(
@@ -1981,20 +1729,11 @@ impl MarketDataClient {
         start_date: &str,
         end_date: &str,
     ) -> anyhow::Result<Vec<DzjyYybph>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:dzjy-yybph:{}:{}",
-            start_date, end_date
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_block_trade_seat_ranking(
-            self, start_date, end_date,
-        )
-        .await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-yybph:{}:{}", start_date, end_date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_block_trade_seat_ranking(self, start_date, end_date),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2002,36 +1741,27 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_hot_follow_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:hot-follow:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_hot_follow_xq(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hot-follow:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_hot_follow_xq(self, symbol),
+        ).await
     }
 
     pub async fn fetch_hot_tweet_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:hot-tweet:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_hot_tweet_xq(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hot-tweet:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_hot_tweet_xq(self, symbol),
+        ).await
     }
 
     pub async fn fetch_hot_deal_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:hot-deal:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_hot_deal_xq(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hot-deal:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_hot_deal_xq(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2047,28 +1777,19 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_dividends(&self, date: &str) -> anyhow::Result<Vec<DividendInfo>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:dividends:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_dividends(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:dividends:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_dividends(self, date),
+        ).await
     }
 
     pub async fn fetch_dividend_detail(&self, symbol: &str) -> anyhow::Result<Vec<DividendInfo>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:dividend-detail:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_dividend_detail(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:dividend-detail:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_dividend_detail(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2087,77 +1808,56 @@ impl MarketDataClient {
     }
 
     pub async fn fetch_pledge_ratio(&self) -> anyhow::Result<Vec<GpzyPledgeRatio>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:pledge-ratio");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_pledge_ratio(self).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-ratio"),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_pledge_ratio(self),
+        ).await
     }
 
     pub async fn fetch_pledge_detail(&self) -> anyhow::Result<Vec<GpzyPledgeDetail>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:pledge-detail");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_pledge_detail(self).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-detail"),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_pledge_detail(self),
+        ).await
     }
 
     pub async fn fetch_pledge_ratio_detail(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<GpzyPledgeRatioDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:pledge-ratio-detail:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_pledge_ratio_detail(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-ratio-detail:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_pledge_ratio_detail(self, symbol),
+        ).await
     }
 
     pub async fn fetch_pledge_distribute_bank(&self) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-bank");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_pledge_distribute_bank(self).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-bank"),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_pledge_distribute_bank(self),
+        ).await
     }
 
     pub async fn fetch_pledge_distribute_company(
         &self,
     ) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-company");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_pledge_distribute_company(self).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-company"),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_pledge_distribute_company(self),
+        ).await
     }
 
     pub async fn fetch_pledge_industry(&self) -> anyhow::Result<Vec<GpzyIndustry>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:pledge-industry");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_pledge_industry(self).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-industry"),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_pledge_industry(self),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2165,29 +1865,22 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_institutional_research(&self, date: &str) -> anyhow::Result<Vec<JgdyTj>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:jgdy-tj:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_institutional_research(self, date).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:jgdy-tj:{}", date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_institutional_research(self, date),
+        ).await
     }
 
     pub async fn fetch_institutional_research_detail(
         &self,
         date: &str,
     ) -> anyhow::Result<Vec<JgdyDetail>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:jgdy-detail:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_institutional_research_detail(self, date).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:jgdy-detail:{}", date),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_institutional_research_detail(self, date),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2243,36 +1936,27 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_balance_sheet(&self, date: &str) -> anyhow::Result<Vec<BalanceSheet>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:balance-sheet:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_balance_sheet(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:balance-sheet:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_balance_sheet(self, date),
+        ).await
     }
 
     pub async fn fetch_profit_sheet(&self, date: &str) -> anyhow::Result<Vec<ProfitSheet>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:profit-sheet:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_profit_sheet(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:profit-sheet:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_profit_sheet(self, date),
+        ).await
     }
 
     pub async fn fetch_cash_flow_sheet(&self, date: &str) -> anyhow::Result<Vec<CashFlowSheet>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:cash-flow-sheet:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_cash_flow_sheet(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:cash-flow-sheet:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_cash_flow_sheet(self, date),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2280,74 +1964,55 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_stock_comments(&self) -> anyhow::Result<Vec<StockComment>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:stock-comments");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_stock_comments(self).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:stock-comments"),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_stock_comments(self),
+        ).await
     }
 
     pub async fn fetch_comment_org_participation(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<CommentOrgParticipation>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:comment-org:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_comment_org_participation(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:comment-org:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_comment_org_participation(self, symbol),
+        ).await
     }
 
     pub async fn fetch_comment_hist_score(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<CommentHistScore>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:comment-hist:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_comment_hist_score(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:comment-hist:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_comment_hist_score(self, symbol),
+        ).await
     }
 
     pub async fn fetch_comment_focus_index(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<CommentFocusIndex>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:comment-focus:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_comment_focus_index(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:comment-focus:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_comment_focus_index(self, symbol),
+        ).await
     }
 
     pub async fn fetch_comment_desire_index(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<CommentDesireIndex>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:comment-desire:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_comment_desire_index(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:comment-desire:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_comment_desire_index(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2355,18 +2020,11 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_executive_shareholding(&self, symbol: &str) -> anyhow::Result<Vec<Ggcg>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:exec-shareholding:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_executive_shareholding(self, symbol).await?;
-        self.cache_set_json(&cache_key, INSIDER_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:exec-shareholding:{}", symbol.trim()),
+            INSIDER_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_executive_shareholding(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2374,29 +2032,22 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_shareholder_count(&self, date: &str) -> anyhow::Result<Vec<Gdhs>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdhs:{}", date);
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::a_share::fetch_shareholder_count(self, date).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdhs:{}", date),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_shareholder_count(self, date),
+        ).await
     }
 
     pub async fn fetch_shareholder_count_detail(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<GdhsDetail>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:gdhs-detail:{}", symbol.trim());
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::a_share::fetch_shareholder_count_detail(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:gdhs-detail:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::a_share::fetch_shareholder_count_detail(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2427,14 +2078,11 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_hk_spot(&self) -> anyhow::Result<Vec<HkSpotQuote>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:hk-spot");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_spot(self).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-spot"),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_spot(self),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2442,14 +2090,11 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_hk_famous_spot(&self) -> anyhow::Result<Vec<HkFamousStock>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:hk-famous-spot");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_famous_spot(self).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-famous-spot"),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_famous_spot(self),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2457,65 +2102,44 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_hk_hot_rank(&self) -> anyhow::Result<Vec<HkHotRank>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_hot_rank(self).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank"),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_hot_rank(self),
+        ).await
     }
 
     pub async fn fetch_hk_hot_rank_latest(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<HkHotRankDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-latest:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_hot_rank_latest(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-latest:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_hot_rank_latest(self, symbol),
+        ).await
     }
 
     pub async fn fetch_hk_hot_rank_detail(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<HkHotRankDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-detail:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_hot_rank_detail(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-detail:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_hot_rank_detail(self, symbol),
+        ).await
     }
 
     pub async fn fetch_hk_hot_rank_realtime(
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<HkHotRankDetail>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-rt:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_hot_rank_realtime(self, symbol).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-rt:{}", symbol.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_hot_rank_realtime(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2526,42 +2150,27 @@ impl MarketDataClient {
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<serde_json::Value>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:hk-dividend-payout:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_dividend_payout(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-dividend-payout:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_dividend_payout(self, symbol),
+        ).await
     }
 
     pub async fn fetch_hk_fhpx_detail(&self, symbol: &str) -> anyhow::Result<Vec<HkFhpxDetailThs>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:hk-fhpx-detail:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_fhpx_detail(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-fhpx-detail:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_fhpx_detail(self, symbol),
+        ).await
     }
 
     pub async fn fetch_hk_dividend_yield(&self) -> anyhow::Result<Vec<HkGxlLg>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:hk-dividend-yield");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_dividend_yield(self).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-dividend-yield"),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_dividend_yield(self),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2572,17 +2181,11 @@ impl MarketDataClient {
         &self,
         symbol: &str,
     ) -> anyhow::Result<Vec<serde_json::Value>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:hk-fin-indicators:{}",
-            symbol.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::hk::fetch_hk_financial_indicators(self, symbol).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-fin-indicators:{}", symbol.trim()),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_financial_indicators(self, symbol),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2595,20 +2198,11 @@ impl MarketDataClient {
         indicator: &str,
         period: &str,
     ) -> anyhow::Result<Vec<HkValuationBaidu>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:hk-valuation:{}:{}:{}",
-            symbol.trim(),
-            indicator,
-            period
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::hk::fetch_hk_valuation(self, symbol, indicator, period).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-valuation:{}:{}:{}", symbol.trim(), indicator, period),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::hk::fetch_hk_valuation(self, symbol, indicator, period),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2616,14 +2210,11 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_us_spot(&self) -> anyhow::Result<Vec<UsSpotSina>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:us-spot");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::us::fetch_us_spot(self).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:us-spot"),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::us::fetch_us_spot(self),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2631,17 +2222,11 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_us_famous_spot(&self, category: &str) -> anyhow::Result<Vec<UsFamousStock>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:us-famous-spot:{}",
-            category.trim()
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::us::fetch_us_famous_spot(self, category).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:us-famous-spot:{}", category.trim()),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::us::fetch_us_famous_spot(self, category),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2649,14 +2234,11 @@ impl MarketDataClient {
     // -----------------------------------------------------------------------
 
     pub async fn fetch_us_pink_spot(&self) -> anyhow::Result<Vec<UsPinkStock>> {
-        let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:us-pink-spot");
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items = super::akshare_rust::us::fetch_us_pink_spot(self).await?;
-        self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:us-pink-spot"),
+            CANDLES_CACHE_TTL_SECS,
+            || super::akshare_rust::us::fetch_us_pink_spot(self),
+        ).await
     }
 
     // -----------------------------------------------------------------------
@@ -2669,20 +2251,11 @@ impl MarketDataClient {
         indicator: &str,
         period: &str,
     ) -> anyhow::Result<Vec<UsValuationBaidu>> {
-        let cache_key = format!(
-            "{MARKET_DATA_CACHE_PREFIX}:us-valuation:{}:{}:{}",
-            symbol.trim(),
-            indicator,
-            period
-        );
-        if let Some(cached) = self.cache_get_json(&cache_key).await {
-            return Ok(cached);
-        }
-        let items =
-            super::akshare_rust::us::fetch_us_valuation(self, symbol, indicator, period).await?;
-        self.cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &items)
-            .await;
-        Ok(items)
+        self.cached_fetch(
+            &format!("{MARKET_DATA_CACHE_PREFIX}:us-valuation:{}:{}:{}", symbol.trim(), indicator, period),
+            FUNDAMENTALS_CACHE_TTL_SECS,
+            || super::akshare_rust::us::fetch_us_valuation(self, symbol, indicator, period),
+        ).await
     }
 
     // -----------------------------------------------------------------------

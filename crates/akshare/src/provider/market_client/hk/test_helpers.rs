@@ -63,12 +63,12 @@ pub(crate) fn test_hkex_item_is_high_value(item: &NewsItem) -> bool {
 #[cfg(test)]
 pub(crate) fn test_parse_hk_tencent_snapshot(
     raw: &str,
-) -> anyhow::Result<(String, Option<f64>, Option<i64>, Option<String>)> {
+) -> anyhow::Result<TencentSnapshotTestResult> {
     let item = MarketDataClient::parse_hk_tencent_snapshot(raw)?;
-    Ok((
-        item.name,
-        item.market_cap_hkd.and_then(|d| d.to_f64()),
-        item.shares_outstanding,
-        item.currency,
-    ))
+    Ok(TencentSnapshotTestResult {
+        name: item.name,
+        market_cap_hkd: item.market_cap_hkd.and_then(|d| d.to_f64()),
+        shares_outstanding: item.shares_outstanding,
+        currency: item.currency,
+    })
 }

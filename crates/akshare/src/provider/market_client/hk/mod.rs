@@ -4,8 +4,8 @@ mod test_helpers;
 
 use super::news_filter::{build_dated_news_query, merge_ranked_news};
 use super::{
-    FundamentalsSnapshot, GeneralSearchIntent, MarketDataClient, NewsItem, QuoteSnapshot,
-    SearchProviderKind, StockSearchResult,
+    CandlesWithProvider, CompanySearchContext, FundamentalsSnapshot, GeneralSearchIntent,
+    MarketDataClient, NewsItem, QuoteWithProvider, SearchProviderKind, StockSearchResult,
 };
 use anyhow::{Context, bail};
 use chrono::{Days, NaiveDate};
@@ -83,7 +83,7 @@ impl MarketDataClient {
         aliases
     }
 
-    async fn hk_company_search_context(&self, standard_code: &str) -> (String, Vec<String>) {
+    async fn hk_company_search_context(&self, standard_code: &str) -> CompanySearchContext {
         let mut items = self
             .search_stocks_from_eastmoney(standard_code, Some("港股"), 8)
             .await
@@ -103,7 +103,7 @@ impl MarketDataClient {
             .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| standard_code.to_string());
         let aliases = self.hk_search_aliases(&company_name);
-        (company_name, aliases)
+        CompanySearchContext { company_name, aliases }
     }
 
     async fn fetch_hk_main_finance_indicator(
@@ -269,20 +269,20 @@ impl MarketDataClient {
     pub(super) async fn fetch_hk_quote_with_provider(
         &self,
         symbol: &str,
-    ) -> anyhow::Result<(QuoteSnapshot, String)> {
+    ) -> anyhow::Result<QuoteWithProvider> {
         let code = self.hk_standard_code(symbol)?;
         match self.fetch_hk_tencent_quote(symbol, &code).await {
-            Ok(snapshot) => Ok((snapshot, "tencent_quote".to_string())),
+            Ok(snapshot) => Ok(QuoteWithProvider { quote: snapshot, provider: "tencent_quote".to_string() }),
             Err(primary_error) => {
                 tracing::info!(
                     symbol = %symbol,
                     error = ?primary_error,
                     "Tencent HK quote failed, falling back to Yahoo Finance"
                 );
-                Ok((
-                    self.fetch_hk_yahoo_quote(symbol).await?,
-                    "yahoo_finance_chart".to_string(),
-                ))
+                Ok(QuoteWithProvider {
+                    quote: self.fetch_hk_yahoo_quote(symbol).await?,
+                    provider: "yahoo_finance_chart".to_string(),
+                })
             }
         }
     }
@@ -518,7 +518,7 @@ impl MarketDataClient {
     ) -> anyhow::Result<super::NewsFetchResult> {
         let standard_code = self.hk_standard_code(symbol)?;
         let code = standard_code.trim_start_matches('0');
-        let (company_name, aliases) = self.hk_company_search_context(&standard_code).await;
+        let CompanySearchContext { company_name, aliases } = self.hk_company_search_context(&standard_code).await;
         let primary_name = aliases
             .iter()
             .find(|alias| !alias.contains("-W") && !alias.contains("-SW") && !alias.contains('－'))
@@ -560,40 +560,13 @@ impl MarketDataClient {
         if merged.len() < 5 {
             let existing_titles: std::collections::HashSet<String> =
                 merged.iter().map(|i| i.title.to_lowercase()).collect();
+            let query_refs: Vec<&str> = queries.iter().map(|s| s.as_str()).collect();
+            let bing_items = self.fetch_bing_rss_news(&query_refs, 2).await;
             let mut bing_added = 0;
-            for query in queries.iter().take(2) {
-                let rss_url = format!(
-                    "https://cn.bing.com/search?q={}&format=rss",
-                    query.replace(' ', "+")
-                );
-                if let Ok(Ok(response)) =
-                    tokio::time::timeout(Duration::from_secs(10), self.http.get(&rss_url).send())
-                        .await
-                    && let Ok(body) = response.text().await
-                {
-                    for item_xml in body.split("<item>").skip(1) {
-                        let end = item_xml.find("</item>").unwrap_or(item_xml.len());
-                        let xml = &item_xml[..end];
-                        let title = extract_rss_field(xml, "title")
-                            .filter(|t| !t.contains("必应") && !t.contains("Bing"));
-                        let link = extract_rss_field(xml, "link");
-                        let desc = extract_rss_field(xml, "description");
-                        let date = extract_rss_field(xml, "pubDate")
-                            .map(|d| normalize_rss_date_simple(&d))
-                            .unwrap_or_default();
-                        if let (Some(title), Some(url)) = (title, link)
-                            && !existing_titles.contains(&title.to_lowercase())
-                        {
-                            merged.push(crate::NewsItem {
-                                published_at: date,
-                                title: title.clone(),
-                                summary: desc.unwrap_or_default(),
-                                source: "bing_rss".to_string(),
-                                url: Some(url),
-                            });
-                            bing_added += 1;
-                        }
-                    }
+            for item in bing_items {
+                if !existing_titles.contains(&item.title.to_lowercase()) {
+                    merged.push(item);
+                    bing_added += 1;
                 }
             }
             if bing_added > 0 {
@@ -958,33 +931,6 @@ impl MarketDataClient {
     }
 }
 
-fn extract_rss_field(xml: &str, tag: &str) -> Option<String> {
-    let start_tag = format!("<{tag}>");
-    let end_tag = format!("</{tag}>");
-    let start = xml.find(&start_tag)? + start_tag.len();
-    let end = xml.find(&end_tag)?;
-    let value = xml[start..end].trim();
-    let value = value
-        .strip_prefix("<![CDATA[")
-        .and_then(|s| s.strip_suffix("]]>"))
-        .unwrap_or(value);
-    let value = value.trim();
-    if value.is_empty() {
-        None
-    } else {
-        Some(value.to_string())
-    }
-}
-
-fn normalize_rss_date_simple(raw: &str) -> String {
-    if let Ok(dt) = chrono::DateTime::parse_from_rfc2822(raw) {
-        return dt.format("%Y-%m-%d").to_string();
-    }
-    if raw.len() >= 10 && raw.as_bytes()[4] == b'-' && raw.as_bytes()[7] == b'-' {
-        return raw[..10].to_string();
-    }
-    raw.to_string()
-}
 impl MarketDataClient {
     async fn fetch_hkex_company_announcements(
         &self,
@@ -1283,16 +1229,16 @@ impl MarketDataClient {
     ) -> anyhow::Result<Vec<super::CandlePoint>> {
         self.fetch_hk_candles_with_provider(symbol, limit)
             .await
-            .map(|(items, _)| items)
+            .map(|r| r.candles)
     }
 
     pub(super) async fn fetch_hk_candles_with_provider(
         &self,
         symbol: &str,
         limit: usize,
-    ) -> anyhow::Result<(Vec<super::CandlePoint>, String)> {
+    ) -> anyhow::Result<CandlesWithProvider> {
         match self.fetch_hk_tencent_candles(symbol, limit).await {
-            Ok(items) => return Ok((items, "tencent_kline".to_string())),
+            Ok(items) => return Ok(CandlesWithProvider { candles: items, provider: "tencent_kline".to_string() }),
             Err(primary_error) => {
                 tracing::info!(
                     symbol = %symbol,
@@ -1301,10 +1247,10 @@ impl MarketDataClient {
                 );
             }
         }
-        Ok((
-            self.fetch_hk_yahoo_candles(symbol, limit).await?,
-            "yahoo_finance_chart".to_string(),
-        ))
+        Ok(CandlesWithProvider {
+            candles: self.fetch_hk_yahoo_candles(symbol, limit).await?,
+            provider: "yahoo_finance_chart".to_string(),
+        })
     }
 }
 impl MarketDataClient {

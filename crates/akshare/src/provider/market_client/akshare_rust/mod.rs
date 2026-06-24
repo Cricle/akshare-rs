@@ -1,18 +1,17 @@
 pub(crate) mod a_share;
 pub(crate) mod hk;
-mod types;
 pub(crate) mod us;
 pub(crate) mod us_sina;
 
 use super::{
-    CandlePoint, FundamentalsSnapshot, MarketDataClient, MarketKind, NewsItem, QuoteSnapshot,
+    CandlesWithProvider, FundamentalsSnapshot, MarketDataClient, MarketKind, NewsItem,
+    QuoteWithProvider,
 };
-use types::ProviderResult;
 
 pub(crate) async fn fetch_quote(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<ProviderResult<QuoteSnapshot>> {
+) -> anyhow::Result<QuoteWithProvider> {
     match client.detect_market(symbol) {
         MarketKind::AShare => {
             let ts_code = client
@@ -57,7 +56,7 @@ pub(crate) async fn fetch_candles(
     symbol: &str,
     adjust: &str,
     limit: usize,
-) -> anyhow::Result<ProviderResult<Vec<CandlePoint>>> {
+) -> anyhow::Result<CandlesWithProvider> {
     match client.detect_market(symbol) {
         MarketKind::AShare => a_share::fetch_candles(client, symbol, adjust, limit).await,
         MarketKind::HongKong => hk::fetch_candles(client, symbol, limit).await,

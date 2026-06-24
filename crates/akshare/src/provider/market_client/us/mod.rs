@@ -14,7 +14,8 @@ use super::news_filter::{
     build_dated_news_query, latest_metric_value, merge_ranked_news, within_date_window,
 };
 use super::{
-    FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot, SearchProviderKind,
+    CandlesWithProvider, FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot,
+    QuoteWithProvider, SearchProviderKind,
     akshare_rust::us_sina,
     wire::{CompanyFactsResponse, CompanySubmissionsResponse, SecTickerEntry, SecTickerLookup},
 };
@@ -126,9 +127,9 @@ impl MarketDataClient {
     pub(super) async fn fetch_us_quote_with_provider(
         &self,
         symbol: &str,
-    ) -> anyhow::Result<(QuoteSnapshot, String)> {
+    ) -> anyhow::Result<QuoteWithProvider> {
         match us_sina::fetch_quote(self, symbol).await {
-            Ok(snapshot) => return Ok((snapshot, "sina_us_daily".to_string())),
+            Ok(snapshot) => return Ok(QuoteWithProvider { quote: snapshot, provider: "sina_us_daily".to_string() }),
             Err(error) => {
                 tracing::info!(
                     symbol = %symbol,
@@ -138,7 +139,7 @@ impl MarketDataClient {
             }
         }
         match self.fetch_us_quote_from_eastmoney(symbol).await {
-            Ok(snapshot) => return Ok((snapshot, "eastmoney_quote".to_string())),
+            Ok(snapshot) => return Ok(QuoteWithProvider { quote: snapshot, provider: "eastmoney_quote".to_string() }),
             Err(error) => {
                 tracing::info!(
                     symbol = %symbol,
@@ -152,8 +153,8 @@ impl MarketDataClient {
         match self.fetch_us_chart_candles(symbol, start, end).await {
             Ok(mut items) => {
                 if let Some(last) = items.pop() {
-                    return Ok((
-                        QuoteSnapshot {
+                    return Ok(QuoteWithProvider {
+                        quote: QuoteSnapshot {
                             symbol: symbol.trim().to_uppercase(),
                             date: last.trade_date,
                             open: last.open,
@@ -162,8 +163,8 @@ impl MarketDataClient {
                             close: last.close,
                             volume: last.volume,
                         },
-                        "yahoo_finance_chart".to_string(),
-                    ));
+                        provider: "yahoo_finance_chart".to_string(),
+                    });
                 }
             }
             Err(error) => {
@@ -174,10 +175,10 @@ impl MarketDataClient {
                 );
             }
         }
-        Ok((
-            self.fetch_us_stooq_quote(symbol).await?,
-            "stooq".to_string(),
-        ))
+        Ok(QuoteWithProvider {
+            quote: self.fetch_us_stooq_quote(symbol).await?,
+            provider: "stooq".to_string(),
+        })
     }
 
     pub(super) async fn fetch_us_fundamentals(
@@ -580,55 +581,17 @@ impl MarketDataClient {
         if items.len() < limit.min(4) {
             let existing_titles: std::collections::HashSet<String> =
                 items.iter().map(|i| i.title.to_lowercase()).collect();
-            let mut bing_added = 0usize;
             let bing_queries = [
                 format!("{} stock news", symbol),
                 format!("{} stock", company_name),
             ];
-            for query in bing_queries.iter().take(2) {
-                let rss_url = format!(
-                    "https://cn.bing.com/search?q={}&format=rss",
-                    query.replace(' ', "+")
-                );
-                if let Ok(Ok(response)) =
-                    tokio::time::timeout(Duration::from_secs(10), self.http.get(&rss_url).send())
-                        .await
-                    && let Ok(body) = response.text().await
-                {
-                    for item_xml in body.split("<item>").skip(1) {
-                        let end = item_xml.find("</item>").unwrap_or(item_xml.len());
-                        let xml = &item_xml[..end];
-                        let title = xml
-                            .split_once("<title>")
-                            .and_then(|(_, rest)| rest.split_once("</title>"))
-                            .map(|(s, _)| s.trim().to_string())
-                            .filter(|t| !t.contains("必应") && !t.contains("Bing"));
-                        let link = xml
-                            .split_once("<link>")
-                            .and_then(|(_, rest)| rest.split_once("</link>"))
-                            .map(|(s, _)| s.trim().to_string());
-                        let desc = xml
-                            .split_once("<description>")
-                            .and_then(|(_, rest)| rest.split_once("</description>"))
-                            .map(|(s, _)| s.trim().to_string());
-                        let date = xml
-                            .split_once("<pubDate>")
-                            .and_then(|(_, rest)| rest.split_once("</pubDate>"))
-                            .map(|(s, _)| s.trim().to_string())
-                            .unwrap_or_default();
-                        if let (Some(title), Some(url)) = (title, link)
-                            && !existing_titles.contains(&title.to_lowercase())
-                        {
-                            items.push(super::NewsItem {
-                                published_at: date,
-                                title: title.clone(),
-                                summary: desc.unwrap_or_default(),
-                                source: "bing_rss".to_string(),
-                                url: Some(url),
-                            });
-                            bing_added += 1;
-                        }
-                    }
+            let query_refs: Vec<&str> = bing_queries.iter().map(|s| s.as_str()).collect();
+            let bing_items = self.fetch_bing_rss_news(&query_refs, 2).await;
+            let mut bing_added = 0usize;
+            for item in bing_items {
+                if !existing_titles.contains(&item.title.to_lowercase()) {
+                    items.push(item);
+                    bing_added += 1;
                 }
             }
             if bing_added > 0 {
@@ -859,7 +822,7 @@ impl MarketDataClient {
         &self,
         symbol: &str,
         limit: usize,
-    ) -> anyhow::Result<(Vec<super::CandlePoint>, String)> {
+    ) -> anyhow::Result<CandlesWithProvider> {
         let (mut items, provider) = match us_sina::fetch_candles(self, symbol, limit).await {
             Ok(items) => (items, "sina_us_daily".to_string()),
             Err(error) => {
@@ -910,7 +873,7 @@ impl MarketDataClient {
             let start = items.len() - limit;
             items = items[start..].to_vec();
         }
-        Ok((items, provider))
+        Ok(CandlesWithProvider { candles: items, provider })
     }
 
     pub(crate) async fn fetch_us_quote_from_eastmoney(
@@ -1363,7 +1326,7 @@ impl MarketDataClient {
         let items = self
             .fetch_us_candles_with_provider(symbol, holding_days + 15)
             .await?
-            .0
+            .candles
             .into_iter()
             .map(|item| (item.trade_date, item.close))
             .collect::<Vec<_>>();

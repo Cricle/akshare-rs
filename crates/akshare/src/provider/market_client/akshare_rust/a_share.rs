@@ -1,5 +1,5 @@
 use super::super::{
-    AnalystDetail, AnalystRank, BalanceSheet, CandlePoint, CashFlowSheet, CommentDesireIndex,
+    AnalystDetail, AnalystRank, BalanceSheet, CashFlowSheet, CommentDesireIndex,
     CommentFocusIndex, CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj,
     DzjyHyyybtj, DzjyMrtj, DzjyYybph, EarningsForecast as AkEarningsForecast, EarningsQuickReport,
     EarningsReport, EsgRating, FundFlowEntry, FundamentalsSnapshot, GdfxHoldingAnalyse,
@@ -9,16 +9,16 @@ use super::super::{
     LhbDetail, LhbHyyyb, LhbJgmmtj, LhbJgstatistic, LhbStockDetail, LhbStockDetailDate,
     LhbStockStatistic, LhbTraderStatistic, LhbYybDetail, LhbYybph, MainFundFlow, MarginAccountInfo,
     MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary,
-    MarketDataClient, NewsItem, PankouChange, ProfitSheet, QuoteSnapshot, SectorFundFlowRank,
+    MarketDataClient, NewsItem, PankouChange, ProfitSheet, SectorFundFlowRank,
     StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
 };
-use super::types::ProviderResult;
+use super::super::{CandlesWithProvider, QuoteWithProvider};
 
 pub(crate) async fn fetch_quote(
     client: &MarketDataClient,
     symbol: &str,
     ts_code: &str,
-) -> anyhow::Result<ProviderResult<QuoteSnapshot>> {
+) -> anyhow::Result<QuoteWithProvider> {
     client
         .fetch_a_share_quote_with_provider(symbol, ts_code)
         .await
@@ -44,7 +44,7 @@ pub(crate) async fn fetch_candles(
     symbol: &str,
     adjust: &str,
     limit: usize,
-) -> anyhow::Result<ProviderResult<Vec<CandlePoint>>> {
+) -> anyhow::Result<CandlesWithProvider> {
     client
         .fetch_a_share_candles_with_provider(symbol, adjust, limit)
         .await

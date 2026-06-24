@@ -7,8 +7,8 @@ use serde_json::Value;
 use super::search::market_to_eastmoney_label;
 use super::{
     AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail, CandlePoint,
-    CapitalFlowPoint, FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot,
-    SectorConstituent, SectorSnapshot, StockSearchResult,
+    CandlesWithProvider, CapitalFlowPoint, FundamentalsSnapshot, MarketDataClient, NewsItem,
+    QuoteSnapshot, QuoteWithProvider, SectorConstituent, SectorSnapshot, StockSearchResult,
     wire::{
         AkshareIndividualInfo, EastmoneyAnnouncementContentEnvelope,
         EastmoneyAnnouncementsEnvelope, EastmoneyBillboardEntryItem, EastmoneyBillboardSeatItem,
@@ -162,9 +162,9 @@ impl MarketDataClient {
         &self,
         symbol: &str,
         ts_code: &str,
-    ) -> anyhow::Result<(QuoteSnapshot, String)> {
+    ) -> anyhow::Result<QuoteWithProvider> {
         match self.fetch_a_share_quote_from_eastmoney(symbol).await {
-            Ok(quote) => Ok((quote, "tencent_quote".to_string())),
+            Ok(quote) => Ok(QuoteWithProvider { quote, provider: "tencent_quote".to_string() }),
             Err(eastmoney_error) => {
                 tracing::info!(
                     "tencent quote unavailable for {} ({}), falling back to tushare",
@@ -172,7 +172,7 @@ impl MarketDataClient {
                     eastmoney_error
                 );
                 match self.fetch_a_share_quote_from_tushare(symbol, ts_code).await {
-                    Ok(quote) => Ok((quote, "tushare_daily".to_string())),
+                    Ok(quote) => Ok(QuoteWithProvider { quote, provider: "tushare_daily".to_string() }),
                     Err(tushare_error) => Err(tushare_error),
                 }
             }
@@ -275,7 +275,7 @@ impl MarketDataClient {
     ) -> anyhow::Result<Vec<CandlePoint>> {
         self.fetch_a_share_candles_with_provider(symbol, adjust, limit)
             .await
-            .map(|(items, _)| items)
+            .map(|cp| cp.candles)
     }
 
     pub(super) async fn fetch_a_share_candles_with_provider(
@@ -283,12 +283,12 @@ impl MarketDataClient {
         symbol: &str,
         adjust: &str,
         limit: usize,
-    ) -> anyhow::Result<(Vec<CandlePoint>, String)> {
+    ) -> anyhow::Result<CandlesWithProvider> {
         match self
             .fetch_a_share_tencent_candles(symbol, adjust, limit)
             .await
         {
-            Ok(items) => Ok((items, "tencent_kline".to_string())),
+            Ok(items) => Ok(CandlesWithProvider { candles: items, provider: "tencent_kline".to_string() }),
             Err(tencent_error) => {
                 tracing::info!(
                     symbol = %symbol,
@@ -296,16 +296,16 @@ impl MarketDataClient {
                     error = ?tencent_error,
                     "Tencent A-share candles failed, falling back to Eastmoney"
                 );
-                Ok((
-                    self.fetch_a_share_eastmoney_candles(symbol, adjust, limit)
+                Ok(CandlesWithProvider {
+                    candles: self.fetch_a_share_eastmoney_candles(symbol, adjust, limit)
                         .await
                         .with_context(|| {
                             format!(
                                 "failed to fetch A-share candles for {symbol} from Tencent and Eastmoney fallback"
                             )
                         })?,
-                    "eastmoney_kline".to_string(),
-                ))
+                    provider: "eastmoney_kline".to_string(),
+                })
             }
         }
     }

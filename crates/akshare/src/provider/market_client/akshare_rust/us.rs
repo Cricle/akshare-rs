@@ -1,5 +1,6 @@
-use super::super::{CandlePoint, FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot};
-use super::types::ProviderResult;
+use super::super::{
+    CandlesWithProvider, FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteWithProvider,
+};
 
 use crate::stock::us_extra::{UsFamousStock, UsPinkStock, UsSpotSina, UsValuationBaidu};
 use crate::stock::xueqiu::XqStockSpot;
@@ -11,7 +12,7 @@ use crate::stock::xueqiu::XqStockSpot;
 pub(crate) async fn fetch_quote(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<ProviderResult<QuoteSnapshot>> {
+) -> anyhow::Result<QuoteWithProvider> {
     client.fetch_us_quote_with_provider(symbol).await
 }
 
@@ -33,7 +34,7 @@ pub(crate) async fn fetch_candles(
     client: &MarketDataClient,
     symbol: &str,
     limit: usize,
-) -> anyhow::Result<ProviderResult<Vec<CandlePoint>>> {
+) -> anyhow::Result<CandlesWithProvider> {
     client.fetch_us_candles_with_provider(symbol, limit).await
 }
 
