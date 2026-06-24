@@ -17,16 +17,19 @@ pub(crate) mod a_share;
 pub(crate) mod hk;
 pub(crate) mod us;
 
+pub mod tools;
+
 use std::fmt;
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
 use crate::types::{
-    AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail, CandlePoint,
-    CapitalFlowPoint, FundamentalsSnapshot, MarketKind, NewsFetchAttempt, NewsFetchResult,
-    NewsItem, QuoteSnapshot, SectorConstituent, SectorSnapshot, StockSearchResult,
-    TradeCalendarItem,
+    AnnouncementDetail, AnnouncementItem, BatchFundamentalsResult, BatchQuoteResult,
+    BillboardEntry, BillboardSeatDetail, CandlePoint, CandlesWithProvider, CapitalFlowPoint,
+    CompanySearchContext, FundamentalsSnapshot, MarketKind, NewsFetchAttempt, NewsFetchResult,
+    NewsItem, QuoteSnapshot, QuoteWithProvider, SectorConstituent, SectorSnapshot,
+    StockSearchResult, TradeCalendarItem,
 };
 
 // Re-export types from stock modules used by fetch methods
