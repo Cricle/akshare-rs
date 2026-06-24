@@ -1,9 +1,12 @@
 #![allow(dead_code)]
 
-#[allow(unused_imports)]
-use super::super::{MarketDataClient, NewsItem};
-#[allow(unused_imports)]
+#[cfg(test)]
 use rust_decimal::prelude::ToPrimitive;
+
+#[cfg(test)]
+use super::super::{MarketDataClient, NewsItem};
+#[cfg(test)]
+use crate::types::TencentSnapshotTestResult;
 
 #[cfg(test)]
 pub(crate) fn test_hk_yahoo_symbol(
@@ -27,6 +30,7 @@ pub(crate) fn test_hk_search_aliases(client: &MarketDataClient, company_name: &s
 }
 
 #[cfg(test)]
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn test_hk_company_news_queries(
     client: &MarketDataClient,
     standard_code: &str,

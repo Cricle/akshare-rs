@@ -248,9 +248,9 @@ async fn test_option_sse_expire_day_sina() {
     let client = mock_client(&server);
     let result = client.option_sse_expire_day("202401", "50ETF", "SSE").await;
     assert!(result.is_ok());
-    let (date, days) = result.unwrap();
-    assert_eq!(date, "2024-01-24");
-    assert_eq!(days, 15);
+    let remainder = result.unwrap();
+    assert_eq!(remainder.expire_date, "2024-01-24");
+    assert_eq!(remainder.remain_days, 15);
 }
 
 #[tokio::test]
@@ -382,8 +382,8 @@ async fn test_option_cffex_sz50_list_sina() {
     assert!(result.is_ok());
     let items = result.unwrap();
     assert_eq!(items.len(), 1);
-    assert_eq!(items[0].0, "上证50");
-    assert_eq!(items[0].1.len(), 2);
+    assert_eq!(items[0].expire_month, "上证50");
+    assert_eq!(items[0].contracts.len(), 2);
 }
 
 #[tokio::test]

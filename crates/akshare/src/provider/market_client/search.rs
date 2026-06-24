@@ -633,8 +633,8 @@ mod search_tests {
 
     #[test]
     fn excel_cell_string_float_decimal() {
-        let result = excel_cell_string(Some(&Data::Float(3.14)));
-        assert!(result.contains("3.14"));
+        let result = excel_cell_string(Some(&Data::Float(3.15)));
+        assert!(result.contains("3.15"));
     }
 
     #[test]
