@@ -59,7 +59,7 @@ pub struct HistData {
 
 /// Billboard detail entry (龙虎榜详情).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbDetail {
+pub struct BillboardDetail {
     pub code: String,
     pub name: String,
     pub trade_date: String,
@@ -84,7 +84,7 @@ pub struct LhbDetail {
 
 /// Billboard stock statistics (个股上榜统计).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbStockStatistic {
+pub struct BillboardStockStatistic {
     pub code: String,
     pub name: String,
     pub latest_trade_date: String,
@@ -108,7 +108,7 @@ pub struct LhbStockStatistic {
 
 /// Billboard institutional daily statistics (机构买卖每日统计).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbJgmmtj {
+pub struct BillboardOrgTradeSummary {
     pub code: String,
     pub name: String,
     pub trade_date: String,
@@ -128,7 +128,7 @@ pub struct LhbJgmmtj {
 
 /// Billboard institutional seat tracking (机构席位追踪).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbJgstatistic {
+pub struct BillboardOrgSeatTracking {
     pub code: String,
     pub name: String,
     pub close_price: f64,
@@ -148,7 +148,7 @@ pub struct LhbJgstatistic {
 
 /// Billboard active trading department (每日活跃营业部).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbHyyyb {
+pub struct BillboardActiveBranch {
     pub dept_name: String,
     pub trade_date: String,
     pub buy_stock_count: i64,
@@ -162,7 +162,7 @@ pub struct LhbHyyyb {
 
 /// Billboard trading department ranking (营业部排行).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbYybph {
+pub struct BillboardBranchRanking {
     pub dept_name: String,
     pub dept_code: String,
     pub close_price: f64,
@@ -182,7 +182,7 @@ pub struct LhbYybph {
 
 /// Billboard trader statistics (游资统计).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbTraderStatistic {
+pub struct BillboardTraderStatistic {
     pub trader_name: String,
     pub trader_code: String,
     pub close_price: f64,
@@ -202,7 +202,7 @@ pub struct LhbTraderStatistic {
 
 /// Billboard stock detail date (个股上榜日期).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbStockDetailDate {
+pub struct BillboardStockDetailDate {
     pub trade_date: String,
     pub close_price: f64,
     pub change_pct: f64,
@@ -214,7 +214,7 @@ pub struct LhbStockDetailDate {
 
 /// Billboard stock detail (个股龙虎榜详情).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbStockDetail {
+pub struct BillboardStockDetail {
     pub trade_date: String,
     pub code: String,
     pub name: String,
@@ -230,7 +230,7 @@ pub struct LhbStockDetail {
 
 /// Billboard trading department detail (营业部龙虎榜详情).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbYybDetail {
+pub struct BillboardBranchDetail {
     pub trade_date: String,
     pub code: String,
     pub name: String,
@@ -1303,7 +1303,7 @@ pub struct ThreeReportEntry {
 
 /// Trading department ranking entry (营业部排名).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhYybRanking {
+pub struct BillboardBranchRankingEntry {
     pub dept_name: String,
     pub dept_code: Option<String>,
     pub metric_value: f64,
@@ -1464,7 +1464,7 @@ pub struct DzjyHygtj {
 
 /// Block trade industry daily stats (大宗交易行业每日统计).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DzjyHyyybtj {
+pub struct BlockTradeActiveBranch {
     pub industry: String,
     pub trade_date: String,
     pub block_trade_count: i64,
@@ -1475,7 +1475,7 @@ pub struct DzjyHyyybtj {
 
 /// Block trade seat ranking (大宗交易营业部排行).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DzjyYybph {
+pub struct BlockTradeBranchRanking {
     pub dept_name: String,
     pub buy_count: i64,
     pub buy_amount: f64,
@@ -1761,7 +1761,7 @@ pub struct IndustryCategory {
 
 /// LHB Sina detail (新浪龙虎榜每日详情).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbSinaDetail {
+pub struct BillboardSinaDetail {
     pub rank: i64,
     pub code: String,
     pub name: String,
@@ -1774,7 +1774,7 @@ pub struct LhbSinaDetail {
 
 /// LHB Sina stock stats (新浪龙虎榜个股统计).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbSinaGgtj {
+pub struct BillboardSinaHkSummary {
     pub code: String,
     pub name: String,
     pub billboard_count: i64,
@@ -1787,7 +1787,7 @@ pub struct LhbSinaGgtj {
 
 /// LHB Sina seat stats (新浪龙虎榜营业部统计).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbSinaYytj {
+pub struct BillboardSinaBranchSummary {
     pub dept_name: String,
     pub billboard_count: i64,
     pub accum_buy: f64,
@@ -1799,7 +1799,7 @@ pub struct LhbSinaYytj {
 
 /// LHB Sina institution tracking (新浪龙虎榜机构追踪).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbSinaJgzz {
+pub struct BillboardSinaOrgTracking {
     pub code: String,
     pub name: String,
     pub accum_buy: f64,
@@ -1811,7 +1811,7 @@ pub struct LhbSinaJgzz {
 
 /// LHB Sina institution detail (新浪龙虎榜机构明细).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LhbSinaJgmx {
+pub struct BillboardSinaOrgDetail {
     pub code: String,
     pub name: String,
     pub trade_date: String,

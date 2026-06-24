@@ -1,18 +1,44 @@
+mod batch;
+mod billboard;
+mod fund_flow;
+mod margin;
+
 use anyhow::Context;
 use opentelemetry::KeyValue;
 use tracing::Instrument;
 
 use super::cache::SingleflightResult;
 use super::{
-    AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail,
-    CANDLES_CACHE_TTL_SECS, CANDLES_CACHE_VERSION, CandlePoint, CapitalFlowPoint, DataError,
-    DataErrorKind, FUNDAMENTALS_CACHE_TTL_SECS, FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot,
-    GLOBAL_NEWS_CACHE_VERSION, INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient,
-    MarketKind, NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult,
-    NewsItem, QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, SEARCH_CACHE_TTL_SECS,
+    AnnouncementDetail, AnnouncementItem, CANDLES_CACHE_TTL_SECS, CANDLES_CACHE_VERSION,
+    CandlePoint, CapitalFlowPoint, DataError, DataErrorKind, FUNDAMENTALS_CACHE_TTL_SECS,
+    FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot, GLOBAL_NEWS_CACHE_VERSION,
+    INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient, MarketKind,
+    NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult, NewsItem,
+    QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, SEARCH_CACHE_TTL_SECS,
     SEARCH_CACHE_VERSION, SectorConstituent, SectorSnapshot, StockSearchResult, TradeCalendarItem,
-    BatchFundamentalsResult, BatchQuoteResult, CandlesWithProvider, QuoteWithProvider,
+    CandlesWithProvider, QuoteWithProvider,
 };
+
+use super::{
+    AnalystDetail, AnalystRank, BalanceSheet, BlockTradeActiveBranch, BlockTradeBranchRanking,
+    CashFlowSheet, CommentDesireIndex, CommentFocusIndex, CommentHistScore,
+    CommentOrgParticipation, DividendInfo, DzjyHygtj, DzjyMrtj, EarningsForecast,
+    EarningsQuickReport, EarningsReport, EsgRating, GdfxHoldingAnalyse, GdfxHoldingChange,
+    GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork, GdfxTop10, Gdhs, GdhsDetail, Ggcg,
+    GpzyDistributeEntry, GpzyIndustry, GpzyPledgeDetail, GpzyPledgeRatio, GpzyPledgeRatioDetail,
+    GpzyProfile, HotStockXq, IndustryCategory, JgdyDetail, JgdyTj, PankouChange, ProfitSheet,
+    StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
+};
+
+use crate::stock::hk_extra::{
+    HkFamousStock, HkFhpxDetailThs, HkGxlLg, HkHotRank, HkHotRankDetail, HkSpotQuote,
+    HkValuationBaidu,
+};
+use crate::stock::us_extra::{UsFamousStock, UsPinkStock, UsSpotSina, UsValuationBaidu};
+use crate::stock::xueqiu::XqStockSpot;
+
+const ESG_CACHE_TTL_SECS: u64 = 24 * 60 * 60;
+const INDUSTRY_CACHE_TTL_SECS: u64 = 24 * 60 * 60;
 
 impl MarketDataClient {
     pub async fn fetch_quote(&self, symbol: &str) -> anyhow::Result<QuoteSnapshot> {
@@ -175,154 +201,6 @@ impl MarketDataClient {
                 .await;
             Ok(snapshot)
         }.instrument(span).await
-    }
-
-    /// Batch fetch quotes for multiple symbols. Returns (symbol, `Option<QuoteSnapshot>`).
-    /// Cache hits are returned from Redis MGET; misses are fetched concurrently via akshare.
-    pub async fn fetch_quotes_batch(
-        &self,
-        symbols: &[&str],
-    ) -> Vec<BatchQuoteResult> {
-        if symbols.is_empty() {
-            return Vec::new();
-        }
-        // Build cache keys
-        let keys: Vec<(String, String)> = symbols
-            .iter()
-            .map(|sym| {
-                let market = self.detect_market(sym);
-                let normalized = self.cache_symbol(sym, market);
-                let cache_key =
-                    format!("{MARKET_DATA_CACHE_PREFIX}:quote:{QUOTE_CACHE_VERSION}:{normalized}");
-                (sym.to_string(), cache_key)
-            })
-            .collect();
-        let cache_keys: Vec<String> = keys.iter().map(|(_, k)| k.clone()).collect();
-        // Batch MGET
-        let cached: Vec<Option<QuoteSnapshot>> = self.cache_mget_json(&cache_keys).await;
-        // Collect misses
-        let mut miss_indices = Vec::new();
-        for (i, hit) in cached.iter().enumerate() {
-            if hit.is_none() {
-                miss_indices.push(i);
-            }
-        }
-        // Fetch misses concurrently
-        let miss_results: Vec<(usize, Option<QuoteSnapshot>)> = if miss_indices.is_empty() {
-            Vec::new()
-        } else {
-            let futs: Vec<_> = miss_indices
-                .iter()
-                .map(|&i| {
-                    let sym = keys[i].0.clone();
-                    let client = self.clone();
-                    async move {
-                        let result = tokio::time::timeout(
-                            std::time::Duration::from_secs(15),
-                            super::akshare_rust::fetch_quote(&client, &sym),
-                        )
-                        .await;
-                        let quote = match result {
-                            Ok(Ok(qwp)) => {
-                                // Write to cache
-                                let market = client.detect_market(&sym);
-                                let normalized = client.cache_symbol(&sym, market);
-                                let cache_key = format!(
-                                    "{MARKET_DATA_CACHE_PREFIX}:quote:{QUOTE_CACHE_VERSION}:{normalized}"
-                                );
-                                client
-                                    .cache_set_json(&cache_key, QUOTE_CACHE_TTL_SECS, &qwp.quote)
-                                    .await;
-                                Some(qwp.quote)
-                            }
-                            _ => None,
-                        };
-                        (i, quote)
-                    }
-                })
-                .collect();
-            futures::future::join_all(futs).await
-        };
-        // Merge results
-        let mut results: Vec<Option<QuoteSnapshot>> = cached;
-        for (i, quote) in miss_results {
-            results[i] = quote;
-        }
-        keys.into_iter()
-            .zip(results)
-            .map(|((sym, _), q)| BatchQuoteResult { symbol: sym, quote: q })
-            .collect()
-    }
-
-    /// Batch fetch fundamentals for multiple symbols.
-    pub async fn fetch_fundamentals_batch(
-        &self,
-        symbols: &[&str],
-    ) -> Vec<BatchFundamentalsResult> {
-        if symbols.is_empty() {
-            return Vec::new();
-        }
-        let keys: Vec<(String, String)> = symbols
-            .iter()
-            .map(|sym| {
-                let market = self.detect_market(sym);
-                let normalized = self.cache_symbol(sym, market);
-                let cache_key = format!(
-                    "{MARKET_DATA_CACHE_PREFIX}:fundamentals:{FUNDAMENTALS_CACHE_VERSION}:{normalized}"
-                );
-                (sym.to_string(), cache_key)
-            })
-            .collect();
-        let cache_keys: Vec<String> = keys.iter().map(|(_, k)| k.clone()).collect();
-        let cached: Vec<Option<FundamentalsSnapshot>> = self.cache_mget_json(&cache_keys).await;
-        let mut miss_indices = Vec::new();
-        for (i, hit) in cached.iter().enumerate() {
-            if hit.is_none() {
-                miss_indices.push(i);
-            }
-        }
-        let miss_results: Vec<(usize, Option<FundamentalsSnapshot>)> = if miss_indices.is_empty() {
-            Vec::new()
-        } else {
-            let futs: Vec<_> = miss_indices
-                .iter()
-                .map(|&i| {
-                    let sym = keys[i].0.clone();
-                    let client = self.clone();
-                    async move {
-                        let result = tokio::time::timeout(
-                            std::time::Duration::from_secs(15),
-                            super::akshare_rust::fetch_fundamentals(&client, &sym),
-                        )
-                        .await;
-                        let fund = match result {
-                            Ok(Ok(f)) => {
-                                let market = client.detect_market(&sym);
-                                let normalized = client.cache_symbol(&sym, market);
-                                let cache_key = format!(
-                                    "{MARKET_DATA_CACHE_PREFIX}:fundamentals:{FUNDAMENTALS_CACHE_VERSION}:{normalized}"
-                                );
-                                client
-                                    .cache_set_json(&cache_key, FUNDAMENTALS_CACHE_TTL_SECS, &f)
-                                    .await;
-                                Some(f)
-                            }
-                            _ => None,
-                        };
-                        (i, fund)
-                    }
-                })
-                .collect();
-            futures::future::join_all(futs).await
-        };
-        let mut results: Vec<Option<FundamentalsSnapshot>> = cached;
-        for (i, fund) in miss_results {
-            results[i] = fund;
-        }
-        keys.into_iter()
-            .zip(results)
-            .map(|((sym, _), f)| BatchFundamentalsResult { symbol: sym, fundamentals: f })
-            .collect()
     }
 
     pub async fn fetch_news(
@@ -537,6 +415,7 @@ impl MarketDataClient {
         Ok(result)
     }
 }
+
 impl MarketDataClient {
     pub async fn fetch_insider_transactions(&self, symbol: &str) -> anyhow::Result<Vec<NewsItem>> {
         let span = tracing::info_span!("market_data.fetch", data_type = "insider", symbol);
@@ -945,61 +824,6 @@ impl MarketDataClient {
         .await
     }
 
-    pub async fn fetch_billboard_entries(
-        &self,
-        symbol: &str,
-        limit: usize,
-    ) -> anyhow::Result<Vec<BillboardEntry>> {
-        if self.normalize_a_share_symbol(symbol).is_some() {
-            let normalized = self.cache_symbol(symbol, MarketKind::AShare);
-            return self
-                .cached_fetch(
-                    &format!(
-                        "{MARKET_DATA_CACHE_PREFIX}:billboard-entries:{}:{}",
-                        normalized, limit
-                    ),
-                    NEWS_CACHE_TTL_SECS,
-                    || self.fetch_a_share_billboard_entries(symbol, limit),
-                )
-                .await;
-        }
-
-        Err(DataError::new(
-            DataErrorKind::UnsupportedMarket,
-            format!("billboard is unsupported for symbol {symbol}"),
-        )
-        .into())
-    }
-
-    pub async fn fetch_billboard_seats(
-        &self,
-        symbol: &str,
-        side: &str,
-        limit: usize,
-    ) -> anyhow::Result<Vec<BillboardSeatDetail>> {
-        if self.normalize_a_share_symbol(symbol).is_some() {
-            let normalized = self.cache_symbol(symbol, MarketKind::AShare);
-            return self
-                .cached_fetch(
-                    &format!(
-                        "{MARKET_DATA_CACHE_PREFIX}:billboard-seats:{}:{}:{}",
-                        normalized,
-                        side.trim().to_lowercase(),
-                        limit
-                    ),
-                    NEWS_CACHE_TTL_SECS,
-                    || self.fetch_a_share_billboard_seats(symbol, side, limit),
-                )
-                .await;
-        }
-
-        Err(DataError::new(
-            DataErrorKind::UnsupportedMarket,
-            format!("billboard seats are unsupported for symbol {symbol}"),
-        )
-        .into())
-    }
-
     pub async fn search_stocks(
         &self,
         query: &str,
@@ -1095,6 +919,7 @@ impl MarketDataClient {
         .await
     }
 }
+
 impl MarketDataClient {
     pub async fn fetch_return_since(
         &self,
@@ -1188,255 +1013,8 @@ impl MarketDataClient {
         }
     }
 }
-use super::{
-    AnalystDetail, AnalystRank, BalanceSheet, CashFlowSheet, CommentDesireIndex, CommentFocusIndex,
-    CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj, DzjyHyyybtj, DzjyMrtj,
-    DzjyYybph, EarningsForecast, EarningsQuickReport, EarningsReport, EsgRating, FundFlowEntry,
-    GdfxHoldingAnalyse, GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork,
-    GdfxTop10, Gdhs, GdhsDetail, Ggcg, GpzyDistributeEntry, GpzyIndustry, GpzyPledgeDetail,
-    GpzyPledgeRatio, GpzyPledgeRatioDetail, GpzyProfile, HotStockXq, IndustryCategory, JgdyDetail,
-    JgdyTj, LhbDetail, LhbHyyyb, LhbJgmmtj, LhbJgstatistic, LhbStockDetail, LhbStockDetailDate,
-    LhbStockStatistic, LhbTraderStatistic, LhbYybDetail, LhbYybph, MainFundFlow, MarginAccountInfo,
-    MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary,
-    PankouChange, ProfitSheet, SectorFundFlowRank, StockComment, ZtPool, ZtPoolDtgc,
-    ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
-};
-
-const ESG_CACHE_TTL_SECS: u64 = 24 * 60 * 60;
-const INDUSTRY_CACHE_TTL_SECS: u64 = 24 * 60 * 60;
 
 impl MarketDataClient {
-    // -----------------------------------------------------------------------
-    // Fund Flow (资金流向)
-    // -----------------------------------------------------------------------
-
-    pub async fn fetch_fund_flow_individual(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<FundFlowEntry>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:fund-flow-individual:{}", symbol.trim()),
-            CANDLES_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_fund_flow_individual(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_fund_flow_concept(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<SectorFundFlowRank>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:fund-flow-concept:{}", symbol.trim()),
-            CANDLES_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_fund_flow_concept(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_fund_flow_industry(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<SectorFundFlowRank>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:fund-flow-industry:{}", symbol.trim()),
-            CANDLES_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_fund_flow_industry(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_main_fund_flow(&self, symbol: &str) -> anyhow::Result<Vec<MainFundFlow>> {
-        let normalized = self
-            .normalize_a_share_symbol(symbol)
-            .ok_or_else(|| anyhow::anyhow!("invalid A-share symbol for main fund flow"))?;
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:main-fund-flow:{}", normalized),
-            CANDLES_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_main_fund_flow(self, symbol),
-        ).await
-    }
-
-    // -----------------------------------------------------------------------
-    // Billboard / Dragon Tiger List (龙虎榜)
-    // -----------------------------------------------------------------------
-
-    pub async fn fetch_lhb_detail(
-        &self,
-        start_date: &str,
-        end_date: &str,
-    ) -> anyhow::Result<Vec<LhbDetail>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-detail:{}:{}", start_date, end_date),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_detail(self, start_date, end_date),
-        ).await
-    }
-
-    pub async fn fetch_lhb_stock_statistic(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<LhbStockStatistic>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-stat:{}", symbol.trim()),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_stock_statistic(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_lhb_jgmmtj(
-        &self,
-        start_date: &str,
-        end_date: &str,
-    ) -> anyhow::Result<Vec<LhbJgmmtj>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-jgmmtj:{}:{}", start_date, end_date),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_jgmmtj(self, start_date, end_date),
-        ).await
-    }
-
-    pub async fn fetch_lhb_jgstatistic(&self, symbol: &str) -> anyhow::Result<Vec<LhbJgstatistic>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-jgstat:{}", symbol.trim()),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_jgstatistic(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_lhb_hyyyb(
-        &self,
-        start_date: &str,
-        end_date: &str,
-    ) -> anyhow::Result<Vec<LhbHyyyb>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-hyyyb:{}:{}", start_date, end_date),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_hyyyb(self, start_date, end_date),
-        ).await
-    }
-
-    pub async fn fetch_lhb_yybph(&self, symbol: &str) -> anyhow::Result<Vec<LhbYybph>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-yybph:{}", symbol.trim()),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_yybph(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_lhb_trader_statistic(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<LhbTraderStatistic>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-trader:{}", symbol.trim()),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_trader_statistic(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_lhb_stock_detail_date(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<LhbStockDetailDate>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-date:{}", symbol.trim()),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_stock_detail_date(self, symbol),
-        ).await
-    }
-
-    pub async fn fetch_lhb_stock_detail(
-        &self,
-        symbol: &str,
-        date: &str,
-        flag: &str,
-    ) -> anyhow::Result<Vec<LhbStockDetail>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-detail:{}:{}:{}", symbol.trim(), date, flag),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_stock_detail(self, symbol, date, flag),
-        ).await
-    }
-
-    pub async fn fetch_lhb_yyb_detail(&self, symbol: &str) -> anyhow::Result<Vec<LhbYybDetail>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-yyb-detail:{}", symbol.trim()),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_billboard_yyb_detail(self, symbol),
-        ).await
-    }
-
-    // -----------------------------------------------------------------------
-    // Margin Trading (融资融券)
-    // -----------------------------------------------------------------------
-
-    pub async fn fetch_margin_account_info(
-        &self,
-        start_date: &str,
-        end_date: &str,
-    ) -> anyhow::Result<Vec<MarginAccountInfo>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-account:{}:{}", start_date, end_date),
-            INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_margin_account_info(self, start_date, end_date),
-        ).await
-    }
-
-    pub async fn fetch_margin_sse_detail(
-        &self,
-        date: &str,
-    ) -> anyhow::Result<Vec<MarginSseDetail>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-sse-detail:{}", date),
-            FUNDAMENTALS_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_margin_sse_detail(self, date),
-        ).await
-    }
-
-    pub async fn fetch_margin_szse_detail(
-        &self,
-        date: &str,
-    ) -> anyhow::Result<Vec<MarginSzseDetail>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-szse-detail:{}", date),
-            FUNDAMENTALS_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_margin_szse_detail(self, date),
-        ).await
-    }
-
-    pub async fn fetch_margin_ratio_pa(
-        &self,
-        symbol: &str,
-        date: &str,
-    ) -> anyhow::Result<Vec<MarginRatioPa>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-ratio-pa:{}:{}", symbol.trim(), date),
-            FUNDAMENTALS_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_margin_ratio_pa(self, symbol, date),
-        ).await
-    }
-
-    pub async fn fetch_margin_sse_summary(
-        &self,
-        start_date: &str,
-        end_date: &str,
-    ) -> anyhow::Result<Vec<MarginSseSummary>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-sse-summary:{}:{}", start_date, end_date),
-            FUNDAMENTALS_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_margin_sse_summary(self, start_date, end_date),
-        ).await
-    }
-
-    pub async fn fetch_margin_szse_summary(
-        &self,
-        date: &str,
-    ) -> anyhow::Result<Vec<MarginSzseSummary>> {
-        self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:margin-szse-summary:{}", date),
-            FUNDAMENTALS_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_margin_szse_summary(self, date),
-        ).await
-    }
-
     // -----------------------------------------------------------------------
     // Limit-Up/Down Pools (涨停/跌停股池)
     // -----------------------------------------------------------------------
@@ -1446,7 +1024,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool:{}", date),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_zt_pool(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_zt_pool_dtgc(&self, date: &str) -> anyhow::Result<Vec<ZtPoolDtgc>> {
@@ -1454,7 +1033,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-dtgc:{}", date),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_zt_pool_dtgc(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_zt_pool_previous(&self, date: &str) -> anyhow::Result<Vec<ZtPoolPrevious>> {
@@ -1462,7 +1042,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-prev:{}", date),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_zt_pool_previous(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_zt_pool_strong(&self, date: &str) -> anyhow::Result<Vec<ZtPoolStrong>> {
@@ -1470,7 +1051,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-strong:{}", date),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_zt_pool_strong(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_zt_pool_sub_new(&self, date: &str) -> anyhow::Result<Vec<ZtPoolSubNew>> {
@@ -1478,7 +1060,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-subnew:{}", date),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_zt_pool_sub_new(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_zt_pool_zbgc(&self, date: &str) -> anyhow::Result<Vec<ZtPoolZbgc>> {
@@ -1486,7 +1069,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-zbgc:{}", date),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_zt_pool_zbgc(self, date),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1501,7 +1085,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:earnings-forecast:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_earnings_forecast(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_earnings_quick_report(
@@ -1512,7 +1097,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:earnings-quick:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_earnings_quick_report(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_earnings_report(&self, date: &str) -> anyhow::Result<Vec<EarningsReport>> {
@@ -1520,7 +1106,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:earnings-report:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_earnings_report(self, date),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1532,7 +1119,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:analyst-rank:{}", year),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_analyst_rank(self, year),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_analyst_detail(
@@ -1541,10 +1129,14 @@ impl MarketDataClient {
         indicator: &str,
     ) -> anyhow::Result<Vec<AnalystDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:analyst-detail:{}:{}", analyst_id, indicator),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:analyst-detail:{}:{}",
+                analyst_id, indicator
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_analyst_detail(self, analyst_id, indicator),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1559,7 +1151,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-stat:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_free_holding_statistics(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_holding_statistics(
@@ -1570,7 +1163,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-stat:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_holding_statistics(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_free_holding_change(
@@ -1581,7 +1175,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-change:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_free_holding_change(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_holding_change(
@@ -1592,7 +1187,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-change:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_holding_change(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_free_top10(
@@ -1601,10 +1197,15 @@ impl MarketDataClient {
         date: &str,
     ) -> anyhow::Result<Vec<GdfxTop10>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-top10:{}:{}", symbol.trim(), date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:gdfx-free-top10:{}:{}",
+                symbol.trim(),
+                date
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_free_top10(self, symbol, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_top10(
@@ -1613,10 +1214,15 @@ impl MarketDataClient {
         date: &str,
     ) -> anyhow::Result<Vec<GdfxTop10>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-top10:{}:{}", symbol.trim(), date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:gdfx-top10:{}:{}",
+                symbol.trim(),
+                date
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_top10(self, symbol, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_free_holding_detail(
@@ -1627,7 +1233,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-detail:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_free_holding_detail(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_holding_detail(
@@ -1637,10 +1244,14 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<GdfxHoldingDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-detail:{}:{}:{}", date, indicator, symbol),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:gdfx-detail:{}:{}:{}",
+                date, indicator, symbol
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_holding_detail(self, date, indicator, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_free_holding_analyse(
@@ -1651,7 +1262,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-analyse:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_free_holding_analyse(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_holding_analyse(
@@ -1662,7 +1274,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-analyse:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_holding_analyse(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_free_teamwork(
@@ -1673,7 +1286,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-team:{}", symbol.trim()),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_free_teamwork(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_gdfx_teamwork(&self, symbol: &str) -> anyhow::Result<Vec<GdfxTeamwork>> {
@@ -1681,7 +1295,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-team:{}", symbol.trim()),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_teamwork(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1694,10 +1309,14 @@ impl MarketDataClient {
         end_date: &str,
     ) -> anyhow::Result<Vec<DzjyMrtj>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-mrtj:{}:{}", start_date, end_date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:dzjy-mrtj:{}:{}",
+                start_date, end_date
+            ),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_block_trade_daily(self, start_date, end_date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_block_trade_industry(
@@ -1706,34 +1325,54 @@ impl MarketDataClient {
         end_date: &str,
     ) -> anyhow::Result<Vec<DzjyHygtj>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-hygtj:{}:{}", start_date, end_date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:dzjy-hygtj:{}:{}",
+                start_date, end_date
+            ),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_block_trade_industry(self, start_date, end_date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_block_trade_industry_daily(
         &self,
         start_date: &str,
         end_date: &str,
-    ) -> anyhow::Result<Vec<DzjyHyyybtj>> {
+    ) -> anyhow::Result<Vec<BlockTradeActiveBranch>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-hyyybtj:{}:{}", start_date, end_date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:dzjy-hyyybtj:{}:{}",
+                start_date, end_date
+            ),
             INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_block_trade_industry_daily(self, start_date, end_date),
-        ).await
+            || {
+                super::akshare_rust::a_share::fetch_block_trade_industry_daily(
+                    self, start_date, end_date,
+                )
+            },
+        )
+        .await
     }
 
     pub async fn fetch_block_trade_seat_ranking(
         &self,
         start_date: &str,
         end_date: &str,
-    ) -> anyhow::Result<Vec<DzjyYybph>> {
+    ) -> anyhow::Result<Vec<BlockTradeBranchRanking>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:dzjy-yybph:{}:{}", start_date, end_date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:dzjy-yybph:{}:{}",
+                start_date, end_date
+            ),
             INSIDER_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_block_trade_seat_ranking(self, start_date, end_date),
-        ).await
+            || {
+                super::akshare_rust::a_share::fetch_block_trade_seat_ranking(
+                    self, start_date, end_date,
+                )
+            },
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1745,7 +1384,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:hot-follow:{}", symbol.trim()),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_hot_follow_xq(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_hot_tweet_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
@@ -1753,7 +1393,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:hot-tweet:{}", symbol.trim()),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_hot_tweet_xq(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_hot_deal_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
@@ -1761,7 +1402,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:hot-deal:{}", symbol.trim()),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_hot_deal_xq(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1781,7 +1423,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:dividends:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_dividends(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_dividend_detail(&self, symbol: &str) -> anyhow::Result<Vec<DividendInfo>> {
@@ -1789,7 +1432,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:dividend-detail:{}", symbol.trim()),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_dividend_detail(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1812,7 +1456,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-ratio"),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_pledge_ratio(self),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_pledge_detail(&self) -> anyhow::Result<Vec<GpzyPledgeDetail>> {
@@ -1820,7 +1465,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-detail"),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_pledge_detail(self),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_pledge_ratio_detail(
@@ -1828,18 +1474,25 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<GpzyPledgeRatioDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-ratio-detail:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:pledge-ratio-detail:{}",
+                symbol.trim()
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_pledge_ratio_detail(self, symbol),
-        ).await
+        )
+        .await
     }
 
-    pub async fn fetch_pledge_distribute_bank(&self) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
+    pub async fn fetch_pledge_distribute_bank(
+        &self,
+    ) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-bank"),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_pledge_distribute_bank(self),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_pledge_distribute_company(
@@ -1849,7 +1502,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-company"),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_pledge_distribute_company(self),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_pledge_industry(&self) -> anyhow::Result<Vec<GpzyIndustry>> {
@@ -1857,7 +1511,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-industry"),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_pledge_industry(self),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1869,7 +1524,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:jgdy-tj:{}", date),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_institutional_research(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_institutional_research_detail(
@@ -1880,7 +1536,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:jgdy-detail:{}", date),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_institutional_research_detail(self, date),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1940,7 +1597,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:balance-sheet:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_balance_sheet(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_profit_sheet(&self, date: &str) -> anyhow::Result<Vec<ProfitSheet>> {
@@ -1948,7 +1606,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:profit-sheet:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_profit_sheet(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_cash_flow_sheet(&self, date: &str) -> anyhow::Result<Vec<CashFlowSheet>> {
@@ -1956,7 +1615,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:cash-flow-sheet:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_cash_flow_sheet(self, date),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -1968,7 +1628,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:stock-comments"),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_stock_comments(self),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_comment_org_participation(
@@ -1979,7 +1640,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:comment-org:{}", symbol.trim()),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_comment_org_participation(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_comment_hist_score(
@@ -1990,7 +1652,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:comment-hist:{}", symbol.trim()),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_comment_hist_score(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_comment_focus_index(
@@ -2001,7 +1664,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:comment-focus:{}", symbol.trim()),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_comment_focus_index(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_comment_desire_index(
@@ -2012,7 +1676,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:comment-desire:{}", symbol.trim()),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_comment_desire_index(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2021,10 +1686,14 @@ impl MarketDataClient {
 
     pub async fn fetch_executive_shareholding(&self, symbol: &str) -> anyhow::Result<Vec<Ggcg>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:exec-shareholding:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:exec-shareholding:{}",
+                symbol.trim()
+            ),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_executive_shareholding(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2036,7 +1705,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdhs:{}", date),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_shareholder_count(self, date),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_shareholder_count_detail(
@@ -2047,7 +1717,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdhs-detail:{}", symbol.trim()),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_shareholder_count_detail(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2065,12 +1736,6 @@ impl MarketDataClient {
         Ok(items)
     }
 }
-use crate::stock::hk_extra::{
-    HkFamousStock, HkFhpxDetailThs, HkGxlLg, HkHotRank, HkHotRankDetail, HkSpotQuote,
-    HkValuationBaidu,
-};
-use crate::stock::us_extra::{UsFamousStock, UsPinkStock, UsSpotSina, UsValuationBaidu};
-use crate::stock::xueqiu::XqStockSpot;
 
 impl MarketDataClient {
     // -----------------------------------------------------------------------
@@ -2082,7 +1747,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-spot"),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_spot(self),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2094,7 +1760,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-famous-spot"),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_famous_spot(self),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2106,7 +1773,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank"),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_hot_rank(self),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_hk_hot_rank_latest(
@@ -2114,10 +1782,14 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<HkHotRankDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-latest:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-latest:{}",
+                symbol.trim()
+            ),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_hot_rank_latest(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_hk_hot_rank_detail(
@@ -2125,10 +1797,14 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<HkHotRankDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-detail:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-detail:{}",
+                symbol.trim()
+            ),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_hot_rank_detail(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_hk_hot_rank_realtime(
@@ -2136,10 +1812,14 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<HkHotRankDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-rt:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank-rt:{}",
+                symbol.trim()
+            ),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_hot_rank_realtime(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2151,18 +1831,29 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<serde_json::Value>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-dividend-payout:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:hk-dividend-payout:{}",
+                symbol.trim()
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_dividend_payout(self, symbol),
-        ).await
+        )
+        .await
     }
 
-    pub async fn fetch_hk_fhpx_detail(&self, symbol: &str) -> anyhow::Result<Vec<HkFhpxDetailThs>> {
+    pub async fn fetch_hk_fhpx_detail(
+        &self,
+        symbol: &str,
+    ) -> anyhow::Result<Vec<HkFhpxDetailThs>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-fhpx-detail:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:hk-fhpx-detail:{}",
+                symbol.trim()
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_fhpx_detail(self, symbol),
-        ).await
+        )
+        .await
     }
 
     pub async fn fetch_hk_dividend_yield(&self) -> anyhow::Result<Vec<HkGxlLg>> {
@@ -2170,7 +1861,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-dividend-yield"),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_dividend_yield(self),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2182,10 +1874,14 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<serde_json::Value>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-fin-indicators:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:hk-fin-indicators:{}",
+                symbol.trim()
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_financial_indicators(self, symbol),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2199,10 +1895,16 @@ impl MarketDataClient {
         period: &str,
     ) -> anyhow::Result<Vec<HkValuationBaidu>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:hk-valuation:{}:{}:{}", symbol.trim(), indicator, period),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:hk-valuation:{}:{}:{}",
+                symbol.trim(),
+                indicator,
+                period
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::hk::fetch_hk_valuation(self, symbol, indicator, period),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2214,19 +1916,27 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:us-spot"),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::us::fetch_us_spot(self),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
     // US Famous Stocks (Eastmoney)
     // -----------------------------------------------------------------------
 
-    pub async fn fetch_us_famous_spot(&self, category: &str) -> anyhow::Result<Vec<UsFamousStock>> {
+    pub async fn fetch_us_famous_spot(
+        &self,
+        category: &str,
+    ) -> anyhow::Result<Vec<UsFamousStock>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:us-famous-spot:{}", category.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:us-famous-spot:{}",
+                category.trim()
+            ),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::us::fetch_us_famous_spot(self, category),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2238,7 +1948,8 @@ impl MarketDataClient {
             &format!("{MARKET_DATA_CACHE_PREFIX}:us-pink-spot"),
             CANDLES_CACHE_TTL_SECS,
             || super::akshare_rust::us::fetch_us_pink_spot(self),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2252,10 +1963,16 @@ impl MarketDataClient {
         period: &str,
     ) -> anyhow::Result<Vec<UsValuationBaidu>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:us-valuation:{}:{}:{}", symbol.trim(), indicator, period),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:us-valuation:{}:{}:{}",
+                symbol.trim(),
+                indicator,
+                period
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::us::fetch_us_valuation(self, symbol, indicator, period),
-        ).await
+        )
+        .await
     }
 
     // -----------------------------------------------------------------------
@@ -2267,7 +1984,7 @@ impl MarketDataClient {
         if let Some(cached) = self.cache_get_json(&cache_key).await {
             return Ok(cached);
         }
-        // Try HK first, then US — both delegate to the same Xueqiu endpoint
+        // Try HK first, then US -- both delegate to the same Xueqiu endpoint
         let market = self.detect_market(symbol);
         let items = match market {
             crate::MarketKind::HongKong => {

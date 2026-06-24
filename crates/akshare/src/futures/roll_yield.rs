@@ -2,7 +2,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::{FuturesDailyBar, Row};
+use crate::types::{FuturesDailyBar, RollYieldResult, Row};
 
 impl AkShareClient {
     /// Calculate roll yield between two futures contracts.
@@ -16,7 +16,7 @@ impl AkShareClient {
         variety: &str,
         symbol1: Option<&str>,
         symbol2: Option<&str>,
-    ) -> Result<(f64, String, String)> {
+    ) -> Result<RollYieldResult> {
         // Get daily data from all exchanges
         let mut all_bars: Vec<FuturesDailyBar> = Vec::new();
         for market in &["CFFEX", "SHFE", "DCE", "CZCE", "GFEX", "INE"] {
@@ -78,9 +78,9 @@ impl AkShareClient {
         let ry = (c2 / c1).ln() / f64::from(c) * 12.0;
 
         if c > 0 {
-            Ok((ry, s2, s1))
+            Ok(RollYieldResult { yield_rate: ry, near_symbol: s2, far_symbol: s1 })
         } else {
-            Ok((ry, s1, s2))
+            Ok(RollYieldResult { yield_rate: ry, near_symbol: s1, far_symbol: s2 })
         }
     }
 
@@ -102,12 +102,12 @@ impl AkShareClient {
             if ["IO", "MO", "HO"].contains(&var.as_str()) {
                 continue;
             }
-            if let Ok((ry, near, deferred)) = self.get_roll_yield(date, var, None, None).await {
+            if let Ok(ry) = self.get_roll_yield(date, var, None, None).await {
                 let mut row = Row::new();
                 row.insert("variety".into(), serde_json::json!(var));
-                row.insert("roll_yield".into(), serde_json::json!(ry));
-                row.insert("near_by".into(), serde_json::json!(near));
-                row.insert("deferred".into(), serde_json::json!(deferred));
+                row.insert("roll_yield".into(), serde_json::json!(ry.yield_rate));
+                row.insert("near_by".into(), serde_json::json!(ry.near_symbol));
+                row.insert("deferred".into(), serde_json::json!(ry.far_symbol));
                 row.insert("date".into(), serde_json::json!(date));
                 items.push(row);
             }

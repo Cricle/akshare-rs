@@ -4,6 +4,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::CffexContractGroup;
 use crate::util::parse_f64_safe;
 
 // ---------------------------------------------------------------------------
@@ -96,19 +97,19 @@ impl AkShareClient {
     /// CFFEX SZ50 index option contract list from Sina.
     ///
     /// Returns a map of index name to contract list (first contract is the main contract).
-    pub async fn option_cffex_sz50_list(&self) -> Result<Vec<(String, Vec<String>)>> {
+    pub async fn option_cffex_sz50_list(&self) -> Result<Vec<CffexContractGroup>> {
         let url = "https://stock.finance.sina.com.cn/futures/view/optionsCffexDP.php/ho/cffex";
         self.fetch_cffex_list_sina(url, 0).await
     }
 
     /// CFFEX HS300 index option contract list from Sina.
-    pub async fn option_cffex_hs300_list(&self) -> Result<Vec<(String, Vec<String>)>> {
+    pub async fn option_cffex_hs300_list(&self) -> Result<Vec<CffexContractGroup>> {
         let url = "https://stock.finance.sina.com.cn/futures/view/optionsCffexDP.php";
         self.fetch_cffex_list_sina(url, 1).await
     }
 
     /// CFFEX ZZ1000 index option contract list from Sina.
-    pub async fn option_cffex_zz1000_list(&self) -> Result<Vec<(String, Vec<String>)>> {
+    pub async fn option_cffex_zz1000_list(&self) -> Result<Vec<CffexContractGroup>> {
         let url = "https://stock.finance.sina.com.cn/futures/view/optionsCffexDP.php/mo/cffex";
         self.fetch_cffex_list_sina(url, 2).await
     }
@@ -154,7 +155,7 @@ impl AkShareClient {
         &self,
         url: &str,
         symbol_index: usize,
-    ) -> Result<Vec<(String, Vec<String>)>> {
+    ) -> Result<Vec<CffexContractGroup>> {
         let body = self
             .get(url)
             .send()
@@ -174,7 +175,7 @@ impl AkShareClient {
             return Err(Error::upstream("sina cffex list: no symbol found"));
         }
 
-        Ok(vec![(symbol, contracts)])
+        Ok(vec![CffexContractGroup { expire_month: symbol, contracts }])
     }
 
     async fn fetch_cffex_spot_sina(

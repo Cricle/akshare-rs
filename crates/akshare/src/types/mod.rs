@@ -120,6 +120,86 @@ pub struct FundamentalsSnapshot {
     pub diluted_shares_outstanding: Option<i64>,
 }
 
+/// Quote snapshot with the provider name that supplied it.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QuoteWithProvider {
+    pub quote: QuoteSnapshot,
+    pub provider: String,
+}
+
+/// Candle data with the provider name that supplied it.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CandlesWithProvider {
+    pub candles: Vec<CandlePoint>,
+    pub provider: String,
+}
+
+/// Result of a batch quote fetch for a single symbol.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BatchQuoteResult {
+    pub symbol: String,
+    pub quote: Option<QuoteSnapshot>,
+}
+
+/// Result of a batch fundamentals fetch for a single symbol.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BatchFundamentalsResult {
+    pub symbol: String,
+    pub fundamentals: Option<FundamentalsSnapshot>,
+}
+
+/// HK company search context: name and its aliases.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CompanySearchContext {
+    pub company_name: String,
+    pub aliases: Vec<String>,
+}
+
+/// Tencent HK snapshot test result.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TencentSnapshotTestResult {
+    pub name: String,
+    pub market_cap_hkd: Option<f64>,
+    pub shares_outstanding: Option<i64>,
+    pub currency: Option<String>,
+}
+
+/// US stock industry classification.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct IndustryInfo {
+    pub sector: Option<String>,
+    pub industry: Option<String>,
+}
+
+/// Roll yield calculation result.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RollYieldResult {
+    pub yield_rate: f64,
+    pub near_symbol: String,
+    pub far_symbol: String,
+}
+
+/// SSE option remainder days info.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SseOptionRemainder {
+    pub expire_date: String,
+    pub remain_days: i64,
+}
+
+/// CFFEX option contract group by expiry month.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CffexContractGroup {
+    pub expire_month: String,
+    pub contracts: Vec<String>,
+}
+
+/// Futures product with name and code.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QhProduct {
+    pub name: String,
+    pub code: String,
+}
+
 /// HK stock financial data from Tencent Finance API.
 ///
 /// Fields are parsed from the `qt.gtimg.cn` real-time quote API.

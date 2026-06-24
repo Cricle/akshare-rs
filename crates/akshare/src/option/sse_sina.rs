@@ -4,6 +4,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::SseOptionRemainder;
 use crate::util::parse_f64_safe;
 
 // ---------------------------------------------------------------------------
@@ -169,7 +170,7 @@ impl AkShareClient {
         trade_date: &str,
         symbol: &str,
         exchange: &str,
-    ) -> Result<(String, i64)> {
+    ) -> Result<SseOptionRemainder> {
         let url = "https://stock.finance.sina.com.cn/futures/api/openapi.php/StockOptionService.getRemainderDay";
         let date_param = if trade_date.len() >= 6 {
             format!("{}-{}", &trade_date[..4], &trade_date[4..])
@@ -217,11 +218,11 @@ impl AkShareClient {
 
             if let Some(data2) = resp2.result.and_then(|r| r.data) {
                 let remaining2 = data2.remainder_days.parse::<i64>().unwrap_or(0);
-                return Ok((data2.expire_day, remaining2));
+                return Ok(SseOptionRemainder { expire_date: data2.expire_day, remain_days: remaining2 });
             }
         }
 
-        Ok((data.expire_day, remaining))
+        Ok(SseOptionRemainder { expire_date: data.expire_day, remain_days: remaining })
     }
 
     /// SSE option codes (call or put) from Sina.

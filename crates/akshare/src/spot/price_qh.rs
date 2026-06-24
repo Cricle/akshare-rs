@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::MacroDataPoint;
+use crate::types::{MacroDataPoint, QhProduct};
 
 #[derive(Debug, Deserialize)]
 struct QhTrendResp {
@@ -32,8 +32,8 @@ impl AkShareClient {
         let products = self.fetch_qh_products().await?;
         let product_id = products
             .iter()
-            .find(|(name, _)| name == symbol)
-            .map(|(_, id)| id.clone())
+            .find(|p| p.name == symbol)
+            .map(|p| p.code.clone())
             .ok_or_else(|| Error::invalid_input(format!("unknown QH commodity: {symbol}")))?;
 
         // Get auth token
@@ -86,16 +86,15 @@ impl AkShareClient {
     /// Fetch the commodity name to product ID mapping table from 99 QH.
     ///
     /// Returns a list of (exchange_name, commodity_name) pairs.
-    pub async fn spot_price_table_qh(&self) -> Result<Vec<(String, String)>> {
+    pub async fn spot_price_table_qh(&self) -> Result<Vec<QhProduct>> {
         let products = self.fetch_qh_products().await?;
         Ok(products
             .into_iter()
-            .map(|(name, _id)| name)
-            .map(|n| (String::new(), n))
+            .map(|p| QhProduct { name: p.name, code: String::new() })
             .collect())
     }
 
-    async fn fetch_qh_products(&self) -> Result<Vec<(String, String)>> {
+    async fn fetch_qh_products(&self) -> Result<Vec<QhProduct>> {
         let resp = self
             .get("https://www.99qh.com/data/spotTrend")
             .send()
@@ -145,7 +144,7 @@ impl AkShareClient {
                         .map(std::string::ToString::to_string)
                         .unwrap_or_default();
                     if !name.is_empty() {
-                        products.push((name, id));
+                        products.push(QhProduct { name, code: id });
                     }
                 }
             }

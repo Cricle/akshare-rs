@@ -2,9 +2,9 @@
 
 use super::helpers::{json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
 use super::types::{
-    LhbDetail, LhbHyyyb, LhbJgmmtj, LhbJgstatistic, LhbSinaDetail, LhbSinaGgtj, LhbSinaJgmx,
-    LhbSinaJgzz, LhbSinaYytj, LhbStockDetail, LhbStockDetailDate, LhbStockStatistic,
-    LhbTraderStatistic, LhbYybDetail, LhbYybph,
+    BillboardDetail, BillboardActiveBranch, BillboardOrgTradeSummary, BillboardOrgSeatTracking, BillboardSinaDetail, BillboardSinaHkSummary, BillboardSinaOrgDetail,
+    BillboardSinaOrgTracking, BillboardSinaBranchSummary, BillboardStockDetail, BillboardStockDetailDate, BillboardStockStatistic,
+    BillboardTraderStatistic, BillboardBranchDetail, BillboardBranchRanking,
 };
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -20,7 +20,7 @@ impl AkShareClient {
         &self,
         start_date: &str,
         end_date: &str,
-    ) -> Result<Vec<LhbDetail>> {
+    ) -> Result<Vec<BillboardDetail>> {
         let (sd, ed) = fmt_date_range(start_date, end_date);
         let filter = format!("(TRADE_DATE<='{ed}')(TRADE_DATE>='{sd}')");
         let data = self
@@ -38,7 +38,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbDetail {
+            .map(|v| BillboardDetail {
                 code: json_str(v, "SECURITY_CODE"),
                 name: json_str(v, "SECURITY_NAME_ABBR"),
                 trade_date: json_str(v, "TRADE_DATE"),
@@ -64,7 +64,7 @@ impl AkShareClient {
     }
 
     /// 个股上榜统计
-    pub async fn stock_lhb_stock_statistic(&self, symbol: &str) -> Result<Vec<LhbStockStatistic>> {
+    pub async fn stock_lhb_stock_statistic(&self, symbol: &str) -> Result<Vec<BillboardStockStatistic>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -87,7 +87,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbStockStatistic {
+            .map(|v| BillboardStockStatistic {
                 code: json_str(v, "SECURITY_CODE"),
                 name: json_str(v, "SECURITY_NAME_ABBR"),
                 latest_trade_date: json_str(v, "LATEST_TDATE"),
@@ -116,7 +116,7 @@ impl AkShareClient {
         &self,
         start_date: &str,
         end_date: &str,
-    ) -> Result<Vec<LhbJgmmtj>> {
+    ) -> Result<Vec<BillboardOrgTradeSummary>> {
         let (sd, ed) = fmt_date_range(start_date, end_date);
         let filter = format!("(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
         let data = self
@@ -134,7 +134,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbJgmmtj {
+            .map(|v| BillboardOrgTradeSummary {
                 code: json_str(v, "SECURITY_CODE"),
                 name: json_str(v, "SECURITY_NAME_ABBR"),
                 trade_date: json_str(v, "TRADE_DATE"),
@@ -155,7 +155,7 @@ impl AkShareClient {
     }
 
     /// 机构席位追踪
-    pub async fn stock_lhb_jgstatistic(&self, symbol: &str) -> Result<Vec<LhbJgstatistic>> {
+    pub async fn stock_lhb_jgstatistic(&self, symbol: &str) -> Result<Vec<BillboardOrgSeatTracking>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -178,7 +178,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbJgstatistic {
+            .map(|v| BillboardOrgSeatTracking {
                 code: json_str(v, "SECURITY_CODE"),
                 name: json_str(v, "SECURITY_NAME_ABBR"),
                 close_price: json_f64(v, "CLOSE_PRICE"),
@@ -199,7 +199,7 @@ impl AkShareClient {
     }
 
     /// 每日活跃营业部
-    pub async fn stock_lhb_hyyyb(&self, start_date: &str, end_date: &str) -> Result<Vec<LhbHyyyb>> {
+    pub async fn stock_lhb_hyyyb(&self, start_date: &str, end_date: &str) -> Result<Vec<BillboardActiveBranch>> {
         let (sd, ed) = fmt_date_range(start_date, end_date);
         let filter = format!("(ONLIST_DATE>='{sd}')(ONLIST_DATE<='{ed}')");
         let data = self
@@ -217,7 +217,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbHyyyb {
+            .map(|v| BillboardActiveBranch {
                 dept_name: json_str(v, "OPERATEDEPT_NAME"),
                 trade_date: json_str(v, "ONLIST_DATE"),
                 buy_stock_count: json_i64(v, "BUY_NUM"),
@@ -232,7 +232,7 @@ impl AkShareClient {
     }
 
     /// 营业部排行
-    pub async fn stock_lhb_yybph(&self, symbol: &str) -> Result<Vec<LhbYybph>> {
+    pub async fn stock_lhb_yybph(&self, symbol: &str) -> Result<Vec<BillboardBranchRanking>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -255,7 +255,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbYybph {
+            .map(|v| BillboardBranchRanking {
                 dept_name: json_str(v, "OPERATEDEPT_NAME"),
                 dept_code: json_str(v, "OPERATEDEPT_CODE"),
                 close_price: json_f64(v, "CLOSE_PRICE"),
@@ -276,7 +276,7 @@ impl AkShareClient {
     }
 
     /// 游资统计
-    pub async fn stock_lhb_traderstatistic(&self, symbol: &str) -> Result<Vec<LhbTraderStatistic>> {
+    pub async fn stock_lhb_traderstatistic(&self, symbol: &str) -> Result<Vec<BillboardTraderStatistic>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -299,7 +299,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbTraderStatistic {
+            .map(|v| BillboardTraderStatistic {
                 trader_name: json_str(v, "OPERATEDEPT_NAME"),
                 trader_code: json_str(v, "OPERATEDEPT_CODE"),
                 close_price: json_f64(v, "CLOSE_PRICE"),
@@ -323,7 +323,7 @@ impl AkShareClient {
     pub async fn stock_lhb_stock_detail_date(
         &self,
         symbol: &str,
-    ) -> Result<Vec<LhbStockDetailDate>> {
+    ) -> Result<Vec<BillboardStockDetailDate>> {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
@@ -340,7 +340,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbStockDetailDate {
+            .map(|v| BillboardStockDetailDate {
                 trade_date: json_str(v, "TRADE_DATE"),
                 close_price: json_f64(v, "CLOSE_PRICE"),
                 change_pct: json_f64(v, "CHANGE_RATE"),
@@ -358,7 +358,7 @@ impl AkShareClient {
         symbol: &str,
         date: &str,
         flag: &str,
-    ) -> Result<Vec<LhbStockDetail>> {
+    ) -> Result<Vec<BillboardStockDetail>> {
         let report = match flag {
             "卖出" => "RPT_BILLBOARD_DAILYDETAILSSELL",
             _ => "RPT_BILLBOARD_DAILYDETAILSBUY",
@@ -373,7 +373,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbStockDetail {
+            .map(|v| BillboardStockDetail {
                 trade_date: json_str(v, "TRADE_DATE"),
                 code: json_str(v, "SECURITY_CODE"),
                 name: json_str(v, "SECURITY_NAME_ABBR"),
@@ -390,7 +390,7 @@ impl AkShareClient {
     }
 
     /// 营业部龙虎榜详情
-    pub async fn stock_lhb_yyb_detail(&self, symbol: &str) -> Result<Vec<LhbYybDetail>> {
+    pub async fn stock_lhb_yyb_detail(&self, symbol: &str) -> Result<Vec<BillboardBranchDetail>> {
         let filter = format!("(OPERATEDEPT_CODE=\"{symbol}\")");
         let data = self
             .dc_fetch_all(
@@ -407,7 +407,7 @@ impl AkShareClient {
 
         Ok(data
             .iter()
-            .map(|v| LhbYybDetail {
+            .map(|v| BillboardBranchDetail {
                 trade_date: json_str(v, "TRADE_DATE"),
                 code: json_str(v, "SECURITY_CODE"),
                 name: json_str(v, "SECURITY_NAME_ABBR"),
@@ -422,7 +422,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-每日详情
-    pub async fn stock_lhb_detail_daily(&self, date: &str) -> Result<Vec<LhbSinaDetail>> {
+    pub async fn stock_lhb_detail_daily(&self, date: &str) -> Result<Vec<BillboardSinaDetail>> {
         let formatted = fmt_date(date);
         let url =
             "https://vip.stock.finance.sina.com.cn/q/go.php/vInvestConsult/kind/lhb/index.phtml";
@@ -440,7 +440,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-个股上榜统计
-    pub async fn stock_lhb_ggtj(&self) -> Result<Vec<LhbSinaGgtj>> {
+    pub async fn stock_lhb_ggtj(&self) -> Result<Vec<BillboardSinaHkSummary>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/ggtj/index.phtml";
         let resp = self
             .get(url)
@@ -455,7 +455,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-机构席位成交明细
-    pub async fn stock_lhb_jgmx(&self) -> Result<Vec<LhbSinaJgmx>> {
+    pub async fn stock_lhb_jgmx(&self) -> Result<Vec<BillboardSinaOrgDetail>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgmx/index.phtml";
         let resp = self
             .get(url)
@@ -470,7 +470,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-机构席位追踪
-    pub async fn stock_lhb_jgzz(&self, symbol: &str) -> Result<Vec<LhbSinaJgzz>> {
+    pub async fn stock_lhb_jgzz(&self, symbol: &str) -> Result<Vec<BillboardSinaOrgTracking>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgzz/index.phtml";
         let resp = self
             .get(url)
@@ -485,7 +485,7 @@ impl AkShareClient {
     }
 
     /// 新浪-龙虎榜-营业部上榜统计
-    pub async fn stock_lhb_yytj(&self, symbol: &str) -> Result<Vec<LhbSinaYytj>> {
+    pub async fn stock_lhb_yytj(&self, symbol: &str) -> Result<Vec<BillboardSinaBranchSummary>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/yytj/index.phtml";
         let resp = self
             .get(url)

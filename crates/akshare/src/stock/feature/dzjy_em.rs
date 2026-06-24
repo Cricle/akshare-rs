@@ -1,7 +1,7 @@
 //! Block trade (大宗交易) data from Eastmoney.
 
 use super::helpers::{json_f64, json_i64, json_str};
-use super::types::{DzjyHygtj, DzjyHyyybtj, DzjyMrtj, DzjyYybph};
+use super::types::{DzjyHygtj, BlockTradeActiveBranch, DzjyMrtj, BlockTradeBranchRanking};
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::util::fmt_date;
@@ -80,7 +80,7 @@ impl AkShareClient {
         &self,
         start_date: &str,
         end_date: &str,
-    ) -> Result<Vec<DzjyHyyybtj>> {
+    ) -> Result<Vec<BlockTradeActiveBranch>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
         let filter = format!("(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
@@ -98,7 +98,7 @@ impl AkShareClient {
             .await?;
         Ok(data
             .iter()
-            .map(|v| DzjyHyyybtj {
+            .map(|v| BlockTradeActiveBranch {
                 industry: json_str(v, "INDUSTRY"),
                 trade_date: json_str(v, "TRADE_DATE"),
                 block_trade_count: json_i64(v, "BLOCKTRADE_NUM"),
@@ -114,7 +114,7 @@ impl AkShareClient {
         &self,
         start_date: &str,
         end_date: &str,
-    ) -> Result<Vec<DzjyYybph>> {
+    ) -> Result<Vec<BlockTradeBranchRanking>> {
         let sd = fmt_date(start_date);
         let ed = fmt_date(end_date);
         let filter = format!("(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
@@ -132,7 +132,7 @@ impl AkShareClient {
             .await?;
         Ok(data
             .iter()
-            .map(|v| DzjyYybph {
+            .map(|v| BlockTradeBranchRanking {
                 dept_name: json_str(v, "OPERATEDEPT_NAME"),
                 buy_count: json_i64(v, "BUY_NUM"),
                 buy_amount: json_f64(v, "BUY_AMT"),

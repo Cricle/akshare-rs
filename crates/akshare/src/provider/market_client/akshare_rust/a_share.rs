@@ -1,13 +1,13 @@
 use super::super::{
     AnalystDetail, AnalystRank, BalanceSheet, CashFlowSheet, CommentDesireIndex,
     CommentFocusIndex, CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj,
-    DzjyHyyybtj, DzjyMrtj, DzjyYybph, EarningsForecast as AkEarningsForecast, EarningsQuickReport,
+    BlockTradeActiveBranch, DzjyMrtj, BlockTradeBranchRanking, EarningsForecast as AkEarningsForecast, EarningsQuickReport,
     EarningsReport, EsgRating, FundFlowEntry, FundamentalsSnapshot, GdfxHoldingAnalyse,
     GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork, GdfxTop10, Gdhs,
     GdhsDetail, Ggcg, GpzyDistributeEntry, GpzyIndustry, GpzyPledgeDetail, GpzyPledgeRatio,
     GpzyPledgeRatioDetail, GpzyProfile, HotStockXq, IndustryCategory, JgdyDetail, JgdyTj,
-    LhbDetail, LhbHyyyb, LhbJgmmtj, LhbJgstatistic, LhbStockDetail, LhbStockDetailDate,
-    LhbStockStatistic, LhbTraderStatistic, LhbYybDetail, LhbYybph, MainFundFlow, MarginAccountInfo,
+    BillboardDetail, BillboardActiveBranch, BillboardOrgTradeSummary, BillboardOrgSeatTracking, BillboardStockDetail, BillboardStockDetailDate,
+    BillboardStockStatistic, BillboardTraderStatistic, BillboardBranchDetail, BillboardBranchRanking, MainFundFlow, MarginAccountInfo,
     MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary,
     MarketDataClient, NewsItem, PankouChange, ProfitSheet, SectorFundFlowRank,
     StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
@@ -117,7 +117,7 @@ pub(crate) async fn fetch_billboard_detail(
     client: &MarketDataClient,
     start_date: &str,
     end_date: &str,
-) -> anyhow::Result<Vec<LhbDetail>> {
+) -> anyhow::Result<Vec<BillboardDetail>> {
     client
         .ak
         .stock_lhb_detail(start_date, end_date)
@@ -128,7 +128,7 @@ pub(crate) async fn fetch_billboard_detail(
 pub(crate) async fn fetch_billboard_stock_statistic(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<Vec<LhbStockStatistic>> {
+) -> anyhow::Result<Vec<BillboardStockStatistic>> {
     client
         .ak
         .stock_lhb_stock_statistic(symbol)
@@ -140,7 +140,7 @@ pub(crate) async fn fetch_billboard_jgmmtj(
     client: &MarketDataClient,
     start_date: &str,
     end_date: &str,
-) -> anyhow::Result<Vec<LhbJgmmtj>> {
+) -> anyhow::Result<Vec<BillboardOrgTradeSummary>> {
     client
         .ak
         .stock_lhb_jgmmtj(start_date, end_date)
@@ -151,7 +151,7 @@ pub(crate) async fn fetch_billboard_jgmmtj(
 pub(crate) async fn fetch_billboard_jgstatistic(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<Vec<LhbJgstatistic>> {
+) -> anyhow::Result<Vec<BillboardOrgSeatTracking>> {
     client
         .ak
         .stock_lhb_jgstatistic(symbol)
@@ -163,7 +163,7 @@ pub(crate) async fn fetch_billboard_hyyyb(
     client: &MarketDataClient,
     start_date: &str,
     end_date: &str,
-) -> anyhow::Result<Vec<LhbHyyyb>> {
+) -> anyhow::Result<Vec<BillboardActiveBranch>> {
     client
         .ak
         .stock_lhb_hyyyb(start_date, end_date)
@@ -174,14 +174,14 @@ pub(crate) async fn fetch_billboard_hyyyb(
 pub(crate) async fn fetch_billboard_yybph(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<Vec<LhbYybph>> {
+) -> anyhow::Result<Vec<BillboardBranchRanking>> {
     client.ak.stock_lhb_yybph(symbol).await.map_err(Into::into)
 }
 
 pub(crate) async fn fetch_billboard_trader_statistic(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<Vec<LhbTraderStatistic>> {
+) -> anyhow::Result<Vec<BillboardTraderStatistic>> {
     client
         .ak
         .stock_lhb_traderstatistic(symbol)
@@ -192,7 +192,7 @@ pub(crate) async fn fetch_billboard_trader_statistic(
 pub(crate) async fn fetch_billboard_stock_detail_date(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<Vec<LhbStockDetailDate>> {
+) -> anyhow::Result<Vec<BillboardStockDetailDate>> {
     client
         .ak
         .stock_lhb_stock_detail_date(symbol)
@@ -205,7 +205,7 @@ pub(crate) async fn fetch_billboard_stock_detail(
     symbol: &str,
     date: &str,
     flag: &str,
-) -> anyhow::Result<Vec<LhbStockDetail>> {
+) -> anyhow::Result<Vec<BillboardStockDetail>> {
     client
         .ak
         .stock_lhb_stock_detail(symbol, date, flag)
@@ -216,7 +216,7 @@ pub(crate) async fn fetch_billboard_stock_detail(
 pub(crate) async fn fetch_billboard_yyb_detail(
     client: &MarketDataClient,
     symbol: &str,
-) -> anyhow::Result<Vec<LhbYybDetail>> {
+) -> anyhow::Result<Vec<BillboardBranchDetail>> {
     client
         .ak
         .stock_lhb_yyb_detail(symbol)
@@ -571,7 +571,7 @@ pub(crate) async fn fetch_block_trade_industry_daily(
     client: &MarketDataClient,
     start_date: &str,
     end_date: &str,
-) -> anyhow::Result<Vec<DzjyHyyybtj>> {
+) -> anyhow::Result<Vec<BlockTradeActiveBranch>> {
     client
         .ak
         .stock_dzjy_hyyybtj(start_date, end_date)
@@ -583,7 +583,7 @@ pub(crate) async fn fetch_block_trade_seat_ranking(
     client: &MarketDataClient,
     start_date: &str,
     end_date: &str,
-) -> anyhow::Result<Vec<DzjyYybph>> {
+) -> anyhow::Result<Vec<BlockTradeBranchRanking>> {
     client
         .ak
         .stock_dzjy_yybph(start_date, end_date)

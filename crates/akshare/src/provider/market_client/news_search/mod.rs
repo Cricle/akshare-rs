@@ -707,41 +707,12 @@ impl MarketDataClient {
             // From China, searxng can't reach upstream engines
             // (GFW blocks DuckDuckGo, Brave, Startpage, etc. and Bing News
             // redirects to homepage), but Bing regular search RSS works.
-            for query in queries.iter().take(2) {
-                let rss_url = format!(
-                    "https://cn.bing.com/search?q={}&format=rss",
-                    query.replace(' ', "+")
-                );
-                let response = tokio::time::timeout(
-                    std::time::Duration::from_secs(10),
-                    self.http.get(&rss_url).send(),
-                )
-                .await;
-                if let Ok(Ok(response)) = response
-                    && let Ok(body) = response.text().await
+            let query_refs: Vec<&str> = queries.iter().map(|s| s.as_ref()).collect();
+            for item in self.fetch_bing_rss_news(&query_refs, 2).await {
+                if let Some(url) = &item.url
+                    && dedup.insert(url.clone())
                 {
-                    for item_xml in body.split("<item>").skip(1) {
-                        let end = item_xml.find("</item>").unwrap_or(item_xml.len());
-                        let xml = &item_xml[..end];
-                        let title = extract_rss_tag(xml, "title")
-                            .filter(|t| !t.contains("必应") && !t.contains("Bing"));
-                        let link = extract_rss_tag(xml, "link");
-                        let desc = extract_rss_tag(xml, "description");
-                        let date = extract_rss_tag(xml, "pubDate")
-                            .map(|d| normalize_rss_date(&d))
-                            .unwrap_or_default();
-                        if let (Some(title), Some(url)) = (title, link)
-                            && dedup.insert(url.clone())
-                        {
-                            merged.push(NewsItem {
-                                published_at: date,
-                                title,
-                                summary: desc.unwrap_or_default(),
-                                source: "bing_rss".to_string(),
-                                url: Some(url),
-                            });
-                        }
-                    }
+                    merged.push(item);
                 }
             }
             // Google News RSS fallback

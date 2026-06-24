@@ -4,7 +4,7 @@
 //! implemented in pure Rust. These functions are stub implementations
 //! that return empty results.
 
-use super::types::LhYybRanking;
+use super::types::BillboardBranchRankingEntry;
 use crate::client::AkShareClient;
 use crate::error::Result;
 
@@ -12,21 +12,21 @@ impl AkShareClient {
     /// 同花顺-营业部排名-上榜次数最多
     ///
     /// Note: THS requires JavaScript cookie generation; returns empty in Rust.
-    pub async fn stock_lh_yyb_most(&self) -> Result<Vec<LhYybRanking>> {
+    pub async fn stock_lh_yyb_most(&self) -> Result<Vec<BillboardBranchRankingEntry>> {
         Ok(vec![])
     }
 
     /// 同花顺-营业部排名-资金实力最强
     ///
     /// Note: THS requires JavaScript cookie generation; returns empty in Rust.
-    pub async fn stock_lh_yyb_capital(&self) -> Result<Vec<LhYybRanking>> {
+    pub async fn stock_lh_yyb_capital(&self) -> Result<Vec<BillboardBranchRankingEntry>> {
         Ok(vec![])
     }
 
     /// 同花顺-营业部排名-抱团操作实力
     ///
     /// Note: THS requires JavaScript cookie generation; returns empty in Rust.
-    pub async fn stock_lh_yyb_control(&self) -> Result<Vec<LhYybRanking>> {
+    pub async fn stock_lh_yyb_control(&self) -> Result<Vec<BillboardBranchRankingEntry>> {
         Ok(vec![])
     }
 }

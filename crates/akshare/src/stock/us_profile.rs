@@ -7,6 +7,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::value_ext::ValueExt;
+use crate::types::IndustryInfo;
 
 use serde::{Deserialize, Serialize};
 
@@ -192,21 +193,21 @@ impl AkShareClient {
     ///
     /// Returns (sector, industry) tuple. Tries Yahoo Finance first,
     /// falls back to static mapping for well-known stocks.
-    pub async fn us_stock_industry(&self, symbol: &str) -> (Option<String>, Option<String>) {
+    pub async fn us_stock_industry(&self, symbol: &str) -> IndustryInfo {
         // Try Yahoo Finance first
         if let Ok(profile) = self.us_stock_profile(symbol).await
             && (profile.sector.is_some() || profile.industry.is_some())
         {
-            return (profile.sector, profile.industry);
+            return IndustryInfo { sector: profile.sector, industry: profile.industry };
         }
 
         // Fallback to static mapping
         let sym = symbol.to_uppercase();
         if let Some((sector, industry)) = static_us_sector(&sym) {
-            return (Some(sector.to_string()), Some(industry.to_string()));
+            return IndustryInfo { sector: Some(sector.to_string()), industry: Some(industry.to_string()) };
         }
 
-        (None, None)
+        IndustryInfo { sector: None, industry: None }
     }
 
     /// Get key financial statistics for a US stock from Yahoo Finance.

@@ -35,13 +35,13 @@ use crate::types::{
 // Re-export types from stock modules used by fetch methods
 pub use crate::stock::feature::{
     AnalystDetail, AnalystRank, BalanceSheet, CashFlowSheet, CommentDesireIndex, CommentFocusIndex,
-    CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj, DzjyHyyybtj, DzjyMrtj,
-    DzjyYybph, EarningsForecast, EarningsQuickReport, EarningsReport, EsgRating, FundFlowEntry,
+    CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj, BlockTradeActiveBranch, DzjyMrtj,
+    BlockTradeBranchRanking, EarningsForecast, EarningsQuickReport, EarningsReport, EsgRating, FundFlowEntry,
     GdfxHoldingAnalyse, GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork,
     GdfxTop10, Gdhs, GdhsDetail, Ggcg, GpzyDistributeEntry, GpzyIndustry, GpzyPledgeDetail,
     GpzyPledgeRatio, GpzyPledgeRatioDetail, GpzyProfile, HotStockXq, IndustryCategory, JgdyDetail,
-    JgdyTj, LhbDetail, LhbHyyyb, LhbJgmmtj, LhbJgstatistic, LhbStockDetail, LhbStockDetailDate,
-    LhbStockStatistic, LhbTraderStatistic, LhbYybDetail, LhbYybph, MainFundFlow, MarginAccountInfo,
+    JgdyTj, BillboardDetail, BillboardActiveBranch, BillboardOrgTradeSummary, BillboardOrgSeatTracking, BillboardStockDetail, BillboardStockDetailDate,
+    BillboardStockStatistic, BillboardTraderStatistic, BillboardBranchDetail, BillboardBranchRanking, MainFundFlow, MarginAccountInfo,
     MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary,
     PankouChange, ProfitSheet, SectorFundFlowRank, StockComment, ZtPool, ZtPoolDtgc,
     ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,

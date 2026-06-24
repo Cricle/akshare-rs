@@ -95,6 +95,21 @@ impl MarketDataClient {
     {
     }
 
+    /// Cache-through fetch: check cache, execute fetch on miss, store result.
+    pub(super) async fn cached_fetch<T, F, Fut>(&self, key: &str, ttl: u64, fetch: F) -> anyhow::Result<T>
+    where
+        T: Serialize + DeserializeOwned,
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = anyhow::Result<T>>,
+    {
+        if let Some(cached) = self.cache_get_json(key).await {
+            return Ok(cached);
+        }
+        let value = fetch().await?;
+        self.cache_set_json(key, ttl, &value).await;
+        Ok(value)
+    }
+
     // --- Cache key utilities ---
 
     pub(super) fn stale_cache_key(&self, key: &str) -> String {
