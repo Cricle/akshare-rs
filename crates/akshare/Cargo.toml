@@ -71,6 +71,95 @@ futures = { version = "0.3", optional = true }
 anyhow = { version = "1", optional = true }
 opentelemetry = { version = "0.28", optional = true }
 
+# --- Integration test feature gates ---
+# Tests that only use provider methods (always available) need no features.
+[[test]]
+name = "mock_smoke"
+required-features = []
+
+[[test]]
+name = "mock_provider"
+required-features = []
+
+# Equity tests (stock + index)
+[[test]]
+name = "stock_core"
+required-features = ["mod-stock"]
+
+[[test]]
+name = "stock_board"
+required-features = ["mod-stock"]
+
+[[test]]
+name = "stock_feature"
+required-features = ["mod-stock", "mod-news"]
+
+[[test]]
+name = "mock_stock"
+required-features = ["mod-stock", "mod-news"]
+
+[[test]]
+name = "index"
+required-features = ["mod-index"]
+
+# Derivatives tests
+[[test]]
+name = "futures"
+required-features = ["mod-futures"]
+
+[[test]]
+name = "mock_futures"
+required-features = ["mod-futures"]
+
+[[test]]
+name = "option"
+required-features = ["mod-option"]
+
+[[test]]
+name = "mock_option"
+required-features = ["mod-option"]
+
+[[test]]
+name = "futures_option"
+required-features = ["mod-futures", "mod-option"]
+
+# Funds & Fixed Income tests
+[[test]]
+name = "bond"
+required-features = ["mod-bond"]
+
+[[test]]
+name = "fund"
+required-features = ["mod-fund"]
+
+# Macro & Economy tests
+[[test]]
+name = "macro_data"
+required-features = ["mod-macro_data"]
+
+[[test]]
+name = "mock_economy"
+required-features = ["mod-economy"]
+
+# News tests
+[[test]]
+name = "mock_news"
+required-features = ["mod-news"]
+
+# Error tests use stock_zh_a_spot + macro_china_gdp methods
+[[test]]
+name = "mock_errors"
+required-features = ["mod-stock", "mod-macro_data"]
+
+# misc.rs and e2e.rs cover many modules — require all
+[[test]]
+name = "misc"
+required-features = ["all"]
+
+[[test]]
+name = "e2e"
+required-features = ["all"]
+
 [dev-dependencies]
 wiremock = "0.6"
 tokio = { version = "1", features = ["full", "test-util"] }
