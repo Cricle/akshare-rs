@@ -56,19 +56,6 @@ macro_rules! macro_test_arg3 {
     };
 }
 
-macro_rules! macro_test_arg4 {
-    ($test_name:ident, $method:ident, $arg1:expr, $arg2:expr, $arg3:expr, $arg4:expr) => {
-        #[tokio::test]
-        async fn $test_name() {
-            let server = wiremock::MockServer::start().await;
-            mount_mocks(&server).await;
-            let client = common::mock_client(&server);
-            let result = client.$method($arg1, $arg2, $arg3, $arg4).await;
-            let _ = result;
-        }
-    };
-}
-
 macro_rules! macro_test_arg5 {
     ($test_name:ident, $method:ident, $arg1:expr, $arg2:expr, $arg3:expr, $arg4:expr, $arg5:expr) => {
         #[tokio::test]
