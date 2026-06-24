@@ -58,3 +58,47 @@ pub fn amplitude_pct(high: f64, low: f64) -> f64 {
         0.0
     }
 }
+
+/// Send a request builder and check for HTTP errors.
+///
+/// This replaces the common pattern:
+/// ```ignore
+/// .send().await.map_err(Error::from)?
+///     .error_for_status().map_err(Error::from)?
+/// ```
+pub(crate) async fn send_and_check(
+    builder: reqwest::RequestBuilder,
+) -> crate::Result<reqwest::Response> {
+    builder
+        .send()
+        .await
+        .map_err(crate::Error::from)?
+        .error_for_status()
+        .map_err(crate::Error::from)
+}
+
+/// Build Eastmoney clist query parameters.
+///
+/// Returns the common parameter block used by `push2.eastmoney.com/api/qt/clist/get`.
+/// Callers pass `pz` (page size) and any extra fields specific to their endpoint.
+pub(crate) fn eastmoney_clist_params<'a>(
+    pz: &'a str,
+    extra: &[(&'a str, &'a str)],
+) -> Vec<(&'a str, &'a str)> {
+    let mut params = vec![
+        ("pn", "1"),
+        ("pz", pz),
+        ("po", "1"),
+        ("np", "1"),
+        ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
+        ("fltt", "2"),
+        ("invt", "2"),
+    ];
+    params.extend_from_slice(extra);
+    params
+}
+
+/// Build Eastmoney F10/HSF10 query parameters.
+pub(crate) fn eastmoney_f10_params<'a>(source: &'a str) -> Vec<(&'a str, &'a str)> {
+    vec![("source", source), ("client", "PC")]
+}
