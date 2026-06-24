@@ -569,29 +569,34 @@ impl AkShareClient {
     }
 
     /// 东方财富-个股新闻 (A股, by stock code)
+    #[cfg(feature = "mod-news")]
     pub async fn stock_news(&self, symbol: &str) -> Result<Vec<StockNews>> {
         self.stock_news_em_inner(symbol, "default", "default", 20)
             .await
     }
 
     /// 东方财富-个股新闻 (by company name, much better coverage)
+    #[cfg(feature = "mod-news")]
     pub async fn stock_news_em_by_name(&self, name: &str) -> Result<Vec<StockNews>> {
         self.stock_news_em_inner(name, "default", "relevance", 50)
             .await
     }
 
     /// 东方财富-港股个股新闻
+    #[cfg(feature = "mod-news")]
     pub async fn stock_news_em_hk(&self, symbol: &str) -> Result<Vec<StockNews>> {
         self.stock_news_em_inner(symbol, "default", "default", 20)
             .await
     }
 
     /// 东方财富-美股个股新闻
+    #[cfg(feature = "mod-news")]
     pub async fn stock_news_em_us(&self, symbol: &str) -> Result<Vec<StockNews>> {
         self.stock_news_em_inner(symbol, "default", "default", 20)
             .await
     }
 
+    #[cfg(feature = "mod-news")]
     async fn stock_news_em_inner(
         &self,
         keyword: &str,
