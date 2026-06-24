@@ -50,6 +50,30 @@ pub struct NewsItem {
     pub url: Option<String>,
 }
 
+/// Metadata about a single attempt to fetch news from a provider.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NewsFetchAttempt {
+    pub source: String,
+    #[serde(default)]
+    pub query: Option<String>,
+    pub success: bool,
+    #[serde(default)]
+    pub item_count: usize,
+    #[serde(default)]
+    pub error: Option<String>,
+}
+
+/// Aggregated result of one or more news-fetch attempts.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct NewsFetchResult {
+    #[serde(default)]
+    pub items: Vec<NewsItem>,
+    #[serde(default)]
+    pub attempts: Vec<NewsFetchAttempt>,
+    #[serde(default)]
+    pub cacheable: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CapitalFlowPoint {
     pub trade_date: String,
