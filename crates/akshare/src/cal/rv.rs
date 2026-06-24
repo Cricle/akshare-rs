@@ -127,6 +127,7 @@ impl AkShareClient {
     ///
     /// `symbol`: futures contract code (e.g., "AU2406")
     /// Fetches minute kline data and computes Yang-Zhang realized volatility.
+    #[cfg(feature = "mod-futures")]
     pub async fn rv_from_futures_zh_minute(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         fn row_f64(row: &crate::types::Row, key: &str) -> f64 {
             row.get(key)
@@ -161,6 +162,7 @@ impl AkShareClient {
     ///
     /// `symbol`: stock code (e.g., "600000")
     /// Fetches minute kline data and computes Yang-Zhang realized volatility.
+    #[cfg(feature = "mod-stock")]
     pub async fn rv_from_stock_zh_a_hist_min(&self, symbol: &str) -> Result<Vec<MacroDataPoint>> {
         let klines = self.stock_zh_a_hist_min(symbol, "5", "qfq", "", "").await?;
         if klines.is_empty() {

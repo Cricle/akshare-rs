@@ -214,6 +214,7 @@ impl AkShareClient {
     ///
     /// `user`: Tushare account email
     /// `password`: Tushare account password
+    #[cfg(feature = "mod-tool")]
     pub async fn get_token(&self, user: &str, password: &str) -> Result<String> {
         self.pro_api(user, password).await
     }
