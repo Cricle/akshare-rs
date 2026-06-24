@@ -1,8 +1,8 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 
-use crate::types::CapitalFlowPoint;
 use super::super::MarketDataClient;
 use super::super::wire::EastmoneyKlineEnvelope;
+use crate::types::CapitalFlowPoint;
 
 impl MarketDataClient {
     pub(crate) async fn fetch_a_share_capital_flow(

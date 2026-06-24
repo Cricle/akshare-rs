@@ -78,9 +78,17 @@ impl AkShareClient {
         let ry = (c2 / c1).ln() / f64::from(c) * 12.0;
 
         if c > 0 {
-            Ok(RollYieldResult { yield_rate: ry, near_symbol: s2, far_symbol: s1 })
+            Ok(RollYieldResult {
+                yield_rate: ry,
+                near_symbol: s2,
+                far_symbol: s1,
+            })
         } else {
-            Ok(RollYieldResult { yield_rate: ry, near_symbol: s1, far_symbol: s2 })
+            Ok(RollYieldResult {
+                yield_rate: ry,
+                near_symbol: s1,
+                far_symbol: s2,
+            })
         }
     }
 

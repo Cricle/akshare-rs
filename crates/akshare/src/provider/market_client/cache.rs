@@ -96,7 +96,12 @@ impl MarketDataClient {
     }
 
     /// Cache-through fetch: check cache, execute fetch on miss, store result.
-    pub(super) async fn cached_fetch<T, F, Fut>(&self, key: &str, ttl: u64, fetch: F) -> anyhow::Result<T>
+    pub(super) async fn cached_fetch<T, F, Fut>(
+        &self,
+        key: &str,
+        ttl: u64,
+        fetch: F,
+    ) -> anyhow::Result<T>
     where
         T: Serialize + DeserializeOwned,
         F: FnOnce() -> Fut,

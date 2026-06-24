@@ -215,13 +215,12 @@ impl TradingToolbox {
                 if item.published_at.trim().is_empty() {
                     return true;
                 }
-                let normalized =
-                    normalized_news_date(&item.published_at).unwrap_or_else(|| {
-                        item.published_at
-                            .get(0..10)
-                            .unwrap_or(item.published_at.as_str())
-                            .to_string()
-                    });
+                let normalized = normalized_news_date(&item.published_at).unwrap_or_else(|| {
+                    item.published_at
+                        .get(0..10)
+                        .unwrap_or(item.published_at.as_str())
+                        .to_string()
+                });
                 let date = normalized.as_str();
                 start_date.is_none_or(|value| date >= value)
                     && end_date.is_none_or(|value| date <= value)
@@ -317,7 +316,8 @@ mod tests {
 
     #[test]
     fn summarize_success_output_stock_data() {
-        let result = TradingToolbox::summarize_success_output("get_stock_data", "data output", &json!({}));
+        let result =
+            TradingToolbox::summarize_success_output("get_stock_data", "data output", &json!({}));
         // Should return summarized version
         assert!(!result.is_empty());
     }

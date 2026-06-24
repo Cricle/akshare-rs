@@ -1,9 +1,9 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
 
-use crate::types::{CandlePoint, CandlesWithProvider};
 use super::super::MarketDataClient;
+use crate::types::{CandlePoint, CandlesWithProvider};
 
 impl MarketDataClient {
     pub(crate) async fn fetch_a_share_candles(
@@ -27,7 +27,10 @@ impl MarketDataClient {
             .fetch_a_share_tencent_candles(symbol, adjust, limit)
             .await
         {
-            Ok(items) => Ok(CandlesWithProvider { candles: items, provider: "tencent_kline".to_string() }),
+            Ok(items) => Ok(CandlesWithProvider {
+                candles: items,
+                provider: "tencent_kline".to_string(),
+            }),
             Err(tencent_error) => {
                 tracing::info!(
                     symbol = %symbol,

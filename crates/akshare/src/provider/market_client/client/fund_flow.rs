@@ -1,6 +1,6 @@
 use super::super::{
-    FundFlowEntry, MainFundFlow, MarketDataClient, SectorFundFlowRank, CANDLES_CACHE_TTL_SECS,
-    MARKET_DATA_CACHE_PREFIX,
+    CANDLES_CACHE_TTL_SECS, FundFlowEntry, MARKET_DATA_CACHE_PREFIX, MainFundFlow,
+    MarketDataClient, SectorFundFlowRank,
 };
 
 impl MarketDataClient {
@@ -53,10 +53,7 @@ impl MarketDataClient {
         .await
     }
 
-    pub async fn fetch_main_fund_flow(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<MainFundFlow>> {
+    pub async fn fetch_main_fund_flow(&self, symbol: &str) -> anyhow::Result<Vec<MainFundFlow>> {
         let normalized = self
             .normalize_a_share_symbol(symbol)
             .ok_or_else(|| anyhow::anyhow!("invalid A-share symbol for main fund flow"))?;

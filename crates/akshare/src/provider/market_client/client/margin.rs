@@ -1,7 +1,7 @@
 use super::super::{
+    FUNDAMENTALS_CACHE_TTL_SECS, INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX,
     MarginAccountInfo, MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail,
-    MarginSzseSummary, MarketDataClient, FUNDAMENTALS_CACHE_TTL_SECS, INSIDER_CACHE_TTL_SECS,
-    MARKET_DATA_CACHE_PREFIX,
+    MarginSzseSummary, MarketDataClient,
 };
 
 impl MarketDataClient {

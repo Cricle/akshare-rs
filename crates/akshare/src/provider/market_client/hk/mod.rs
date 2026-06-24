@@ -103,7 +103,10 @@ impl MarketDataClient {
             .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| standard_code.to_string());
         let aliases = self.hk_search_aliases(&company_name);
-        CompanySearchContext { company_name, aliases }
+        CompanySearchContext {
+            company_name,
+            aliases,
+        }
     }
 
     async fn fetch_hk_main_finance_indicator(
@@ -272,7 +275,10 @@ impl MarketDataClient {
     ) -> anyhow::Result<QuoteWithProvider> {
         let code = self.hk_standard_code(symbol)?;
         match self.fetch_hk_tencent_quote(symbol, &code).await {
-            Ok(snapshot) => Ok(QuoteWithProvider { quote: snapshot, provider: "tencent_quote".to_string() }),
+            Ok(snapshot) => Ok(QuoteWithProvider {
+                quote: snapshot,
+                provider: "tencent_quote".to_string(),
+            }),
             Err(primary_error) => {
                 tracing::info!(
                     symbol = %symbol,
@@ -518,7 +524,10 @@ impl MarketDataClient {
     ) -> anyhow::Result<super::NewsFetchResult> {
         let standard_code = self.hk_standard_code(symbol)?;
         let code = standard_code.trim_start_matches('0');
-        let CompanySearchContext { company_name, aliases } = self.hk_company_search_context(&standard_code).await;
+        let CompanySearchContext {
+            company_name,
+            aliases,
+        } = self.hk_company_search_context(&standard_code).await;
         let primary_name = aliases
             .iter()
             .find(|alias| !alias.contains("-W") && !alias.contains("-SW") && !alias.contains('－'))
@@ -1238,7 +1247,12 @@ impl MarketDataClient {
         limit: usize,
     ) -> anyhow::Result<CandlesWithProvider> {
         match self.fetch_hk_tencent_candles(symbol, limit).await {
-            Ok(items) => return Ok(CandlesWithProvider { candles: items, provider: "tencent_kline".to_string() }),
+            Ok(items) => {
+                return Ok(CandlesWithProvider {
+                    candles: items,
+                    provider: "tencent_kline".to_string(),
+                });
+            }
             Err(primary_error) => {
                 tracing::info!(
                     symbol = %symbol,

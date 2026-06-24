@@ -1,7 +1,7 @@
 use super::super::{
-    BatchFundamentalsResult, BatchQuoteResult, FundamentalsSnapshot, MarketDataClient,
-    QuoteSnapshot, FUNDAMENTALS_CACHE_TTL_SECS, FUNDAMENTALS_CACHE_VERSION,
-    MARKET_DATA_CACHE_PREFIX, QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION,
+    BatchFundamentalsResult, BatchQuoteResult, FUNDAMENTALS_CACHE_TTL_SECS,
+    FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot, MARKET_DATA_CACHE_PREFIX, MarketDataClient,
+    QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot,
 };
 
 impl MarketDataClient {
@@ -83,10 +83,7 @@ impl MarketDataClient {
     }
 
     /// Batch fetch fundamentals for multiple symbols.
-    pub async fn fetch_fundamentals_batch(
-        &self,
-        symbols: &[&str],
-    ) -> Vec<BatchFundamentalsResult> {
+    pub async fn fetch_fundamentals_batch(&self, symbols: &[&str]) -> Vec<BatchFundamentalsResult> {
         if symbols.is_empty() {
             return Vec::new();
         }
@@ -109,8 +106,7 @@ impl MarketDataClient {
                 miss_indices.push(i);
             }
         }
-        let miss_results: Vec<(usize, Option<FundamentalsSnapshot>)> = if miss_indices.is_empty()
-        {
+        let miss_results: Vec<(usize, Option<FundamentalsSnapshot>)> = if miss_indices.is_empty() {
             Vec::new()
         } else {
             let futs: Vec<_> = miss_indices

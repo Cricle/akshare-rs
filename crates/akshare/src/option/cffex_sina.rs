@@ -175,7 +175,10 @@ impl AkShareClient {
             return Err(Error::upstream("sina cffex list: no symbol found"));
         }
 
-        Ok(vec![CffexContractGroup { expire_month: symbol, contracts }])
+        Ok(vec![CffexContractGroup {
+            expire_month: symbol,
+            contracts,
+        }])
     }
 
     async fn fetch_cffex_spot_sina(

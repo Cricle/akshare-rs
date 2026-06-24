@@ -1,10 +1,10 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 
-use crate::types::{CapitalFlowPoint, SectorConstituent, SectorSnapshot};
 use super::super::MarketDataClient;
 use super::super::wire::{
     EastmoneyKlineEnvelope, EastmoneySectorConstituentEnvelope, EastmoneySectorRankingEnvelope,
 };
+use crate::types::{CapitalFlowPoint, SectorConstituent, SectorSnapshot};
 
 impl MarketDataClient {
     pub(crate) async fn fetch_a_share_sector_rankings_from_eastmoney(

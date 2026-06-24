@@ -9,11 +9,9 @@ use anyhow::{Context, bail};
 
 use super::search::market_to_eastmoney_label;
 use super::{
-    CapitalFlowPoint, FundamentalsSnapshot, MarketDataClient, NewsItem,
-    QuoteSnapshot, QuoteWithProvider, StockSearchResult,
-    wire::{
-        AkshareIndividualInfo, EastmoneyAnnouncementsEnvelope, EastmoneySearchEnvelope,
-    },
+    CapitalFlowPoint, FundamentalsSnapshot, MarketDataClient, NewsItem, QuoteSnapshot,
+    QuoteWithProvider, StockSearchResult,
+    wire::{AkshareIndividualInfo, EastmoneyAnnouncementsEnvelope, EastmoneySearchEnvelope},
 };
 
 impl MarketDataClient {
@@ -163,7 +161,10 @@ impl MarketDataClient {
         ts_code: &str,
     ) -> anyhow::Result<QuoteWithProvider> {
         match self.fetch_a_share_quote_from_eastmoney(symbol).await {
-            Ok(quote) => Ok(QuoteWithProvider { quote, provider: "tencent_quote".to_string() }),
+            Ok(quote) => Ok(QuoteWithProvider {
+                quote,
+                provider: "tencent_quote".to_string(),
+            }),
             Err(eastmoney_error) => {
                 tracing::info!(
                     "tencent quote unavailable for {} ({}), falling back to tushare",
@@ -171,7 +172,10 @@ impl MarketDataClient {
                     eastmoney_error
                 );
                 match self.fetch_a_share_quote_from_tushare(symbol, ts_code).await {
-                    Ok(quote) => Ok(QuoteWithProvider { quote, provider: "tushare_daily".to_string() }),
+                    Ok(quote) => Ok(QuoteWithProvider {
+                        quote,
+                        provider: "tushare_daily".to_string(),
+                    }),
                     Err(tushare_error) => Err(tushare_error),
                 }
             }
@@ -265,8 +269,6 @@ impl MarketDataClient {
             .context("unexpected tencent quote response format")?;
         Ok(payload.split('~').collect::<Vec<_>>())
     }
-
-
 }
 impl MarketDataClient {
     pub(crate) fn a_share_fiscal_year_end_candidate(value: Option<String>) -> Option<String> {
@@ -1233,7 +1235,9 @@ impl MarketDataClient {
 impl MarketDataClient {
     #[cfg(test)]
     #[allow(dead_code)]
-    pub(super) fn parse_a_share_candle_line(line: &str) -> anyhow::Result<crate::types::CandlePoint> {
+    pub(super) fn parse_a_share_candle_line(
+        line: &str,
+    ) -> anyhow::Result<crate::types::CandlePoint> {
         let fields = line.split(',').collect::<Vec<_>>();
         if fields.len() < 11 {
             bail!("unexpected eastmoney candle format: {}", line);

@@ -1,6 +1,6 @@
 use super::super::{
-    BillboardEntry, BillboardSeatDetail, DataError, DataErrorKind, MarketDataClient, MarketKind,
-    INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, NEWS_CACHE_TTL_SECS,
+    BillboardEntry, BillboardSeatDetail, DataError, DataErrorKind, INSIDER_CACHE_TTL_SECS,
+    MARKET_DATA_CACHE_PREFIX, MarketDataClient, MarketKind, NEWS_CACHE_TTL_SECS,
 };
 
 use super::super::{
@@ -75,9 +75,16 @@ impl MarketDataClient {
         end_date: &str,
     ) -> anyhow::Result<Vec<BillboardDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-detail:{}:{}", start_date, end_date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:lhb-detail:{}:{}",
+                start_date, end_date
+            ),
             INSIDER_CACHE_TTL_SECS,
-            || super::super::akshare_rust::a_share::fetch_billboard_detail(self, start_date, end_date),
+            || {
+                super::super::akshare_rust::a_share::fetch_billboard_detail(
+                    self, start_date, end_date,
+                )
+            },
         )
         .await
     }
@@ -87,7 +94,10 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<BillboardStockStatistic>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-stat:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:lhb-stock-stat:{}",
+                symbol.trim()
+            ),
             INSIDER_CACHE_TTL_SECS,
             || super::super::akshare_rust::a_share::fetch_billboard_stock_statistic(self, symbol),
         )
@@ -100,9 +110,16 @@ impl MarketDataClient {
         end_date: &str,
     ) -> anyhow::Result<Vec<BillboardOrgTradeSummary>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-jgmmtj:{}:{}", start_date, end_date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:lhb-jgmmtj:{}:{}",
+                start_date, end_date
+            ),
             INSIDER_CACHE_TTL_SECS,
-            || super::super::akshare_rust::a_share::fetch_billboard_jgmmtj(self, start_date, end_date),
+            || {
+                super::super::akshare_rust::a_share::fetch_billboard_jgmmtj(
+                    self, start_date, end_date,
+                )
+            },
         )
         .await
     }
@@ -125,9 +142,16 @@ impl MarketDataClient {
         end_date: &str,
     ) -> anyhow::Result<Vec<BillboardActiveBranch>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-hyyyb:{}:{}", start_date, end_date),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:lhb-hyyyb:{}:{}",
+                start_date, end_date
+            ),
             INSIDER_CACHE_TTL_SECS,
-            || super::super::akshare_rust::a_share::fetch_billboard_hyyyb(self, start_date, end_date),
+            || {
+                super::super::akshare_rust::a_share::fetch_billboard_hyyyb(
+                    self, start_date, end_date,
+                )
+            },
         )
         .await
     }
@@ -161,7 +185,10 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<BillboardStockDetailDate>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-stock-date:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:lhb-stock-date:{}",
+                symbol.trim()
+            ),
             INSIDER_CACHE_TTL_SECS,
             || super::super::akshare_rust::a_share::fetch_billboard_stock_detail_date(self, symbol),
         )
@@ -182,7 +209,11 @@ impl MarketDataClient {
                 flag
             ),
             INSIDER_CACHE_TTL_SECS,
-            || super::super::akshare_rust::a_share::fetch_billboard_stock_detail(self, symbol, date, flag),
+            || {
+                super::super::akshare_rust::a_share::fetch_billboard_stock_detail(
+                    self, symbol, date, flag,
+                )
+            },
         )
         .await
     }
@@ -192,7 +223,10 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<BillboardBranchDetail>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:lhb-yyb-detail:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:lhb-yyb-detail:{}",
+                symbol.trim()
+            ),
             INSIDER_CACHE_TTL_SECS,
             || super::super::akshare_rust::a_share::fetch_billboard_yyb_detail(self, symbol),
         )

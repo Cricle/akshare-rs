@@ -2,9 +2,11 @@
 
 use super::helpers::{json_f64, json_f64_opt, json_i64, json_str, json_str_opt};
 use super::types::{
-    BillboardDetail, BillboardActiveBranch, BillboardOrgTradeSummary, BillboardOrgSeatTracking, BillboardSinaDetail, BillboardSinaHkSummary, BillboardSinaOrgDetail,
-    BillboardSinaOrgTracking, BillboardSinaBranchSummary, BillboardStockDetail, BillboardStockDetailDate, BillboardStockStatistic,
-    BillboardTraderStatistic, BillboardBranchDetail, BillboardBranchRanking,
+    BillboardActiveBranch, BillboardBranchDetail, BillboardBranchRanking, BillboardDetail,
+    BillboardOrgSeatTracking, BillboardOrgTradeSummary, BillboardSinaBranchSummary,
+    BillboardSinaDetail, BillboardSinaHkSummary, BillboardSinaOrgDetail, BillboardSinaOrgTracking,
+    BillboardStockDetail, BillboardStockDetailDate, BillboardStockStatistic,
+    BillboardTraderStatistic,
 };
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
@@ -64,7 +66,10 @@ impl AkShareClient {
     }
 
     /// 个股上榜统计
-    pub async fn stock_lhb_stock_statistic(&self, symbol: &str) -> Result<Vec<BillboardStockStatistic>> {
+    pub async fn stock_lhb_stock_statistic(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<BillboardStockStatistic>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -155,7 +160,10 @@ impl AkShareClient {
     }
 
     /// 机构席位追踪
-    pub async fn stock_lhb_jgstatistic(&self, symbol: &str) -> Result<Vec<BillboardOrgSeatTracking>> {
+    pub async fn stock_lhb_jgstatistic(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<BillboardOrgSeatTracking>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",
@@ -199,7 +207,11 @@ impl AkShareClient {
     }
 
     /// 每日活跃营业部
-    pub async fn stock_lhb_hyyyb(&self, start_date: &str, end_date: &str) -> Result<Vec<BillboardActiveBranch>> {
+    pub async fn stock_lhb_hyyyb(
+        &self,
+        start_date: &str,
+        end_date: &str,
+    ) -> Result<Vec<BillboardActiveBranch>> {
         let (sd, ed) = fmt_date_range(start_date, end_date);
         let filter = format!("(ONLIST_DATE>='{sd}')(ONLIST_DATE<='{ed}')");
         let data = self
@@ -276,7 +288,10 @@ impl AkShareClient {
     }
 
     /// 游资统计
-    pub async fn stock_lhb_traderstatistic(&self, symbol: &str) -> Result<Vec<BillboardTraderStatistic>> {
+    pub async fn stock_lhb_traderstatistic(
+        &self,
+        symbol: &str,
+    ) -> Result<Vec<BillboardTraderStatistic>> {
         let cycle = match symbol {
             "近三月" => "02",
             "近六月" => "03",

@@ -34,17 +34,19 @@ use crate::types::{
 
 // Re-export types from stock modules used by fetch methods
 pub use crate::stock::feature::{
-    AnalystDetail, AnalystRank, BalanceSheet, CashFlowSheet, CommentDesireIndex, CommentFocusIndex,
-    CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj, BlockTradeActiveBranch, DzjyMrtj,
-    BlockTradeBranchRanking, EarningsForecast, EarningsQuickReport, EarningsReport, EsgRating, FundFlowEntry,
-    GdfxHoldingAnalyse, GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork,
-    GdfxTop10, Gdhs, GdhsDetail, Ggcg, GpzyDistributeEntry, GpzyIndustry, GpzyPledgeDetail,
-    GpzyPledgeRatio, GpzyPledgeRatioDetail, GpzyProfile, HotStockXq, IndustryCategory, JgdyDetail,
-    JgdyTj, BillboardDetail, BillboardActiveBranch, BillboardOrgTradeSummary, BillboardOrgSeatTracking, BillboardStockDetail, BillboardStockDetailDate,
-    BillboardStockStatistic, BillboardTraderStatistic, BillboardBranchDetail, BillboardBranchRanking, MainFundFlow, MarginAccountInfo,
-    MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary,
-    PankouChange, ProfitSheet, SectorFundFlowRank, StockComment, ZtPool, ZtPoolDtgc,
-    ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
+    AnalystDetail, AnalystRank, BalanceSheet, BillboardActiveBranch, BillboardBranchDetail,
+    BillboardBranchRanking, BillboardDetail, BillboardOrgSeatTracking, BillboardOrgTradeSummary,
+    BillboardStockDetail, BillboardStockDetailDate, BillboardStockStatistic,
+    BillboardTraderStatistic, BlockTradeActiveBranch, BlockTradeBranchRanking, CashFlowSheet,
+    CommentDesireIndex, CommentFocusIndex, CommentHistScore, CommentOrgParticipation, DividendInfo,
+    DzjyHygtj, DzjyMrtj, EarningsForecast, EarningsQuickReport, EarningsReport, EsgRating,
+    FundFlowEntry, GdfxHoldingAnalyse, GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic,
+    GdfxTeamwork, GdfxTop10, Gdhs, GdhsDetail, Ggcg, GpzyDistributeEntry, GpzyIndustry,
+    GpzyPledgeDetail, GpzyPledgeRatio, GpzyPledgeRatioDetail, GpzyProfile, HotStockXq,
+    IndustryCategory, JgdyDetail, JgdyTj, MainFundFlow, MarginAccountInfo, MarginRatioPa,
+    MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary, PankouChange,
+    ProfitSheet, SectorFundFlowRank, StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious,
+    ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
 };
 
 pub use crate::stock::hk_extra::{
@@ -622,16 +624,22 @@ impl MarketDataClient {
     /// Fetch news items from Bing RSS for the given queries.
     ///
     /// Returns parsed `NewsItem`s. Callers are responsible for deduplication.
-    pub(crate) async fn fetch_bing_rss_news(&self, queries: &[&str], max_queries: usize) -> Vec<NewsItem> {
+    pub(crate) async fn fetch_bing_rss_news(
+        &self,
+        queries: &[&str],
+        max_queries: usize,
+    ) -> Vec<NewsItem> {
         let mut items = Vec::new();
         for query in queries.iter().take(max_queries) {
             let rss_url = format!(
                 "https://cn.bing.com/search?q={}&format=rss",
                 query.replace(' ', "+")
             );
-            if let Ok(Ok(response)) =
-                tokio::time::timeout(std::time::Duration::from_secs(10), self.http.get(&rss_url).send())
-                    .await
+            if let Ok(Ok(response)) = tokio::time::timeout(
+                std::time::Duration::from_secs(10),
+                self.http.get(&rss_url).send(),
+            )
+            .await
                 && let Ok(body) = response.text().await
             {
                 for item_xml in body.split("<item>").skip(1) {

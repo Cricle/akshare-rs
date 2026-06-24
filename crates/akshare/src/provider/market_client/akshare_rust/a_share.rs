@@ -1,16 +1,18 @@
 use super::super::{
-    AnalystDetail, AnalystRank, BalanceSheet, CashFlowSheet, CommentDesireIndex,
-    CommentFocusIndex, CommentHistScore, CommentOrgParticipation, DividendInfo, DzjyHygtj,
-    BlockTradeActiveBranch, DzjyMrtj, BlockTradeBranchRanking, EarningsForecast as AkEarningsForecast, EarningsQuickReport,
+    AnalystDetail, AnalystRank, BalanceSheet, BillboardActiveBranch, BillboardBranchDetail,
+    BillboardBranchRanking, BillboardDetail, BillboardOrgSeatTracking, BillboardOrgTradeSummary,
+    BillboardStockDetail, BillboardStockDetailDate, BillboardStockStatistic,
+    BillboardTraderStatistic, BlockTradeActiveBranch, BlockTradeBranchRanking, CashFlowSheet,
+    CommentDesireIndex, CommentFocusIndex, CommentHistScore, CommentOrgParticipation, DividendInfo,
+    DzjyHygtj, DzjyMrtj, EarningsForecast as AkEarningsForecast, EarningsQuickReport,
     EarningsReport, EsgRating, FundFlowEntry, FundamentalsSnapshot, GdfxHoldingAnalyse,
     GdfxHoldingChange, GdfxHoldingDetail, GdfxHoldingStatistic, GdfxTeamwork, GdfxTop10, Gdhs,
     GdhsDetail, Ggcg, GpzyDistributeEntry, GpzyIndustry, GpzyPledgeDetail, GpzyPledgeRatio,
     GpzyPledgeRatioDetail, GpzyProfile, HotStockXq, IndustryCategory, JgdyDetail, JgdyTj,
-    BillboardDetail, BillboardActiveBranch, BillboardOrgTradeSummary, BillboardOrgSeatTracking, BillboardStockDetail, BillboardStockDetailDate,
-    BillboardStockStatistic, BillboardTraderStatistic, BillboardBranchDetail, BillboardBranchRanking, MainFundFlow, MarginAccountInfo,
-    MarginRatioPa, MarginSseDetail, MarginSseSummary, MarginSzseDetail, MarginSzseSummary,
-    MarketDataClient, NewsItem, PankouChange, ProfitSheet, SectorFundFlowRank,
-    StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong, ZtPoolSubNew, ZtPoolZbgc,
+    MainFundFlow, MarginAccountInfo, MarginRatioPa, MarginSseDetail, MarginSseSummary,
+    MarginSzseDetail, MarginSzseSummary, MarketDataClient, NewsItem, PankouChange, ProfitSheet,
+    SectorFundFlowRank, StockComment, ZtPool, ZtPoolDtgc, ZtPoolPrevious, ZtPoolStrong,
+    ZtPoolSubNew, ZtPoolZbgc,
 };
 use super::super::{CandlesWithProvider, QuoteWithProvider};
 

@@ -218,11 +218,17 @@ impl AkShareClient {
 
             if let Some(data2) = resp2.result.and_then(|r| r.data) {
                 let remaining2 = data2.remainder_days.parse::<i64>().unwrap_or(0);
-                return Ok(SseOptionRemainder { expire_date: data2.expire_day, remain_days: remaining2 });
+                return Ok(SseOptionRemainder {
+                    expire_date: data2.expire_day,
+                    remain_days: remaining2,
+                });
             }
         }
 
-        Ok(SseOptionRemainder { expire_date: data.expire_day, remain_days: remaining })
+        Ok(SseOptionRemainder {
+            expire_date: data.expire_day,
+            remain_days: remaining,
+        })
     }
 
     /// SSE option codes (call or put) from Sina.

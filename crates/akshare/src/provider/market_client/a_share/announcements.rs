@@ -1,11 +1,11 @@
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 
-use crate::types::{AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail};
 use super::super::MarketDataClient;
 use super::super::wire::{
     EastmoneyAnnouncementContentEnvelope, EastmoneyAnnouncementsEnvelope,
     EastmoneyBillboardEntryItem, EastmoneyBillboardSeatItem, EastmoneyDatacenterEnvelope,
 };
+use crate::types::{AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail};
 
 impl MarketDataClient {
     pub(crate) async fn fetch_a_share_announcement_detail(

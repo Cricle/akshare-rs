@@ -90,7 +90,10 @@ impl AkShareClient {
         let products = self.fetch_qh_products().await?;
         Ok(products
             .into_iter()
-            .map(|p| QhProduct { name: p.name, code: String::new() })
+            .map(|p| QhProduct {
+                name: p.name,
+                code: String::new(),
+            })
             .collect())
     }
 

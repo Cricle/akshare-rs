@@ -10,13 +10,13 @@ use tracing::Instrument;
 use super::cache::SingleflightResult;
 use super::{
     AnnouncementDetail, AnnouncementItem, CANDLES_CACHE_TTL_SECS, CANDLES_CACHE_VERSION,
-    CandlePoint, CapitalFlowPoint, DataError, DataErrorKind, FUNDAMENTALS_CACHE_TTL_SECS,
-    FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot, GLOBAL_NEWS_CACHE_VERSION,
-    INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient, MarketKind,
-    NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult, NewsItem,
-    QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, SEARCH_CACHE_TTL_SECS,
-    SEARCH_CACHE_VERSION, SectorConstituent, SectorSnapshot, StockSearchResult, TradeCalendarItem,
-    CandlesWithProvider, QuoteWithProvider,
+    CandlePoint, CandlesWithProvider, CapitalFlowPoint, DataError, DataErrorKind,
+    FUNDAMENTALS_CACHE_TTL_SECS, FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot,
+    GLOBAL_NEWS_CACHE_VERSION, INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient,
+    MarketKind, NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult,
+    NewsItem, QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, QuoteWithProvider,
+    SEARCH_CACHE_TTL_SECS, SEARCH_CACHE_VERSION, SectorConstituent, SectorSnapshot,
+    StockSearchResult, TradeCalendarItem,
 };
 
 use super::{
@@ -100,7 +100,10 @@ impl MarketDataClient {
                     .f64_histogram("market_data_fetch_duration_ms")
                     .build()
                     .record(dur_ms, &attrs);
-                return Ok(QuoteWithProvider { quote: cached, provider: "redis_cache".to_string() });
+                return Ok(QuoteWithProvider {
+                    quote: cached,
+                    provider: "redis_cache".to_string(),
+                });
             }
             // Singleflight: prevent cache stampede when multiple users request the same stock
             let sf = self.singleflight.clone();
@@ -108,7 +111,10 @@ impl MarketDataClient {
                 SingleflightResult::Leader(g) => Some(g),
                 SingleflightResult::Waiting => {
                     if let Some(cached) = self.cache_get_json::<QuoteSnapshot>(&cache_key).await {
-                        return Ok(QuoteWithProvider { quote: cached, provider: "redis_cache".to_string() });
+                        return Ok(QuoteWithProvider {
+                            quote: cached,
+                            provider: "redis_cache".to_string(),
+                        });
                     }
                     None
                 }
@@ -1249,7 +1255,11 @@ impl MarketDataClient {
                 date, indicator, symbol
             ),
             FUNDAMENTALS_CACHE_TTL_SECS,
-            || super::akshare_rust::a_share::fetch_gdfx_holding_detail(self, date, indicator, symbol),
+            || {
+                super::akshare_rust::a_share::fetch_gdfx_holding_detail(
+                    self, date, indicator, symbol,
+                )
+            },
         )
         .await
     }
@@ -1283,7 +1293,10 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<GdfxTeamwork>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-free-team:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:gdfx-free-team:{}",
+                symbol.trim()
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_gdfx_free_teamwork(self, symbol),
         )
@@ -1429,7 +1442,10 @@ impl MarketDataClient {
 
     pub async fn fetch_dividend_detail(&self, symbol: &str) -> anyhow::Result<Vec<DividendInfo>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:dividend-detail:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:dividend-detail:{}",
+                symbol.trim()
+            ),
             FUNDAMENTALS_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_dividend_detail(self, symbol),
         )
@@ -1484,9 +1500,7 @@ impl MarketDataClient {
         .await
     }
 
-    pub async fn fetch_pledge_distribute_bank(
-        &self,
-    ) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
+    pub async fn fetch_pledge_distribute_bank(&self) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-bank"),
             FUNDAMENTALS_CACHE_TTL_SECS,
@@ -1673,7 +1687,10 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<Vec<CommentDesireIndex>> {
         self.cached_fetch(
-            &format!("{MARKET_DATA_CACHE_PREFIX}:comment-desire:{}", symbol.trim()),
+            &format!(
+                "{MARKET_DATA_CACHE_PREFIX}:comment-desire:{}",
+                symbol.trim()
+            ),
             INSIDER_CACHE_TTL_SECS,
             || super::akshare_rust::a_share::fetch_comment_desire_index(self, symbol),
         )
@@ -1841,10 +1858,7 @@ impl MarketDataClient {
         .await
     }
 
-    pub async fn fetch_hk_fhpx_detail(
-        &self,
-        symbol: &str,
-    ) -> anyhow::Result<Vec<HkFhpxDetailThs>> {
+    pub async fn fetch_hk_fhpx_detail(&self, symbol: &str) -> anyhow::Result<Vec<HkFhpxDetailThs>> {
         self.cached_fetch(
             &format!(
                 "{MARKET_DATA_CACHE_PREFIX}:hk-fhpx-detail:{}",
@@ -1924,10 +1938,7 @@ impl MarketDataClient {
     // US Famous Stocks (Eastmoney)
     // -----------------------------------------------------------------------
 
-    pub async fn fetch_us_famous_spot(
-        &self,
-        category: &str,
-    ) -> anyhow::Result<Vec<UsFamousStock>> {
+    pub async fn fetch_us_famous_spot(&self, category: &str) -> anyhow::Result<Vec<UsFamousStock>> {
         self.cached_fetch(
             &format!(
                 "{MARKET_DATA_CACHE_PREFIX}:us-famous-spot:{}",

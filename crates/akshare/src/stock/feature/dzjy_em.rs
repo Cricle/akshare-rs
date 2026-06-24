@@ -1,7 +1,7 @@
 //! Block trade (大宗交易) data from Eastmoney.
 
 use super::helpers::{json_f64, json_i64, json_str};
-use super::types::{DzjyHygtj, BlockTradeActiveBranch, DzjyMrtj, BlockTradeBranchRanking};
+use super::types::{BlockTradeActiveBranch, BlockTradeBranchRanking, DzjyHygtj, DzjyMrtj};
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::util::fmt_date;

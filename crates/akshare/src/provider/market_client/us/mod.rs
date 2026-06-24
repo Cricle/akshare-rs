@@ -129,7 +129,12 @@ impl MarketDataClient {
         symbol: &str,
     ) -> anyhow::Result<QuoteWithProvider> {
         match us_sina::fetch_quote(self, symbol).await {
-            Ok(snapshot) => return Ok(QuoteWithProvider { quote: snapshot, provider: "sina_us_daily".to_string() }),
+            Ok(snapshot) => {
+                return Ok(QuoteWithProvider {
+                    quote: snapshot,
+                    provider: "sina_us_daily".to_string(),
+                });
+            }
             Err(error) => {
                 tracing::info!(
                     symbol = %symbol,
@@ -139,7 +144,12 @@ impl MarketDataClient {
             }
         }
         match self.fetch_us_quote_from_eastmoney(symbol).await {
-            Ok(snapshot) => return Ok(QuoteWithProvider { quote: snapshot, provider: "eastmoney_quote".to_string() }),
+            Ok(snapshot) => {
+                return Ok(QuoteWithProvider {
+                    quote: snapshot,
+                    provider: "eastmoney_quote".to_string(),
+                });
+            }
             Err(error) => {
                 tracing::info!(
                     symbol = %symbol,
@@ -873,7 +883,10 @@ impl MarketDataClient {
             let start = items.len() - limit;
             items = items[start..].to_vec();
         }
-        Ok(CandlesWithProvider { candles: items, provider })
+        Ok(CandlesWithProvider {
+            candles: items,
+            provider,
+        })
     }
 
     pub(crate) async fn fetch_us_quote_from_eastmoney(
