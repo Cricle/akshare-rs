@@ -8,7 +8,7 @@
 - **Async/await** — built on tokio for high-performance concurrent requests
 - **Type-safe** — strong typing with serde for all API responses
 - **Mock-friendly** — built-in mock server support for testing
-- **1407 functions** — covers 100% of akshare's public API
+- **1400+ functions** — covers 100% of akshare's public API
 
 ## Quick Start
 
@@ -74,6 +74,7 @@ async fn main() -> Result<(), akshare::Error> {
 - **bank** — Banking data (1 function)
 - **cal** — Calendar, volatility calculations (2 functions)
 - **tool** — Trade calendar, utilities (2 functions)
+- **ta** — Technical analysis indicators (SMA, EMA, RSI, MACD, etc.) (17 functions)
 - **provider** — Data provider abstractions (13 functions)
 
 ## Testing

@@ -85,7 +85,7 @@
 //! | [`news`] | Financial news from multiple sources | 6 |
 //! | [`bank`] | Banking regulatory data | 1 |
 //! | [`cal`] | Calendar, volatility calculations | 2 |
-//! | [`ta`] | Technical analysis indicators (SMA, EMA, RSI, MACD, etc.) | 20 |
+//! | [`ta`] | Technical analysis indicators (SMA, EMA, RSI, MACD, etc.) | 17 |
 //! | [`tool`] | Trade calendar, utilities | 2 |
 //! | [`provider`] | Data provider abstractions | 12 |
 //!
