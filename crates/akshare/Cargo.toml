@@ -13,6 +13,45 @@ keywords = ["akshare", "finance", "stock", "china", "market-data"]
 categories = ["api-bindings", "finance"]
 exclude = ["/tests", "/.github", "/.gitignore"]
 
+[features]
+# --- Fine-grained module features ---
+mod-stock = []
+mod-index = []
+mod-futures = []
+mod-option = []
+mod-fund = []
+mod-bond = []
+mod-reits = []
+mod-macro_data = []
+mod-economy = []
+mod-forex = []
+mod-crypto = []
+mod-commodity = []
+mod-spot = []
+mod-news = []
+mod-bank = []
+mod-cal = []
+mod-ta = []
+mod-tool = []
+
+# --- Category features (aggregated) ---
+equity = ["mod-stock", "mod-index"]
+derivatives = ["mod-futures", "mod-option"]
+funds = ["mod-fund", "mod-bond", "mod-reits"]
+macro = ["mod-macro_data", "mod-economy"]
+fx-commodity = ["mod-forex", "mod-crypto", "mod-commodity", "mod-spot"]
+misc = ["mod-news", "mod-bank", "mod-cal", "mod-ta", "mod-tool"]
+
+# --- Market client (existing, unchanged) ---
+market-client = [
+    "dep:reqwest-middleware", "dep:reqwest-tracing", "dep:opentelemetry",
+    "dep:tracing", "dep:futures", "dep:anyhow",
+]
+
+# --- Aggregation ---
+all = ["equity", "derivatives", "funds", "macro", "fx-commodity", "misc", "market-client"]
+default = ["all"]
+
 [dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
@@ -20,6 +59,17 @@ serde_json = "1"
 chrono = "0.4"
 regex = "1"
 tokio = { version = "1", features = ["time"] }
+sha2 = "0.10"
+calamine = "0.26"
+rust_decimal = { version = "1", features = ["serde-with-str"] }
+
+# Optional deps for market-client feature
+reqwest-middleware = { version = "0.4", features = ["json"], optional = true }
+reqwest-tracing = { version = "0.5", features = ["opentelemetry_0_28"], optional = true }
+tracing = { version = "0.1", optional = true }
+futures = { version = "0.3", optional = true }
+anyhow = { version = "1", optional = true }
+opentelemetry = { version = "0.28", optional = true }
 
 [dev-dependencies]
 wiremock = "0.6"
