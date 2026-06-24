@@ -46,6 +46,7 @@ misc = ["mod-news", "mod-bank", "mod-cal", "mod-ta", "mod-tool"]
 market-client = [
     "dep:reqwest-middleware", "dep:reqwest-tracing", "dep:opentelemetry",
     "dep:tracing", "dep:futures", "dep:anyhow",
+    "tokio/macros",
 ]
 
 # --- Aggregation ---
@@ -105,7 +106,7 @@ required-features = ["mod-index"]
 # Derivatives tests
 [[test]]
 name = "futures"
-required-features = ["mod-futures"]
+required-features = ["mod-futures", "mod-tool"]
 
 [[test]]
 name = "mock_futures"
@@ -135,7 +136,7 @@ required-features = ["mod-fund"]
 # Macro & Economy tests
 [[test]]
 name = "macro_data"
-required-features = ["mod-macro_data"]
+required-features = ["mod-macro_data", "mod-bond"]
 
 [[test]]
 name = "mock_economy"
