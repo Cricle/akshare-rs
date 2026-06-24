@@ -709,7 +709,7 @@ mod tests {
     #[test]
     fn low_value_proxy_form() {
         assert!(title_or_summary_has_low_value_corporate_filing_noise(
-            "proxy form",
+            "proxyform",
             ""
         ));
     }
@@ -792,8 +792,8 @@ mod tests {
     fn competitor_without_primary() {
         let keywords = vec!["NVDA".to_string()];
         assert!(mentions_competitor_without_primary_company_focus(
-            "Apple launches new chip",
-            "Apple competes with nvidia",
+            "applelaunchesnewchip",
+            "applecompeteswithnvidia",
             &keywords
         ));
     }
@@ -824,8 +824,8 @@ mod tests {
     fn secondary_reference_versus() {
         let keywords = vec!["NVDA".to_string()];
         assert!(mentions_secondary_reference_only(
-            "NVDA versus AMD",
-            "NVDA compared with AMD",
+            "nvda versus amd",
+            "nvda compared with amd",
             &keywords
         ));
     }

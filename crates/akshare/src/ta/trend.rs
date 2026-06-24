@@ -10,7 +10,10 @@ pub fn macd<T: Ohlcv>(candles: &[T]) -> Option<MacdValues> {
     }
     let ema12_series = moving_average::ema_series(candles, 12)?;
     let ema26_series = moving_average::ema_series(candles, 26)?;
-    let macd_series: Vec<f64> = ema12_series
+    // Align by candle index: EMA12 has (len-12) values, EMA26 has (len-26) values.
+    // The last N values of each series correspond to the same candle indices.
+    let offset = ema12_series.len() - ema26_series.len();
+    let macd_series: Vec<f64> = ema12_series[offset..]
         .iter()
         .zip(ema26_series.iter())
         .map(|(fast, slow)| fast - slow)
