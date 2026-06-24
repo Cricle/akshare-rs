@@ -15,6 +15,40 @@ pub enum MarketKind {
     UsEquity,
 }
 
+/// Eastmoney adjust type (前复权/后复权/不复权).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum AdjustType {
+    /// No adjustment (不复权)
+    None,
+    /// Forward adjustment (前复权)
+    Forward,
+    /// Backward adjustment (后复权)
+    Backward,
+}
+
+impl AdjustType {
+    /// Convert to Eastmoney API parameter value.
+    pub fn to_eastmoney_str(self) -> &'static str {
+        match self {
+            Self::None => "0",
+            Self::Forward => "1",
+            Self::Backward => "2",
+        }
+    }
+
+    /// Parse from user-facing string ("", "qfq", "hfq").
+    pub fn from_adjust_str(s: &str) -> crate::Result<Self> {
+        match s {
+            "" => Ok(Self::None),
+            "qfq" => Ok(Self::Forward),
+            "hfq" => Ok(Self::Backward),
+            _ => Err(crate::Error::invalid_input(format!(
+                "invalid adjust: {s}"
+            ))),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QuoteSnapshot {
     pub symbol: String,
