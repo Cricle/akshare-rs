@@ -103,6 +103,10 @@ required-features = ["mod-stock", "mod-news"]
 name = "index"
 required-features = ["mod-index"]
 
+[[test]]
+name = "mock_index"
+required-features = ["mod-index"]
+
 # Derivatives tests
 [[test]]
 name = "futures"
@@ -130,7 +134,15 @@ name = "bond"
 required-features = ["mod-bond"]
 
 [[test]]
+name = "mock_bond"
+required-features = ["mod-bond"]
+
+[[test]]
 name = "fund"
+required-features = ["mod-fund"]
+
+[[test]]
+name = "mock_fund"
 required-features = ["mod-fund"]
 
 # Macro & Economy tests
