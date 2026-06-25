@@ -96,18 +96,20 @@ impl AkShareClient {
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
             .get(url)
-            .query(&[
-                ("reportName", "RPT_PCF10_INDUSTRY_DUPONT"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", ""),
-                ("pageSize", ""),
-                ("sortTypes", "1"),
-                ("sortColumns", "PAIMING"),
-                ("source", "HSF10"),
-                ("client", "PC"),
-            ])
+            .query({
+                let mut p = vec![
+                    ("reportName", "RPT_PCF10_INDUSTRY_DUPONT"),
+                    ("columns", "ALL"),
+                    ("quoteColumns", ""),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", ""),
+                    ("pageSize", ""),
+                    ("sortTypes", "1"),
+                    ("sortColumns", "PAIMING"),
+                ];
+                p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
+                p
+            }.as_slice())
             .send()
             .await
             .map_err(Error::from)?
@@ -133,18 +135,20 @@ impl AkShareClient {
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
             .get(url)
-            .query(&[
-                ("reportName", "RPT_PCF10_INDUSTRY_SCALE"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", ""),
-                ("pageSize", ""),
-                ("sortTypes", "1"),
-                ("sortColumns", "PAIMING"),
-                ("source", "HSF10"),
-                ("client", "PC"),
-            ])
+            .query({
+                let mut p = vec![
+                    ("reportName", "RPT_PCF10_INDUSTRY_SCALE"),
+                    ("columns", "ALL"),
+                    ("quoteColumns", ""),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", ""),
+                    ("pageSize", ""),
+                    ("sortTypes", "1"),
+                    ("sortColumns", "PAIMING"),
+                ];
+                p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
+                p
+            }.as_slice())
             .send()
             .await
             .map_err(Error::from)?

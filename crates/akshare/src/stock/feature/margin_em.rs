@@ -105,9 +105,8 @@ impl AkShareClient {
                 ("pageHelp.endPage", "21"),
             ])
             .header("Referer", "https://www.sse.com.cn/")
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+        let resp = crate::util::send_and_check(resp).await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("result")
@@ -151,9 +150,8 @@ impl AkShareClient {
                 ("TABKEY", "tab2"),
             ])
             .header("Referer", "https://www.szse.cn/disclosure/margin/margin/index.html")
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+        let resp = crate::util::send_and_check(resp).await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .as_array()
@@ -274,9 +272,8 @@ impl AkShareClient {
                 ("pageHelp.endPage", "5"),
             ])
             .header("Referer", "https://www.sse.com.cn/")
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+        let resp = crate::util::send_and_check(resp).await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("result")
@@ -316,9 +313,8 @@ impl AkShareClient {
                 ("random", "0.7425245522795993"),
             ])
             .header("Referer", "https://www.szse.cn/disclosure/margin/object/index.html")
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+        let resp = crate::util::send_and_check(resp).await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .as_array()
@@ -376,9 +372,8 @@ impl AkShareClient {
                 ("TABKEY", "tab1"),
             ])
             .header("Referer", "https://www.szse.cn/disclosure/margin/object/index.html")
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36")
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+        let resp = crate::util::send_and_check(resp).await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .as_array()

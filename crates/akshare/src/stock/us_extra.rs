@@ -293,25 +293,15 @@ impl AkShareClient {
             diff: Option<Vec<serde_json::Value>>,
         }
         // Use Eastmoney US spot API as a more reliable alternative
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "5000"),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", "f3"),
-                ("fs", "m:105,m:106,m:107"),
-                ("fields", "f2,f3,f4,f5,f6,f12,f14"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("5000", &[
+                    ("fid", "f3"),
+                    ("fs", "m:105,m:106,m:107"),
+                    ("fields", "f2,f3,f4,f5,f6,f12,f14"),
+                ])),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -379,25 +369,22 @@ impl AkShareClient {
 
         let fs = format!("b:MK{code}");
 
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "5000"),
-                ("po", "1"),
-                ("np", "2"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", "f3"),
-                ("fs", fs.as_str()),
-                ("fields", "f2,f3,f4,f5,f6,f9,f12,f14,f15,f16,f17,f18,f20"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&[
+                    ("pn", "1"),
+                    ("pz", "5000"),
+                    ("po", "1"),
+                    ("np", "2"),
+                    ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    ("fid", "f3"),
+                    ("fs", fs.as_str()),
+                    ("fields", "f2,f3,f4,f5,f6,f9,f12,f14,f15,f16,f17,f18,f20"),
+                ]),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -470,25 +457,22 @@ impl AkShareClient {
         struct EnvData {
             diff: Option<Vec<serde_json::Value>>,
         }
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "5000"),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "1"),
-                ("invt", "1"),
-                ("fid", "f3"),
-                ("fs", "m:153"),
-                ("fields", "f2,f3,f4,f5,f6,f9,f12,f14,f15,f16,f17,f18,f20"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&[
+                    ("pn", "1"),
+                    ("pz", "5000"),
+                    ("po", "1"),
+                    ("np", "1"),
+                    ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
+                    ("fltt", "1"),
+                    ("invt", "1"),
+                    ("fid", "f3"),
+                    ("fs", "m:153"),
+                    ("fields", "f2,f3,f4,f5,f6,f9,f12,f14,f15,f16,f17,f18,f20"),
+                ]),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -539,29 +523,26 @@ impl AkShareClient {
         period: &str,
     ) -> Result<Vec<UsValuationBaidu>> {
         let url = "https://gushitong.baidu.com/opendata";
-        let response = self
-            .get(url)
-            .query(&[
-                ("openapi", "1"),
-                ("dspName", "iphone"),
-                ("tn", "tangram"),
-                ("client", "app"),
-                ("query", indicator),
-                ("code", symbol),
-                ("word", ""),
-                ("resource_id", "51171"),
-                ("market", "us"),
-                ("tag", indicator),
-                ("chart_select", period),
-                ("industry_select", ""),
-                ("skip_industry", "1"),
-                ("finClientType", "pc"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
+                    ("openapi", "1"),
+                    ("dspName", "iphone"),
+                    ("tn", "tangram"),
+                    ("client", "app"),
+                    ("query", indicator),
+                    ("code", symbol),
+                    ("word", ""),
+                    ("resource_id", "51171"),
+                    ("market", "us"),
+                    ("tag", indicator),
+                    ("chart_select", period),
+                    ("industry_select", ""),
+                    ("skip_industry", "1"),
+                    ("finClientType", "pc"),
+                ]),
+        )
+        .await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
 
@@ -623,14 +604,10 @@ impl AkShareClient {
             "pageSize": 100,
         });
 
-        let response = self
-            .post(url)
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post(url).json(&payload),
+        )
+        .await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let rank_data = env
@@ -670,14 +647,10 @@ impl AkShareClient {
             "srcSecurityCode": format!("US|{}", symbol),
         });
 
-        let response = self
-            .post(url)
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post(url).json(&payload),
+        )
+        .await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
         let obj = data
@@ -722,14 +695,10 @@ impl AkShareClient {
             "srcSecurityCode": format!("US|{}", symbol),
         });
 
-        let response = self
-            .post(url)
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post(url).json(&payload),
+        )
+        .await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -775,14 +744,10 @@ impl AkShareClient {
             "srcSecurityCode": format!("US|{}", symbol),
         });
 
-        let response = self
-            .post(url)
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post(url).json(&payload),
+        )
+        .await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -820,25 +785,15 @@ impl AkShareClient {
         struct EnvData {
             diff: Option<Vec<serde_json::Value>>,
         }
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "5000"),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", "f3"),
-                ("fs", "i:100.NDX,i:100.DJIA,i:100.SPX"),
-                ("fields", "f1,f2,f3,f4,f5,f6,f7,f8,f12,f13,f14"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("5000", &[
+                    ("fid", "f3"),
+                    ("fs", "i:100.NDX,i:100.DJIA,i:100.SPX"),
+                    ("fields", "f1,f2,f3,f4,f5,f6,f7,f8,f12,f13,f14"),
+                ])),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -1046,18 +1001,20 @@ impl AkShareClient {
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
             .get(url)
-            .query(&[
-                ("reportName", "RPT_USF10_FN_GMAININDICATOR"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "REPORT_DATE"),
-                ("source", "F10"),
-                ("client", "PC"),
-            ])
+            .query({
+                let mut p = vec![
+                    ("reportName", "RPT_USF10_FN_GMAININDICATOR"),
+                    ("columns", "ALL"),
+                    ("quoteColumns", ""),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", "1"),
+                    ("pageSize", ""),
+                    ("sortTypes", "-1"),
+                    ("sortColumns", "REPORT_DATE"),
+                ];
+                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                p
+            }.as_slice())
             .send()
             .await
             .map_err(Error::from)?
@@ -1093,18 +1050,20 @@ impl AkShareClient {
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
             .get(url)
-            .query(&[
-                ("reportName", "RPT_USF10_FN_DIVIDEND"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "EX_DIVIDEND_DATE"),
-                ("source", "F10"),
-                ("client", "PC"),
-            ])
+            .query({
+                let mut p = vec![
+                    ("reportName", "RPT_USF10_FN_DIVIDEND"),
+                    ("columns", "ALL"),
+                    ("quoteColumns", ""),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", "1"),
+                    ("pageSize", ""),
+                    ("sortTypes", "-1"),
+                    ("sortColumns", "EX_DIVIDEND_DATE"),
+                ];
+                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                p
+            }.as_slice())
             .send()
             .await
             .map_err(Error::from)?
@@ -1182,18 +1141,20 @@ impl AkShareClient {
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
             .get(url)
-            .query(&[
-                ("reportName", "RPT_PCF10_INDUSTRY_USSCALE"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", ""),
-                ("pageSize", ""),
-                ("sortTypes", "1"),
-                ("sortColumns", "PAIMING"),
-                ("source", "F10"),
-                ("client", "PC"),
-            ])
+            .query({
+                let mut p = vec![
+                    ("reportName", "RPT_PCF10_INDUSTRY_USSCALE"),
+                    ("columns", "ALL"),
+                    ("quoteColumns", ""),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", ""),
+                    ("pageSize", ""),
+                    ("sortTypes", "1"),
+                    ("sortColumns", "PAIMING"),
+                ];
+                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                p
+            }.as_slice())
             .send()
             .await
             .map_err(Error::from)?
@@ -1233,18 +1194,20 @@ impl AkShareClient {
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = self
             .get(url)
-            .query(&[
-                ("reportName", "RPT_USF10_HOT_KEYWORD"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "TRADE_DATE"),
-                ("source", "F10"),
-                ("client", "PC"),
-            ])
+            .query({
+                let mut p = vec![
+                    ("reportName", "RPT_USF10_HOT_KEYWORD"),
+                    ("columns", "ALL"),
+                    ("quoteColumns", ""),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", "1"),
+                    ("pageSize", ""),
+                    ("sortTypes", "-1"),
+                    ("sortColumns", "TRADE_DATE"),
+                ];
+                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                p
+            }.as_slice())
             .send()
             .await
             .map_err(Error::from)?

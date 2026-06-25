@@ -235,25 +235,15 @@ impl AkShareClient {
             _ => symbol,
         };
 
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "100"),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", "f62"),
-                ("fs", fs),
-                ("fields", "f2,f3,f4,f5,f6,f8,f12,f14,f62,f184"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("100", &[
+                    ("fid", "f62"),
+                    ("fs", fs),
+                    ("fields", "f2,f3,f4,f5,f6,f8,f12,f14,f62,f184"),
+                ])),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -315,25 +305,15 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "5000"),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", "f12"),
-                ("fs", fs),
-                ("fields", "f12,f14"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("5000", &[
+                    ("fid", "f12"),
+                    ("fs", fs),
+                    ("fields", "f12,f14"),
+                ])),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -363,24 +343,21 @@ impl AkShareClient {
         beg: &str,
         end: &str,
     ) -> Result<Vec<BoardHistPoint>> {
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-            .query(&[
-                ("secid", secid),
-                ("fields1", "f1,f2,f3,f4,f5,f6"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                ("klt", klt),
-                ("fqt", fqt),
-                ("beg", beg),
-                ("end", end),
-                ("smplmt", "10000"),
-                ("lmt", "1000000"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+                .query(&[
+                    ("secid", secid),
+                    ("fields1", "f1,f2,f3,f4,f5,f6"),
+                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
+                    ("klt", klt),
+                    ("fqt", fqt),
+                    ("beg", beg),
+                    ("end", end),
+                    ("smplmt", "10000"),
+                    ("lmt", "1000000"),
+                ]),
+        )
+        .await?;
 
         let payload: KlineResp = response.json().await.map_err(Error::from)?;
         let klines = payload
@@ -425,20 +402,17 @@ impl AkShareClient {
     ) -> Result<Vec<BoardMinutePoint>> {
         if period == "1" {
             // 1-minute uses trends endpoint
-            let response = self
-                .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
-                .query(&[
-                    ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
-                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
-                    ("iscr", "0"),
-                    ("ndays", "1"),
-                    ("secid", secid),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+            let response = crate::util::send_and_check(
+                self.get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
+                    .query(&[
+                        ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
+                        ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
+                        ("iscr", "0"),
+                        ("ndays", "1"),
+                        ("secid", secid),
+                    ]),
+            )
+            .await?;
 
             let payload: TrendsEnvelope = response.json().await.map_err(Error::from)?;
             let trends = payload
@@ -471,22 +445,19 @@ impl AkShareClient {
             Ok(items)
         } else {
             // 5/15/30/60-minute uses kline endpoint
-            let response = self
-                .get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
-                .query(&[
-                    ("secid", secid),
-                    ("fields1", "f1,f2,f3,f4,f5,f6"),
-                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
-                    ("klt", period),
-                    ("fqt", "1"),
-                    ("end", "20500101"),
-                    ("lmt", "1000000"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+            let response = crate::util::send_and_check(
+                self.get("https://push2his.eastmoney.com/api/qt/stock/kline/get")
+                    .query(&[
+                        ("secid", secid),
+                        ("fields1", "f1,f2,f3,f4,f5,f6"),
+                        ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"),
+                        ("klt", period),
+                        ("fqt", "1"),
+                        ("end", "20500101"),
+                        ("lmt", "1000000"),
+                    ]),
+            )
+            .await?;
 
             let payload: KlineResp = response.json().await.map_err(Error::from)?;
             let klines = payload
@@ -540,20 +511,17 @@ impl AkShareClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/stock/get")
-            .query(&[
-                ("fields", fields.as_str()),
-                ("mpi", "1000"),
-                ("invt", "2"),
-                ("fltt", "1"),
-                ("secid", secid),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/stock/get")
+                .query(&[
+                    ("fields", fields.as_str()),
+                    ("mpi", "1000"),
+                    ("invt", "2"),
+                    ("fltt", "1"),
+                    ("secid", secid),
+                ]),
+        )
+        .await?;
 
         let payload: StockGetEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload

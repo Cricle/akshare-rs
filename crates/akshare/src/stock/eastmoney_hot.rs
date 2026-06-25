@@ -169,14 +169,11 @@ impl AkShareClient {
             "pageSize": limit,
         });
 
-        let rank_response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getAllCurrentList")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let rank_response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getAllCurrentList")
+                .json(&payload),
+        )
+        .await?;
 
         let rank_data: RankListEnvelope = rank_response.json().await.map_err(Error::from)?;
         let rank_items = rank_data.data.unwrap_or_default();
@@ -202,20 +199,17 @@ impl AkShareClient {
         let secids_str = format!("{},?v=08926209912590994", secids.join(","));
 
         // Step 3: Get quotes
-        let ulist_response = self
-            .get("https://push2.eastmoney.com/api/qt/ulist.np/get")
-            .query(&[
-                ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fields", "f14,f3,f12,f2"),
-                ("secids", secids_str.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let ulist_response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/ulist.np/get")
+                .query(&[
+                    ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    ("fields", "f14,f3,f12,f2"),
+                    ("secids", secids_str.as_str()),
+                ]),
+        )
+        .await?;
 
         let ulist_data: UlistEnvelope = ulist_response.json().await.map_err(Error::from)?;
         let quotes = ulist_data.data.and_then(|d| d.diff).unwrap_or_default();
@@ -265,26 +259,20 @@ impl AkShareClient {
             "yearType": "5",
         });
 
-        let rank_response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getHisList")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let rank_response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getHisList")
+                .json(&payload),
+        )
+        .await?;
 
         let rank_data: RankListEnvelope = rank_response.json().await.map_err(Error::from)?;
 
         // Step 2: Get fan profile
-        let profile_response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getHisProfileList")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let profile_response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getHisProfileList")
+                .json(&payload),
+        )
+        .await?;
 
         let profile_data: ProfileEnvelope = profile_response.json().await.map_err(Error::from)?;
 
@@ -334,14 +322,11 @@ impl AkShareClient {
             "srcSecurityCode": symbol,
         });
 
-        let response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getCurrentList")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getCurrentList")
+                .json(&payload),
+        )
+        .await?;
 
         let data: RealtimeEnvelope = response.json().await.map_err(Error::from)?;
 
@@ -368,14 +353,11 @@ impl AkShareClient {
             "srcSecurityCode": symbol,
         });
 
-        let response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getHotStockRankList")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getHotStockRankList")
+                .json(&payload),
+        )
+        .await?;
 
         let data: KeywordEnvelope = response.json().await.map_err(Error::from)?;
 
@@ -406,14 +388,11 @@ impl AkShareClient {
             "pageSize": limit,
         });
 
-        let rank_response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getAllHisRcList")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let rank_response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getAllHisRcList")
+                .json(&payload),
+        )
+        .await?;
 
         let rank_data: RankListEnvelope = rank_response.json().await.map_err(Error::from)?;
         let rank_items = rank_data.data.unwrap_or_default();
@@ -439,20 +418,17 @@ impl AkShareClient {
         let secids_str = format!("{},?v=08926209912590994", secids.join(","));
 
         // Step 3: Get quotes
-        let ulist_response = self
-            .get("https://push2.eastmoney.com/api/qt/ulist.np/get")
-            .query(&[
-                ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fields", "f14,f3,f12,f2"),
-                ("secids", secids_str.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let ulist_response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/ulist.np/get")
+                .query(&[
+                    ("ut", "f057cbcbce2a86e2866ab8877db1d059"),
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    ("fields", "f14,f3,f12,f2"),
+                    ("secids", secids_str.as_str()),
+                ]),
+        )
+        .await?;
 
         let ulist_data: UlistEnvelope = ulist_response.json().await.map_err(Error::from)?;
         let quotes = ulist_data.data.and_then(|d| d.diff).unwrap_or_default();
@@ -495,14 +471,11 @@ impl AkShareClient {
             "globalId": "786e4c21-70dc-435a-93bb-38",
             "srcSecurityCode": symbol,
         });
-        let response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getCurrentLatest")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getCurrentLatest")
+                .json(&payload),
+        )
+        .await?;
         let data: TrendEnvelope = response.json().await.map_err(Error::from)?;
         Ok(data
             .data
@@ -526,14 +499,11 @@ impl AkShareClient {
             "pageNo": 1,
             "pageSize": 10,
         });
-        let response = self
-            .post("https://emappdata.eastmoney.com/stockrank/getFollowStockRankList")
-            .json(&payload)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.post("https://emappdata.eastmoney.com/stockrank/getFollowStockRankList")
+                .json(&payload),
+        )
+        .await?;
         let data: RankListEnvelope = response.json().await.map_err(Error::from)?;
         Ok(data
             .data
@@ -559,13 +529,7 @@ impl AkShareClient {
         let url = format!(
             "https://finance.pae.baidu.com/selfselect/listsugrecomm?srcid=5353&all=1&pointType=string&group=quotation_index&code={symbol}&market_type=ab&newFormat=1&finClientType=pc"
         );
-        let response = self
-            .get(&url)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
         let items = data
             .get("result")

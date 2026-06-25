@@ -247,27 +247,24 @@ impl AkShareClient {
     /// Python equivalent: `stock_dzjy_sctj()`
     pub async fn stock_dzjy_sctj(&self, limit: usize) -> Result<Vec<BlockTradeStat>> {
         let page_size = limit.to_string();
-        let response = self
-            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
-            .query(&[
-                ("sortColumns", "TRADE_DATE"),
-                ("sortTypes", "-1"),
-                ("pageSize", page_size.as_str()),
-                ("pageNumber", "1"),
-                ("reportName", "PRT_BLOCKTRADE_MARKET_STA"),
-                (
-                    "columns",
-                    "TRADE_DATE,SZ_INDEX,SZ_CHANGE_RATE,BLOCKTRADE_DEAL_AMT,PREMIUM_DEAL_AMT,\
-                     PREMIUM_RATIO,DISCOUNT_DEAL_AMT,DISCOUNT_RATIO",
-                ),
-                ("source", "WEB"),
-                ("client", "WEB"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .query(&[
+                    ("sortColumns", "TRADE_DATE"),
+                    ("sortTypes", "-1"),
+                    ("pageSize", page_size.as_str()),
+                    ("pageNumber", "1"),
+                    ("reportName", "PRT_BLOCKTRADE_MARKET_STA"),
+                    (
+                        "columns",
+                        "TRADE_DATE,SZ_INDEX,SZ_CHANGE_RATE,BLOCKTRADE_DEAL_AMT,PREMIUM_DEAL_AMT,\
+                         PREMIUM_RATIO,DISCOUNT_DEAL_AMT,DISCOUNT_RATIO",
+                    ),
+                    ("source", "WEB"),
+                    ("client", "WEB"),
+                ]),
+        )
+        .await?;
 
         let payload: DatacenterEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -332,28 +329,25 @@ impl AkShareClient {
             format!("(MARKET_TYPE=\"{asset_code}\")(TRADE_DATE>='{sd}')(TRADE_DATE<='{ed}')");
         let page_size = limit.min(5000).to_string();
 
-        let response = self
-            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
-            .query(&[
-                ("sortColumns", "SECURITY_CODE"),
-                ("sortTypes", "1"),
-                ("pageSize", page_size.as_str()),
-                ("pageNumber", "1"),
-                ("reportName", "RPT_DATA_BLOCKTRADE"),
-                (
-                    "columns",
-                    "TRADE_DATE,SECURITY_CODE,SECURITY_NAME_ABBR,CHANGE_RATE,CLOSE_PRICE,\
-                     DEAL_PRICE,DEAL_VOLUME,DEAL_AMT,PREMIUM_RATIO,BUYER_NAME,SELLER_NAME",
-                ),
-                ("filter", filter.as_str()),
-                ("source", "WEB"),
-                ("client", "WEB"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .query(&[
+                    ("sortColumns", "SECURITY_CODE"),
+                    ("sortTypes", "1"),
+                    ("pageSize", page_size.as_str()),
+                    ("pageNumber", "1"),
+                    ("reportName", "RPT_DATA_BLOCKTRADE"),
+                    (
+                        "columns",
+                        "TRADE_DATE,SECURITY_CODE,SECURITY_NAME_ABBR,CHANGE_RATE,CLOSE_PRICE,\
+                         DEAL_PRICE,DEAL_VOLUME,DEAL_AMT,PREMIUM_RATIO,BUYER_NAME,SELLER_NAME",
+                    ),
+                    ("filter", filter.as_str()),
+                    ("source", "WEB"),
+                    ("client", "WEB"),
+                ]),
+        )
+        .await?;
 
         let payload: DatacenterEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -403,22 +397,19 @@ impl AkShareClient {
     /// Python equivalent: `stock_repurchase()`
     pub async fn stock_repurchase(&self, limit: usize) -> Result<Vec<RepurchaseEntry>> {
         let page_size = limit.min(500).to_string();
-        let response = self
-            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
-            .query(&[
-                ("sortColumns", "UPD,DIM_DATE,DIM_SCODE"),
-                ("sortTypes", "-1,-1,-1"),
-                ("pageSize", page_size.as_str()),
-                ("pageNumber", "1"),
-                ("reportName", "RPTA_WEB_GETHGLIST_NEW"),
-                ("columns", "ALL"),
-                ("source", "WEB"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .query(&[
+                    ("sortColumns", "UPD,DIM_DATE,DIM_SCODE"),
+                    ("sortTypes", "-1,-1,-1"),
+                    ("pageSize", page_size.as_str()),
+                    ("pageNumber", "1"),
+                    ("reportName", "RPTA_WEB_GETHGLIST_NEW"),
+                    ("columns", "ALL"),
+                    ("source", "WEB"),
+                ]),
+        )
+        .await?;
 
         let payload: DatacenterEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -469,27 +460,24 @@ impl AkShareClient {
     pub async fn stock_gsrl_gsdt(&self, date: &str) -> Result<Vec<CompanyEvent>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let filter = format!("(TRADE_DATE='{date_fmt}')");
-        let response = self
-            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
-            .query(&[
-                ("sortColumns", "SECURITY_CODE"),
-                ("sortTypes", "1"),
-                ("pageSize", "5000"),
-                ("pageNumber", "1"),
-                (
-                    "columns",
-                    "SECURITY_CODE,SECUCODE,SECURITY_NAME_ABBR,EVENT_TYPE,EVENT_CONTENT,TRADE_DATE",
-                ),
-                ("source", "WEB"),
-                ("client", "WEB"),
-                ("reportName", "RPT_ORGOP_ALL"),
-                ("filter", filter.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .query(&[
+                    ("sortColumns", "SECURITY_CODE"),
+                    ("sortTypes", "1"),
+                    ("pageSize", "5000"),
+                    ("pageNumber", "1"),
+                    (
+                        "columns",
+                        "SECURITY_CODE,SECUCODE,SECURITY_NAME_ABBR,EVENT_TYPE,EVENT_CONTENT,TRADE_DATE",
+                    ),
+                    ("source", "WEB"),
+                    ("client", "WEB"),
+                    ("reportName", "RPT_ORGOP_ALL"),
+                    ("filter", filter.as_str()),
+                ]),
+        )
+        .await?;
 
         let payload: DatacenterEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -554,24 +542,21 @@ impl AkShareClient {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let page_size = limit.min(500).to_string();
 
-        let response = self
-            .get("http://data.eastmoney.com/dataapi/zlsj/list")
-            .query(&[
-                ("date", date_fmt.as_str()),
-                ("type", type_code),
-                ("zjc", "0"),
-                ("sortField", "HOULD_NUM"),
-                ("sortDirec", "1"),
-                ("pageNum", "1"),
-                ("pageSize", page_size.as_str()),
-                ("p", "1"),
-                ("pageNo", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("http://data.eastmoney.com/dataapi/zlsj/list")
+                .query(&[
+                    ("date", date_fmt.as_str()),
+                    ("type", type_code),
+                    ("zjc", "0"),
+                    ("sortField", "HOULD_NUM"),
+                    ("sortDirec", "1"),
+                    ("pageNum", "1"),
+                    ("pageSize", page_size.as_str()),
+                    ("p", "1"),
+                    ("pageNo", "1"),
+                ]),
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -615,20 +600,17 @@ impl AkShareClient {
     /// Python equivalent: `stock_sse_summary(date)`
     pub async fn stock_sse_summary(&self, date: &str) -> Result<Vec<MarketSummary>> {
         let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
-        let response = self
-            .get("https://query.sse.com.cn/commonQuery.do")
-            .query(&[
-                ("isPagination", "false"),
-                ("sqlId", "COMMON_SSE_XXPL_LSSJL_S"),
-                ("STAT_DATE", date_fmt.as_str()),
-            ])
-            .header("Referer", "https://www.sse.com.cn/")
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://query.sse.com.cn/commonQuery.do")
+                .query(&[
+                    ("isPagination", "false"),
+                    ("sqlId", "COMMON_SSE_XXPL_LSSJL_S"),
+                    ("STAT_DATE", date_fmt.as_str()),
+                ])
+                .header("Referer", "https://www.sse.com.cn/")
+                .header("User-Agent", "Mozilla/5.0"),
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -747,25 +729,24 @@ impl AkShareClient {
         };
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query(&[
-                ("reportName", "RPT_F10_FN_MAINFINADATA"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "REPORT_DATE"),
-                ("source", "HSF10"),
-                ("client", "PC"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
+                    let mut p = vec![
+                        ("reportName", "RPT_F10_FN_MAINFINADATA"),
+                        ("columns", "ALL"),
+                        ("quoteColumns", ""),
+                        ("filter", filter.as_str()),
+                        ("pageNumber", "1"),
+                        ("pageSize", ""),
+                        ("sortTypes", "-1"),
+                        ("sortColumns", "REPORT_DATE"),
+                    ];
+                    p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
+                    p
+                }.as_slice()),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -803,25 +784,24 @@ impl AkShareClient {
         };
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query(&[
-                ("reportName", "RPT_F10_EH_DIVIDEND"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "EX_DIVIDEND_DATE"),
-                ("source", "HSF10"),
-                ("client", "PC"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
+                    let mut p = vec![
+                        ("reportName", "RPT_F10_EH_DIVIDEND"),
+                        ("columns", "ALL"),
+                        ("quoteColumns", ""),
+                        ("filter", filter.as_str()),
+                        ("pageNumber", "1"),
+                        ("pageSize", ""),
+                        ("sortTypes", "-1"),
+                        ("sortColumns", "EX_DIVIDEND_DATE"),
+                    ];
+                    p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
+                    p
+                }.as_slice()),
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -843,25 +823,24 @@ impl AkShareClient {
         filter: &str,
         source: &str,
     ) -> Result<Vec<PeerComparison>> {
-        let response = self
-            .get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
-            .query(&[
-                ("reportName", report_name),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter),
-                ("pageNumber", ""),
-                ("pageSize", ""),
-                ("sortTypes", "1"),
-                ("sortColumns", "PAIMING"),
-                ("source", source),
-                ("client", "PC"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
+                .query({
+                    let mut p = vec![
+                        ("reportName", report_name),
+                        ("columns", "ALL"),
+                        ("quoteColumns", ""),
+                        ("filter", filter),
+                        ("pageNumber", ""),
+                        ("pageSize", ""),
+                        ("sortTypes", "1"),
+                        ("sortColumns", "PAIMING"),
+                    ];
+                    p.extend_from_slice(&crate::util::eastmoney_f10_params(source));
+                    p
+                }.as_slice()),
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 

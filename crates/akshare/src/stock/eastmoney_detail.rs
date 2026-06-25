@@ -203,25 +203,22 @@ impl AkShareClient {
     /// Python equivalent: `stock_bid_ask(symbol)` / `stock_ask_bid_em(symbol)`
     pub async fn stock_bid_ask(&self, symbol: &str) -> Result<BidAskData> {
         let secid = crate::market::eastmoney_secid(symbol)?;
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/stock/get")
-            .query(&[
-                ("fltt", "2"),
-                ("invt", "2"),
-                (
-                    "fields",
-                    "f43,f44,f45,f46,f47,f48,f49,f50,f51,f52,f55,f57,f58,f59,f60,f62,\
-                     f71,f116,f117,f161,f162,f163,f164,f167,f168,f169,f170,f171,f120,f121,\
-                     f122,f174,f175,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f31,f32,f33,\
-                     f34,f35,f36,f37,f38,f39,f40",
-                ),
-                ("secid", secid.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/stock/get")
+                .query(&[
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    (
+                        "fields",
+                        "f43,f44,f45,f46,f47,f48,f49,f50,f51,f52,f55,f57,f58,f59,f60,f62,\
+                         f71,f116,f117,f161,f162,f163,f164,f167,f168,f169,f170,f171,f120,f121,\
+                         f122,f174,f175,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f31,f32,f33,\
+                         f34,f35,f36,f37,f38,f39,f40",
+                    ),
+                    ("secid", secid.as_str()),
+                ]),
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -275,22 +272,19 @@ impl AkShareClient {
     /// Python equivalent: `stock_intraday_em(symbol)`
     pub async fn stock_intraday_em(&self, symbol: &str) -> Result<Vec<IntradayTick>> {
         let secid = crate::market::eastmoney_secid(symbol)?;
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/stock/details/sse")
-            .query(&[
-                ("fields1", "f1,f2,f3,f4"),
-                ("fields2", "f51,f52,f53,f54,f55"),
-                ("mpi", "2000"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("pos", "-0"),
-                ("secid", secid.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/stock/details/sse")
+                .query(&[
+                    ("fields1", "f1,f2,f3,f4"),
+                    ("fields2", "f51,f52,f53,f54,f55"),
+                    ("mpi", "2000"),
+                    ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
+                    ("fltt", "2"),
+                    ("pos", "-0"),
+                    ("secid", secid.as_str()),
+                ]),
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
 
@@ -341,19 +335,16 @@ impl AkShareClient {
     /// Python equivalent: `stock_individual_info(symbol)`
     pub async fn stock_individual_info(&self, symbol: &str) -> Result<Vec<StockInfoItem>> {
         let secid = crate::market::eastmoney_secid(symbol)?;
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/stock/get")
-            .query(&[
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fields", "f57,f58,f84,f85,f127,f116,f117,f189,f43"),
-                ("secid", secid.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/stock/get")
+                .query(&[
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    ("fields", "f57,f58,f84,f85,f127,f116,f117,f189,f43"),
+                    ("secid", secid.as_str()),
+                ]),
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 
@@ -395,19 +386,16 @@ impl AkShareClient {
         &self,
         secid: &str,
     ) -> Result<Vec<StockInfoItem>> {
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/stock/get")
-            .query(&[
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fields", "f57,f58,f84,f85,f127,f116,f117,f189,f43"),
-                ("secid", secid),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/stock/get")
+                .query(&[
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    ("fields", "f57,f58,f84,f85,f127,f116,f117,f189,f43"),
+                    ("secid", secid),
+                ]),
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 
@@ -442,19 +430,16 @@ impl AkShareClient {
 
     /// Get industry for any stock by raw Eastmoney secid (e.g. "105.AAPL", "116.00700").
     pub async fn stock_info_by_secid(&self, secid: &str) -> Result<Option<String>> {
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/stock/get")
-            .query(&[
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fields", "f127"),
-                ("secid", secid),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/stock/get")
+                .query(&[
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    ("fields", "f127"),
+                    ("secid", secid),
+                ]),
+        )
+        .await?;
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let industry = payload
             .nested(&["data", "f127"])
@@ -488,25 +473,22 @@ impl AkShareClient {
     where
         T: for<'de> Deserialize<'de>,
     {
-        let response = self
-            .get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
-            .query(&[
-                ("reportName", report_name),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter),
-                ("pageNumber", "1"),
-                ("pageSize", "200"),
-                ("sortTypes", ""),
-                ("sortColumns", ""),
-                ("source", "F10"),
-                ("client", "PC"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
+                .query(&[
+                    ("reportName", report_name),
+                    ("columns", "ALL"),
+                    ("quoteColumns", ""),
+                    ("filter", filter),
+                    ("pageNumber", "1"),
+                    ("pageSize", "200"),
+                    ("sortTypes", ""),
+                    ("sortColumns", ""),
+                    ("source", "F10"),
+                    ("client", "PC"),
+                ]),
+        )
+        .await?;
 
         let payload: DatacenterProfileEnvelope<T> = response.json().await.map_err(Error::from)?;
         Ok(payload.result.and_then(|r| r.data).unwrap_or_default())

@@ -132,18 +132,11 @@ impl AkShareClient {
         }
         let response = self
             .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "5000"),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
+            .query(&crate::util::eastmoney_clist_params("5000", &[
                 ("fid", "f3"),
                 ("fs", "m:1+s:2,m:0+t:5,m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23"),
                 ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
-            ])
+            ]))
             .send()
             .await
             .map_err(Error::from)?

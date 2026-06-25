@@ -252,28 +252,25 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_ah_spot_em()`
     pub async fn stock_zh_ah_spot_em(&self, limit: usize) -> Result<Vec<AhComparisonRow>> {
         let pz = limit.to_string();
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("np", "1"),
-                ("fltt", "1"),
-                ("invt", "2"),
-                ("fs", "b:DLMK0101"),
-                (
-                    "fields",
-                    "f193,f191,f192,f12,f13,f14,f1,f2,f4,f3,f152,f186,f190,f187,f189,f188",
-                ),
-                ("fid", "f3"),
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("dect", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&[
+                    ("np", "1"),
+                    ("fltt", "1"),
+                    ("invt", "2"),
+                    ("fs", "b:DLMK0101"),
+                    (
+                        "fields",
+                        "f193,f191,f192,f12,f13,f14,f1,f2,f4,f3,f152,f186,f190,f187,f189,f188",
+                    ),
+                    ("fid", "f3"),
+                    ("pn", "1"),
+                    ("pz", pz.as_str()),
+                    ("po", "1"),
+                    ("dect", "1"),
+                ]),
+        )
+        .await?;
 
         let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -311,28 +308,18 @@ impl AkShareClient {
     /// Generic spot list fetcher using the Eastmoney clist API.
     async fn fetch_spot_list(&self, fs: &str, limit: usize) -> Result<Vec<SpotRow>> {
         let pz = limit.to_string();
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", "f3"),
-                ("fs", fs),
-                (
-                    "fields",
-                    "f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f62",
-                ),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
+                    ("fid", "f3"),
+                    ("fs", fs),
+                    (
+                        "fields",
+                        "f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f62",
+                    ),
+                ])),
+        )
+        .await?;
 
         let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -350,28 +337,18 @@ impl AkShareClient {
     /// Generic board list fetcher using the Eastmoney clist API.
     async fn fetch_board_list(&self, fs: &str, limit: usize) -> Result<Vec<BoardRow>> {
         let pz = limit.to_string();
-        let response = self
-                        .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", "f3"),
-                ("fs", fs),
-                (
-                    "fields",
-                    "f2,f3,f4,f8,f12,f14,f15,f16,f17,f18,f20,f21,f24,f25,f22,f33,f11,f62,f128,f124,f107,f104,f105,f136",
-                ),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
+                    ("fid", "f3"),
+                    ("fs", fs),
+                    (
+                        "fields",
+                        "f2,f3,f4,f8,f12,f14,f15,f16,f17,f18,f20,f21,f24,f25,f22,f33,f11,f62,f128,f124,f107,f104,f105,f136",
+                    ),
+                ])),
+        )
+        .await?;
 
         let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -389,28 +366,25 @@ impl AkShareClient {
     /// Fetch HSGT stock list.
     async fn fetch_hsgt_stocks(&self, fs: &str, limit: usize) -> Result<Vec<HsgtStockRow>> {
         let pz = limit.to_string();
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("np", "1"),
-                ("fltt", "1"),
-                ("invt", "2"),
-                ("fs", fs),
-                (
-                    "fields",
-                    "f12,f13,f14,f19,f1,f2,f4,f3,f152,f17,f18,f15,f16,f5,f6",
-                ),
-                ("fid", "f12"),
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("dect", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&[
+                    ("np", "1"),
+                    ("fltt", "1"),
+                    ("invt", "2"),
+                    ("fs", fs),
+                    (
+                        "fields",
+                        "f12,f13,f14,f19,f1,f2,f4,f3,f152,f17,f18,f15,f16,f5,f6",
+                    ),
+                    ("fid", "f12"),
+                    ("pn", "1"),
+                    ("pz", pz.as_str()),
+                    ("po", "1"),
+                    ("dect", "1"),
+                ]),
+        )
+        .await?;
 
         let payload: ClistEnvelope = response.json().await.map_err(Error::from)?;
         let diff = payload

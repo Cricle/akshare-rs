@@ -44,7 +44,6 @@ pub(crate) struct EastmoneySearchItem {
     pub(crate) code: Option<String>,
     #[serde(rename = "Name")]
     pub(crate) name: Option<String>,
-    #[allow(dead_code)]
     #[serde(rename = "SecurityTypeName")]
     pub(crate) security_type_name: Option<String>,
     #[serde(rename = "JYS")]

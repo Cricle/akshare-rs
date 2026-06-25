@@ -26,9 +26,8 @@ impl AkShareClient {
             .query(&[
                 ("page", "1"), ("num", "10000"), ("sort", "zmjgm"), ("asc", "0"),
                 ("ccode", ""), ("type2", type_code), ("type3", ""),
-            ])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            ]);
+        let resp = crate::util::send_and_check(resp).await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_start = text.find("({").map_or(0, |i| i + 1);
@@ -73,9 +72,8 @@ impl AkShareClient {
     pub async fn fund_scale_close(&self) -> Result<Vec<FundSnapshot>> {
         let resp = self
             .get("http://vip.stock.finance.sina.com.cn/fund_center/data/jsonp.php/IO.XSRV2.CallbackList['J2cW8KXheoWKdSHc']/NetValueReturn_Service.NetValueReturnClose")
-            .query(&[("page", "1"), ("num", "10000"), ("sort", "zmjgm"), ("asc", "0")])
-            .send().await.map_err(Error::from)?
-            .error_for_status().map_err(Error::from)?;
+            .query(&[("page", "1"), ("num", "10000"), ("sort", "zmjgm"), ("asc", "0")]);
+        let resp = crate::util::send_and_check(resp).await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_start = text.find("({").map_or(0, |i| i + 1);

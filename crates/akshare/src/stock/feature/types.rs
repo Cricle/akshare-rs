@@ -38,6 +38,9 @@ pub struct SpotQuote {
 // ---------------------------------------------------------------------------
 
 /// Historical candlestick data point.
+///
+/// Similar to `crate::types::CandlePoint` but `volume` is `f64` (not `i64`)
+/// and uses `turnover_rate` instead of `turnover_pct`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistData {
     pub trade_date: String,
