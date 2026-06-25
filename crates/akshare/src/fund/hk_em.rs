@@ -8,10 +8,10 @@ impl AkShareClient {
     /// Fetch HK fund ranking (Python: fund_hk_rank).
     pub async fn fund_hk_rank(&self) -> Result<Vec<FundHkRankItem>> {
         let format_date = chrono::Utc::now().format("%Y-%m-%d").to_string();
-        let response = self
-            .get("https://overseas.1234567.com.cn/overseasapi/OpenApiHander.ashx")
-            .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://overseas.1234567.com.cn/overseasapi/OpenApiHander.ashx")
+                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
+                .query(&[
                 ("api", "HKFDApi"),
                 ("m", "MethodFundList"),
                 ("action", "1"),
@@ -23,12 +23,9 @@ impl AkShareClient {
                 ("sortfield", "Y"),
                 ("sorttype", "-1"),
                 ("isbuy", "0"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -88,10 +85,10 @@ impl AkShareClient {
         } else {
             "2"
         };
-        let response = self
-            .get("https://overseas.1234567.com.cn/overseasapi/OpenApiHander.ashx")
-            .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://overseas.1234567.com.cn/overseasapi/OpenApiHander.ashx")
+                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
+                .query(&[
                 ("api", "HKFDApi"),
                 ("m", "MethodJZ"),
                 ("hkfcode", code),
@@ -100,12 +97,9 @@ impl AkShareClient {
                 ("pagesize", "1000"),
                 ("date1", ""),
                 ("date2", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload

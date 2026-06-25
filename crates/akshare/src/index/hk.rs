@@ -76,24 +76,15 @@ impl AkShareClient {
 
     /// 东方财富 — 港股指数实时行情.
     pub async fn index_hk_spot_em(&self) -> Result<Vec<HkIndexSpotItem>> {
-        let response = self
-            .get("https://15.push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "200"),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://15.push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("200", &[
                 ("fid", "f3"),
                 ("fs", "m:124,m:125,m:305"),
                 ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: EmClistEnvelope = response.json().await.map_err(Error::from)?;
         let diff = payload.data.and_then(|d| d.diff).unwrap_or_default();

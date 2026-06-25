@@ -37,14 +37,11 @@ struct CniHistData {
 impl AkShareClient {
     /// 国证指数 — 最近交易日的所有指数.
     pub async fn index_all_cni(&self) -> Result<Vec<CniIndexItem>> {
-        let response = self
-            .get("https://www.cnindex.com.cn/index/indexList")
-            .query(&[("channelCode", "-1"), ("rows", "2000"), ("pageNum", "1")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.cnindex.com.cn/index/indexList")
+                .query(&[("channelCode", "-1"), ("rows", "2000"), ("pageNum", "1")])
+        )
+        .await?;
 
         let payload: CniListEnvelope = response.json().await.map_err(Error::from)?;
         let rows = payload.data.and_then(|d| d.rows).unwrap_or_default();
@@ -97,19 +94,16 @@ impl AkShareClient {
         let start = format_date_hyphen(start_date);
         let end = format_date_hyphen(end_date);
 
-        let response = self
-            .get("http://hq.cnindex.com.cn/market/market/getIndexDailyDataWithDataFormat")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("http://hq.cnindex.com.cn/market/market/getIndexDailyDataWithDataFormat")
+                .query(&[
                 ("indexCode", symbol),
                 ("startDate", &start),
                 ("endDate", &end),
                 ("frequency", "day"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: CniHistEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload.data.and_then(|d| d.data).unwrap_or_default();
@@ -159,14 +153,11 @@ impl AkShareClient {
     /// total_mv, weight.  The upstream returns an XLS; this endpoint returns
     /// JSON when called with the right accept header.
     pub async fn index_detail_cni(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("https://www.cnindex.com.cn/sample-detail/download-history")
-            .query(&[("indexcode", symbol)])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.cnindex.com.cn/sample-detail/download-history")
+                .query(&[("indexcode", symbol)])
+        )
+        .await?;
 
         let content_type = response
             .headers()
@@ -207,14 +198,11 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("http://www.cnindex.com.cn/sample-detail/download-adjustment")
-            .query(&[("indexcode", symbol)])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("http://www.cnindex.com.cn/sample-detail/download-adjustment")
+                .query(&[("indexcode", symbol)])
+        )
+        .await?;
 
         let content_type = response
             .headers()

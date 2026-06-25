@@ -76,14 +76,11 @@ impl AkShareClient {
         let url = "https://proxy.finance.qq.com/cgi/cgi-bin/mstats/hk_ah";
         for page in 0..10 {
             let page_str = page.to_string();
-            let response = self
-                .get(url)
-                .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+            let response = crate::util::send_and_check(
+                self.get(url)
+                    .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
+            )
+            .await?;
 
             let text = response.text().await.map_err(Error::from)?;
 
@@ -261,14 +258,11 @@ impl AkShareClient {
 
         for page in 0..10 {
             let page_str = page.to_string();
-            let response = self
-                .get(url)
-                .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+            let response = crate::util::send_and_check(
+                self.get(url)
+                    .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
+            )
+            .await?;
 
             let text = response.text().await.map_err(Error::from)?;
 

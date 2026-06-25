@@ -215,14 +215,11 @@ impl AkShareClient {
 
     /// Fetch board names from a THS category page.
     async fn fetch_ths_board_names(&self, url: &str) -> Result<Vec<ThsBoardName>> {
-        let response = self
-                        .get(url)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        )
+        .await?;
 
         let html = response.text().await.map_err(Error::from)?;
 
@@ -257,14 +254,11 @@ impl AkShareClient {
 
     /// Fetch board info from a THS detail page.
     async fn fetch_ths_board_info(&self, url: &str) -> Result<Vec<ThsBoardInfo>> {
-        let response = self
-                        .get(url)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        )
+        .await?;
 
         let html = response.text().await.map_err(Error::from)?;
 
@@ -374,14 +368,11 @@ impl AkShareClient {
 
     /// Fetch board summary data from THS.
     async fn fetch_ths_board_summary(&self, url: &str) -> Result<Vec<ThsBoardSummary>> {
-        let response = self
-                        .get(url)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        )
+        .await?;
 
         let html = response.text().await.map_err(Error::from)?;
 

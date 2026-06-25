@@ -42,14 +42,11 @@ struct HogRow {
 impl AkShareClient {
     /// 行情宝 — 生猪市场价格指数.
     pub async fn index_hog_spot_price(&self) -> Result<Vec<HogIndexPoint>> {
-        let response = self
-            .get("https://hqb.nxin.com/pigindex/getPigIndexChart.shtml")
-            .query(&[("regionId", "0")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://hqb.nxin.com/pigindex/getPigIndexChart.shtml")
+                .query(&[("regionId", "0")])
+        )
+        .await?;
 
         let payload: HogEnvelope = response.json().await.map_err(Error::from)?;
         let rows = payload.data.unwrap_or_default();

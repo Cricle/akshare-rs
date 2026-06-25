@@ -76,20 +76,17 @@ impl AkShareClient {
 
     async fn fetch_hsgt_flow(&self, fields: &str, limit: usize) -> Result<Vec<HsgtFlowEntry>> {
         let lmt = limit.to_string();
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/kamt.kline/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://push2his.eastmoney.com/api/qt/kamt.kline/get")
+                .query(&[
                 ("fields1", "f1,f2,f3,f7"),
                 ("fields2", fields),
                 ("klt", "101"),
                 ("lmt", lmt.as_str()),
                 ("ut", "b2884a393a59ad64002292a3e90d46a5"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 

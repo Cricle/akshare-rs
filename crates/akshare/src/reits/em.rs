@@ -35,24 +35,15 @@ impl AkShareClient {
         let pz = limit.clamp(1, 200).to_string();
         let today = today_iso();
 
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
                 ("fid", "f3"),
                 ("fs", "b:MK0970"),
                 ("fields", "f12,f14,f2,f3,f5"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let items = payload

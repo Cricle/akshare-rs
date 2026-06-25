@@ -9,9 +9,9 @@ impl AkShareClient {
     ///
     /// `year`: query year (e.g. "2025").
     pub async fn fund_cf(&self, year: &str) -> Result<Vec<FundSplitItem>> {
-        let response = self
-            .get("https://fund.eastmoney.com/Data/funddataIndex_Interface.aspx")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/Data/funddataIndex_Interface.aspx")
+                .query(&[
                 ("dt", "9"),
                 ("page", "1"),
                 ("rank", "FSRQ"),
@@ -19,12 +19,9 @@ impl AkShareClient {
                 ("gs", ""),
                 ("ftype", ""),
                 ("year", year),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         // Parse JS response: [[...],[...]]

@@ -62,14 +62,11 @@ impl AkShareClient {
             .map(|(_, c)| *c)
             .ok_or_else(|| Error::invalid_input(format!("unknown global index name: {name}")))?;
 
-        let response = self
-            .get("https://gi.finance.sina.com.cn/hq/daily")
-            .query(&[("symbol", code), ("num", "10000")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://gi.finance.sina.com.cn/hq/daily")
+                .query(&[("symbol", code), ("num", "10000")])
+        )
+        .await?;
 
         let payload: SinaGlobalEnvelope = response.json().await.map_err(Error::from)?;
         let rows = payload.result.and_then(|r| r.data).unwrap_or_default();

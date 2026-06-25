@@ -31,23 +31,14 @@ impl AkShareClient {
     /// Fetch LOF fund list from Eastmoney.
     pub async fn fund_lof_list(&self, limit: usize) -> Result<Vec<FundSnapshot>> {
         let pz = limit.max(1).to_string();
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
                 ("fs", "b:MK0025"),
                 ("fields", "f12,f14,f2,f3"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let items = payload
@@ -176,21 +167,18 @@ impl AkShareClient {
         let secid = lof_secid(symbol)?;
 
         if period == "1" {
-            let response = self
-                .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
-                .query(&[
+            let response = crate::util::send_and_check(
+                self.get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
+                    .query(&[
                     ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
                     ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
                     ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
                     ("ndays", "5"),
                     ("iscr", "0"),
                     ("secid", secid.as_str()),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
             let trends = payload
@@ -260,28 +248,18 @@ impl AkShareClient {
 
     /// Fetch LOF spot (real-time) data from Eastmoney.
     pub async fn fund_lof_spot(&self) -> Result<Vec<EtfSpotItem>> {
-        let response = self
-            .get("https://88.push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "10000"),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://88.push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("10000", &[
                 ("fid", "f3"),
                 ("fs", "b:MK0404,b:MK0405,b:MK0406,b:MK0407"),
                 (
-                    "fields",
-                    "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21",
+                "fields",
+                "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21",
                 ),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let items = payload

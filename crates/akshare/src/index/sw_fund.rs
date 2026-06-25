@@ -64,21 +64,18 @@ impl AkShareClient {
     ///
     /// `symbol` is one of: "基础一级", "基础二级", "基础三级", "特色指数".
     pub async fn index_realtime_fund_sw(&self, symbol: &str) -> Result<Vec<SwFundRealtime>> {
-        let response = self
-            .post("https://www.swsresearch.com/insWechatSw/fundIndex/pageList")
-            .json(&serde_json::json!({
+        let response = crate::util::send_and_check(
+            self.post("https://www.swsresearch.com/insWechatSw/fundIndex/pageList")
+                .json(&serde_json::json!({
                 "pageNo": 1,
                 "pageSize": 50,
                 "indexTypeName": symbol,
                 "sortField": "",
                 "rule": "",
                 "indexType": 1,
-            }))
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }))
+        )
+        .await?;
 
         let payload: SwFundPageEnvelope = response.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.list).unwrap_or_default();
@@ -121,17 +118,14 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .post("https://www.swsresearch.com/insWechatSw/fundIndex/getFundKChartData")
-            .json(&serde_json::json!({
+        let response = crate::util::send_and_check(
+            self.post("https://www.swsresearch.com/insWechatSw/fundIndex/getFundKChartData")
+                .json(&serde_json::json!({
                 "swIndexCode": symbol,
                 "type": period_upper,
-            }))
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }))
+        )
+        .await?;
 
         let payload: SwFundHistEnvelope = response.json().await.map_err(Error::from)?;
         let items = payload.data.unwrap_or_default();

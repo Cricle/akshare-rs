@@ -25,9 +25,9 @@ impl AkShareClient {
 
         for page in 1..=limit {
             let page_str = page.to_string();
-            let resp = self
-                                .get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData")
-                .query(&[
+            let resp = crate::util::send_and_check(
+                self.get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData")
+                    .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
                     ("sort", "changepercent"),
@@ -35,12 +35,9 @@ impl AkShareClient {
                     ("node", "hs_z"),
                     ("symbol", ""),
                     ("_s_r_a", "page"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let text = resp.text().await.map_err(Error::from)?;
             if text.is_empty() || text == "null" {
@@ -80,13 +77,10 @@ impl AkShareClient {
     pub async fn bond_zh_hs_daily(&self, symbol: &str) -> Result<Vec<BondSnapshot>> {
         let now = chrono::Utc::now().format("%Y_%m_%d").to_string();
         let url = format!("https://hq.sinajs.cn/lb/{symbol}_{now}");
-        let resp = self
-            .get(&url)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+        )
+        .await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         if text.is_empty() {

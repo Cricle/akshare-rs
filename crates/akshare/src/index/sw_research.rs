@@ -157,14 +157,11 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .get("https://www.swsresearch.com/institute-sw/api/index_publish/trend/")
-            .query(&[("swindexcode", symbol), ("period", period_upper)])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_publish/trend/")
+                .query(&[("swindexcode", symbol), ("period", period_upper)])
+        )
+        .await?;
 
         let payload: SwTrendEnvelope = response.json().await.map_err(Error::from)?;
         let items = payload.data.unwrap_or_default();
@@ -209,14 +206,11 @@ impl AkShareClient {
             trading_time: String,
         }
 
-        let response = self
-            .get("https://www.swsresearch.com/institute-sw/api/index_publish/details/timelines/")
-            .query(&[("swindexcode", symbol)])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_publish/details/timelines/")
+                .query(&[("swindexcode", symbol)])
+        )
+        .await?;
 
         let payload: MinEnvelope = response.json().await.map_err(Error::from)?;
         let items = payload.data.unwrap_or_default();
@@ -240,14 +234,11 @@ impl AkShareClient {
 
     /// 申万宏源研究 — 指数成分股.
     pub async fn index_component_sw(&self, symbol: &str) -> Result<Vec<SwResearchComponent>> {
-        let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_publish/details/component_stocks/")
-            .query(&[("swindexcode", symbol), ("page", "1"), ("page_size", "10000")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_publish/details/component_stocks/")
+                .query(&[("swindexcode", symbol), ("page", "1"), ("page_size", "10000")])
+        )
+        .await?;
 
         let payload: SwComponentEnvelope = response.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.results).unwrap_or_default();
@@ -276,14 +267,11 @@ impl AkShareClient {
             return self.index_realtime_sw_page_list(symbol).await;
         }
 
-        let response = self
-            .get("https://www.swsresearch.com/institute-sw/api/index_publish/current/")
-            .query(&[("page", "1"), ("page_size", "200"), ("indextype", symbol)])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_publish/current/")
+                .query(&[("page", "1"), ("page_size", "200"), ("indextype", symbol)])
+        )
+        .await?;
 
         let payload: SwCurrentEnvelope = response.json().await.map_err(Error::from)?;
         let results = payload.data.and_then(|d| d.results).unwrap_or_default();
@@ -322,9 +310,9 @@ impl AkShareClient {
         let sd = format_dash_date(start_date);
         let ed = format_dash_date(end_date);
 
-        let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_analysis/index_analysis_report/")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_analysis/index_analysis_report/")
+                .query(&[
                 ("page", "1"),
                 ("page_size", "50"),
                 ("index_type", symbol),
@@ -332,12 +320,9 @@ impl AkShareClient {
                 ("end_date", ed.as_str()),
                 ("type", "DAY"),
                 ("swindexcode", "all"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         fetch_sw_analysis(self, &response.text().await.map_err(Error::from)?).await
     }
@@ -356,14 +341,11 @@ impl AkShareClient {
 
         let period = symbol.to_uppercase();
 
-        let response = self
-            .get("https://www.swsresearch.com/institute-sw/api/index_analysis/week_month_datetime/")
-            .query(&[("type", period.as_str())])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_analysis/week_month_datetime/")
+                .query(&[("type", period.as_str())])
+        )
+        .await?;
 
         let payload: DateEnvelope = response.json().await.map_err(Error::from)?;
         let dates: Vec<String> = payload
@@ -387,21 +369,18 @@ impl AkShareClient {
     ) -> Result<Vec<SwAnalysisPoint>> {
         let d = format_dash_date(date);
 
-        let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_analysis/index_analysis_reports/")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_analysis/index_analysis_reports/")
+                .query(&[
                 ("page", "1"),
                 ("page_size", "50"),
                 ("index_type", symbol),
                 ("bargaindate", d.as_str()),
                 ("type", "WEEK"),
                 ("swindexcode", "all"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         fetch_sw_analysis(self, &response.text().await.map_err(Error::from)?).await
     }
@@ -414,42 +393,36 @@ impl AkShareClient {
     ) -> Result<Vec<SwAnalysisPoint>> {
         let d = format_dash_date(date);
 
-        let response = self
-                        .get("https://www.swsresearch.com/institute-sw/api/index_analysis/index_analysis_reports/")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://www.swsresearch.com/institute-sw/api/index_analysis/index_analysis_reports/")
+                .query(&[
                 ("page", "1"),
                 ("page_size", "50"),
                 ("index_type", symbol),
                 ("bargaindate", d.as_str()),
                 ("type", "MONTH"),
                 ("swindexcode", "all"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         fetch_sw_analysis(self, &response.text().await.map_err(Error::from)?).await
     }
 
     // Private: page list for 大类风格/金创
     async fn index_realtime_sw_page_list(&self, symbol: &str) -> Result<Vec<SwResearchRealtime>> {
-        let response = self
-            .post("https://www.swsresearch.com/insWechatSw/dflgOrJcIndex/pageList")
-            .json(&serde_json::json!({
+        let response = crate::util::send_and_check(
+            self.post("https://www.swsresearch.com/insWechatSw/dflgOrJcIndex/pageList")
+                .json(&serde_json::json!({
                 "pageNo": 1,
                 "pageSize": 50,
                 "indexTypeName": symbol,
                 "sortField": "",
                 "rule": "",
                 "indexType": 1,
-            }))
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }))
+        )
+        .await?;
 
         let payload: SwPageListEnvelope = response.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.list).unwrap_or_default();

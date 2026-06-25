@@ -441,14 +441,11 @@ impl AkShareClient {
         let formatted = fmt_date(date);
         let url =
             "https://vip.stock.finance.sina.com.cn/q/go.php/vInvestConsult/kind/lhb/index.phtml";
-        let resp = self
-            .get(url)
-            .query(&[("tradedate", formatted.as_str())])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("tradedate", formatted.as_str())])
+        )
+        .await?;
         let _text = resp.text().await.map_err(Error::from)?;
         // Sina LHB returns HTML tables - return empty vec as HTML parsing requires external crate
         Ok(vec![])
@@ -457,14 +454,11 @@ impl AkShareClient {
     /// 新浪-龙虎榜-个股上榜统计
     pub async fn stock_lhb_ggtj(&self) -> Result<Vec<BillboardSinaHkSummary>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/ggtj/index.phtml";
-        let resp = self
-            .get(url)
-            .query(&[("last", "5"), ("p", "1")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("last", "5"), ("p", "1")])
+        )
+        .await?;
         let _text = resp.text().await.map_err(Error::from)?;
         Ok(vec![])
     }
@@ -472,14 +466,11 @@ impl AkShareClient {
     /// 新浪-龙虎榜-机构席位成交明细
     pub async fn stock_lhb_jgmx(&self) -> Result<Vec<BillboardSinaOrgDetail>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgmx/index.phtml";
-        let resp = self
-            .get(url)
-            .query(&[("p", "1")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("p", "1")])
+        )
+        .await?;
         let _text = resp.text().await.map_err(Error::from)?;
         Ok(vec![])
     }
@@ -487,14 +478,11 @@ impl AkShareClient {
     /// 新浪-龙虎榜-机构席位追踪
     pub async fn stock_lhb_jgzz(&self, symbol: &str) -> Result<Vec<BillboardSinaOrgTracking>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/jgzz/index.phtml";
-        let resp = self
-            .get(url)
-            .query(&[("last", symbol), ("p", "1")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("last", symbol), ("p", "1")])
+        )
+        .await?;
         let _text = resp.text().await.map_err(Error::from)?;
         Ok(vec![])
     }
@@ -502,14 +490,11 @@ impl AkShareClient {
     /// 新浪-龙虎榜-营业部上榜统计
     pub async fn stock_lhb_yytj(&self, symbol: &str) -> Result<Vec<BillboardSinaBranchSummary>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vLHBData/kind/yytj/index.phtml";
-        let resp = self
-            .get(url)
-            .query(&[("last", symbol), ("p", "1")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("last", symbol), ("p", "1")])
+        )
+        .await?;
         let _text = resp.text().await.map_err(Error::from)?;
         Ok(vec![])
     }

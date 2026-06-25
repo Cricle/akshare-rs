@@ -16,21 +16,18 @@ impl AkShareClient {
     ) -> Result<Vec<FundAnnouncementItem>> {
         let ts = chrono::Utc::now().timestamp_millis().to_string();
         let referer = format!("http://fundf10.eastmoney.com/jjgg_{symbol}_{ann_type}.html");
-        let response = self
-            .get("http://api.fund.eastmoney.com/f10/JJGG")
-            .header("Referer", &referer)
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("http://api.fund.eastmoney.com/f10/JJGG")
+                .header("Referer", &referer)
+                .query(&[
                 ("fundcode", symbol),
                 ("pageIndex", "1"),
                 ("pageSize", "1000"),
                 ("type", ann_type),
                 ("_", ts.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload

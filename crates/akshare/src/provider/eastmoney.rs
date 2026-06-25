@@ -8,7 +8,7 @@ use crate::types::{
     AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail, CandlePoint,
     CapitalFlowPoint, SectorConstituent, SectorSnapshot, StockSearchResult,
 };
-use crate::util::{parse_csv_line, parse_f64_safe};
+use crate::util::{parse_candle_line, parse_csv_line, parse_f64_safe};
 
 use serde::Deserialize;
 
@@ -173,19 +173,16 @@ impl AkShareClient {
         }
 
         let count = limit.clamp(1, 20).to_string();
-        let response = self
-            .get("https://searchapi.eastmoney.com/api/suggest/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://searchapi.eastmoney.com/api/suggest/get")
+                .query(&[
                 ("input", trimmed),
                 ("type", "14"),
                 ("token", SEARCH_TOKEN),
                 ("count", count.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: SearchEnvelope = response.json().await.map_err(Error::from)?;
 
@@ -280,24 +277,15 @@ impl AkShareClient {
         };
 
         let pz = limit.to_string();
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
                 ("fid", "f62"),
                 ("fs", fs),
                 ("fields", "f12,f14,f2,f3,f62,f184"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let items = payload
@@ -332,24 +320,15 @@ impl AkShareClient {
     ) -> Result<Vec<SectorConstituent>> {
         let pz = limit.to_string();
         let fs = format!("b:{sector_code}+f:!50");
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
                 ("fid", "f3"),
                 ("fs", fs.as_str()),
                 ("fields", "f12,f14,f2,f3,f62"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let items = payload
@@ -408,9 +387,9 @@ impl AkShareClient {
         let filter = format!("(SECURITY_CODE=\"{code}\")");
         let page_size = limit.to_string();
 
-        let response = self
-            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .query(&[
                 ("reportName", "RPT_DAILYBILLBOARD_DETAILSNEW"),
                 ("columns", "ALL"),
                 ("filter", filter.as_str()),
@@ -420,12 +399,9 @@ impl AkShareClient {
                 ("sortColumns", "TRADE_DATE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: DatacenterEnvelope<BillboardItem> =
             response.json().await.map_err(Error::from)?;
@@ -478,9 +454,9 @@ impl AkShareClient {
         let filter = format!("(SECURITY_CODE=\"{code}\")");
         let page_size = limit.to_string();
 
-        let response = self
-            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .query(&[
                 ("reportName", report_name),
                 ("columns", "ALL"),
                 ("filter", filter.as_str()),
@@ -490,12 +466,9 @@ impl AkShareClient {
                 ("sortColumns", "TRADE_DATE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: DatacenterEnvelope<BillboardSeatItem> =
             response.json().await.map_err(Error::from)?;
@@ -536,20 +509,17 @@ impl AkShareClient {
         let code = strip_exchange_suffix(symbol);
         let page_size = limit.clamp(1, 100).to_string();
 
-        let response = self
-            .get("https://np-anotice-stock.eastmoney.com/api/security/ann")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://np-anotice-stock.eastmoney.com/api/security/ann")
+                .query(&[
                 ("page_size", page_size.as_str()),
                 ("page_index", "1"),
                 ("ann_type", "A"),
                 ("client_source", "web"),
                 ("stock_list", code.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: AnnouncementEnvelope = response.json().await.map_err(Error::from)?;
         let mut items = payload
@@ -584,18 +554,15 @@ impl AkShareClient {
         &self,
         art_code: &str,
     ) -> Result<AnnouncementDetail> {
-        let response = self
-            .get("https://np-cnotice-stock.eastmoney.com/api/content/ann")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://np-cnotice-stock.eastmoney.com/api/content/ann")
+                .query(&[
                 ("art_code", art_code),
                 ("client_source", "web"),
                 ("page_index", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: AnnouncementContentEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -652,12 +619,8 @@ impl AkShareClient {
                 builder = builder.query(&[(k, v)]);
             }
 
-            let resp = builder
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+            let resp = crate::util::send_and_check(builder)
+                .await?;
             let payload: EmDatacenterResp = resp.json().await.map_err(Error::from)?;
             let result = payload
                 .result
@@ -685,14 +648,11 @@ impl AkShareClient {
         params: &[(&str, &str)],
     ) -> Result<serde_json::Value> {
         let url = format!("https://push2ex.eastmoney.com/{path}");
-        let resp = self
-            .get(&url)
-            .query(params)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+                .query(params)
+        )
+        .await?;
         let payload: serde_json::Value = resp.json().await.map_err(Error::from)?;
         Ok(payload)
     }
@@ -705,25 +665,15 @@ impl AkShareClient {
         page_size: &str,
         sort_field: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let resp = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", page_size),
-                ("po", "1"),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let resp = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(page_size, &[
                 ("fid", sort_field),
                 ("fs", fs),
                 ("fields", fields),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
@@ -764,12 +714,8 @@ impl AkShareClient {
             builder = builder.query(&[(k, v)]);
         }
 
-        let resp = builder
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(builder)
+            .await?;
 
         let payload: KlineResp = resp.json().await.map_err(Error::from)?;
         let klines = payload.data.and_then(|d| d.klines).unwrap_or_default();
@@ -824,18 +770,15 @@ impl AkShareClient {
             "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}DateAjaxNew"
         );
         let code_lower = code.to_lowercase();
-        let resp = self
-            .get(&date_url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(&date_url)
+                .query(&[
                 ("companyType", company_type.as_str()),
                 ("reportDateType", date_type),
                 ("code", code_lower.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let date_json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let dates = date_json
@@ -864,20 +807,17 @@ impl AkShareClient {
             let data_url = format!(
                 "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}AjaxNew"
             );
-            let resp = self
-                .get(&data_url)
-                .query(&[
+            let resp = crate::util::send_and_check(
+                self.get(&data_url)
+                    .query(&[
                     ("companyType", company_type.as_str()),
                     ("reportDateType", date_type),
                     ("reportType", "1"),
                     ("dates", dates_param.as_str()),
                     ("code", code_lower.as_str()),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
             if let Some(data) = json.get("data").and_then(|d| d.as_array()) {
@@ -893,22 +833,19 @@ impl AkShareClient {
     /// Shared implementation for individual-stock and sector capital flow.
     async fn fetch_capital_flow(&self, secid: &str, limit: usize) -> Result<Vec<CapitalFlowPoint>> {
         let lmt = limit.to_string();
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
+                .query(&[
                 ("secid", secid),
                 ("lmt", lmt.as_str()),
                 ("fields1", "f1,f2,f3,f7"),
                 (
-                    "fields2",
-                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63",
+                "fields2",
+                "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63",
                 ),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: KlineResp = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -934,31 +871,6 @@ impl AkShareClient {
 // ---------------------------------------------------------------------------
 // Parsing helpers (free functions, private)
 // ---------------------------------------------------------------------------
-
-/// Parse a single Eastmoney kline CSV line into a `CandlePoint`.
-///
-/// Format: `date,open,close,high,low,volume,amount,amplitude_pct,change_pct,change_amount,turnover_pct`
-fn parse_candle_line(line: &str) -> Result<CandlePoint> {
-    let f = parse_csv_line(line);
-    if f.len() < 11 {
-        return Err(Error::decode(format!(
-            "unexpected eastmoney candle format: {line}"
-        )));
-    }
-    Ok(CandlePoint {
-        trade_date: f[0].to_string(),
-        open: parse_f64_safe(f[1]),
-        close: parse_f64_safe(f[2]),
-        high: parse_f64_safe(f[3]),
-        low: parse_f64_safe(f[4]),
-        volume: parse_f64_safe(f[5]).round() as i64,
-        amount: parse_f64_safe(f[6]),
-        amplitude_pct: parse_f64_safe(f[7]),
-        change_pct: parse_f64_safe(f[8]),
-        change_amount: parse_f64_safe(f[9]),
-        turnover_pct: parse_f64_safe(f[10]),
-    })
-}
 
 /// Parse a single Eastmoney capital-flow CSV line into a `CapitalFlowPoint`.
 ///

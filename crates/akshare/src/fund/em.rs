@@ -10,20 +10,17 @@ impl AkShareClient {
     /// Returns up to `limit` funds with their current purchase and redemption status.
     pub async fn fund_purchase(&self, limit: usize) -> Result<Vec<serde_json::Value>> {
         let page = format!("1,{}", limit.max(1));
-        let resp = self
-            .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
+                .query(&[
                 ("t", "8"),
                 ("page", page.as_str()),
                 ("js", "reData"),
                 ("sort", "fcode,asc"),
-            ])
-            .header("Referer", "https://fund.eastmoney.com/")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://fund.eastmoney.com/")
+        )
+        .await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_str = text
@@ -49,13 +46,10 @@ impl AkShareClient {
     ///
     /// Returns a list of fund code, name, and type for all available funds.
     pub async fn fund_name(&self) -> Result<Vec<serde_json::Value>> {
-        let resp = self
-            .get("https://fund.eastmoney.com/js/fundcode_search.js")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/js/fundcode_search.js")
+        )
+        .await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_str = text
@@ -107,9 +101,9 @@ impl AkShareClient {
             .map_or("", |(_, c)| *c);
 
         let pn = limit.max(1).to_string();
-        let resp = self
-            .get("https://api.fund.eastmoney.com/FundTradeRank/GetRankList")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/FundTradeRank/GetRankList")
+                .query(&[
                 ("ft", "zs"),
                 ("sc", "1n"),
                 ("st", "desc"),
@@ -127,13 +121,10 @@ impl AkShareClient {
                 ("fr2", i_code),
                 ("fl", "0"),
                 ("is498", "1"),
-            ])
-            .header("Referer", "https://fund.eastmoney.com/")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://fund.eastmoney.com/")
+        )
+        .await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         // Response is JS callback, extract JSON

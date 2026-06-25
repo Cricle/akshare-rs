@@ -9,9 +9,9 @@ impl AkShareClient {
     /// Fetch daily NAV snapshot for all open-end funds from Eastmoney.
     pub async fn fund_open_end_daily(&self, limit: usize) -> Result<Vec<FundSnapshot>> {
         let page = format!("1,{}", limit.max(1));
-        let response = self
-            .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
+                .query(&[
                 ("t", "1"),
                 ("lx", "1"),
                 ("letter", ""),
@@ -22,12 +22,9 @@ impl AkShareClient {
                 ("dt", "1580914040623"),
                 ("atfc", ""),
                 ("onlySale", "0"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text
@@ -80,9 +77,9 @@ impl AkShareClient {
     /// Fetch NAV history for a specific open-end fund.
     pub async fn fund_open_end_nav(&self, symbol: &str, limit: usize) -> Result<Vec<FundSnapshot>> {
         let page = format!("1,{}", limit.max(1));
-        let response = self
-            .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
+                .query(&[
                 ("t", "1"),
                 ("lx", "1"),
                 ("letter", ""),
@@ -93,12 +90,9 @@ impl AkShareClient {
                 ("dt", "1580914040623"),
                 ("atfc", ""),
                 ("onlySale", "0"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text
@@ -152,9 +146,9 @@ impl AkShareClient {
     ///
     /// Returns all open-end fund NAV data for the current trading day.
     pub async fn fund_open_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
+                .query(&[
                 ("t", "1"),
                 ("lx", "1"),
                 ("letter", ""),
@@ -165,12 +159,9 @@ impl AkShareClient {
                 ("dt", "1580914040623"),
                 ("atfc", ""),
                 ("onlySale", "0"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text
@@ -232,24 +223,21 @@ impl AkShareClient {
         indicator: &str,
     ) -> Result<Vec<FundNavHistory>> {
         // Use the lsjz API for NAV history
-        let response = self
-            .get("https://api.fund.eastmoney.com/f10/lsjz")
-            .header(
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/f10/lsjz")
+                .header(
                 "Referer",
                 format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
-            )
-            .query(&[
+                )
+                .query(&[
                 ("fundCode", symbol),
                 ("pageIndex", "1"),
                 ("pageSize", "10000"),
                 ("startDate", ""),
                 ("endDate", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = payload

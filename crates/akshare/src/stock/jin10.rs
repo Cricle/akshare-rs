@@ -70,17 +70,14 @@ impl AkShareClient {
     ///
     /// Python equivalent: `stock_js_weibo_nlp_time()`
     pub async fn stock_js_weibo_nlp_time(&self) -> Result<HashMap<String, String>> {
-        let response = self
-            .get("https://datacenter-api.jin10.com/weibo/config")
-            .header("x-app-id", "rU6QIu7JHe2gOUeR")
-            .header("x-version", "1.0.0")
-            .header("origin", "https://datacenter.jin10.com")
-            .header("referer", "https://datacenter.jin10.com/market")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-api.jin10.com/weibo/config")
+                .header("x-app-id", "rU6QIu7JHe2gOUeR")
+                .header("x-version", "1.0.0")
+                .header("origin", "https://datacenter.jin10.com")
+                .header("referer", "https://datacenter.jin10.com/market")
+        )
+        .await?;
 
         let payload: ConfigEnvelope = response.json().await.map_err(Error::from)?;
         Ok(payload.data.and_then(|d| d.timescale).unwrap_or_default())
@@ -92,18 +89,15 @@ impl AkShareClient {
     ///
     /// `time_period` is one of: "CNHOUR2", "CNHOUR6", "CNHOUR12", "CNHOUR24", "CNDAY7", "CNDAY30".
     pub async fn stock_js_weibo_report(&self, time_period: &str) -> Result<Vec<WeiboReportEntry>> {
-        let response = self
-            .get("https://datacenter-api.jin10.com/weibo/list")
-            .query(&[("timescale", time_period)])
-            .header("x-app-id", "rU6QIu7JHe2gOUeR")
-            .header("x-version", "1.0.0")
-            .header("origin", "https://datacenter.jin10.com")
-            .header("referer", "https://datacenter.jin10.com/market")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-api.jin10.com/weibo/list")
+                .query(&[("timescale", time_period)])
+                .header("x-app-id", "rU6QIu7JHe2gOUeR")
+                .header("x-version", "1.0.0")
+                .header("origin", "https://datacenter.jin10.com")
+                .header("referer", "https://datacenter.jin10.com/market")
+        )
+        .await?;
 
         let payload: WeiboEnvelope = response.json().await.map_err(Error::from)?;
 

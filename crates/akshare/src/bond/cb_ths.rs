@@ -16,16 +16,13 @@ impl AkShareClient {
     /// Returns CB issue details including subscription dates, listing dates,
     /// conversion prices, etc.
     pub async fn bond_zh_cov_info_ths(&self) -> Result<Vec<serde_json::Value>> {
-        let resp: ThsBondResp = self
-            .get("https://data.10jqka.com.cn/ipo/kzz/")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?
-            .json()
-            .await
-            .map_err(Error::from)?;
+        let resp: ThsBondResp = crate::util::send_and_check(
+            self.get("https://data.10jqka.com.cn/ipo/kzz/"),
+        )
+        .await?
+        .json()
+        .await
+        .map_err(Error::from)?;
 
         let items = resp.list.unwrap_or_default();
         if items.is_empty() {

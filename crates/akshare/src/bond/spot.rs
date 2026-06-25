@@ -80,9 +80,9 @@ impl AkShareClient {
     pub async fn bond_spot_rates(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
         let page_size = limit.clamp(1, 500).to_string();
 
-        let response = self
-            .get("https://datacenter.eastmoney.com/api/data/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter.eastmoney.com/api/data/get")
+                .query(&[
                 ("type", "RPTA_WEB_TREASURYYIELD"),
                 ("sty", "ALL"),
                 ("st", "SOLAR_DATE"),
@@ -92,12 +92,9 @@ impl AkShareClient {
                 ("ps", page_size.as_str()),
                 ("pageNo", "1"),
                 ("pageNum", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload

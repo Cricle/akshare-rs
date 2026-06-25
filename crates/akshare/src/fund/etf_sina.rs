@@ -20,20 +20,17 @@ impl AkShareClient {
             .map(|(_, c)| *c)
             .ok_or_else(|| Error::invalid_input(format!("unknown fund category: {symbol}")))?;
 
-        let resp = self
-            .get("https://vip.stock.finance.sina.com.cn/quotes_service/api/jsonp.php/IO.XSRV2.CallbackList['da_yPT46_Ll7K6WD']/Market_Center.getHQNodeDataSimple")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("https://vip.stock.finance.sina.com.cn/quotes_service/api/jsonp.php/IO.XSRV2.CallbackList['da_yPT46_Ll7K6WD']/Market_Center.getHQNodeDataSimple")
+                .query(&[
                 ("page", "1"),
                 ("num", "5000"),
                 ("sort", "symbol"),
                 ("asc", "0"),
                 ("node", node),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_start = text.find("([").map_or(0, |i| i + 1);

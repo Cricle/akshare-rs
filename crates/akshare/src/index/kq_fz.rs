@@ -32,20 +32,17 @@ impl AkShareClient {
         };
 
         // First request to get page count
-        let resp = self
-            .get("http://www.kqindex.cn/flzs/table_data")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("http://www.kqindex.cn/flzs/table_data")
+                .query(&[
                 ("category", "0"),
                 ("start", ""),
                 ("end", ""),
                 ("indexType", index_type),
                 ("pageindex", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let first: PageEnvelope = resp.json().await.map_err(Error::from)?;
         let page_count = first.page.unwrap_or(1);
@@ -53,20 +50,17 @@ impl AkShareClient {
 
         // Fetch remaining pages
         for page in 2..=page_count {
-            let resp = self
-                .get("http://www.kqindex.cn/flzs/table_data")
-                .query(&[
+            let resp = crate::util::send_and_check(
+                self.get("http://www.kqindex.cn/flzs/table_data")
+                    .query(&[
                     ("category", "0"),
                     ("start", ""),
                     ("end", ""),
                     ("indexType", index_type),
                     ("pageindex", &page.to_string()),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let page_data: PageEnvelope = resp.json().await.map_err(Error::from)?;
             if let Some(rows) = page_data.result {

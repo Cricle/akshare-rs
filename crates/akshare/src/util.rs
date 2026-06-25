@@ -41,6 +41,31 @@ pub fn parse_csv_line(line: &str) -> Vec<&str> {
     line.split(',').map(str::trim).collect()
 }
 
+/// Parse an Eastmoney candle CSV line into a `CandlePoint`.
+///
+/// Format: `date,open,close,high,low,volume,amount,amplitude_pct,change_pct,change_amount,turnover_pct`
+pub fn parse_candle_line(line: &str) -> crate::Result<crate::types::CandlePoint> {
+    let f = parse_csv_line(line);
+    if f.len() < 11 {
+        return Err(crate::Error::decode(format!(
+            "unexpected eastmoney candle format: {line}"
+        )));
+    }
+    Ok(crate::types::CandlePoint {
+        trade_date: f[0].to_string(),
+        open: parse_f64_safe(f[1]),
+        close: parse_f64_safe(f[2]),
+        high: parse_f64_safe(f[3]),
+        low: parse_f64_safe(f[4]),
+        volume: parse_f64_safe(f[5]).round() as i64,
+        amount: parse_f64_safe(f[6]),
+        amplitude_pct: parse_f64_safe(f[7]),
+        change_pct: parse_f64_safe(f[8]),
+        change_amount: parse_f64_safe(f[9]),
+        turnover_pct: parse_f64_safe(f[10]),
+    })
+}
+
 pub fn apply_change_metrics(items: &mut [crate::types::CandlePoint]) {
     for index in 1..items.len() {
         let prev_close = items[index - 1].close;

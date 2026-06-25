@@ -27,14 +27,11 @@ struct ScopeRow {
 impl AkShareClient {
     /// 数库 — A股新闻情绪指数.
     pub async fn index_news_sentiment_scope(&self) -> Result<Vec<NewsSentimentPoint>> {
-        let response = self
-            .get("https://www.chinascope.com/inews/senti/index")
-            .query(&[("period", "YEAR")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.chinascope.com/inews/senti/index")
+                .query(&[("period", "YEAR")])
+        )
+        .await?;
 
         let rows: Vec<ScopeRow> = response.json().await.map_err(Error::from)?;
 

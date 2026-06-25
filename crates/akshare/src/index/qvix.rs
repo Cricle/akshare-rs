@@ -34,16 +34,13 @@ async fn fetch_qvix_daily(
     client: &AkShareClient,
     cols: &[usize; 4],
 ) -> Result<Vec<QvixDailyPoint>> {
-    let body = client
-        .get("http://1.optbbs.com/d/csv/d/k.csv")
-        .send()
-        .await
-        .map_err(Error::from)?
-        .error_for_status()
-        .map_err(Error::from)?
-        .text()
-        .await
-        .map_err(Error::from)?;
+    let body = crate::util::send_and_check(
+        client.get("http://1.optbbs.com/d/csv/d/k.csv"),
+    )
+    .await?
+    .text()
+    .await
+    .map_err(Error::from)?;
 
     let mut points = Vec::new();
     for (i, line) in body.lines().enumerate() {
@@ -75,13 +72,8 @@ async fn fetch_qvix_daily(
 
 /// Fetch a single intraday QVIX CSV.
 async fn fetch_qvix_min(client: &AkShareClient, url: &str) -> Result<Vec<QvixMinPoint>> {
-    let body = client
-        .get(url)
-        .send()
-        .await
-        .map_err(Error::from)?
-        .error_for_status()
-        .map_err(Error::from)?
+    let body = crate::util::send_and_check(client.get(url))
+        .await?
         .text()
         .await
         .map_err(Error::from)?;

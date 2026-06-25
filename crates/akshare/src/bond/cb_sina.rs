@@ -10,13 +10,10 @@ impl AkShareClient {
     /// Returns raw key-value pairs as JSON.
     pub async fn bond_cb_profile(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://money.finance.sina.com.cn/bond/info/{symbol}.html");
-        let resp = self
-            .get(&url)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+        )
+        .await?;
 
         let _text = resp.text().await.map_err(Error::from)?;
         // Sina returns HTML; parsing requires HTML extraction which is complex.
@@ -31,13 +28,10 @@ impl AkShareClient {
     /// `symbol` is in Sina format with market prefix, e.g. "sh155255".
     pub async fn bond_cb_summary(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://money.finance.sina.com.cn/bond/quotes/{symbol}.html");
-        let resp = self
-            .get(&url)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+        )
+        .await?;
 
         let _text = resp.text().await.map_err(Error::from)?;
         Err(Error::decode(format!(

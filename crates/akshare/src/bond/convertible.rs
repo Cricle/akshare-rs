@@ -8,7 +8,7 @@ use crate::error::{Error, Result};
 use crate::types::value_ext::ValueExt;
 use crate::types::wire::ClistResp;
 use crate::types::{BondSnapshot, CandlePoint};
-use crate::util::{parse_csv_line, parse_f64_safe};
+use crate::util::parse_candle_line;
 
 // ---------------------------------------------------------------------------
 // Implementation
@@ -44,24 +44,15 @@ impl AkShareClient {
     /// and change percentage.
     pub async fn bond_convertible_list(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
         let pz = limit.clamp(1, 5000).to_string();
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
                 ("fid", "f3"),
                 ("fs", "b:MK0354"),
                 ("fields", "f2,f3,f12,f14"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: ClistResp = response.json().await.map_err(Error::from)?;
         let values = payload.data.and_then(|d| d.diff).unwrap_or_default();
@@ -128,31 +119,6 @@ impl AkShareClient {
         }
         Ok(items)
     }
-}
-
-/// Parse a single Eastmoney kline CSV line into a `CandlePoint`.
-///
-/// Format: `date,open,close,high,low,volume,amount,amplitude_pct,change_pct,change_amount,turnover_pct`
-fn parse_candle_line(line: &str) -> Result<CandlePoint> {
-    let f = parse_csv_line(line);
-    if f.len() < 11 {
-        return Err(Error::decode(format!(
-            "unexpected eastmoney candle format: {line}"
-        )));
-    }
-    Ok(CandlePoint {
-        trade_date: f[0].to_string(),
-        open: parse_f64_safe(f[1]),
-        close: parse_f64_safe(f[2]),
-        high: parse_f64_safe(f[3]),
-        low: parse_f64_safe(f[4]),
-        volume: parse_f64_safe(f[5]).round() as i64,
-        amount: parse_f64_safe(f[6]),
-        amplitude_pct: parse_f64_safe(f[7]),
-        change_pct: parse_f64_safe(f[8]),
-        change_amount: parse_f64_safe(f[9]),
-        turnover_pct: parse_f64_safe(f[10]),
-    })
 }
 
 #[cfg(test)]

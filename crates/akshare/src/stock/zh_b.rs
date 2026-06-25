@@ -80,14 +80,11 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_b_spot()`
     pub async fn stock_zh_b_spot(&self) -> Result<Vec<ZhBSpotQuote>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
-        let count_resp = self
-            .get(count_url)
-            .query(&[("node", "hs_b")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let count_resp = crate::util::send_and_check(
+            self.get(count_url)
+                .query(&[("node", "hs_b")])
+        )
+        .await?;
 
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
@@ -103,9 +100,9 @@ impl AkShareClient {
 
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
-            let response = self
-                .get(list_url)
-                .query(&[
+            let response = crate::util::send_and_check(
+                self.get(list_url)
+                    .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
                     ("sort", "symbol"),
@@ -113,12 +110,9 @@ impl AkShareClient {
                     ("node", "hs_b"),
                     ("symbol", ""),
                     ("_s_r_a", "page"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
 
@@ -228,18 +222,15 @@ impl AkShareClient {
         };
 
         let url = "https://quotes.sina.cn/cn/api/jsonp_v2.php/=/CN_MarketDataService.getKLineData";
-        let response = self
-            .get(url)
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("symbol", sina_symbol.as_str()),
                 ("scale", period),
                 ("datalen", "1970"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
 

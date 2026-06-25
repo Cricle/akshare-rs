@@ -187,14 +187,11 @@ impl AkShareClient {
         let url =
             format!("https://stock.xueqiu.com/v5/stock/quote.json?symbol={symbol}&extend=detail");
 
-        let response = self
-                        .get(&url)
-            .header("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(&url)
+                .header("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1")
+        )
+        .await?;
 
         let payload: XqQuoteEnvelope = response.json().await.map_err(Error::from)?;
         let quote = payload

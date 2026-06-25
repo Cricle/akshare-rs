@@ -7,10 +7,10 @@ use crate::types::FundNavHistory;
 impl AkShareClient {
     /// Fetch financial fund daily data (Python: fund_financial_fund_daily).
     pub async fn fund_financial_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("https://api.fund.eastmoney.com/FundNetValue/GetLCJJJZ")
-            .header("Referer", "https://fund.eastmoney.com/lcjj.html")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/FundNetValue/GetLCJJJZ")
+                .header("Referer", "https://fund.eastmoney.com/lcjj.html")
+                .query(&[
                 ("letter", ""),
                 ("jjgsid", "0"),
                 ("searchtext", ""),
@@ -19,12 +19,9 @@ impl AkShareClient {
                 ("AttentionCodes", ""),
                 ("cycle", ""),
                 ("OnlySale", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = payload
@@ -43,20 +40,17 @@ impl AkShareClient {
     ///
     /// `symbol`: financial fund code (e.g. "000134").
     pub async fn fund_financial_fund_info(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
-        let response = self
-            .get("https://api.fund.eastmoney.com/f10/lsjz")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/f10/lsjz")
+                .query(&[
                 ("fundCode", symbol),
                 ("pageIndex", "1"),
                 ("pageSize", "10000"),
                 ("startDate", ""),
                 ("endDate", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = payload

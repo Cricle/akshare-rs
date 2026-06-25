@@ -94,27 +94,24 @@ impl AkShareClient {
         };
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query({
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
                 let mut p = vec![
-                    ("reportName", "RPT_PCF10_INDUSTRY_DUPONT"),
-                    ("columns", "ALL"),
-                    ("quoteColumns", ""),
-                    ("filter", filter.as_str()),
-                    ("pageNumber", ""),
-                    ("pageSize", ""),
-                    ("sortTypes", "1"),
-                    ("sortColumns", "PAIMING"),
+                ("reportName", "RPT_PCF10_INDUSTRY_DUPONT"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", ""),
+                ("pageSize", ""),
+                ("sortTypes", "1"),
+                ("sortColumns", "PAIMING"),
                 ];
                 p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
                 p
-            }.as_slice())
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }.as_slice())
+        )
+        .await?;
 
         parse_datacenter_response(response).await
     }
@@ -133,27 +130,24 @@ impl AkShareClient {
         };
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query({
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
                 let mut p = vec![
-                    ("reportName", "RPT_PCF10_INDUSTRY_SCALE"),
-                    ("columns", "ALL"),
-                    ("quoteColumns", ""),
-                    ("filter", filter.as_str()),
-                    ("pageNumber", ""),
-                    ("pageSize", ""),
-                    ("sortTypes", "1"),
-                    ("sortColumns", "PAIMING"),
+                ("reportName", "RPT_PCF10_INDUSTRY_SCALE"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", ""),
+                ("pageSize", ""),
+                ("sortTypes", "1"),
+                ("sortColumns", "PAIMING"),
                 ];
                 p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
                 p
-            }.as_slice())
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }.as_slice())
+        )
+        .await?;
 
         parse_datacenter_response(response).await
     }
@@ -172,9 +166,9 @@ impl AkShareClient {
         period: &str,
     ) -> Result<Vec<BaiduValuation>> {
         let url = "https://gushitong.baidu.com/opendata";
-        let response = self
-            .get(url)
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("openapi", "1"),
                 ("dspName", "iphone"),
                 ("tn", "tangram"),
@@ -189,12 +183,9 @@ impl AkShareClient {
                 ("industry_select", ""),
                 ("skip_industry", "1"),
                 ("finClientType", "pc"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         parse_baidu_valuation(response).await
     }
@@ -220,9 +211,9 @@ impl AkShareClient {
         let mut votes = Vec::new();
 
         for period in &["day", "week", "month", "year"] {
-            let response = self
-                .get(url)
-                .query(&[
+            let response = crate::util::send_and_check(
+                self.get(url)
+                    .query(&[
                     ("code", symbol),
                     ("market", "ab"),
                     ("finance_type", finance_type),
@@ -230,12 +221,9 @@ impl AkShareClient {
                     ("from_smart_app", "0"),
                     ("method", "query"),
                     ("finClientType", "pc"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let data: serde_json::Value = response.json().await.map_err(Error::from)?;
 

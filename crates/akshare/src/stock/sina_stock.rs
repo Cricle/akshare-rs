@@ -74,9 +74,9 @@ impl AkShareClient {
 
         // Step 1: Get total count
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_Bill.GetBillListCount";
-        let count_response = self
-                        .get(count_url)
-            .query(&[
+        let count_response = crate::util::send_and_check(
+            self.get(count_url)
+                .query(&[
                 ("symbol", symbol),
                 ("num", "60"),
                 ("page", "1"),
@@ -86,18 +86,15 @@ impl AkShareClient {
                 ("amount", "0"),
                 ("type", "0"),
                 ("day", date_fmt.as_str()),
-            ])
-            .header(
+                ])
+                .header(
                 "Referer",
                 format!(
-                    "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={symbol}"
+                "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={symbol}"
                 ),
-            )
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                )
+        )
+        .await?;
 
         let count_text = count_response.text().await.map_err(Error::from)?;
         let total_count: i64 = count_text
@@ -118,9 +115,9 @@ impl AkShareClient {
 
         for page in 1..=max_pages {
             let page_str = page.to_string();
-            let response = self
-                                .get(list_url)
-                .query(&[
+            let response = crate::util::send_and_check(
+                self.get(list_url)
+                    .query(&[
                     ("symbol", symbol),
                     ("num", "60"),
                     ("page", page_str.as_str()),
@@ -130,18 +127,15 @@ impl AkShareClient {
                     ("amount", "0"),
                     ("type", "0"),
                     ("day", date_fmt.as_str()),
-                ])
-                .header(
+                    ])
+                    .header(
                     "Referer",
                     format!(
-                        "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={symbol}"
+                    "https://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill.php?symbol={symbol}"
                     ),
-                )
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    )
+            )
+            .await?;
 
             let ticks: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
 
@@ -201,13 +195,10 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .get(&url)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(&url)
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
 

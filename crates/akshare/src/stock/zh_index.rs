@@ -130,18 +130,15 @@ impl AkShareClient {
         struct EnvData {
             diff: Option<Vec<serde_json::Value>>,
         }
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&crate::util::eastmoney_clist_params("5000", &[
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("5000", &[
                 ("fid", "f3"),
                 ("fs", "m:1+s:2,m:0+t:5,m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23"),
                 ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
-            ]))
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let diff = payload
@@ -304,14 +301,11 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_index_spot_sina()`
     pub async fn stock_zh_index_spot_sina(&self) -> Result<Vec<IndexSpotSina>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getNameCount";
-        let count_resp = self
-            .get(count_url)
-            .query(&[("node", "hs_s")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let count_resp = crate::util::send_and_check(
+            self.get(count_url)
+                .query(&[("node", "hs_s")])
+        )
+        .await?;
 
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
@@ -327,9 +321,9 @@ impl AkShareClient {
 
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
-            let response = self
-                .get(list_url)
-                .query(&[
+            let response = crate::util::send_and_check(
+                self.get(list_url)
+                    .query(&[
                     ("page", page_str.as_str()),
                     ("num", "80"),
                     ("sort", "symbol"),
@@ -337,12 +331,9 @@ impl AkShareClient {
                     ("node", "hs_s"),
                     ("symbol", ""),
                     ("_s_r_a", "page"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
 
@@ -386,18 +377,15 @@ impl AkShareClient {
         let start_date = "20000101";
         let end_date = chrono::Utc::now().format("%Y%m%d").to_string();
 
-        let response = self
-            .get(url)
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("indexCode", symbol),
                 ("startDate", start_date),
                 ("endDate", end_date.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload

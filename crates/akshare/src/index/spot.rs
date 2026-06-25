@@ -57,14 +57,11 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-                        .get("https://stock.finance.sina.com.cn/futures/api/openapi.php/GoodsIndexService.get_goods_index")
-            .query(&[("symbol", code), ("table", "0")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://stock.finance.sina.com.cn/futures/api/openapi.php/GoodsIndexService.get_goods_index")
+                .query(&[("symbol", code), ("table", "0")])
+        )
+        .await?;
 
         let payload: SpotEnvelope = response.json().await.map_err(Error::from)?;
         let rows = payload

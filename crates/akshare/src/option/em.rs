@@ -43,9 +43,9 @@ impl AkShareClient {
         let page_size = limit.clamp(1, 200).to_string();
         let filter = format!("(UNDERLYING_SECURITY_CODE=\"{trimmed}\")");
 
-        let response = self
-            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+                .query(&[
                 ("reportName", "RPT_OPTION_CURRENTDAY"),
                 ("columns", "ALL"),
                 ("filter", filter.as_str()),
@@ -55,12 +55,9 @@ impl AkShareClient {
                 ("sortColumns", "TRADE_DATE"),
                 ("source", "WEB"),
                 ("client", "WEB"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: DatacenterEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload.result.map(|r| r.data).unwrap_or_default();

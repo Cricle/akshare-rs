@@ -127,20 +127,17 @@ impl AkShareClient {
         }
 
         let secid = format!("1.{symbol}");
-        let response = self
-            .get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
+                .query(&[
                 ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
                 ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
                 ("iscr", "0"),
                 ("ndays", "5"),
                 ("secid", secid.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: TrendsEnvelope = response.json().await.map_err(Error::from)?;
         let trends = payload.data.and_then(|d| d.trends).unwrap_or_default();

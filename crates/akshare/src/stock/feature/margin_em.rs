@@ -213,9 +213,9 @@ impl AkShareClient {
         } else {
             date.to_string()
         };
-        let resp = self
-            .post(url)
-            .json(&serde_json::json!({
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .json(&serde_json::json!({
                 "currentPage": 1,
                 "pageSize": 50000,
                 "type": "bdzq",
@@ -227,12 +227,9 @@ impl AkShareClient {
                 "appChannel": "LRSP",
                 "requestId": "194055910e2075c03e25fabf6ffc5a7f",
                 "channel": "pa18",
-            }))
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }))
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")

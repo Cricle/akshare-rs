@@ -236,15 +236,12 @@ impl AkShareClient {
     pub async fn stock_rank_forecast(&self, date: &str) -> Result<Vec<ForecastCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1133";
         let sd = fmt_date(date);
-        let resp = self
-            .post(url)
-            .form(&[("sdate", sd.as_str())])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("sdate", sd.as_str())])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -263,9 +260,9 @@ impl AkShareClient {
         sort_field: &str,
         sort_order: &str,
     ) -> Result<Vec<RankThsEntry>> {
-        let resp = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&[
                 ("pn", "1"),
                 ("pz", "5000"),
                 ("po", sort_order),
@@ -276,12 +273,9 @@ impl AkShareClient {
                 ("fid", sort_field),
                 ("fs", "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048"),
                 ("fields", "f2,f3,f12,f14"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
         let payload: crate::types::wire::ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
         Ok(items

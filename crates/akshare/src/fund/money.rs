@@ -19,22 +19,19 @@ impl AkShareClient {
     /// Fetch money market fund rankings from Eastmoney.
     pub async fn fund_money_market(&self, limit: usize) -> Result<Vec<FundSnapshot>> {
         let pn = limit.max(1).to_string();
-        let response = self
-            .get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
+                .query(&[
                 ("FundType", "0"),
                 ("SortColumn", "SYL_7"),
                 ("Sort", "desc"),
                 ("pageIndex", "1"),
                 ("pageSize", pn.as_str()),
                 ("IsSale", "1"),
-            ])
-            .header("Referer", "https://fund.eastmoney.com/")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://fund.eastmoney.com/")
+        )
+        .await?;
 
         let payload: HbRankEnvelope = response.json().await.map_err(Error::from)?;
         if let Some(code) = payload.err_code
@@ -96,13 +93,10 @@ impl AkShareClient {
 
     /// Fetch money fund daily data (Python: fund_money_fund_daily).
     pub async fn fund_money_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("https://fund.eastmoney.com/HBJJ_pjsyl.html")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/HBJJ_pjsyl.html")
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         // This endpoint returns HTML; we need to parse the table.
@@ -122,24 +116,21 @@ impl AkShareClient {
     ///
     /// `symbol`: money fund code (e.g. "000009").
     pub async fn fund_money_fund_info(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
-        let response = self
-            .get("https://api.fund.eastmoney.com/f10/lsjz")
-            .header(
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/f10/lsjz")
+                .header(
                 "Referer",
                 format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
-            )
-            .query(&[
+                )
+                .query(&[
                 ("fundCode", symbol),
                 ("pageIndex", "1"),
                 ("pageSize", "10000"),
                 ("startDate", ""),
                 ("endDate", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = payload
@@ -172,9 +163,9 @@ impl AkShareClient {
 
     /// Fetch money fund ranking (Python: fund_money_rank).
     pub async fn fund_money_rank(&self) -> Result<Vec<FundMoneyRankItem>> {
-        let response = self
-            .get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
+                .query(&[
                 ("intCompany", "0"),
                 ("MinsgType", ""),
                 ("IsSale", "1"),
@@ -182,13 +173,10 @@ impl AkShareClient {
                 ("orderType", "desc"),
                 ("pageIndex", "1"),
                 ("pageSize", "10000"),
-            ])
-            .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload

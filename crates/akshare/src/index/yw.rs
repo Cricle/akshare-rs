@@ -43,14 +43,11 @@ impl AkShareClient {
             confidentindex: Option<f64>,
         }
 
-        let response = self
-            .get("https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/bi")
-            .query(&[("gcCode", "")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/bi")
+                .query(&[("gcCode", "")])
+        )
+        .await?;
 
         let payload: Envelope = response.json().await.map_err(Error::from)?;
         let rows = payload.data.unwrap_or_default();
@@ -83,14 +80,11 @@ impl AkShareClient {
         let url = format!(
             "https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/{path}"
         );
-        let response = self
-            .get(&url)
-            .query(&[("gcCode", "")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(&url)
+                .query(&[("gcCode", "")])
+        )
+        .await?;
 
         let payload: Envelope = response.json().await.map_err(Error::from)?;
         let data = payload.data.unwrap_or_default();

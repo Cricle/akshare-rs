@@ -39,28 +39,19 @@ impl AkShareClient {
 
     async fn fetch_buyback_list(&self, fs: &str, limit: usize) -> Result<Vec<BondSnapshot>> {
         let pz = limit.max(1).to_string();
-        let resp = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let resp = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
                 ("fs", fs),
                 (
-                    "fields",
-                    "f12,f13,f14,f1,f2,f4,f3,f152,f17,f18,f15,f16,f5,f6",
+                "fields",
+                "f12,f13,f14,f1,f2,f4,f3,f152,f17,f18,f15,f16,f5,f6",
                 ),
                 ("fid", "f6"),
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
                 ("dect", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();

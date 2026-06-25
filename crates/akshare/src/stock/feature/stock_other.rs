@@ -53,15 +53,12 @@ impl AkShareClient {
     /// 巨潮-配股
     pub async fn stock_allotment(&self, symbol: &str) -> Result<Vec<AllotmentCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1091";
-        let resp = self
-            .post(url)
-            .form(&[("seccode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("seccode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -77,18 +74,15 @@ impl AkShareClient {
     /// 乐咕乐股-全部A股等权重市净率
     pub async fn stock_a_all_pb(&self) -> Result<Vec<serde_json::Value>> {
         let url = "https://legulegu.com/api/stockdata/market-index-pb";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("marketId", "ALL"),
                 ("token", "325843825a2745a2a8f9b9e3355cb864"),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -101,18 +95,15 @@ impl AkShareClient {
     /// 乐咕乐股-破净股统计
     pub async fn stock_a_below_net_asset_statistics(&self) -> Result<Vec<serde_json::Value>> {
         let url = "https://legulegu.com/stockdata/below-net-asset-statistics-data";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("marketId", "1"),
                 ("token", "325843825a2745a2a8f9b9e3355cb864"),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json.as_array().cloned().unwrap_or_default();
         Ok(arr)
@@ -134,15 +125,12 @@ impl AkShareClient {
     /// 乐咕乐股-A股拥堵度
     pub async fn stock_a_congestion_lg(&self) -> Result<Vec<CongestionLg>> {
         let url = "https://legulegu.com/stockdata/congestion-index-data";
-        let resp = self
-            .get(url)
-            .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json.as_array().cloned().unwrap_or_default();
         Ok(arr
@@ -154,15 +142,12 @@ impl AkShareClient {
     /// 乐咕乐股-A股股息率
     pub async fn stock_a_gxl_lg(&self) -> Result<Vec<GxlLg>> {
         let url = "https://legulegu.com/stockdata/ashare-dividend-yield-data";
-        let resp = self
-            .get(url)
-            .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json.as_array().cloned().unwrap_or_default();
         Ok(arr.into_iter().map(|v| GxlLg { data: v }).collect())
@@ -171,14 +156,11 @@ impl AkShareClient {
     /// 乐咕乐股-创新高新低统计
     pub async fn stock_a_high_low_statistics(&self) -> Result<Vec<serde_json::Value>> {
         let url = "https://www.legulegu.com/stockdata/member-ship/get-high-low-statistics/all";
-        let resp = self
-            .get(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json.as_array().cloned().unwrap_or_default();
         Ok(arr)
@@ -187,18 +169,15 @@ impl AkShareClient {
     /// 乐咕乐股-A股TTM/LYR
     pub async fn stock_a_ttm_lyr(&self) -> Result<Vec<serde_json::Value>> {
         let url = "https://legulegu.com/api/stock-data/market-ttm-lyr";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("marketId", "5"),
                 ("token", "325843825a2745a2a8f9b9e3355cb864"),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -211,15 +190,12 @@ impl AkShareClient {
     /// 乐咕乐股-巴菲特指标
     pub async fn stock_buffett_index_lg(&self) -> Result<Vec<BuffettIndexLg>> {
         let url = "https://legulegu.com/stockdata/buffett-index-data";
-        let resp = self
-            .get(url)
-            .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json.as_array().cloned().unwrap_or_default();
         Ok(arr
@@ -231,9 +207,9 @@ impl AkShareClient {
     /// 新浪-行业分类
     pub async fn stock_classify(&self, symbol: &str) -> Result<Vec<ClassifySina>> {
         let url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData".to_string();
-        let resp = self
-            .get(&url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+                .query(&[
                 ("page", "1"),
                 ("num", "5000"),
                 ("sort", "changepercent"),
@@ -241,13 +217,10 @@ impl AkShareClient {
                 ("node", symbol),
                 ("symbol", ""),
                 ("_s_r_a", "init"),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let text = resp.text().await.map_err(Error::from)?;
         // Try to parse as JSON array
         let json: serde_json::Value = serde_json::from_str(&text).unwrap_or(serde_json::json!([]));
@@ -261,15 +234,12 @@ impl AkShareClient {
     /// 富途-概念成份股
     pub async fn stock_concept_cons_futu(&self, symbol: &str) -> Result<Vec<ConceptConsFutu>> {
         let url = "https://www.futunn.com/quote-api/quote/v2/get-stock-list-by-market";
-        let resp = self
-            .get(url)
-            .query(&[("market", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("market", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -320,15 +290,12 @@ impl AkShareClient {
     /// 巨潮-分红送配
     pub async fn stock_dividend(&self, symbol: &str) -> Result<Vec<DividendCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1092";
-        let resp = self
-            .post(url)
-            .form(&[("seccode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("seccode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -344,15 +311,12 @@ impl AkShareClient {
     /// 乐咕乐股-等权市净率
     pub async fn stock_ebs_lg(&self) -> Result<Vec<EbsLg>> {
         let url = "https://legulegu.com/stockdata/equal-weight-pb-data";
-        let resp = self
-            .get(url)
-            .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json.as_array().cloned().unwrap_or_default();
         Ok(arr.into_iter().map(|v| EbsLg { data: v }).collect())
@@ -376,14 +340,11 @@ impl AkShareClient {
     /// 同花顺-分红配送明细
     pub async fn stock_fhps_detail_ths(&self, symbol: &str) -> Result<Vec<FhpsThs>> {
         let url = format!("https://basic.10jqka.com.cn/api/stockph/fhsp/{symbol}");
-        let resp = self
-            .get(&url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -434,14 +395,11 @@ impl AkShareClient {
     /// 巨潮-IPO概况
     pub async fn stock_ipo_summary(&self) -> Result<Vec<IpoSummaryCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1093";
-        let resp = self
-            .post(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -457,15 +415,12 @@ impl AkShareClient {
     /// 乐咕乐股-市场活跃度
     pub async fn stock_market_activity_legu(&self) -> Result<Vec<MarketActivityLegu>> {
         let url = "https://legulegu.com/stockdata/market-activity-data";
-        let resp = self
-            .get(url)
-            .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("token", "325843825a2745a2a8f9b9e3355cb864")])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json.as_array().cloned().unwrap_or_default();
         Ok(arr
@@ -477,18 +432,15 @@ impl AkShareClient {
     /// 乐咕乐股-市场市净率
     pub async fn stock_market_pb_lg(&self) -> Result<Vec<serde_json::Value>> {
         let url = "https://legulegu.com/api/stockdata/index-basic-pb";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("token", "325843825a2745a2a8f9b9e3355cb864"),
                 ("indexCode", "1"),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -501,18 +453,15 @@ impl AkShareClient {
     /// 乐咕乐股-市场市盈率
     pub async fn stock_market_pe_lg(&self) -> Result<Vec<serde_json::Value>> {
         let url = "https://legulegu.com/api/stock-data/market-pe";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("token", "325843825a2745a2a8f9b9e3355cb864"),
                 ("marketId", "1"),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -525,14 +474,11 @@ impl AkShareClient {
     /// 巨潮-新股过会
     pub async fn stock_new_gh(&self) -> Result<Vec<NewGhCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1094";
-        let resp = self
-            .post(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -548,14 +494,11 @@ impl AkShareClient {
     /// 巨潮-新股IPO
     pub async fn stock_new_ipo(&self) -> Result<Vec<NewIpoCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1095";
-        let resp = self
-            .post(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -667,15 +610,12 @@ impl AkShareClient {
     pub async fn stock_news_main_cx(&self, symbol: &str) -> Result<Vec<CxMainNews>> {
         let _ = symbol;
         let url = "https://www.cls.cn/nodeapi/updateTelegraph";
-        let resp = self
-            .get(url)
-            .query(&[("app", "CailianpressWeb"), ("os", "web"), ("sv", "7.7.5")])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("app", "CailianpressWeb"), ("os", "web"), ("sv", "7.7.5")])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -710,15 +650,12 @@ impl AkShareClient {
     /// 巨潮-公司概况
     pub async fn stock_profile(&self, symbol: &str) -> Result<Vec<ProfileCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1096";
-        let resp = self
-            .post(url)
-            .form(&[("seccode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("seccode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -813,9 +750,9 @@ impl AkShareClient {
     /// 东方财富-个股研报
     pub async fn stock_research_report(&self, symbol: &str) -> Result<Vec<ResearchReport>> {
         let url = "https://reportapi.eastmoney.com/report/list";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("industryCode", "*"),
                 ("pageSize", "200"),
                 ("industry", "*"),
@@ -830,12 +767,9 @@ impl AkShareClient {
                 ("code", symbol),
                 ("rcode", ""),
                 ("p", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -909,15 +843,12 @@ impl AkShareClient {
     /// 巨潮-股本变动
     pub async fn stock_share_change(&self, symbol: &str) -> Result<Vec<ShareChangeCninfo>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1097";
-        let resp = self
-            .post(url)
-            .form(&[("seccode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("seccode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -1008,22 +939,19 @@ impl AkShareClient {
     /// 上交所-互动易
     pub async fn stock_sns_sseinfo(&self, symbol: &str) -> Result<Vec<SseInfo>> {
         let url = "https://sns.sseinfo.com/ajax/feeds.do";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("type", "11"),
                 ("pageSize", "20"),
                 ("lastid", "-1"),
                 ("show", "hasmark"),
                 ("page", "1"),
                 ("stockcode", symbol),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("list")
@@ -1036,9 +964,9 @@ impl AkShareClient {
     /// 上交所-每日交易
     pub async fn stock_sse_deal_daily(&self, date: &str) -> Result<Vec<SseDealDaily>> {
         let url = "https://query.sse.com.cn/commonQuery.do";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("jsonCallBack", ""),
                 ("isPagination", "true"),
                 ("sqlId", "COMMON_SSE_SCSJ_MRTJ_L"),
@@ -1048,14 +976,11 @@ impl AkShareClient {
                 ("pageHelp.beginPage", "1"),
                 ("pageHelp.cacheSize", "1"),
                 ("pageHelp.endPage", "5"),
-            ])
-            .header("Referer", "https://www.sse.com.cn/")
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://www.sse.com.cn/")
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("result")
@@ -1099,21 +1024,18 @@ impl AkShareClient {
     pub async fn stock_szse_area_summary(&self, date: &str) -> Result<Vec<SzseAreaSummary>> {
         let sd = fmt_date(date);
         let url = "https://www.szse.cn/api/report/ShowReport/data";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("SHOWTYPE", "JSON"),
                 ("CATALOGID", "1803"),
                 ("txtDate", sd.as_str()),
                 ("tab1PAGENO", "1"),
-            ])
-            .header("Referer", "https://www.szse.cn/")
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://www.szse.cn/")
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .as_array()
@@ -1132,21 +1054,18 @@ impl AkShareClient {
     pub async fn stock_szse_sector_summary(&self, date: &str) -> Result<Vec<SzseSectorSummary>> {
         let sd = fmt_date(date);
         let url = "https://www.szse.cn/api/report/ShowReport/data";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("SHOWTYPE", "JSON"),
                 ("CATALOGID", "1801"),
                 ("txtDate", sd.as_str()),
                 ("tab1PAGENO", "1"),
-            ])
-            .header("Referer", "https://www.szse.cn/")
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://www.szse.cn/")
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .as_array()
@@ -1165,21 +1084,18 @@ impl AkShareClient {
     pub async fn stock_szse_summary(&self, date: &str) -> Result<Vec<SzseSummaryEntry>> {
         let sd = fmt_date(date);
         let url = "https://www.szse.cn/api/report/ShowReport/data";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("SHOWTYPE", "JSON"),
                 ("CATALOGID", "1801"),
                 ("txtDate", sd.as_str()),
                 ("tab1PAGENO", "1"),
-            ])
-            .header("Referer", "https://www.szse.cn/")
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "https://www.szse.cn/")
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .as_array()
@@ -1265,14 +1181,11 @@ impl AkShareClient {
     /// 同花顺-新股上市日
     pub async fn stock_xgsr(&self, symbol: &str) -> Result<Vec<XgsrThs>> {
         let url = format!("https://basic.10jqka.com.cn/api/stockph/xgsr/{symbol}");
-        let resp = self
-            .get(&url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -1363,14 +1276,11 @@ impl AkShareClient {
     ) -> Result<Vec<DelistedReport>> {
         let code_lower = symbol.to_lowercase();
         let url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/BalanceSheetDateAjaxNew";
-        let resp = self
-            .get(url)
-            .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -1394,14 +1304,11 @@ impl AkShareClient {
     ) -> Result<Vec<DelistedReport>> {
         let code_lower = symbol.to_lowercase();
         let url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/CashFlowDateAjaxNew";
-        let resp = self
-            .get(url)
-            .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -1426,14 +1333,11 @@ impl AkShareClient {
         let code_lower = symbol.to_lowercase();
         let url =
             "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ProfitDateAjaxNew";
-        let resp = self
-            .get(url)
-            .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")
@@ -1453,15 +1357,12 @@ impl AkShareClient {
     /// 巨潮-股权抵押
     pub async fn stock_cg_equity_mortgage(&self, symbol: &str) -> Result<Vec<CgEquityMortgage>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1098";
-        let resp = self
-            .post(url)
-            .form(&[("seccode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("seccode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -1477,15 +1378,12 @@ impl AkShareClient {
     /// 巨潮-担保
     pub async fn stock_cg_guarantee(&self, symbol: &str) -> Result<Vec<CgGuarantee>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1099";
-        let resp = self
-            .post(url)
-            .form(&[("seccode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("seccode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -1501,15 +1399,12 @@ impl AkShareClient {
     /// 巨潮-诉讼
     pub async fn stock_cg_lawsuit(&self, symbol: &str) -> Result<Vec<CgLawsuit>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1100";
-        let resp = self
-            .post(url)
-            .form(&[("seccode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("seccode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -1526,14 +1421,11 @@ impl AkShareClient {
     pub async fn stock_zcfz_bj(&self, symbol: &str) -> Result<Vec<DelistedReport>> {
         let code_lower = symbol.to_lowercase();
         let url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/BalanceSheetDateAjaxNew";
-        let resp = self
-            .get(url)
-            .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[("code", code_lower.as_str()), ("reportDateType", "0")])
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json
             .get("data")

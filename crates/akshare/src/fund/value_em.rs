@@ -29,10 +29,10 @@ impl AkShareClient {
             .map_or("1", |(_, c)| *c);
 
         let ts = chrono::Utc::now().timestamp_millis().to_string();
-        let response = self
-            .get("https://api.fund.eastmoney.com/FundGuZhi/GetFundGZList")
-            .header("Referer", "https://fund.eastmoney.com/")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/FundGuZhi/GetFundGZList")
+                .header("Referer", "https://fund.eastmoney.com/")
+                .query(&[
                 ("type", type_id),
                 ("sort", "3"),
                 ("orderType", "desc"),
@@ -40,12 +40,9 @@ impl AkShareClient {
                 ("pageIndex", "1"),
                 ("pageSize", "20000"),
                 ("_", ts.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload

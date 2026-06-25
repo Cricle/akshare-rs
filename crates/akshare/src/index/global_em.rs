@@ -39,9 +39,9 @@ impl AkShareClient {
             i:100.SPX,i:100.NDX,i:100.TSX,i:100.BVSP,i:100.MXX,\
             i:100.AS51,i:100.AORD,i:100.NZ50,i:100.UDI,i:100.BDI,i:100.CRB";
 
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&[
                 ("np", "2"),
                 ("fltt", "1"),
                 ("invt", "2"),
@@ -52,12 +52,9 @@ impl AkShareClient {
                 ("pz", "200"),
                 ("po", "1"),
                 ("dect", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: EmGlobalEnvelope = response.json().await.map_err(Error::from)?;
         let diff = payload.data.and_then(|d| d.diff).unwrap_or_default();

@@ -49,14 +49,11 @@ impl AkShareClient {
         ];
 
         // Fetch index data
-        let resp1 = self
-            .get("https://zs.zjpwq.net/pwq-index-webapi/indexData")
-            .query(&params)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp1 = crate::util::send_and_check(
+            self.get("https://zs.zjpwq.net/pwq-index-webapi/indexData")
+                .query(&params)
+        )
+        .await?;
 
         let payload1: EriEnvelope = resp1.json().await.map_err(Error::from)?;
         let data1 = payload1.data.unwrap_or_default();
@@ -84,14 +81,11 @@ impl AkShareClient {
         }
 
         // Fetch statistics data
-        let resp2 = self
-            .get("https://zs.zjpwq.net/pwq-index-webapi/dataStatistics")
-            .query(&params)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp2 = crate::util::send_and_check(
+            self.get("https://zs.zjpwq.net/pwq-index-webapi/dataStatistics")
+                .query(&params)
+        )
+        .await?;
 
         let payload2: EriStatsEnvelope = resp2.json().await.map_err(Error::from)?;
         let data2 = payload2.data.unwrap_or_default();

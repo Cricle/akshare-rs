@@ -10,25 +10,22 @@ impl AkShareClient {
         symbol: &str,
         _date: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let resp = self
-            .get("https://fundf10.eastmoney.com/FundArchivesDatas.aspx")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("https://fundf10.eastmoney.com/FundArchivesDatas.aspx")
+                .query(&[
                 ("type", "jjcc"),
                 ("code", symbol),
                 ("topline", "10"),
                 ("year", ""),
                 ("month", ""),
                 ("rt", "0.123"),
-            ])
-            .header(
+                ])
+                .header(
                 "Referer",
                 format!("https://fundf10.eastmoney.com/ccmx_{symbol}.html").as_str(),
-            )
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                )
+        )
+        .await?;
 
         let _text = resp.text().await.map_err(Error::from)?;
         Err(Error::decode(format!(
@@ -54,19 +51,16 @@ impl AkShareClient {
         &self,
         symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("https://api.fund.eastmoney.com/f10/HYPZ/")
-            .header("Referer", "https://fundf10.eastmoney.com/")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/f10/HYPZ/")
+                .header("Referer", "https://fundf10.eastmoney.com/")
+                .query(&[
                 ("fundCode", symbol),
                 ("year", ""),
                 ("callback", "jQuery183006997159478989867_1648016188499"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         // Response is JSONP; extract JSON
@@ -121,20 +115,17 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .get("https://fundf10.eastmoney.com/FundArchivesDatas.aspx")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fundf10.eastmoney.com/FundArchivesDatas.aspx")
+                .query(&[
                 ("type", "zdbd"),
                 ("code", symbol),
                 ("zdbd", zdbd),
                 ("year", ""),
                 ("rt", "0.913877030254846"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);

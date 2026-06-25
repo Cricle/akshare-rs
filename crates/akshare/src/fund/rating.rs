@@ -8,21 +8,18 @@ impl AkShareClient {
     /// Fetch fund ratings from Eastmoney.
     pub async fn fund_rating(&self, limit: usize) -> Result<Vec<serde_json::Value>> {
         let pn = limit.max(1).to_string();
-        let resp = self
-            .get("https://api.fund.eastmoney.com/FundRating/GetFundRatingList")
-            .header("Referer", "https://fund.eastmoney.com/")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/FundRating/GetFundRatingList")
+                .header("Referer", "https://fund.eastmoney.com/")
+                .query(&[
                 ("FundType", "0"),
                 ("SortColumn", "SYL_1N"),
                 ("Sort", "desc"),
                 ("pageIndex", "1"),
                 ("pageSize", pn.as_str()),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let root: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let items = root
@@ -53,13 +50,10 @@ impl AkShareClient {
 
     /// Fetch all fund ratings summary (Python: fund_rating_all).
     pub async fn fund_rating_all(&self) -> Result<Vec<FundRatingItem>> {
-        let response = self
-            .get("https://fund.eastmoney.com/data/fundrating.html")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/data/fundrating.html")
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         // This returns HTML with embedded JS data; requires HTML parsing.

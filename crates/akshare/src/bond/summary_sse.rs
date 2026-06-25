@@ -11,18 +11,15 @@ impl AkShareClient {
     pub async fn bond_cash_summary(&self, date: &str) -> Result<Vec<serde_json::Value>> {
         let formatted = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "http://query.sse.com.cn/commonExcelDd.do";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQXQSCGL_CX_L"),
                 ("TRADE_DATE", formatted.as_str()),
-            ])
-            .header("Referer", "http://bond.sse.com.cn/")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "http://bond.sse.com.cn/")
+        )
+        .await?;
 
         let _bytes = resp.bytes().await.map_err(Error::from)?;
         // SSE returns Excel files; parsing requires xlsx/xls support.
@@ -38,18 +35,15 @@ impl AkShareClient {
     pub async fn bond_deal_summary(&self, date: &str) -> Result<Vec<serde_json::Value>> {
         let formatted = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let url = "http://query.sse.com.cn/commonExcelDd.do";
-        let resp = self
-            .get(url)
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get(url)
+                .query(&[
                 ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQCJGL_CX_L"),
                 ("TRADE_DATE", formatted.as_str()),
-            ])
-            .header("Referer", "http://bond.sse.com.cn/")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+                .header("Referer", "http://bond.sse.com.cn/")
+        )
+        .await?;
 
         let _bytes = resp.bytes().await.map_err(Error::from)?;
         Err(Error::decode(

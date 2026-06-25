@@ -48,14 +48,12 @@ async fn fetch_cx_index(
     let mut params = vec![("type", cx_type)];
     params.extend(extra.iter().map(|(k, v)| (*k, *v)));
 
-    let response = client
-        .get("https://yun.ccxe.com.cn/api/index/pro/cxIndexTrendInfo")
-        .query(&params)
-        .send()
-        .await
-        .map_err(Error::from)?
-        .error_for_status()
-        .map_err(Error::from)?;
+    let response = crate::util::send_and_check(
+        client
+            .get("https://yun.ccxe.com.cn/api/index/pro/cxIndexTrendInfo")
+            .query(&params),
+    )
+    .await?;
 
     let payload: CxEnvelope = response.json().await.map_err(Error::from)?;
     let rows = payload.data.unwrap_or_default();

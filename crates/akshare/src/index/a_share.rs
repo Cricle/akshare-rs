@@ -84,24 +84,15 @@ impl AkShareClient {
             .map(|(_, fs)| *fs)
             .ok_or_else(|| Error::invalid_input(format!("unknown series: {series}")))?;
 
-        let response = self
-            .get("https://48.push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", "200"),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://48.push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params("200", &[
                 ("fid", "f12"),
                 ("fs", fs),
                 ("fields", "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: EmClistEnvelope = response.json().await.map_err(Error::from)?;
         let diff = payload.data.and_then(|d| d.diff).unwrap_or_default();
@@ -141,14 +132,11 @@ impl AkShareClient {
     /// Note: Heavy scraping may trigger IP bans.
     pub async fn index_stock_zh_spot_sina(&self) -> Result<Vec<IndexSpotSinaItem>> {
         // Get page count
-        let count_resp = self
-                        .get("http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCountSimple")
-            .query(&[("node", "hs_s")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let count_resp = crate::util::send_and_check(
+            self.get("http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCountSimple")
+                .query(&[("node", "hs_s")])
+        )
+        .await?;
 
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let count: i64 = count_text
@@ -159,21 +147,18 @@ impl AkShareClient {
 
         let mut all_items = Vec::new();
         for page in 1..=pages {
-            let resp = self
-                                .get("http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple")
-                .query(&[
+            let resp = crate::util::send_and_check(
+                self.get("http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple")
+                    .query(&[
                     ("page", page.to_string().as_str()),
                     ("num", "80"),
                     ("sort", "symbol"),
                     ("asc", "1"),
                     ("node", "hs_s"),
                     ("_s_r_a", "page"),
-                ])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+                    ])
+            )
+            .await?;
 
             let items: Vec<IndexSpotSinaItem> = resp.json().await.map_err(Error::from)?;
             all_items.extend(items);
@@ -192,14 +177,11 @@ impl AkShareClient {
         // Sina uses JS-encoded data; try to parse the response directly
         let url =
             format!("https://finance.sina.com.cn/realstock/company/{symbol}/hisdata/klc_kl.js");
-        let response = self
-            .get(&url)
-            .query(&[("d", "2020_2_4")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(&url)
+                .query(&[("d", "2020_2_4")])
+        )
+        .await?;
 
         let body = response.text().await.map_err(Error::from)?;
         // The response is JS-encoded; we can't decode it without a JS runtime.

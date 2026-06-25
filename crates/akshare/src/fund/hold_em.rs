@@ -7,21 +7,18 @@ use crate::types::FundHolderStructureItem;
 impl AkShareClient {
     /// Fetch fund holder structure (Python: fund_hold_structure).
     pub async fn fund_hold_structure(&self) -> Result<Vec<FundHolderStructureItem>> {
-        let response = self
-            .get("https://fund.eastmoney.com/data/FundDataPortfolio_Interface.aspx")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/data/FundDataPortfolio_Interface.aspx")
+                .query(&[
                 ("dt", "11"),
                 ("pi", "1"),
                 ("pn", "50"),
                 ("mc", "hypzDetail"),
                 ("st", "desc"),
                 ("sc", "reportdate"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);

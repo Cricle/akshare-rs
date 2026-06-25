@@ -30,10 +30,10 @@ impl AkShareClient {
         let now = chrono::Utc::now().format("%Y-%m-%d").to_string();
         let pn = limit.max(1).to_string();
 
-        let resp = self
-            .get("https://fund.eastmoney.com/data/rankhandler.aspx")
-            .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
-            .query(&[
+        let resp = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/data/rankhandler.aspx")
+                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
+                .query(&[
                 ("op", "ph"),
                 ("dt", "kf"),
                 ("ft", ft),
@@ -48,12 +48,9 @@ impl AkShareClient {
                 ("pi", "1"),
                 ("pn", pn.as_str()),
                 ("dx", "1"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);
@@ -97,10 +94,10 @@ impl AkShareClient {
 
     /// Fetch exchange fund ranking (Python: fund_exchange_rank).
     pub async fn fund_exchange_rank(&self) -> Result<Vec<FundExchangeRankItem>> {
-        let response = self
-            .get("https://fund.eastmoney.com/data/rankhandler.aspx")
-            .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/data/rankhandler.aspx")
+                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
+                .query(&[
                 ("op", "ph"),
                 ("dt", "fb"),
                 ("ft", "ct"),
@@ -110,12 +107,9 @@ impl AkShareClient {
                 ("st", "desc"),
                 ("pi", "1"),
                 ("pn", "30000"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_start = text.find('{').unwrap_or(0);

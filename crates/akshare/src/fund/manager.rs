@@ -7,9 +7,9 @@ use crate::types::FundManagerItem;
 impl AkShareClient {
     /// Fetch fund manager list (Python: fund_manager).
     pub async fn fund_manager(&self) -> Result<Vec<FundManagerItem>> {
-        let response = self
-            .get("https://fund.eastmoney.com/Data/FundDataPortfolio_Interface.aspx")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/Data/FundDataPortfolio_Interface.aspx")
+                .query(&[
                 ("dt", "14"),
                 ("mc", "returnjson"),
                 ("ft", "all"),
@@ -17,12 +17,9 @@ impl AkShareClient {
                 ("pi", "1"),
                 ("sc", "abbname"),
                 ("st", "asc"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text.strip_prefix("var returnjson= ").unwrap_or(&text);

@@ -9,14 +9,11 @@ impl AkShareClient {
     /// 巨潮-行业分类
     pub async fn stock_industry_category(&self) -> Result<Vec<IndustryCategory>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1125";
-        let resp = self
-            .post(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -37,15 +34,12 @@ impl AkShareClient {
     /// 巨潮-行业变动
     pub async fn stock_industry_change(&self, symbol: &str) -> Result<Vec<IndustryChange>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1126";
-        let resp = self
-            .post(url)
-            .form(&[("indcode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("indcode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -78,15 +72,12 @@ impl AkShareClient {
     /// 巨潮-行业市盈率
     pub async fn stock_industry_pe_ratio(&self, symbol: &str) -> Result<Vec<IndustryPeRatio>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1131";
-        let resp = self
-            .post(url)
-            .form(&[("indcode", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.post(url)
+                .form(&[("indcode", symbol)])
+                .header("User-Agent", "Mozilla/5.0")
+        )
+        .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")

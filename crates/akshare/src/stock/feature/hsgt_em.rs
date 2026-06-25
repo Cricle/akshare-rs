@@ -332,13 +332,10 @@ impl AkShareClient {
         let url = format!(
             "https://push2.eastmoney.com/api/qt/kamtbs.rtmin/get?fields1=f1,f2,f3,f4&fields2=f51,f52,f53,f54,f55,f56&ut=b2884a393a59ad64002292a3e90d46a5&klt={market}"
         );
-        let resp = self
-            .get(&url)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let resp = crate::util::send_and_check(
+            self.get(&url)
+        )
+        .await?;
         let data: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let items = data
             .get("data")

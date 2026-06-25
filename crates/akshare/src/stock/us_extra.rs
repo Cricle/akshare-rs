@@ -871,14 +871,11 @@ impl AkShareClient {
     /// Python equivalent: `stock_us_index_spot_sina()`
     pub async fn stock_us_index_spot_sina(&self) -> Result<Vec<UsIndexSpotSina>> {
         let url = "https://hq.sinajs.cn/list=int_dji,int_nasdaq,int_sp500";
-        let response = self
-            .get(url)
-            .header("Referer", "https://finance.sina.com.cn")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .header("Referer", "https://finance.sina.com.cn")
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let mut items = Vec::new();
@@ -931,14 +928,11 @@ impl AkShareClient {
     pub async fn stock_us_index_daily_sina(&self, symbol: &str) -> Result<Vec<UsIndexDailyCandle>> {
         let url = format!("https://finance.sina.com.cn/stock/usstock/{symbol}/klc_kl.js");
 
-        let response = self
-            .get(&url)
-            .query(&[("d", "2023_5_01")])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(&url)
+                .query(&[("d", "2023_5_01")])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
 
@@ -999,27 +993,24 @@ impl AkShareClient {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query({
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
                 let mut p = vec![
-                    ("reportName", "RPT_USF10_FN_GMAININDICATOR"),
-                    ("columns", "ALL"),
-                    ("quoteColumns", ""),
-                    ("filter", filter.as_str()),
-                    ("pageNumber", "1"),
-                    ("pageSize", ""),
-                    ("sortTypes", "-1"),
-                    ("sortColumns", "REPORT_DATE"),
+                ("reportName", "RPT_USF10_FN_GMAININDICATOR"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "REPORT_DATE"),
                 ];
                 p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
                 p
-            }.as_slice())
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }.as_slice())
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -1048,27 +1039,24 @@ impl AkShareClient {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query({
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
                 let mut p = vec![
-                    ("reportName", "RPT_USF10_FN_DIVIDEND"),
-                    ("columns", "ALL"),
-                    ("quoteColumns", ""),
-                    ("filter", filter.as_str()),
-                    ("pageNumber", "1"),
-                    ("pageSize", ""),
-                    ("sortTypes", "-1"),
-                    ("sortColumns", "EX_DIVIDEND_DATE"),
+                ("reportName", "RPT_USF10_FN_DIVIDEND"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "EX_DIVIDEND_DATE"),
                 ];
                 p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
                 p
-            }.as_slice())
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }.as_slice())
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -1089,13 +1077,10 @@ impl AkShareClient {
     /// Returns S&P 500 dividend yield data.
     pub async fn stock_us_gxl_lg(&self) -> Result<Vec<UsGxlLg>> {
         let url = "https://legulegu.com/api/stockdata/s-and-p-500";
-        let response = self
-            .get(url)
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get(url)
+        )
+        .await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
         let arr = data
@@ -1139,27 +1124,24 @@ impl AkShareClient {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query({
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
                 let mut p = vec![
-                    ("reportName", "RPT_PCF10_INDUSTRY_USSCALE"),
-                    ("columns", "ALL"),
-                    ("quoteColumns", ""),
-                    ("filter", filter.as_str()),
-                    ("pageNumber", ""),
-                    ("pageSize", ""),
-                    ("sortTypes", "1"),
-                    ("sortColumns", "PAIMING"),
+                ("reportName", "RPT_PCF10_INDUSTRY_USSCALE"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", ""),
+                ("pageSize", ""),
+                ("sortTypes", "1"),
+                ("sortColumns", "PAIMING"),
                 ];
                 p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
                 p
-            }.as_slice())
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }.as_slice())
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload
@@ -1192,27 +1174,24 @@ impl AkShareClient {
         let filter = format!("(SECURITY_CODE=\"{symbol}\")");
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
-        let response = self
-            .get(url)
-            .query({
+        let response = crate::util::send_and_check(
+            self.get(url)
+                .query({
                 let mut p = vec![
-                    ("reportName", "RPT_USF10_HOT_KEYWORD"),
-                    ("columns", "ALL"),
-                    ("quoteColumns", ""),
-                    ("filter", filter.as_str()),
-                    ("pageNumber", "1"),
-                    ("pageSize", ""),
-                    ("sortTypes", "-1"),
-                    ("sortColumns", "TRADE_DATE"),
+                ("reportName", "RPT_USF10_HOT_KEYWORD"),
+                ("columns", "ALL"),
+                ("quoteColumns", ""),
+                ("filter", filter.as_str()),
+                ("pageNumber", "1"),
+                ("pageSize", ""),
+                ("sortTypes", "-1"),
+                ("sortColumns", "TRADE_DATE"),
                 ];
                 p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
                 p
-            }.as_slice())
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                }.as_slice())
+        )
+        .await?;
 
         let payload: Env = response.json().await.map_err(Error::from)?;
         let data = payload

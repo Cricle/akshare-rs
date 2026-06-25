@@ -52,14 +52,11 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .get("http://api.idx365.com/index/project/34/data")
-            .query(&[("structCode", struct_code)])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("http://api.idx365.com/index/project/34/data")
+                .query(&[("structCode", struct_code)])
+        )
+        .await?;
 
         let payload: Envelope = response.json().await.map_err(Error::from)?;
         let items = payload.data.unwrap_or_default();

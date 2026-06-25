@@ -46,11 +46,11 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .post("http://index.0256.cn/expcenter_trend.action")
-            .header("Origin", "http://index.0256.cn")
-            .header("Referer", "http://index.0256.cn/expx.htm")
-            .form(&[
+        let response = crate::util::send_and_check(
+            self.post("http://index.0256.cn/expcenter_trend.action")
+                .header("Origin", "http://index.0256.cn")
+                .header("Referer", "http://index.0256.cn/expx.htm")
+                .form(&[
                 ("marketId", "1"),
                 ("attribute1", "5"),
                 ("exponentTypeId", exp_type),
@@ -59,12 +59,9 @@ impl AkShareClient {
                 ("city", ""),
                 ("startLine", ""),
                 ("endLine", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         parse_cflp_response(response).await
     }
@@ -84,11 +81,11 @@ impl AkShareClient {
             }
         };
 
-        let response = self
-            .post("http://index.0256.cn/volume_query.action")
-            .header("Origin", "http://index.0256.cn")
-            .header("Referer", "http://index.0256.cn/expx.htm")
-            .form(&[
+        let response = crate::util::send_and_check(
+            self.post("http://index.0256.cn/volume_query.action")
+                .header("Origin", "http://index.0256.cn")
+                .header("Referer", "http://index.0256.cn/expx.htm")
+                .form(&[
                 ("type", "1"),
                 ("marketId", "1"),
                 ("expTypeId", exp_type),
@@ -97,12 +94,9 @@ impl AkShareClient {
                 ("city", ""),
                 ("startDate3", ""),
                 ("endDate3", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         parse_cflp_response(response).await
     }

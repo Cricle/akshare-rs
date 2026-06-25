@@ -130,18 +130,15 @@ impl AkShareClient {
             symbol.to_uppercase()
         );
 
-        let response = self
-            .get(&url)
-            .query(&[("modules", "assetProfile")])
-            .header(
+        let response = crate::util::send_and_check(
+            self.get(&url)
+                .query(&[("modules", "assetProfile")])
+                .header(
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            )
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                )
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 
@@ -229,21 +226,18 @@ impl AkShareClient {
             symbol.to_uppercase()
         );
 
-        let response = self
-            .get(&url)
-            .query(&[(
+        let response = crate::util::send_and_check(
+            self.get(&url)
+                .query(&[(
                 "modules",
                 "defaultKeyStatistics,summaryDetail,financialData",
-            )])
-            .header(
+                )])
+                .header(
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            )
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                )
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
 

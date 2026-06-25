@@ -14,14 +14,11 @@ impl AkShareClient {
     pub async fn index_stock_cons_sina(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         if symbol == "000300" {
             // HS300 uses a special endpoint
-            let count_resp = self
-                                .get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCountSimple")
-                .query(&[("node", "hs300")])
-                .send()
-                .await
-                .map_err(Error::from)?
-                .error_for_status()
-                .map_err(Error::from)?;
+            let count_resp = crate::util::send_and_check(
+                self.get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCountSimple")
+                    .query(&[("node", "hs300")])
+            )
+            .await?;
 
             let count_text = count_resp.text().await.map_err(Error::from)?;
             let count: i64 = count_text
@@ -32,9 +29,9 @@ impl AkShareClient {
 
             let mut all = Vec::new();
             for page in 1..=pages {
-                let resp = self
-                                        .get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData")
-                    .query(&[
+                let resp = crate::util::send_and_check(
+                    self.get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData")
+                        .query(&[
                         ("page", page.to_string().as_str()),
                         ("num", "80"),
                         ("sort", "symbol"),
@@ -42,12 +39,9 @@ impl AkShareClient {
                         ("node", "hs300"),
                         ("symbol", ""),
                         ("_s_r_a", "init"),
-                    ])
-                    .send()
-                    .await
-                    .map_err(Error::from)?
-                    .error_for_status()
-                    .map_err(Error::from)?;
+                        ])
+                )
+                .await?;
 
                 let items: Vec<serde_json::Value> = resp.json().await.map_err(Error::from)?;
                 all.extend(items);
@@ -60,21 +54,18 @@ impl AkShareClient {
         }
 
         // General case
-        let response = self
-                        .get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeDataSimple")
+                .query(&[
                 ("page", "1"),
                 ("num", "3000"),
                 ("sort", "symbol"),
                 ("asc", "1"),
                 ("node", &format!("zhishu_{symbol}")),
                 ("_s_r_a", "setlen"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let items: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
         if items.is_empty() {
@@ -89,13 +80,10 @@ impl AkShareClient {
     ///
     /// Returns index code, display name, and publish date.
     pub async fn index_stock_info(&self) -> Result<Vec<IndexInfoItem>> {
-        let response = self
-            .get("https://www.joinquant.com/data/dict/indexData")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+        let response = crate::util::send_and_check(
+            self.get("https://www.joinquant.com/data/dict/indexData")
+        )
+        .await?;
 
         let html = response.text().await.map_err(Error::from)?;
 

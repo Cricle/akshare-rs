@@ -58,18 +58,15 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<CsindexHistPoint>> {
-        let response = self
-            .get("https://www.csindex.com.cn/csindex-home/perf/index-perf")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://www.csindex.com.cn/csindex-home/perf/index-perf")
+                .query(&[
                 ("indexCode", symbol),
                 ("startDate", start_date),
                 ("endDate", end_date),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: CsindexEnvelope = response.json().await.map_err(Error::from)?;
         let data = payload.data.unwrap_or_default();

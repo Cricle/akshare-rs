@@ -10,23 +10,14 @@ impl AkShareClient {
     /// Fetch graded fund daily snapshot from Eastmoney.
     pub async fn fund_graded(&self, limit: usize) -> Result<Vec<FundSnapshot>> {
         let pz = limit.max(1).to_string();
-        let response = self
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", "1"),
-                ("pz", pz.as_str()),
-                ("po", "1"),
-                ("np", "1"),
-                ("fltt", "2"),
-                ("invt", "2"),
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
                 ("fs", "b:MK0021,b:MK0022,b:MK0023"),
                 ("fields", "f12,f14,f2,f3"),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ]))
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let items = payload
@@ -60,10 +51,10 @@ impl AkShareClient {
 
     /// Fetch graded fund daily data (Python: fund_graded_fund_daily).
     pub async fn fund_graded_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
-            .header("Referer", "https://fund.eastmoney.com/fjjj.html")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
+                .header("Referer", "https://fund.eastmoney.com/fjjj.html")
+                .query(&[
                 ("t", "1"),
                 ("lx", "9"),
                 ("letter", ""),
@@ -73,12 +64,9 @@ impl AkShareClient {
                 ("page", "1,10000"),
                 ("dt", "1580914040623"),
                 ("atfc", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         let json_str = text
@@ -130,24 +118,21 @@ impl AkShareClient {
     ///
     /// `symbol`: graded fund code (e.g. "150232").
     pub async fn fund_graded_fund_info(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
-        let response = self
-            .get("https://api.fund.eastmoney.com/f10/lsjz")
-            .header(
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/f10/lsjz")
+                .header(
                 "Referer",
                 format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
-            )
-            .query(&[
+                )
+                .query(&[
                 ("fundCode", symbol),
                 ("pageIndex", "1"),
                 ("pageSize", "10000"),
                 ("startDate", ""),
                 ("endDate", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = payload

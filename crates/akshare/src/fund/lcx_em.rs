@@ -6,10 +6,10 @@ use crate::error::{Error, Result};
 impl AkShareClient {
     /// Fetch financial fund ranking (Python: fund_lcx_rank).
     pub async fn fund_lcx_rank(&self) -> Result<Vec<serde_json::Value>> {
-        let response = self
-            .get("https://api.fund.eastmoney.com/FundRank/GetLcRankList")
-            .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
-            .query(&[
+        let response = crate::util::send_and_check(
+            self.get("https://api.fund.eastmoney.com/FundRank/GetLcRankList")
+                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
+                .query(&[
                 ("intCompany", "0"),
                 ("MinsgType", "undefined"),
                 ("IsSale", "1"),
@@ -18,12 +18,9 @@ impl AkShareClient {
                 ("pageIndex", "1"),
                 ("pageSize", "50"),
                 ("FBQ", ""),
-            ])
-            .send()
-            .await
-            .map_err(Error::from)?
-            .error_for_status()
-            .map_err(Error::from)?;
+                ])
+        )
+        .await?;
 
         let payload: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = payload
