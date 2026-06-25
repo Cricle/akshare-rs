@@ -162,7 +162,7 @@ pub fn eastmoney_datacenter_params<'a>(
 }
 
 /// Build Eastmoney F10/HSF10 query parameters.
-pub(crate) fn eastmoney_f10_params<'a>(source: &'a str) -> Vec<(&'a str, &'a str)> {
+pub(crate) fn eastmoney_f10_params(source: &str) -> Vec<(&str, &str)> {
     vec![("source", source), ("client", "PC")]
 }
 
