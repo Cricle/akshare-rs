@@ -981,19 +981,14 @@ impl MarketDataClient {
         let klines = data
             .klines
             .context("eastmoney US candle response missing klines")?;
-        let mut items = klines
+        let items = klines
             .into_iter()
             .map(|line| Self::parse_eastmoney_us_candle_line(&line))
             .collect::<anyhow::Result<Vec<_>>>()?;
         if items.is_empty() {
             bail!("eastmoney US candle response returned no rows");
         }
-        items.sort_by(|left, right| left.trade_date.cmp(&right.trade_date));
-        if items.len() > limit {
-            let start = items.len() - limit;
-            items = items[start..].to_vec();
-        }
-        Ok(items)
+        Ok(crate::util::sort_and_limit(items, limit))
     }
 
     pub(crate) async fn fetch_us_stooq_quote(&self, symbol: &str) -> anyhow::Result<QuoteSnapshot> {

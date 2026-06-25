@@ -124,7 +124,7 @@ impl AkShareClient {
         }
         let klines = self.kline_fetch(symbol, "101", "1", limit, &[]).await?;
 
-        let mut items: Vec<CandlePoint> = klines
+        let items: Vec<CandlePoint> = klines
             .iter()
             .map(|line| parse_candle_line(line))
             .collect::<Result<Vec<_>>>()?;
@@ -133,12 +133,7 @@ impl AkShareClient {
             return Err(Error::not_found("eastmoney returned no forex kline items"));
         }
 
-        items.sort_by(|a, b| a.trade_date.cmp(&b.trade_date));
-        if items.len() > limit {
-            let start = items.len() - limit;
-            items = items[start..].to_vec();
-        }
-        Ok(items)
+        Ok(crate::util::sort_and_limit(items, limit))
     }
 }
 

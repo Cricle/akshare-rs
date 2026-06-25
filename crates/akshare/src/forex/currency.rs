@@ -290,7 +290,7 @@ impl AkShareClient {
         for line in body.lines() {
             let trimmed = line.trim();
             if trimmed.contains("<td") {
-                let cells = extract_table_cells(trimmed);
+                let cells = crate::util::extract_table_cells(trimmed);
                 if cells.len() >= 5 {
                     let date = cells[0].clone();
                     let buy_rate: f64 = cells[1].parse().unwrap_or(0.0);
@@ -330,7 +330,7 @@ impl AkShareClient {
         for line in body.lines() {
             let trimmed = line.trim();
             if trimmed.contains("<td") {
-                let cells = extract_table_cells(trimmed);
+                let cells = crate::util::extract_table_cells(trimmed);
                 if cells.len() >= 2 {
                     let date = cells[0].clone();
                     for (i, cell) in cells.iter().enumerate().skip(1) {
@@ -353,30 +353,10 @@ impl AkShareClient {
 // Helpers
 // ---------------------------------------------------------------------------
 
-fn extract_table_cells(html: &str) -> Vec<String> {
-    let mut cells = Vec::new();
-    let mut remaining = html;
-    while let Some(start) = remaining.find("<td") {
-        let after_td = &remaining[start..];
-        if let Some(content_start) = after_td.find('>') {
-            let content = &after_td[content_start + 1..];
-            if let Some(content_end) = content.find("</td>") {
-                let cell_text = content[..content_end].trim().to_string();
-                cells.push(cell_text);
-                remaining = &content[content_end + 5..];
-            } else {
-                break;
-            }
-        } else {
-            break;
-        }
-    }
-    cells
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::util::extract_table_cells;
 
     #[test]
     fn test_extract_table_cells() {

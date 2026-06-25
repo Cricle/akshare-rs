@@ -101,7 +101,7 @@ impl AkShareClient {
             .kline_fetch(&secid, "101", "1", limit, &[("iscca", "1")])
             .await?;
 
-        let mut items: Vec<CandlePoint> = klines
+        let items: Vec<CandlePoint> = klines
             .iter()
             .map(|line| parse_candle_line(line))
             .collect::<Result<Vec<_>>>()?;
@@ -112,12 +112,7 @@ impl AkShareClient {
             ));
         }
 
-        items.sort_by(|a, b| a.trade_date.cmp(&b.trade_date));
-        if items.len() > limit {
-            let start = items.len() - limit;
-            items = items[start..].to_vec();
-        }
-        Ok(items)
+        Ok(crate::util::sort_and_limit(items, limit))
     }
 }
 

@@ -20,17 +20,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_CINEMA_DAILY"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
                 ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -47,17 +40,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_CINEMA_WEEKLY"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
                 ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -74,17 +60,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_DAILY"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
                 ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -102,20 +81,13 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_MONTHLY"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
                 (
                     "filter",
                     format!("(YEAR='{year}')(MONTH='{month}')").as_str(),
                 ),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -129,16 +101,9 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_REALTIME"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -155,17 +120,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_WEEKLY"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
                 ("filter", format!("(TRADE_DATE='{date_fmt}')").as_str()),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -181,17 +139,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_YEARLY"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
                 ("filter", format!("(YEAR='{year}')").as_str()),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -210,17 +161,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("BOX_OFFICE", &[
                 ("reportName", "RPT_MOVIE_YEARLY_FIRST_WEEK"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "BOX_OFFICE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
                 ("filter", format!("(YEAR='{year}')").as_str()),
-            ])
+            ]))
             .send()
             .await?
             .json()
@@ -237,16 +181,9 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&[
+            .query(&crate::util::eastmoney_datacenter_params("REPORT_DATE", &[
                 ("reportName", "RPT_MOVIE_BOXOFFICE"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", "500"),
-                ("sortTypes", "-1"),
-                ("sortColumns", "REPORT_DATE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
-            ])
+            ]))
             .send()
             .await?
             .json()

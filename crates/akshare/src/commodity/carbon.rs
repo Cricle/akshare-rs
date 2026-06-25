@@ -19,19 +19,9 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         // Parse HTML table for carbon trading data
-        let mut in_table = false;
-        for line in body.lines() {
-            let trimmed = line.trim();
-            if trimmed.contains("<table") {
-                in_table = true;
-                continue;
-            }
-            if trimmed.contains("</table>") {
-                in_table = false;
-                continue;
-            }
-            if in_table && trimmed.contains("<td") {
-                let cells = extract_table_cells(trimmed);
+        for line in &crate::util::extract_table_lines(&body) {
+            if line.contains("<td") {
+                let cells = crate::util::extract_table_cells(line);
                 if cells.len() >= 3 {
                     let date = cells[0].clone();
                     let _volume: f64 = cells[1].parse().unwrap_or(0.0);
@@ -183,41 +173,10 @@ impl AkShareClient {
 // Helpers
 // ---------------------------------------------------------------------------
 
-fn extract_table_cells(html: &str) -> Vec<String> {
-    let mut cells = Vec::new();
-    let mut remaining = html;
-    while let Some(start) = remaining.find("<td") {
-        let after_td = &remaining[start..];
-        if let Some(content_start) = after_td.find('>') {
-            let content = &after_td[content_start + 1..];
-            if let Some(content_end) = content.find("</td>") {
-                let cell_text = content[..content_end].trim().to_string();
-                cells.push(cell_text);
-                remaining = &content[content_end + 5..];
-            } else {
-                break;
-            }
-        } else {
-            break;
-        }
-    }
-    cells
-}
-
 fn parse_carx_table(body: &str, items: &mut Vec<MacroDataPoint>, name: &str) {
-    let mut in_table = false;
-    for line in body.lines() {
-        let trimmed = line.trim();
-        if trimmed.contains("<table") {
-            in_table = true;
-            continue;
-        }
-        if trimmed.contains("</table>") {
-            in_table = false;
-            continue;
-        }
-        if in_table && trimmed.contains("<td") {
-            let cells = extract_table_cells(trimmed);
+    for line in &crate::util::extract_table_lines(body) {
+        if line.contains("<td") {
+            let cells = crate::util::extract_table_cells(line);
             if cells.len() >= 5 {
                 let date = cells[0].clone();
                 let close: f64 = cells[4].parse().unwrap_or(0.0);
@@ -234,19 +193,9 @@ fn parse_carx_table(body: &str, items: &mut Vec<MacroDataPoint>, name: &str) {
 }
 
 fn parse_html_table(body: &str, items: &mut Vec<MacroDataPoint>, name: &str) {
-    let mut in_table = false;
-    for line in body.lines() {
-        let trimmed = line.trim();
-        if trimmed.contains("<table") {
-            in_table = true;
-            continue;
-        }
-        if trimmed.contains("</table>") {
-            in_table = false;
-            continue;
-        }
-        if in_table && trimmed.contains("<td") {
-            let cells = extract_table_cells(trimmed);
+    for line in &crate::util::extract_table_lines(body) {
+        if line.contains("<td") {
+            let cells = crate::util::extract_table_cells(line);
             if cells.len() >= 4 {
                 let date = cells[0].clone();
                 let close: f64 = cells[3].parse().unwrap_or(0.0);
@@ -265,6 +214,7 @@ fn parse_html_table(body: &str, items: &mut Vec<MacroDataPoint>, name: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::util::extract_table_cells;
 
     #[test]
     fn test_extract_table_cells() {

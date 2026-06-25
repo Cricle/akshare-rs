@@ -83,21 +83,8 @@ impl AkShareClient {
 
         let mut items = Vec::new();
         // Parse HTML table
-        let mut in_table = false;
         let headers: Vec<String> = Vec::new();
-        for line in body.lines() {
-            let trimmed = line.trim();
-            if trimmed.contains("<table") {
-                in_table = true;
-                continue;
-            }
-            if trimmed.contains("</table>") {
-                in_table = false;
-                continue;
-            }
-            if !in_table {
-                continue;
-            }
+        for trimmed in &crate::util::extract_table_lines(&body) {
             // Parse table rows
             if trimmed.contains("<tr") || trimmed.contains("<td") {
                 let cells = extract_html_cells(trimmed);

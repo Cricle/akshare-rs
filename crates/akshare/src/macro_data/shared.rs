@@ -38,16 +38,9 @@ pub(crate) async fn fetch_em_report(
     let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
     let resp: EmDatacenterResp = client
         .get(url)
-        .query(&[
+        .query(&crate::util::eastmoney_datacenter_params(sort_column, &[
             ("reportName", report_name),
-            ("columns", "ALL"),
-            ("pageNumber", "1"),
-            ("pageSize", "500"),
-            ("sortTypes", "-1"),
-            ("sortColumns", sort_column),
-            ("source", "WEB"),
-            ("client", "WEB"),
-        ])
+        ]))
         .send()
         .await?
         .json()
