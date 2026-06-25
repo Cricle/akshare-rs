@@ -14,8 +14,8 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::market::eastmoney_secid;
-use crate::types::value_ext::ValueExt;
 use crate::types::AdjustType;
+use crate::types::value_ext::ValueExt;
 
 use serde::{Deserialize, Serialize};
 
@@ -159,11 +159,8 @@ impl AkShareClient {
     pub async fn stock_zh_a_spot(&self) -> Result<Vec<ZhASpotQuote>> {
         // Get page count first
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
-        let count_resp = crate::util::send_and_check(
-            self.get(count_url)
-                .query(&[("node", "hs_a")])
-        )
-        .await?;
+        let count_resp =
+            crate::util::send_and_check(self.get(count_url).query(&[("node", "hs_a")])).await?;
 
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
@@ -179,18 +176,15 @@ impl AkShareClient {
 
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
-            let response = crate::util::send_and_check(
-                self.get(list_url)
-                    .query(&[
-                    ("page", page_str.as_str()),
-                    ("num", "80"),
-                    ("sort", "symbol"),
-                    ("asc", "1"),
-                    ("node", "hs_a"),
-                    ("symbol", ""),
-                    ("_s_r_a", "page"),
-                    ])
-            )
+            let response = crate::util::send_and_check(self.get(list_url).query(&[
+                ("page", page_str.as_str()),
+                ("num", "80"),
+                ("sort", "symbol"),
+                ("asc", "1"),
+                ("node", "hs_a"),
+                ("symbol", ""),
+                ("_s_r_a", "page"),
+            ]))
             .await?;
 
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
@@ -306,14 +300,11 @@ impl AkShareClient {
         };
 
         let url = "https://quotes.sina.cn/cn/api/jsonp_v2.php/=/CN_MarketDataService.getKLineData";
-        let response = crate::util::send_and_check(
-            self.get(url)
-                .query(&[
-                ("symbol", sina_symbol.as_str()),
-                ("scale", period),
-                ("datalen", "1970"),
-                ])
-        )
+        let response = crate::util::send_and_check(self.get(url).query(&[
+            ("symbol", sina_symbol.as_str()),
+            ("scale", period),
+            ("datalen", "1970"),
+        ]))
         .await?;
 
         let text = response.text().await.map_err(Error::from)?;
@@ -366,11 +357,9 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_a_new()`
     pub async fn stock_zh_a_new(&self) -> Result<Vec<ZhANewStock>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
-        let count_resp = crate::util::send_and_check(
-            self.get(count_url)
-                .query(&[("node", "new_stock")])
-        )
-        .await?;
+        let count_resp =
+            crate::util::send_and_check(self.get(count_url).query(&[("node", "new_stock")]))
+                .await?;
 
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
@@ -386,18 +375,15 @@ impl AkShareClient {
 
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
-            let response = crate::util::send_and_check(
-                self.get(list_url)
-                    .query(&[
-                    ("page", page_str.as_str()),
-                    ("num", "80"),
-                    ("sort", "symbol"),
-                    ("asc", "1"),
-                    ("node", "new_stock"),
-                    ("symbol", ""),
-                    ("_s_r_a", "page"),
-                    ])
-            )
+            let response = crate::util::send_and_check(self.get(list_url).query(&[
+                ("page", page_str.as_str()),
+                ("num", "80"),
+                ("sort", "symbol"),
+                ("asc", "1"),
+                ("node", "new_stock"),
+                ("symbol", ""),
+                ("_s_r_a", "page"),
+            ]))
             .await?;
 
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
@@ -438,11 +424,14 @@ impl AkShareClient {
         }
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("5000", &[
-                ("fid", "f3"),
-                ("fs", "m:0 s:3"),
-                ("fields", "f2,f3,f4,f5,f6,f12,f14,f15,f16,f17,f18"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    "5000",
+                    &[
+                        ("fid", "f3"),
+                        ("fs", "m:0 s:3"),
+                        ("fields", "f2,f3,f4,f5,f6,f12,f14,f15,f16,f17,f18"),
+                    ],
+                )),
         )
         .await?;
 
@@ -551,12 +540,12 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
                 .query(&[
-                ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
-                ("iscr", "0"),
-                ("ndays", "1"),
-                ("secid", secid.as_str()),
-                ])
+                    ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
+                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
+                    ("iscr", "0"),
+                    ("ndays", "1"),
+                    ("secid", secid.as_str()),
+                ]),
         )
         .await?;
 

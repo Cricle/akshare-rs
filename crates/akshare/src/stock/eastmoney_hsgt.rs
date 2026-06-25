@@ -79,12 +79,12 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://push2his.eastmoney.com/api/qt/kamt.kline/get")
                 .query(&[
-                ("fields1", "f1,f2,f3,f7"),
-                ("fields2", fields),
-                ("klt", "101"),
-                ("lmt", lmt.as_str()),
-                ("ut", "b2884a393a59ad64002292a3e90d46a5"),
-                ])
+                    ("fields1", "f1,f2,f3,f7"),
+                    ("fields2", fields),
+                    ("klt", "101"),
+                    ("lmt", lmt.as_str()),
+                    ("ut", "b2884a393a59ad64002292a3e90d46a5"),
+                ]),
         )
         .await?;
 

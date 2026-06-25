@@ -20,12 +20,12 @@ impl AkShareClient {
             self.get("http://api.fund.eastmoney.com/f10/JJGG")
                 .header("Referer", &referer)
                 .query(&[
-                ("fundcode", symbol),
-                ("pageIndex", "1"),
-                ("pageSize", "1000"),
-                ("type", ann_type),
-                ("_", ts.as_str()),
-                ])
+                    ("fundcode", symbol),
+                    ("pageIndex", "1"),
+                    ("pageSize", "1000"),
+                    ("type", ann_type),
+                    ("_", ts.as_str()),
+                ]),
         )
         .await?;
 

@@ -13,17 +13,17 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.get("https://fundf10.eastmoney.com/FundArchivesDatas.aspx")
                 .query(&[
-                ("type", "jjcc"),
-                ("code", symbol),
-                ("topline", "10"),
-                ("year", ""),
-                ("month", ""),
-                ("rt", "0.123"),
+                    ("type", "jjcc"),
+                    ("code", symbol),
+                    ("topline", "10"),
+                    ("year", ""),
+                    ("month", ""),
+                    ("rt", "0.123"),
                 ])
                 .header(
-                "Referer",
-                format!("https://fundf10.eastmoney.com/ccmx_{symbol}.html").as_str(),
-                )
+                    "Referer",
+                    format!("https://fundf10.eastmoney.com/ccmx_{symbol}.html").as_str(),
+                ),
         )
         .await?;
 
@@ -55,10 +55,10 @@ impl AkShareClient {
             self.get("https://api.fund.eastmoney.com/f10/HYPZ/")
                 .header("Referer", "https://fundf10.eastmoney.com/")
                 .query(&[
-                ("fundCode", symbol),
-                ("year", ""),
-                ("callback", "jQuery183006997159478989867_1648016188499"),
-                ])
+                    ("fundCode", symbol),
+                    ("year", ""),
+                    ("callback", "jQuery183006997159478989867_1648016188499"),
+                ]),
         )
         .await?;
 
@@ -118,12 +118,12 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://fundf10.eastmoney.com/FundArchivesDatas.aspx")
                 .query(&[
-                ("type", "zdbd"),
-                ("code", symbol),
-                ("zdbd", zdbd),
-                ("year", ""),
-                ("rt", "0.913877030254846"),
-                ])
+                    ("type", "zdbd"),
+                    ("code", symbol),
+                    ("zdbd", zdbd),
+                    ("year", ""),
+                    ("rt", "0.913877030254846"),
+                ]),
         )
         .await?;
 

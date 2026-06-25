@@ -12,10 +12,13 @@ impl AkShareClient {
         let pz = limit.max(1).to_string();
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
-                ("fs", "b:MK0021,b:MK0022,b:MK0023"),
-                ("fields", "f12,f14,f2,f3"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    pz.as_str(),
+                    &[
+                        ("fs", "b:MK0021,b:MK0022,b:MK0023"),
+                        ("fields", "f12,f14,f2,f3"),
+                    ],
+                )),
         )
         .await?;
 
@@ -55,16 +58,16 @@ impl AkShareClient {
             self.get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
                 .header("Referer", "https://fund.eastmoney.com/fjjj.html")
                 .query(&[
-                ("t", "1"),
-                ("lx", "9"),
-                ("letter", ""),
-                ("gsid", "0"),
-                ("text", ""),
-                ("sort", "zdf,desc"),
-                ("page", "1,10000"),
-                ("dt", "1580914040623"),
-                ("atfc", ""),
-                ])
+                    ("t", "1"),
+                    ("lx", "9"),
+                    ("letter", ""),
+                    ("gsid", "0"),
+                    ("text", ""),
+                    ("sort", "zdf,desc"),
+                    ("page", "1,10000"),
+                    ("dt", "1580914040623"),
+                    ("atfc", ""),
+                ]),
         )
         .await?;
 
@@ -121,16 +124,16 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://api.fund.eastmoney.com/f10/lsjz")
                 .header(
-                "Referer",
-                format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
+                    "Referer",
+                    format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
                 )
                 .query(&[
-                ("fundCode", symbol),
-                ("pageIndex", "1"),
-                ("pageSize", "10000"),
-                ("startDate", ""),
-                ("endDate", ""),
-                ])
+                    ("fundCode", symbol),
+                    ("pageIndex", "1"),
+                    ("pageSize", "10000"),
+                    ("startDate", ""),
+                    ("endDate", ""),
+                ]),
         )
         .await?;
 

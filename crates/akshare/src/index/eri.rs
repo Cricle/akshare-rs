@@ -51,7 +51,7 @@ impl AkShareClient {
         // Fetch index data
         let resp1 = crate::util::send_and_check(
             self.get("https://zs.zjpwq.net/pwq-index-webapi/indexData")
-                .query(&params)
+                .query(&params),
         )
         .await?;
 
@@ -83,7 +83,7 @@ impl AkShareClient {
         // Fetch statistics data
         let resp2 = crate::util::send_and_check(
             self.get("https://zs.zjpwq.net/pwq-index-webapi/dataStatistics")
-                .query(&params)
+                .query(&params),
         )
         .await?;
 

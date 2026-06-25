@@ -18,14 +18,12 @@ impl AkShareClient {
             data: Option<Vec<Vec<serde_json::Value>>>,
         }
 
-        let response = crate::util::send_and_check(
-            self.get("https://www.msweet.com.cn/eportal/ui")
-                .query(&[
+        let response =
+            crate::util::send_and_check(self.get("https://www.msweet.com.cn/eportal/ui").query(&[
                 ("struts.portlet.action", "/portlet/price!getSTZSJson.action"),
                 ("moduleId", "cb752447cfe24b44b18c7a7e9abab048"),
-                ])
-        )
-        .await?;
+            ]))
+            .await?;
 
         let payload: Envelope = response.json().await.map_err(Error::from)?;
         let categories = payload.category.unwrap_or_default();
@@ -69,7 +67,7 @@ impl AkShareClient {
         }
 
         let response = crate::util::send_and_check(
-            self.get("https://www.msweet.com.cn/datacenterapply/datacenter/json/JinKongTang.json")
+            self.get("https://www.msweet.com.cn/datacenterapply/datacenter/json/JinKongTang.json"),
         )
         .await?;
 
@@ -120,7 +118,7 @@ impl AkShareClient {
         }
 
         let response = crate::util::send_and_check(
-            self.get("https://www.msweet.com.cn/datacenterapply/datacenter/json/Jkpewlr.json")
+            self.get("https://www.msweet.com.cn/datacenterapply/datacenter/json/Jkpewlr.json"),
         )
         .await?;
 

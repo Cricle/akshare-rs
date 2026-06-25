@@ -159,7 +159,7 @@ impl AkShareClient {
 
         let response = crate::util::send_and_check(
             self.get("https://www.swsresearch.com/institute-sw/api/index_publish/trend/")
-                .query(&[("swindexcode", symbol), ("period", period_upper)])
+                .query(&[("swindexcode", symbol), ("period", period_upper)]),
         )
         .await?;
 
@@ -207,8 +207,10 @@ impl AkShareClient {
         }
 
         let response = crate::util::send_and_check(
-            self.get("https://www.swsresearch.com/institute-sw/api/index_publish/details/timelines/")
-                .query(&[("swindexcode", symbol)])
+            self.get(
+                "https://www.swsresearch.com/institute-sw/api/index_publish/details/timelines/",
+            )
+            .query(&[("swindexcode", symbol)]),
         )
         .await?;
 
@@ -269,7 +271,7 @@ impl AkShareClient {
 
         let response = crate::util::send_and_check(
             self.get("https://www.swsresearch.com/institute-sw/api/index_publish/current/")
-                .query(&[("page", "1"), ("page_size", "200"), ("indextype", symbol)])
+                .query(&[("page", "1"), ("page_size", "200"), ("indextype", symbol)]),
         )
         .await?;
 
@@ -342,8 +344,10 @@ impl AkShareClient {
         let period = symbol.to_uppercase();
 
         let response = crate::util::send_and_check(
-            self.get("https://www.swsresearch.com/institute-sw/api/index_analysis/week_month_datetime/")
-                .query(&[("type", period.as_str())])
+            self.get(
+                "https://www.swsresearch.com/institute-sw/api/index_analysis/week_month_datetime/",
+            )
+            .query(&[("type", period.as_str())]),
         )
         .await?;
 
@@ -420,7 +424,7 @@ impl AkShareClient {
                 "sortField": "",
                 "rule": "",
                 "indexType": 1,
-                }))
+                })),
         )
         .await?;
 

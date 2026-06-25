@@ -26,8 +26,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::value_ext::ValueExt;
 use crate::types::AdjustType;
+use crate::types::value_ext::ValueExt;
 
 static RE_TR: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"<tr[^>]*>([\s\S]*?)</tr>").unwrap());
@@ -238,17 +238,14 @@ impl AkShareClient {
 
         for page in 1..100 {
             let page_str = page.to_string();
-            let response = crate::util::send_and_check(
-                self.get(url)
-                    .query(&[
-                        ("page", page_str.as_str()),
-                        ("num", "60"),
-                        ("sort", "symbol"),
-                        ("asc", "1"),
-                        ("node", "qbgg_hk"),
-                        ("_s_r_a", "init"),
-                    ]),
-            )
+            let response = crate::util::send_and_check(self.get(url).query(&[
+                ("page", page_str.as_str()),
+                ("num", "60"),
+                ("sort", "symbol"),
+                ("asc", "1"),
+                ("node", "qbgg_hk"),
+                ("_s_r_a", "init"),
+            ]))
             .await?;
 
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
@@ -455,10 +452,8 @@ impl AkShareClient {
     pub async fn stock_hk_index_daily_sina(&self, symbol: &str) -> Result<Vec<HkIndexDailyCandle>> {
         let url = format!("https://finance.sina.com.cn/stock/hkstock/{symbol}/klc2_kl.js");
 
-        let response = crate::util::send_and_check(
-            self.get(&url).query(&[("d", "2023_5_01")]),
-        )
-        .await?;
+        let response =
+            crate::util::send_and_check(self.get(&url).query(&[("d", "2023_5_01")])).await?;
 
         let text = response.text().await.map_err(Error::from)?;
 
@@ -513,11 +508,14 @@ impl AkShareClient {
         }
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("5000", &[
-                    ("fid", "f3"),
-                    ("fs", "m:124,m:125,m:305"),
-                    ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
-                ])),
+                .query(&crate::util::eastmoney_clist_params(
+                    "5000",
+                    &[
+                        ("fid", "f3"),
+                        ("fs", "m:124,m:125,m:305"),
+                        ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
+                    ],
+                )),
         )
         .await?;
 
@@ -626,10 +624,7 @@ impl AkShareClient {
             "pageSize": 100,
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let rank_data = env
@@ -670,10 +665,7 @@ impl AkShareClient {
             "srcSecurityCode": format!("HK|{}", symbol),
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
         let obj = data
@@ -718,10 +710,7 @@ impl AkShareClient {
             "srcSecurityCode": format!("HK|{}", symbol),
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -767,10 +756,7 @@ impl AkShareClient {
             "srcSecurityCode": format!("HK|{}", symbol),
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -802,25 +788,22 @@ impl AkShareClient {
         period: &str,
     ) -> Result<Vec<HkValuationBaidu>> {
         let url = "https://finance.baidu.com/opendata";
-        let response = crate::util::send_and_check(
-            self.get(url)
-                .query(&[
-                    ("openapi", "1"),
-                    ("dspName", "iphone"),
-                    ("tn", "tangram"),
-                    ("client", "app"),
-                    ("query", indicator),
-                    ("code", symbol),
-                    ("word", ""),
-                    ("resource_id", "51171"),
-                    ("market", "hk"),
-                    ("tag", indicator),
-                    ("chart_select", period),
-                    ("industry_select", ""),
-                    ("skip_industry", "1"),
-                    ("finClientType", "pc"),
-                ]),
-        )
+        let response = crate::util::send_and_check(self.get(url).query(&[
+            ("openapi", "1"),
+            ("dspName", "iphone"),
+            ("tn", "tangram"),
+            ("client", "app"),
+            ("query", indicator),
+            ("code", symbol),
+            ("word", ""),
+            ("resource_id", "51171"),
+            ("market", "hk"),
+            ("tag", indicator),
+            ("chart_select", period),
+            ("industry_select", ""),
+            ("skip_industry", "1"),
+            ("finClientType", "pc"),
+        ]))
         .await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
@@ -874,8 +857,8 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
+            self.get(url).query(
+                {
                     let mut p = vec![
                         ("reportName", "RPT_PCF10_INDUSTRY_HKSCALE"),
                         ("columns", "ALL"),
@@ -888,7 +871,9 @@ impl AkShareClient {
                     ];
                     p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
                     p
-                }.as_slice()),
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -920,8 +905,8 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
+            self.get(url).query(
+                {
                     let mut p = vec![
                         ("reportName", "RPT_HKF10_FN_DIVIDEND"),
                         ("columns", "ALL"),
@@ -934,7 +919,9 @@ impl AkShareClient {
                     ];
                     p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
                     p
-                }.as_slice()),
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -1018,8 +1005,8 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
+            self.get(url).query(
+                {
                     let mut p = vec![
                         ("reportName", "RPT_HKF10_FN_MAINFINADATA"),
                         ("columns", "ALL"),
@@ -1032,7 +1019,9 @@ impl AkShareClient {
                     ];
                     p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
                     p
-                }.as_slice()),
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -1055,10 +1044,8 @@ impl AkShareClient {
     /// Returns HSI (Hang Seng Index) dividend yield data.
     pub async fn stock_hk_gxl_lg(&self) -> Result<Vec<HkGxlLg>> {
         let url = "https://legulegu.com/api/stockdata/hs";
-        let response = crate::util::send_and_check(
-            self.get(url).query(&[("indexCode", "HSI")]),
-        )
-        .await?;
+        let response =
+            crate::util::send_and_check(self.get(url).query(&[("indexCode", "HSI")])).await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
         let arr = data

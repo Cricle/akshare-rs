@@ -44,7 +44,7 @@ impl AkShareClient {
     pub async fn index_hog_spot_price(&self) -> Result<Vec<HogIndexPoint>> {
         let response = crate::util::send_and_check(
             self.get("https://hqb.nxin.com/pigindex/getPigIndexChart.shtml")
-                .query(&[("regionId", "0")])
+                .query(&[("regionId", "0")]),
         )
         .await?;
 

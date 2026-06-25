@@ -30,11 +30,14 @@ impl AkShareClient {
     pub async fn forex_em_rates(&self) -> Result<Vec<ForexRate>> {
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("100", &[
-                ("fid", "f3"),
-                ("fs", "m:119,m:120"),
-                ("fields", "f12,f14,f2,f3"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    "100",
+                    &[
+                        ("fid", "f3"),
+                        ("fs", "m:119,m:120"),
+                        ("fields", "f12,f14,f2,f3"),
+                    ],
+                )),
         )
         .await?;
 

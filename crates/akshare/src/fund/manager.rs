@@ -10,14 +10,14 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://fund.eastmoney.com/Data/FundDataPortfolio_Interface.aspx")
                 .query(&[
-                ("dt", "14"),
-                ("mc", "returnjson"),
-                ("ft", "all"),
-                ("pn", "500"),
-                ("pi", "1"),
-                ("sc", "abbname"),
-                ("st", "asc"),
-                ])
+                    ("dt", "14"),
+                    ("mc", "returnjson"),
+                    ("ft", "all"),
+                    ("pn", "500"),
+                    ("pi", "1"),
+                    ("sc", "abbname"),
+                    ("st", "asc"),
+                ]),
         )
         .await?;
 

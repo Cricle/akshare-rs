@@ -12,12 +12,12 @@ impl AkShareClient {
             self.get("https://api.fund.eastmoney.com/FundRating/GetFundRatingList")
                 .header("Referer", "https://fund.eastmoney.com/")
                 .query(&[
-                ("FundType", "0"),
-                ("SortColumn", "SYL_1N"),
-                ("Sort", "desc"),
-                ("pageIndex", "1"),
-                ("pageSize", pn.as_str()),
-                ])
+                    ("FundType", "0"),
+                    ("SortColumn", "SYL_1N"),
+                    ("Sort", "desc"),
+                    ("pageIndex", "1"),
+                    ("pageSize", pn.as_str()),
+                ]),
         )
         .await?;
 
@@ -51,7 +51,7 @@ impl AkShareClient {
     /// Fetch all fund ratings summary (Python: fund_rating_all).
     pub async fn fund_rating_all(&self) -> Result<Vec<FundRatingItem>> {
         let response = crate::util::send_and_check(
-            self.get("https://fund.eastmoney.com/data/fundrating.html")
+            self.get("https://fund.eastmoney.com/data/fundrating.html"),
         )
         .await?;
 

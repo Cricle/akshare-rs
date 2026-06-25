@@ -10,12 +10,12 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://fund.eastmoney.com/data/FundNewIssue.aspx")
                 .query(&[
-                ("t", "xcln"),
-                ("sort", "jzrgq,desc"),
-                ("y", ""),
-                ("page", "1,50000"),
-                ("isbuy", "1"),
-                ])
+                    ("t", "xcln"),
+                    ("sort", "jzrgq,desc"),
+                    ("y", ""),
+                    ("page", "1,50000"),
+                    ("isbuy", "1"),
+                ]),
         )
         .await?;
 
@@ -61,10 +61,9 @@ impl AkShareClient {
 
     /// Fetch new funds from THS (Python: fund_new_found_ths).
     pub async fn fund_new_found_ths(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        let response = crate::util::send_and_check(
-            self.get("https://fund.10jqka.com.cn/datacenter/xfjj/")
-        )
-        .await?;
+        let response =
+            crate::util::send_and_check(self.get("https://fund.10jqka.com.cn/datacenter/xfjj/"))
+                .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         // Extract jsonData from the HTML page

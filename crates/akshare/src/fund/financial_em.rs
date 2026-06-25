@@ -11,15 +11,15 @@ impl AkShareClient {
             self.get("https://api.fund.eastmoney.com/FundNetValue/GetLCJJJZ")
                 .header("Referer", "https://fund.eastmoney.com/lcjj.html")
                 .query(&[
-                ("letter", ""),
-                ("jjgsid", "0"),
-                ("searchtext", ""),
-                ("sort", "ljjz,desc"),
-                ("page", "1,100"),
-                ("AttentionCodes", ""),
-                ("cycle", ""),
-                ("OnlySale", "1"),
-                ])
+                    ("letter", ""),
+                    ("jjgsid", "0"),
+                    ("searchtext", ""),
+                    ("sort", "ljjz,desc"),
+                    ("page", "1,100"),
+                    ("AttentionCodes", ""),
+                    ("cycle", ""),
+                    ("OnlySale", "1"),
+                ]),
         )
         .await?;
 
@@ -41,14 +41,13 @@ impl AkShareClient {
     /// `symbol`: financial fund code (e.g. "000134").
     pub async fn fund_financial_fund_info(&self, symbol: &str) -> Result<Vec<FundNavHistory>> {
         let response = crate::util::send_and_check(
-            self.get("https://api.fund.eastmoney.com/f10/lsjz")
-                .query(&[
+            self.get("https://api.fund.eastmoney.com/f10/lsjz").query(&[
                 ("fundCode", symbol),
                 ("pageIndex", "1"),
                 ("pageSize", "10000"),
                 ("startDate", ""),
                 ("endDate", ""),
-                ])
+            ]),
         )
         .await?;
 

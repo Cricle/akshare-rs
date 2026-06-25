@@ -51,11 +51,14 @@ impl AkShareClient {
         let filter = "m:113,m:114,m:115,m:8,m:142,m:225".to_string();
         let resp = self
             .get(url)
-            .query(&crate::util::eastmoney_clist_params("500", &[
-                ("fid", "f3"),
-                ("fs", filter.as_str()),
-                ("fields", "f12,f14,f2,f3,f5,f10"),
-            ]))
+            .query(&crate::util::eastmoney_clist_params(
+                "500",
+                &[
+                    ("fid", "f3"),
+                    ("fs", filter.as_str()),
+                    ("fields", "f12,f14,f2,f3,f5,f10"),
+                ],
+            ))
             .send()
             .await?
             .text()

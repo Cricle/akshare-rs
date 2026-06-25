@@ -78,7 +78,7 @@ impl AkShareClient {
             let page_str = page.to_string();
             let response = crate::util::send_and_check(
                 self.get(url)
-                    .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
+                    .query(&[("reqPage", page_str.as_str()), ("type", "AH")]),
             )
             .await?;
 
@@ -260,7 +260,7 @@ impl AkShareClient {
             let page_str = page.to_string();
             let response = crate::util::send_and_check(
                 self.get(url)
-                    .query(&[("reqPage", page_str.as_str()), ("type", "AH")])
+                    .query(&[("reqPage", page_str.as_str()), ("type", "AH")]),
             )
             .await?;
 

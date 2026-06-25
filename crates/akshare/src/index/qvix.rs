@@ -34,13 +34,11 @@ async fn fetch_qvix_daily(
     client: &AkShareClient,
     cols: &[usize; 4],
 ) -> Result<Vec<QvixDailyPoint>> {
-    let body = crate::util::send_and_check(
-        client.get("http://1.optbbs.com/d/csv/d/k.csv"),
-    )
-    .await?
-    .text()
-    .await
-    .map_err(Error::from)?;
+    let body = crate::util::send_and_check(client.get("http://1.optbbs.com/d/csv/d/k.csv"))
+        .await?
+        .text()
+        .await
+        .map_err(Error::from)?;
 
     let mut points = Vec::new();
     for (i, line) in body.lines().enumerate() {

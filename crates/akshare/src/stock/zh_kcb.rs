@@ -91,11 +91,8 @@ impl AkShareClient {
     /// Python equivalent: `stock_zh_kcb_spot()`
     pub async fn stock_zh_kcb_spot(&self) -> Result<Vec<KcbSpotQuote>> {
         let count_url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount";
-        let count_resp = crate::util::send_and_check(
-            self.get(count_url)
-                .query(&[("node", "kcb")])
-        )
-        .await?;
+        let count_resp =
+            crate::util::send_and_check(self.get(count_url).query(&[("node", "kcb")])).await?;
 
         let count_text = count_resp.text().await.map_err(Error::from)?;
         let total: i64 = count_text
@@ -111,18 +108,15 @@ impl AkShareClient {
 
         for page in 1..=page_count.min(5) {
             let page_str = page.to_string();
-            let response = crate::util::send_and_check(
-                self.get(list_url)
-                    .query(&[
-                    ("page", page_str.as_str()),
-                    ("num", "80"),
-                    ("sort", "symbol"),
-                    ("asc", "1"),
-                    ("node", "kcb"),
-                    ("symbol", ""),
-                    ("_s_r_a", "page"),
-                    ])
-            )
+            let response = crate::util::send_and_check(self.get(list_url).query(&[
+                ("page", page_str.as_str()),
+                ("num", "80"),
+                ("sort", "symbol"),
+                ("asc", "1"),
+                ("node", "kcb"),
+                ("symbol", ""),
+                ("_s_r_a", "page"),
+            ]))
             .await?;
 
             let data: Vec<serde_json::Value> = response.json().await.map_err(Error::from)?;
@@ -261,18 +255,15 @@ impl AkShareClient {
                 column_name: Option<String>,
             }
             let page_str = page.to_string();
-            let response = crate::util::send_and_check(
-                self.get(url)
-                    .query(&[
-                    ("sr", "-1"),
-                    ("page_size", "100"),
-                    ("page_index", page_str.as_str()),
-                    ("ann_type", "KCB"),
-                    ("client_source", "web"),
-                    ("f_node", "0"),
-                    ("s_node", "0"),
-                    ])
-            )
+            let response = crate::util::send_and_check(self.get(url).query(&[
+                ("sr", "-1"),
+                ("page_size", "100"),
+                ("page_index", page_str.as_str()),
+                ("ann_type", "KCB"),
+                ("client_source", "web"),
+                ("f_node", "0"),
+                ("s_node", "0"),
+            ]))
             .await?;
 
             let payload: Env = response.json().await.map_err(Error::from)?;

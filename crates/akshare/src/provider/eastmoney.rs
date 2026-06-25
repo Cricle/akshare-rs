@@ -176,11 +176,11 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://searchapi.eastmoney.com/api/suggest/get")
                 .query(&[
-                ("input", trimmed),
-                ("type", "14"),
-                ("token", SEARCH_TOKEN),
-                ("count", count.as_str()),
-                ])
+                    ("input", trimmed),
+                    ("type", "14"),
+                    ("token", SEARCH_TOKEN),
+                    ("count", count.as_str()),
+                ]),
         )
         .await?;
 
@@ -274,11 +274,14 @@ impl AkShareClient {
         let pz = limit.to_string();
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
-                ("fid", "f62"),
-                ("fs", fs),
-                ("fields", "f12,f14,f2,f3,f62,f184"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    pz.as_str(),
+                    &[
+                        ("fid", "f62"),
+                        ("fs", fs),
+                        ("fields", "f12,f14,f2,f3,f62,f184"),
+                    ],
+                )),
         )
         .await?;
 
@@ -317,11 +320,14 @@ impl AkShareClient {
         let fs = format!("b:{sector_code}+f:!50");
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
-                ("fid", "f3"),
-                ("fs", fs.as_str()),
-                ("fields", "f12,f14,f2,f3,f62"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    pz.as_str(),
+                    &[
+                        ("fid", "f3"),
+                        ("fs", fs.as_str()),
+                        ("fields", "f12,f14,f2,f3,f62"),
+                    ],
+                )),
         )
         .await?;
 
@@ -385,16 +391,16 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
                 .query(&[
-                ("reportName", "RPT_DAILYBILLBOARD_DETAILSNEW"),
-                ("columns", "ALL"),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", page_size.as_str()),
-                ("sortTypes", "-1"),
-                ("sortColumns", "TRADE_DATE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
-                ])
+                    ("reportName", "RPT_DAILYBILLBOARD_DETAILSNEW"),
+                    ("columns", "ALL"),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", "1"),
+                    ("pageSize", page_size.as_str()),
+                    ("sortTypes", "-1"),
+                    ("sortColumns", "TRADE_DATE"),
+                    ("source", "WEB"),
+                    ("client", "WEB"),
+                ]),
         )
         .await?;
 
@@ -452,16 +458,16 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
                 .query(&[
-                ("reportName", report_name),
-                ("columns", "ALL"),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", page_size.as_str()),
-                ("sortTypes", "-1"),
-                ("sortColumns", "TRADE_DATE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
-                ])
+                    ("reportName", report_name),
+                    ("columns", "ALL"),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", "1"),
+                    ("pageSize", page_size.as_str()),
+                    ("sortTypes", "-1"),
+                    ("sortColumns", "TRADE_DATE"),
+                    ("source", "WEB"),
+                    ("client", "WEB"),
+                ]),
         )
         .await?;
 
@@ -507,12 +513,12 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://np-anotice-stock.eastmoney.com/api/security/ann")
                 .query(&[
-                ("page_size", page_size.as_str()),
-                ("page_index", "1"),
-                ("ann_type", "A"),
-                ("client_source", "web"),
-                ("stock_list", code.as_str()),
-                ])
+                    ("page_size", page_size.as_str()),
+                    ("page_index", "1"),
+                    ("ann_type", "A"),
+                    ("client_source", "web"),
+                    ("stock_list", code.as_str()),
+                ]),
         )
         .await?;
 
@@ -552,10 +558,10 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://np-cnotice-stock.eastmoney.com/api/content/ann")
                 .query(&[
-                ("art_code", art_code),
-                ("client_source", "web"),
-                ("page_index", "1"),
-                ])
+                    ("art_code", art_code),
+                    ("client_source", "web"),
+                    ("page_index", "1"),
+                ]),
         )
         .await?;
 
@@ -614,8 +620,7 @@ impl AkShareClient {
                 builder = builder.query(&[(k, v)]);
             }
 
-            let resp = crate::util::send_and_check(builder)
-                .await?;
+            let resp = crate::util::send_and_check(builder).await?;
             let payload: EmDatacenterResp = resp.json().await.map_err(Error::from)?;
             let result = payload
                 .result
@@ -643,11 +648,7 @@ impl AkShareClient {
         params: &[(&str, &str)],
     ) -> Result<serde_json::Value> {
         let url = format!("https://push2ex.eastmoney.com/{path}");
-        let resp = crate::util::send_and_check(
-            self.get(&url)
-                .query(params)
-        )
-        .await?;
+        let resp = crate::util::send_and_check(self.get(&url).query(params)).await?;
         let payload: serde_json::Value = resp.json().await.map_err(Error::from)?;
         Ok(payload)
     }
@@ -662,11 +663,10 @@ impl AkShareClient {
     ) -> Result<Vec<serde_json::Value>> {
         let resp = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(page_size, &[
-                ("fid", sort_field),
-                ("fs", fs),
-                ("fields", fields),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    page_size,
+                    &[("fid", sort_field), ("fs", fs), ("fields", fields)],
+                )),
         )
         .await?;
 
@@ -709,8 +709,7 @@ impl AkShareClient {
             builder = builder.query(&[(k, v)]);
         }
 
-        let resp = crate::util::send_and_check(builder)
-            .await?;
+        let resp = crate::util::send_and_check(builder).await?;
 
         let payload: KlineResp = resp.json().await.map_err(Error::from)?;
         let klines = payload.data.and_then(|d| d.klines).unwrap_or_default();
@@ -765,14 +764,11 @@ impl AkShareClient {
             "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}DateAjaxNew"
         );
         let code_lower = code.to_lowercase();
-        let resp = crate::util::send_and_check(
-            self.get(&date_url)
-                .query(&[
-                ("companyType", company_type.as_str()),
-                ("reportDateType", date_type),
-                ("code", code_lower.as_str()),
-                ])
-        )
+        let resp = crate::util::send_and_check(self.get(&date_url).query(&[
+            ("companyType", company_type.as_str()),
+            ("reportDateType", date_type),
+            ("code", code_lower.as_str()),
+        ]))
         .await?;
 
         let date_json: serde_json::Value = resp.json().await.map_err(Error::from)?;
@@ -802,16 +798,13 @@ impl AkShareClient {
             let data_url = format!(
                 "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}AjaxNew"
             );
-            let resp = crate::util::send_and_check(
-                self.get(&data_url)
-                    .query(&[
-                    ("companyType", company_type.as_str()),
-                    ("reportDateType", date_type),
-                    ("reportType", "1"),
-                    ("dates", dates_param.as_str()),
-                    ("code", code_lower.as_str()),
-                    ])
-            )
+            let resp = crate::util::send_and_check(self.get(&data_url).query(&[
+                ("companyType", company_type.as_str()),
+                ("reportDateType", date_type),
+                ("reportType", "1"),
+                ("dates", dates_param.as_str()),
+                ("code", code_lower.as_str()),
+            ]))
             .await?;
 
             let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
@@ -831,14 +824,14 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
                 .query(&[
-                ("secid", secid),
-                ("lmt", lmt.as_str()),
-                ("fields1", "f1,f2,f3,f7"),
-                (
-                "fields2",
-                "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63",
-                ),
-                ])
+                    ("secid", secid),
+                    ("lmt", lmt.as_str()),
+                    ("fields1", "f1,f2,f3,f7"),
+                    (
+                        "fields2",
+                        "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63",
+                    ),
+                ]),
         )
         .await?;
 

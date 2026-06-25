@@ -12,10 +12,7 @@ impl AkShareClient {
     /// Fetch fund information from Danjuan API.
     pub async fn fund_xueqiu_info(&self, symbol: &str) -> Result<FundSnapshot> {
         let url = format!("https://danjuanfunds.com/djapi/fund/{symbol}");
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
 
         let root: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = root
@@ -71,10 +68,7 @@ impl AkShareClient {
     /// Fetch fund performance/achievement data from Danjuan API.
     pub async fn fund_xueqiu_achievement(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://danjuanfunds.com/djapi/fundx/base/fund/achievement/{symbol}");
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
         let root: serde_json::Value = response.json().await.map_err(Error::from)?;
         root.get("data")
             .cloned()
@@ -84,10 +78,7 @@ impl AkShareClient {
     /// Fetch fund basic info from Xueqiu (Python: fund_individual_basic_info_xq).
     pub async fn fund_individual_basic_info_xq(&self, symbol: &str) -> Result<Vec<XqBasicInfo>> {
         let url = format!("https://danjuanfunds.com/djapi/fund/{symbol}");
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
         let root: serde_json::Value = response.json().await.map_err(Error::from)?;
         let data = root
             .get("data")
@@ -172,10 +163,7 @@ impl AkShareClient {
     pub async fn fund_individual_analysis_xq(&self, symbol: &str) -> Result<Vec<XqAnalysisItem>> {
         let url =
             format!("https://danjuanfunds.com/djapi/fund/base/quote/data/index/analysis/{symbol}");
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
         let root: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = root
             .get("data")
@@ -212,10 +200,7 @@ impl AkShareClient {
         symbol: &str,
     ) -> Result<Vec<XqProfitProbabilityItem>> {
         let url = format!("https://danjuanfunds.com/djapi/fundx/base/fund/profit/ratio/{symbol}");
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
         let root: serde_json::Value = response.json().await.map_err(Error::from)?;
         let list = root
             .get("data")
@@ -245,10 +230,7 @@ impl AkShareClient {
     /// Fetch fund detail info (trading rules) from Xueqiu (Python: fund_individual_detail_info_xq).
     pub async fn fund_individual_detail_info_xq(&self, symbol: &str) -> Result<serde_json::Value> {
         let url = format!("https://danjuanfunds.com/djapi/fund/detail/{symbol}");
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
         let root: serde_json::Value = response.json().await.map_err(Error::from)?;
         root.get("data")
             .cloned()
@@ -265,7 +247,7 @@ impl AkShareClient {
         let url = "https://danjuanfunds.com/djapi/fundx/base/fund/record/asset/percent";
         let response = crate::util::send_and_check(
             self.get(url)
-                .query(&[("fund_code", symbol), ("report_date", date_fmt.as_str())])
+                .query(&[("fund_code", symbol), ("report_date", date_fmt.as_str())]),
         )
         .await?;
 

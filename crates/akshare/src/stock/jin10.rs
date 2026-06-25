@@ -75,7 +75,7 @@ impl AkShareClient {
                 .header("x-app-id", "rU6QIu7JHe2gOUeR")
                 .header("x-version", "1.0.0")
                 .header("origin", "https://datacenter.jin10.com")
-                .header("referer", "https://datacenter.jin10.com/market")
+                .header("referer", "https://datacenter.jin10.com/market"),
         )
         .await?;
 
@@ -95,7 +95,7 @@ impl AkShareClient {
                 .header("x-app-id", "rU6QIu7JHe2gOUeR")
                 .header("x-version", "1.0.0")
                 .header("origin", "https://datacenter.jin10.com")
-                .header("referer", "https://datacenter.jin10.com/market")
+                .header("referer", "https://datacenter.jin10.com/market"),
         )
         .await?;
 

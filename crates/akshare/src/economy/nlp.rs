@@ -54,9 +54,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&crate::util::eastmoney_datacenter_params("REPORT_DATE", &[
-                ("reportName", "RPT_ECONOMY_SENTIMENT"),
-            ]))
+            .query(&crate::util::eastmoney_datacenter_params(
+                "REPORT_DATE",
+                &[("reportName", "RPT_ECONOMY_SENTIMENT")],
+            ))
             .send()
             .await?
             .json()

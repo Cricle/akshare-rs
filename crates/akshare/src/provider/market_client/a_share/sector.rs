@@ -20,11 +20,14 @@ impl MarketDataClient {
         let response = self
             .http
             .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&crate::util::eastmoney_clist_params(&limit.to_string(), &[
-                ("fid", "f62"),
-                ("fs", fs),
-                ("fields", "f12,f14,f2,f3,f62,f184"),
-            ]))
+            .query(&crate::util::eastmoney_clist_params(
+                &limit.to_string(),
+                &[
+                    ("fid", "f62"),
+                    ("fs", fs),
+                    ("fields", "f12,f14,f2,f3,f62,f184"),
+                ],
+            ))
             .send()
             .await
             .context("failed to fetch A-share sector rankings from Eastmoney")?
@@ -62,11 +65,14 @@ impl MarketDataClient {
         let response = self
             .http
             .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&crate::util::eastmoney_clist_params(&limit.to_string(), &[
-                ("fid", "f3"),
-                ("fs", &format!("b:{sector_code}")),
-                ("fields", "f12,f14,f2,f3,f62"),
-            ]))
+            .query(&crate::util::eastmoney_clist_params(
+                &limit.to_string(),
+                &[
+                    ("fid", "f3"),
+                    ("fs", &format!("b:{sector_code}")),
+                    ("fields", "f12,f14,f2,f3,f62"),
+                ],
+            ))
             .send()
             .await
             .context("failed to fetch A-share sector constituents from Eastmoney")?

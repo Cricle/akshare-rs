@@ -42,17 +42,17 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
                 .query(&[
-                ("np", "2"),
-                ("fltt", "1"),
-                ("invt", "2"),
-                ("fs", fs),
-                ("fields", "f12,f14,f2,f3,f4,f7,f15,f16,f17,f18,f124"),
-                ("fid", "f3"),
-                ("pn", "1"),
-                ("pz", "200"),
-                ("po", "1"),
-                ("dect", "1"),
-                ])
+                    ("np", "2"),
+                    ("fltt", "1"),
+                    ("invt", "2"),
+                    ("fs", fs),
+                    ("fields", "f12,f14,f2,f3,f4,f7,f15,f16,f17,f18,f124"),
+                    ("fid", "f3"),
+                    ("pn", "1"),
+                    ("pz", "200"),
+                    ("po", "1"),
+                    ("dect", "1"),
+                ]),
         )
         .await?;
 

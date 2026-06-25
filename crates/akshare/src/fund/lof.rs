@@ -33,10 +33,10 @@ impl AkShareClient {
         let pz = limit.max(1).to_string();
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
-                ("fs", "b:MK0025"),
-                ("fields", "f12,f14,f2,f3"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    pz.as_str(),
+                    &[("fs", "b:MK0025"), ("fields", "f12,f14,f2,f3")],
+                )),
         )
         .await?;
 
@@ -170,13 +170,13 @@ impl AkShareClient {
             let response = crate::util::send_and_check(
                 self.get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
                     .query(&[
-                    ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
-                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
-                    ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
-                    ("ndays", "5"),
-                    ("iscr", "0"),
-                    ("secid", secid.as_str()),
-                    ])
+                        ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
+                        ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
+                        ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
+                        ("ndays", "5"),
+                        ("iscr", "0"),
+                        ("secid", secid.as_str()),
+                    ]),
             )
             .await?;
 
@@ -250,14 +250,17 @@ impl AkShareClient {
     pub async fn fund_lof_spot(&self) -> Result<Vec<EtfSpotItem>> {
         let response = crate::util::send_and_check(
             self.get("https://88.push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("10000", &[
-                ("fid", "f3"),
-                ("fs", "b:MK0404,b:MK0405,b:MK0406,b:MK0407"),
-                (
-                "fields",
-                "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21",
-                ),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    "10000",
+                    &[
+                        ("fid", "f3"),
+                        ("fs", "b:MK0404,b:MK0405,b:MK0406,b:MK0407"),
+                        (
+                            "fields",
+                            "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18,f20,f21",
+                        ),
+                    ],
+                )),
         )
         .await?;
 

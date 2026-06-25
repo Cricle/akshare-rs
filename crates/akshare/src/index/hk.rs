@@ -78,11 +78,14 @@ impl AkShareClient {
     pub async fn index_hk_spot_em(&self) -> Result<Vec<HkIndexSpotItem>> {
         let response = crate::util::send_and_check(
             self.get("https://15.push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("200", &[
-                ("fid", "f3"),
-                ("fs", "m:124,m:125,m:305"),
-                ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    "200",
+                    &[
+                        ("fid", "f3"),
+                        ("fs", "m:124,m:125,m:305"),
+                        ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
+                    ],
+                )),
         )
         .await?;
 

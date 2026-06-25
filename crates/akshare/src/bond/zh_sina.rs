@@ -77,10 +77,7 @@ impl AkShareClient {
     pub async fn bond_zh_hs_daily(&self, symbol: &str) -> Result<Vec<BondSnapshot>> {
         let now = chrono::Utc::now().format("%Y_%m_%d").to_string();
         let url = format!("https://hq.sinajs.cn/lb/{symbol}_{now}");
-        let resp = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let resp = crate::util::send_and_check(self.get(&url)).await?;
 
         let text = resp.text().await.map_err(Error::from)?;
         if text.is_empty() {

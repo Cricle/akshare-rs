@@ -86,11 +86,14 @@ impl AkShareClient {
 
         let response = crate::util::send_and_check(
             self.get("https://48.push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("200", &[
-                ("fid", "f12"),
-                ("fs", fs),
-                ("fields", "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    "200",
+                    &[
+                        ("fid", "f12"),
+                        ("fs", fs),
+                        ("fields", "f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f18"),
+                    ],
+                )),
         )
         .await?;
 
@@ -177,11 +180,8 @@ impl AkShareClient {
         // Sina uses JS-encoded data; try to parse the response directly
         let url =
             format!("https://finance.sina.com.cn/realstock/company/{symbol}/hisdata/klc_kl.js");
-        let response = crate::util::send_and_check(
-            self.get(&url)
-                .query(&[("d", "2020_2_4")])
-        )
-        .await?;
+        let response =
+            crate::util::send_and_check(self.get(&url).query(&[("d", "2020_2_4")])).await?;
 
         let body = response.text().await.map_err(Error::from)?;
         // The response is JS-encoded; we can't decode it without a JS runtime.

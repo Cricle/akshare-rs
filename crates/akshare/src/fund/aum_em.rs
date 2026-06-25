@@ -9,7 +9,7 @@ impl AkShareClient {
     pub async fn fund_aum(&self) -> Result<Vec<FundAumCompanyItem>> {
         let response = crate::util::send_and_check(
             self.get("https://fund.eastmoney.com/Company/home/gspmlist")
-                .query(&[("fundType", "0")])
+                .query(&[("fundType", "0")]),
         )
         .await?;
 
@@ -43,7 +43,7 @@ impl AkShareClient {
     /// Fetch fund market AUM trend (Python: fund_aum_trend).
     pub async fn fund_aum_trend(&self) -> Result<Vec<FundAumTrendPoint>> {
         let response = crate::util::send_and_check(
-            self.get("https://fund.eastmoney.com/Company/home/GetFundTotalScaleForChart")
+            self.get("https://fund.eastmoney.com/Company/home/GetFundTotalScaleForChart"),
         )
         .await?;
 
@@ -74,7 +74,7 @@ impl AkShareClient {
     pub async fn fund_aum_hist(&self, year: &str) -> Result<Vec<FundAumHistItem>> {
         let response = crate::util::send_and_check(
             self.get("https://fund.eastmoney.com/Company/home/HistoryScaleTable")
-                .query(&[("year", year)])
+                .query(&[("year", year)]),
         )
         .await?;
 

@@ -213,22 +213,19 @@ impl AkShareClient {
         } else {
             date.to_string()
         };
-        let resp = crate::util::send_and_check(
-            self.post(url)
-                .json(&serde_json::json!({
-                "currentPage": 1,
-                "pageSize": 50000,
-                "type": "bdzq",
-                "setdate": setdate,
-                "stockMes": "",
-                "market": market_code,
-                "appName": "AYLCH5",
-                "tokenId": "",
-                "appChannel": "LRSP",
-                "requestId": "194055910e2075c03e25fabf6ffc5a7f",
-                "channel": "pa18",
-                }))
-        )
+        let resp = crate::util::send_and_check(self.post(url).json(&serde_json::json!({
+        "currentPage": 1,
+        "pageSize": 50000,
+        "type": "bdzq",
+        "setdate": setdate,
+        "stockMes": "",
+        "market": market_code,
+        "appName": "AYLCH5",
+        "tokenId": "",
+        "appChannel": "LRSP",
+        "requestId": "194055910e2075c03e25fabf6ffc5a7f",
+        "channel": "pa18",
+        })))
         .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let arr = json

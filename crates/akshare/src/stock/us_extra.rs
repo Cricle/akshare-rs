@@ -295,11 +295,14 @@ impl AkShareClient {
         // Use Eastmoney US spot API as a more reliable alternative
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("5000", &[
-                    ("fid", "f3"),
-                    ("fs", "m:105,m:106,m:107"),
-                    ("fields", "f2,f3,f4,f5,f6,f12,f14"),
-                ])),
+                .query(&crate::util::eastmoney_clist_params(
+                    "5000",
+                    &[
+                        ("fid", "f3"),
+                        ("fs", "m:105,m:106,m:107"),
+                        ("fields", "f2,f3,f4,f5,f6,f12,f14"),
+                    ],
+                )),
         )
         .await?;
 
@@ -523,25 +526,22 @@ impl AkShareClient {
         period: &str,
     ) -> Result<Vec<UsValuationBaidu>> {
         let url = "https://gushitong.baidu.com/opendata";
-        let response = crate::util::send_and_check(
-            self.get(url)
-                .query(&[
-                    ("openapi", "1"),
-                    ("dspName", "iphone"),
-                    ("tn", "tangram"),
-                    ("client", "app"),
-                    ("query", indicator),
-                    ("code", symbol),
-                    ("word", ""),
-                    ("resource_id", "51171"),
-                    ("market", "us"),
-                    ("tag", indicator),
-                    ("chart_select", period),
-                    ("industry_select", ""),
-                    ("skip_industry", "1"),
-                    ("finClientType", "pc"),
-                ]),
-        )
+        let response = crate::util::send_and_check(self.get(url).query(&[
+            ("openapi", "1"),
+            ("dspName", "iphone"),
+            ("tn", "tangram"),
+            ("client", "app"),
+            ("query", indicator),
+            ("code", symbol),
+            ("word", ""),
+            ("resource_id", "51171"),
+            ("market", "us"),
+            ("tag", indicator),
+            ("chart_select", period),
+            ("industry_select", ""),
+            ("skip_industry", "1"),
+            ("finClientType", "pc"),
+        ]))
         .await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
@@ -604,10 +604,7 @@ impl AkShareClient {
             "pageSize": 100,
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let rank_data = env
@@ -647,10 +644,7 @@ impl AkShareClient {
             "srcSecurityCode": format!("US|{}", symbol),
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
         let obj = data
@@ -695,10 +689,7 @@ impl AkShareClient {
             "srcSecurityCode": format!("US|{}", symbol),
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -744,10 +735,7 @@ impl AkShareClient {
             "srcSecurityCode": format!("US|{}", symbol),
         });
 
-        let response = crate::util::send_and_check(
-            self.post(url).json(&payload),
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.post(url).json(&payload)).await?;
 
         let env: Env = response.json().await.map_err(Error::from)?;
         let data = env
@@ -787,11 +775,14 @@ impl AkShareClient {
         }
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("5000", &[
-                    ("fid", "f3"),
-                    ("fs", "i:100.NDX,i:100.DJIA,i:100.SPX"),
-                    ("fields", "f1,f2,f3,f4,f5,f6,f7,f8,f12,f13,f14"),
-                ])),
+                .query(&crate::util::eastmoney_clist_params(
+                    "5000",
+                    &[
+                        ("fid", "f3"),
+                        ("fs", "i:100.NDX,i:100.DJIA,i:100.SPX"),
+                        ("fields", "f1,f2,f3,f4,f5,f6,f7,f8,f12,f13,f14"),
+                    ],
+                )),
         )
         .await?;
 
@@ -873,7 +864,7 @@ impl AkShareClient {
         let url = "https://hq.sinajs.cn/list=int_dji,int_nasdaq,int_sp500";
         let response = crate::util::send_and_check(
             self.get(url)
-                .header("Referer", "https://finance.sina.com.cn")
+                .header("Referer", "https://finance.sina.com.cn"),
         )
         .await?;
 
@@ -928,11 +919,8 @@ impl AkShareClient {
     pub async fn stock_us_index_daily_sina(&self, symbol: &str) -> Result<Vec<UsIndexDailyCandle>> {
         let url = format!("https://finance.sina.com.cn/stock/usstock/{symbol}/klc_kl.js");
 
-        let response = crate::util::send_and_check(
-            self.get(&url)
-                .query(&[("d", "2023_5_01")])
-        )
-        .await?;
+        let response =
+            crate::util::send_and_check(self.get(&url).query(&[("d", "2023_5_01")])).await?;
 
         let text = response.text().await.map_err(Error::from)?;
 
@@ -994,21 +982,23 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
-                let mut p = vec![
-                ("reportName", "RPT_USF10_FN_GMAININDICATOR"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "REPORT_DATE"),
-                ];
-                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
-                p
-                }.as_slice())
+            self.get(url).query(
+                {
+                    let mut p = vec![
+                        ("reportName", "RPT_USF10_FN_GMAININDICATOR"),
+                        ("columns", "ALL"),
+                        ("quoteColumns", ""),
+                        ("filter", filter.as_str()),
+                        ("pageNumber", "1"),
+                        ("pageSize", ""),
+                        ("sortTypes", "-1"),
+                        ("sortColumns", "REPORT_DATE"),
+                    ];
+                    p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                    p
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -1040,21 +1030,23 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
-                let mut p = vec![
-                ("reportName", "RPT_USF10_FN_DIVIDEND"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "EX_DIVIDEND_DATE"),
-                ];
-                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
-                p
-                }.as_slice())
+            self.get(url).query(
+                {
+                    let mut p = vec![
+                        ("reportName", "RPT_USF10_FN_DIVIDEND"),
+                        ("columns", "ALL"),
+                        ("quoteColumns", ""),
+                        ("filter", filter.as_str()),
+                        ("pageNumber", "1"),
+                        ("pageSize", ""),
+                        ("sortTypes", "-1"),
+                        ("sortColumns", "EX_DIVIDEND_DATE"),
+                    ];
+                    p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                    p
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -1077,10 +1069,7 @@ impl AkShareClient {
     /// Returns S&P 500 dividend yield data.
     pub async fn stock_us_gxl_lg(&self) -> Result<Vec<UsGxlLg>> {
         let url = "https://legulegu.com/api/stockdata/s-and-p-500";
-        let response = crate::util::send_and_check(
-            self.get(url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(url)).await?;
 
         let data: serde_json::Value = response.json().await.map_err(Error::from)?;
         let arr = data
@@ -1125,21 +1114,23 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
-                let mut p = vec![
-                ("reportName", "RPT_PCF10_INDUSTRY_USSCALE"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", ""),
-                ("pageSize", ""),
-                ("sortTypes", "1"),
-                ("sortColumns", "PAIMING"),
-                ];
-                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
-                p
-                }.as_slice())
+            self.get(url).query(
+                {
+                    let mut p = vec![
+                        ("reportName", "RPT_PCF10_INDUSTRY_USSCALE"),
+                        ("columns", "ALL"),
+                        ("quoteColumns", ""),
+                        ("filter", filter.as_str()),
+                        ("pageNumber", ""),
+                        ("pageSize", ""),
+                        ("sortTypes", "1"),
+                        ("sortColumns", "PAIMING"),
+                    ];
+                    p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                    p
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -1175,21 +1166,23 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
-                let mut p = vec![
-                ("reportName", "RPT_USF10_HOT_KEYWORD"),
-                ("columns", "ALL"),
-                ("quoteColumns", ""),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", ""),
-                ("sortTypes", "-1"),
-                ("sortColumns", "TRADE_DATE"),
-                ];
-                p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
-                p
-                }.as_slice())
+            self.get(url).query(
+                {
+                    let mut p = vec![
+                        ("reportName", "RPT_USF10_HOT_KEYWORD"),
+                        ("columns", "ALL"),
+                        ("quoteColumns", ""),
+                        ("filter", filter.as_str()),
+                        ("pageNumber", "1"),
+                        ("pageSize", ""),
+                        ("sortTypes", "-1"),
+                        ("sortColumns", "TRADE_DATE"),
+                    ];
+                    p.extend_from_slice(&crate::util::eastmoney_f10_params("F10"));
+                    p
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 

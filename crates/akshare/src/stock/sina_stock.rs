@@ -195,10 +195,7 @@ impl AkShareClient {
             }
         };
 
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
 
         let text = response.text().await.map_err(Error::from)?;
 

@@ -9,11 +9,8 @@ impl AkShareClient {
     /// 巨潮-行业分类
     pub async fn stock_industry_category(&self) -> Result<Vec<IndustryCategory>> {
         let url = "http://webapi.cninfo.com.cn/api/sysapi/p_sysapi1125";
-        let resp = crate::util::send_and_check(
-            self.post(url)
-                .header("User-Agent", "Mozilla/5.0")
-        )
-        .await?;
+        let resp =
+            crate::util::send_and_check(self.post(url).header("User-Agent", "Mozilla/5.0")).await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let records = json
             .get("records")
@@ -37,7 +34,7 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.post(url)
                 .form(&[("indcode", symbol)])
-                .header("User-Agent", "Mozilla/5.0")
+                .header("User-Agent", "Mozilla/5.0"),
         )
         .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
@@ -75,7 +72,7 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.post(url)
                 .form(&[("indcode", symbol)])
-                .header("User-Agent", "Mozilla/5.0")
+                .header("User-Agent", "Mozilla/5.0"),
         )
         .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;

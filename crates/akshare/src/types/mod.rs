@@ -42,9 +42,7 @@ impl AdjustType {
             "" => Ok(Self::None),
             "qfq" => Ok(Self::Forward),
             "hfq" => Ok(Self::Backward),
-            _ => Err(crate::Error::invalid_input(format!(
-                "invalid adjust: {s}"
-            ))),
+            _ => Err(crate::Error::invalid_input(format!("invalid adjust: {s}"))),
         }
     }
 }

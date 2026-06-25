@@ -64,7 +64,7 @@ impl AkShareClient {
 
         let response = crate::util::send_and_check(
             self.get("https://gi.finance.sina.com.cn/hq/daily")
-                .query(&[("symbol", code), ("num", "10000")])
+                .query(&[("symbol", code), ("num", "10000")]),
         )
         .await?;
 

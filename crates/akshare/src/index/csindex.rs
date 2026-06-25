@@ -61,10 +61,10 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://www.csindex.com.cn/csindex-home/perf/index-perf")
                 .query(&[
-                ("indexCode", symbol),
-                ("startDate", start_date),
-                ("endDate", end_date),
-                ])
+                    ("indexCode", symbol),
+                    ("startDate", start_date),
+                    ("endDate", end_date),
+                ]),
         )
         .await?;
 

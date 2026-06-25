@@ -80,10 +80,9 @@ impl AkShareClient {
     ///
     /// Returns index code, display name, and publish date.
     pub async fn index_stock_info(&self) -> Result<Vec<IndexInfoItem>> {
-        let response = crate::util::send_and_check(
-            self.get("https://www.joinquant.com/data/dict/indexData")
-        )
-        .await?;
+        let response =
+            crate::util::send_and_check(self.get("https://www.joinquant.com/data/dict/indexData"))
+                .await?;
 
         let html = response.text().await.map_err(Error::from)?;
 

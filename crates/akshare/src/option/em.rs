@@ -46,16 +46,16 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://datacenter-web.eastmoney.com/api/data/v1/get")
                 .query(&[
-                ("reportName", "RPT_OPTION_CURRENTDAY"),
-                ("columns", "ALL"),
-                ("filter", filter.as_str()),
-                ("pageNumber", "1"),
-                ("pageSize", page_size.as_str()),
-                ("sortTypes", "-1"),
-                ("sortColumns", "TRADE_DATE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
-                ])
+                    ("reportName", "RPT_OPTION_CURRENTDAY"),
+                    ("columns", "ALL"),
+                    ("filter", filter.as_str()),
+                    ("pageNumber", "1"),
+                    ("pageSize", page_size.as_str()),
+                    ("sortTypes", "-1"),
+                    ("sortColumns", "TRADE_DATE"),
+                    ("source", "WEB"),
+                    ("client", "WEB"),
+                ]),
         )
         .await?;
 

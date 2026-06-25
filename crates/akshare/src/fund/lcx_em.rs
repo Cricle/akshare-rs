@@ -10,15 +10,15 @@ impl AkShareClient {
             self.get("https://api.fund.eastmoney.com/FundRank/GetLcRankList")
                 .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
                 .query(&[
-                ("intCompany", "0"),
-                ("MinsgType", "undefined"),
-                ("IsSale", "1"),
-                ("strSortCol", "SYL_Z"),
-                ("orderType", "desc"),
-                ("pageIndex", "1"),
-                ("pageSize", "50"),
-                ("FBQ", ""),
-                ])
+                    ("intCompany", "0"),
+                    ("MinsgType", "undefined"),
+                    ("IsSale", "1"),
+                    ("strSortCol", "SYL_Z"),
+                    ("orderType", "desc"),
+                    ("pageIndex", "1"),
+                    ("pageSize", "50"),
+                    ("FBQ", ""),
+                ]),
         )
         .await?;
 

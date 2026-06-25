@@ -39,7 +39,7 @@ impl AkShareClient {
     pub async fn index_all_cni(&self) -> Result<Vec<CniIndexItem>> {
         let response = crate::util::send_and_check(
             self.get("https://www.cnindex.com.cn/index/indexList")
-                .query(&[("channelCode", "-1"), ("rows", "2000"), ("pageNum", "1")])
+                .query(&[("channelCode", "-1"), ("rows", "2000"), ("pageNum", "1")]),
         )
         .await?;
 
@@ -97,11 +97,11 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("http://hq.cnindex.com.cn/market/market/getIndexDailyDataWithDataFormat")
                 .query(&[
-                ("indexCode", symbol),
-                ("startDate", &start),
-                ("endDate", &end),
-                ("frequency", "day"),
-                ])
+                    ("indexCode", symbol),
+                    ("startDate", &start),
+                    ("endDate", &end),
+                    ("frequency", "day"),
+                ]),
         )
         .await?;
 
@@ -155,7 +155,7 @@ impl AkShareClient {
     pub async fn index_detail_cni(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let response = crate::util::send_and_check(
             self.get("https://www.cnindex.com.cn/sample-detail/download-history")
-                .query(&[("indexcode", symbol)])
+                .query(&[("indexcode", symbol)]),
         )
         .await?;
 
@@ -200,7 +200,7 @@ impl AkShareClient {
     ) -> Result<Vec<serde_json::Value>> {
         let response = crate::util::send_and_check(
             self.get("http://www.cnindex.com.cn/sample-detail/download-adjustment")
-                .query(&[("indexcode", symbol)])
+                .query(&[("indexcode", symbol)]),
         )
         .await?;
 

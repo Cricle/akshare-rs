@@ -897,14 +897,17 @@ impl MarketDataClient {
         let response = self
             .http
             .get("https://72.push2.eastmoney.com/api/qt/clist/get")
-            .query(&crate::util::eastmoney_clist_params("200", &[
-                ("fid", "f12"),
-                ("fs", secid.as_str()),
-                (
-                    "fields",
-                    "f2,f3,f4,f5,f6,f7,f8,f12,f13,f14,f15,f16,f17,f18,f20,f115",
-                ),
-            ]))
+            .query(&crate::util::eastmoney_clist_params(
+                "200",
+                &[
+                    ("fid", "f12"),
+                    ("fs", secid.as_str()),
+                    (
+                        "fields",
+                        "f2,f3,f4,f5,f6,f7,f8,f12,f13,f14,f15,f16,f17,f18,f20,f115",
+                    ),
+                ],
+            ))
             .send()
             .await
             .context("failed to fetch US quote from Eastmoney")?

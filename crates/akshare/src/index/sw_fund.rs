@@ -73,7 +73,7 @@ impl AkShareClient {
                 "sortField": "",
                 "rule": "",
                 "indexType": 1,
-                }))
+                })),
         )
         .await?;
 
@@ -123,7 +123,7 @@ impl AkShareClient {
                 .json(&serde_json::json!({
                 "swIndexCode": symbol,
                 "type": period_upper,
-                }))
+                })),
         )
         .await?;
 

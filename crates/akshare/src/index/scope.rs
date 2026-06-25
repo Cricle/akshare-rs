@@ -29,7 +29,7 @@ impl AkShareClient {
     pub async fn index_news_sentiment_scope(&self) -> Result<Vec<NewsSentimentPoint>> {
         let response = crate::util::send_and_check(
             self.get("https://www.chinascope.com/inews/senti/index")
-                .query(&[("period", "YEAR")])
+                .query(&[("period", "YEAR")]),
         )
         .await?;
 

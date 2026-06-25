@@ -34,21 +34,21 @@ impl AkShareClient {
             self.get("https://fund.eastmoney.com/data/rankhandler.aspx")
                 .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
                 .query(&[
-                ("op", "ph"),
-                ("dt", "kf"),
-                ("ft", ft),
-                ("rs", ""),
-                ("gs", "0"),
-                ("sc", "1nzf"),
-                ("st", "desc"),
-                ("sd", now.as_str()),
-                ("ed", now.as_str()),
-                ("qdii", ""),
-                ("tabSubtype", ",,,,,"),
-                ("pi", "1"),
-                ("pn", pn.as_str()),
-                ("dx", "1"),
-                ])
+                    ("op", "ph"),
+                    ("dt", "kf"),
+                    ("ft", ft),
+                    ("rs", ""),
+                    ("gs", "0"),
+                    ("sc", "1nzf"),
+                    ("st", "desc"),
+                    ("sd", now.as_str()),
+                    ("ed", now.as_str()),
+                    ("qdii", ""),
+                    ("tabSubtype", ",,,,,"),
+                    ("pi", "1"),
+                    ("pn", pn.as_str()),
+                    ("dx", "1"),
+                ]),
         )
         .await?;
 
@@ -98,16 +98,16 @@ impl AkShareClient {
             self.get("https://fund.eastmoney.com/data/rankhandler.aspx")
                 .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
                 .query(&[
-                ("op", "ph"),
-                ("dt", "fb"),
-                ("ft", "ct"),
-                ("rs", ""),
-                ("gs", "0"),
-                ("sc", "1nzf"),
-                ("st", "desc"),
-                ("pi", "1"),
-                ("pn", "30000"),
-                ])
+                    ("op", "ph"),
+                    ("dt", "fb"),
+                    ("ft", "ct"),
+                    ("rs", ""),
+                    ("gs", "0"),
+                    ("sc", "1nzf"),
+                    ("st", "desc"),
+                    ("pi", "1"),
+                    ("pn", "30000"),
+                ]),
         )
         .await?;
 

@@ -239,7 +239,7 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.post(url)
                 .form(&[("sdate", sd.as_str())])
-                .header("User-Agent", "Mozilla/5.0")
+                .header("User-Agent", "Mozilla/5.0"),
         )
         .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
@@ -263,17 +263,17 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
                 .query(&[
-                ("pn", "1"),
-                ("pz", "5000"),
-                ("po", sort_order),
-                ("np", "1"),
-                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
-                ("fltt", "2"),
-                ("invt", "2"),
-                ("fid", sort_field),
-                ("fs", "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048"),
-                ("fields", "f2,f3,f12,f14"),
-                ])
+                    ("pn", "1"),
+                    ("pz", "5000"),
+                    ("po", sort_order),
+                    ("np", "1"),
+                    ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
+                    ("fltt", "2"),
+                    ("invt", "2"),
+                    ("fid", sort_field),
+                    ("fs", "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048"),
+                    ("fields", "f2,f3,f12,f14"),
+                ]),
         )
         .await?;
         let payload: crate::types::wire::ClistResp = resp.json().await.map_err(Error::from)?;

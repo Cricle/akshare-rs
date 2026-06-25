@@ -131,12 +131,10 @@ impl AkShareClient {
         );
 
         let response = crate::util::send_and_check(
-            self.get(&url)
-                .query(&[("modules", "assetProfile")])
-                .header(
+            self.get(&url).query(&[("modules", "assetProfile")]).header(
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                )
+            ),
         )
         .await?;
 
@@ -229,13 +227,13 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get(&url)
                 .query(&[(
-                "modules",
-                "defaultKeyStatistics,summaryDetail,financialData",
+                    "modules",
+                    "defaultKeyStatistics,summaryDetail,financialData",
                 )])
                 .header(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                )
+                    "User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                ),
         )
         .await?;
 

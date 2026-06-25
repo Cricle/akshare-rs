@@ -130,12 +130,12 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
                 .query(&[
-                ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
-                ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
-                ("iscr", "0"),
-                ("ndays", "5"),
-                ("secid", secid.as_str()),
-                ])
+                    ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
+                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
+                    ("iscr", "0"),
+                    ("ndays", "5"),
+                    ("secid", secid.as_str()),
+                ]),
         )
         .await?;
 

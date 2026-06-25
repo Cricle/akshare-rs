@@ -24,10 +24,13 @@ impl AkShareClient {
         let pz = limit.max(1).to_string();
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
-                ("fs", "b:MK0021,b:MK0022,b:MK0023,b:MK0024,b:MK0025"),
-                ("fields", "f2,f3,f12,f14"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    pz.as_str(),
+                    &[
+                        ("fs", "b:MK0021,b:MK0022,b:MK0023,b:MK0024,b:MK0025"),
+                        ("fields", "f2,f3,f12,f14"),
+                    ],
+                )),
         )
         .await?;
 
@@ -161,13 +164,13 @@ impl AkShareClient {
             let response = crate::util::send_and_check(
                 self.get("https://push2his.eastmoney.com/api/qt/stock/trends2/get")
                     .query(&[
-                    ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
-                    ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
-                    ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
-                    ("ndays", "5"),
-                    ("iscr", "0"),
-                    ("secid", &format!("{market_id}.{symbol}")),
-                    ])
+                        ("fields1", "f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13"),
+                        ("fields2", "f51,f52,f53,f54,f55,f56,f57,f58"),
+                        ("ut", "7eea3edcaed734bea9cbfc24409ed989"),
+                        ("ndays", "5"),
+                        ("iscr", "0"),
+                        ("secid", &format!("{market_id}.{symbol}")),
+                    ]),
             )
             .await?;
 
@@ -323,16 +326,16 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://api.fund.eastmoney.com/f10/lsjz")
                 .header(
-                "Referer",
-                format!("https://fundf10.eastmoney.com/jjjz_{fund}.html"),
+                    "Referer",
+                    format!("https://fundf10.eastmoney.com/jjjz_{fund}.html"),
                 )
                 .query(&[
-                ("fundCode", fund),
-                ("pageIndex", "1"),
-                ("pageSize", "10000"),
-                ("startDate", sd.as_str()),
-                ("endDate", ed.as_str()),
-                ])
+                    ("fundCode", fund),
+                    ("pageIndex", "1"),
+                    ("pageSize", "10000"),
+                    ("startDate", sd.as_str()),
+                    ("endDate", ed.as_str()),
+                ]),
         )
         .await?;
 
@@ -377,15 +380,15 @@ impl AkShareClient {
             self.get("https://query.sse.com.cn/commonQuery.do")
                 .header("Referer", "https://www.sse.com.cn/")
                 .query(&[
-                ("isPagination", "true"),
-                ("pageHelp.pageSize", "10000"),
-                ("pageHelp.pageNo", "1"),
-                ("pageHelp.beginPage", "1"),
-                ("pageHelp.cacheSize", "1"),
-                ("pageHelp.endPage", "1"),
-                ("sqlId", "COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L"),
-                ("STAT_DATE", data_str.as_str()),
-                ])
+                    ("isPagination", "true"),
+                    ("pageHelp.pageSize", "10000"),
+                    ("pageHelp.pageNo", "1"),
+                    ("pageHelp.beginPage", "1"),
+                    ("pageHelp.cacheSize", "1"),
+                    ("pageHelp.endPage", "1"),
+                    ("sqlId", "COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L"),
+                    ("STAT_DATE", data_str.as_str()),
+                ]),
         )
         .await?;
 
@@ -460,10 +463,7 @@ impl AkShareClient {
             "https://fund.10jqka.com.cn/data/Net/info/{inner_symbol}_rate_desc_{inner_date}_0_1_9999_0_0_0_jsonp_g.html"
         );
 
-        let response = crate::util::send_and_check(
-            self.get(&url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url)).await?;
 
         let text = response.text().await.map_err(Error::from)?;
         // THS returns JSONP: g({...})
@@ -509,10 +509,7 @@ impl AkShareClient {
     /// `symbol`: e.g. "sh510050" (with exchange prefix).
     pub async fn fund_etf_dividend(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
         let factor_url = format!("https://finance.sina.com.cn/realstock/company/{symbol}/hfq.js");
-        let response = crate::util::send_and_check(
-            self.get(&factor_url)
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&factor_url)).await?;
 
         let text = response.text().await.map_err(Error::from)?;
         if !text.starts_with("var") {

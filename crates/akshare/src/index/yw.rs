@@ -44,8 +44,10 @@ impl AkShareClient {
         }
 
         let response = crate::util::send_and_check(
-            self.get("https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/bi")
-                .query(&[("gcCode", "")])
+            self.get(
+                "https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/bi",
+            )
+            .query(&[("gcCode", "")]),
         )
         .await?;
 
@@ -80,11 +82,7 @@ impl AkShareClient {
         let url = format!(
             "https://apiserver.chinagoods.com/yiwuindex/v1/active/industry/class/history/{path}"
         );
-        let response = crate::util::send_and_check(
-            self.get(&url)
-                .query(&[("gcCode", "")])
-        )
-        .await?;
+        let response = crate::util::send_and_check(self.get(&url).query(&[("gcCode", "")])).await?;
 
         let payload: Envelope = response.json().await.map_err(Error::from)?;
         let data = payload.data.unwrap_or_default();

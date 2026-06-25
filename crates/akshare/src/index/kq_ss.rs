@@ -54,7 +54,7 @@ impl AkShareClient {
 
         let response = crate::util::send_and_check(
             self.get("http://api.idx365.com/index/project/34/data")
-                .query(&[("structCode", struct_code)])
+                .query(&[("structCode", struct_code)]),
         )
         .await?;
 

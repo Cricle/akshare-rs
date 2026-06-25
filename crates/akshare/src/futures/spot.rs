@@ -60,11 +60,14 @@ impl AkShareClient {
         let pz = limit.clamp(1, 500).to_string();
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(pz.as_str(), &[
-                ("fid", "f3"),
-                ("fs", FUTURES_FS),
-                ("fields", "f12,f14,f2,f3,f5,f10"),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    pz.as_str(),
+                    &[
+                        ("fid", "f3"),
+                        ("fs", FUTURES_FS),
+                        ("fields", "f12,f14,f2,f3,f5,f10"),
+                    ],
+                )),
         )
         .await?;
 

@@ -92,19 +92,16 @@ impl AkShareClient {
         symbol: &str,
     ) -> Result<Vec<SectorFundFlowHist>> {
         let url = "https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get".to_string();
-        let resp = crate::util::send_and_check(
-            self.get(&url)
-                .query(&[
-                ("lmt", "0"),
-                ("klt", "101"),
-                ("secid", symbol),
-                ("fields1", "f1,f2,f3,f7"),
-                (
+        let resp = crate::util::send_and_check(self.get(&url).query(&[
+            ("lmt", "0"),
+            ("klt", "101"),
+            ("secid", symbol),
+            ("fields1", "f1,f2,f3,f7"),
+            (
                 "fields2",
                 "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64,f65",
-                ),
-                ])
-        )
+            ),
+        ]))
         .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let klines = json
@@ -171,19 +168,16 @@ impl AkShareClient {
             }
         };
         let url = "https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get";
-        let resp = crate::util::send_and_check(
-            self.get(url)
-                .query(&[
-                ("lmt", "0"),
-                ("klt", "101"),
-                ("secid", secid.as_str()),
-                ("fields1", "f1,f2,f3,f7"),
-                (
+        let resp = crate::util::send_and_check(self.get(url).query(&[
+            ("lmt", "0"),
+            ("klt", "101"),
+            ("secid", secid.as_str()),
+            ("fields1", "f1,f2,f3,f7"),
+            (
                 "fields2",
                 "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64,f65",
-                ),
-                ])
-        )
+            ),
+        ]))
         .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let klines = json
@@ -243,19 +237,16 @@ impl AkShareClient {
         symbol: &str,
     ) -> Result<Vec<ConceptFundFlowHist>> {
         let url = "https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get";
-        let resp = crate::util::send_and_check(
-            self.get(url)
-                .query(&[
-                ("lmt", "0"),
-                ("klt", "101"),
-                ("secid", symbol),
-                ("fields1", "f1,f2,f3,f7"),
-                (
+        let resp = crate::util::send_and_check(self.get(url).query(&[
+            ("lmt", "0"),
+            ("klt", "101"),
+            ("secid", symbol),
+            ("fields1", "f1,f2,f3,f7"),
+            (
                 "fields2",
                 "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64,f65",
-                ),
-                ])
-        )
+            ),
+        ]))
         .await?;
         let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
         let klines = json
@@ -308,11 +299,10 @@ impl AkShareClient {
     ) -> Result<Vec<serde_json::Value>> {
         let resp = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(page_size, &[
-                ("fid", sort_field),
-                ("fs", fs),
-                ("fields", fields),
-                ]))
+                .query(&crate::util::eastmoney_clist_params(
+                    page_size,
+                    &[("fid", sort_field), ("fs", fs), ("fields", fields)],
+                )),
         )
         .await?;
         let payload: crate::types::wire::ClistResp = resp.json().await.map_err(Error::from)?;

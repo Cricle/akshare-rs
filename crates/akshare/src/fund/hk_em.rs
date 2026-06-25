@@ -12,18 +12,18 @@ impl AkShareClient {
             self.get("https://overseas.1234567.com.cn/overseasapi/OpenApiHander.ashx")
                 .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
                 .query(&[
-                ("api", "HKFDApi"),
-                ("m", "MethodFundList"),
-                ("action", "1"),
-                ("pageindex", "0"),
-                ("pagesize", "5000"),
-                ("dy", "1"),
-                ("date1", format_date.as_str()),
-                ("date2", format_date.as_str()),
-                ("sortfield", "Y"),
-                ("sorttype", "-1"),
-                ("isbuy", "0"),
-                ])
+                    ("api", "HKFDApi"),
+                    ("m", "MethodFundList"),
+                    ("action", "1"),
+                    ("pageindex", "0"),
+                    ("pagesize", "5000"),
+                    ("dy", "1"),
+                    ("date1", format_date.as_str()),
+                    ("date2", format_date.as_str()),
+                    ("sortfield", "Y"),
+                    ("sorttype", "-1"),
+                    ("isbuy", "0"),
+                ]),
         )
         .await?;
 
@@ -89,15 +89,15 @@ impl AkShareClient {
             self.get("https://overseas.1234567.com.cn/overseasapi/OpenApiHander.ashx")
                 .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
                 .query(&[
-                ("api", "HKFDApi"),
-                ("m", "MethodJZ"),
-                ("hkfcode", code),
-                ("action", action),
-                ("pageindex", "0"),
-                ("pagesize", "1000"),
-                ("date1", ""),
-                ("date2", ""),
-                ])
+                    ("api", "HKFDApi"),
+                    ("m", "MethodJZ"),
+                    ("hkfcode", code),
+                    ("action", action),
+                    ("pageindex", "0"),
+                    ("pagesize", "1000"),
+                    ("date1", ""),
+                    ("date2", ""),
+                ]),
         )
         .await?;
 

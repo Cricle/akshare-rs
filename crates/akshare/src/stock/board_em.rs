@@ -11,9 +11,9 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::types::AdjustType;
 use crate::types::value_ext::ValueExt;
 use crate::types::wire::KlineResp;
-use crate::types::AdjustType;
 
 use serde::{Deserialize, Serialize};
 
@@ -237,11 +237,14 @@ impl AkShareClient {
 
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("100", &[
-                    ("fid", "f62"),
-                    ("fs", fs),
-                    ("fields", "f2,f3,f4,f5,f6,f8,f12,f14,f62,f184"),
-                ])),
+                .query(&crate::util::eastmoney_clist_params(
+                    "100",
+                    &[
+                        ("fid", "f62"),
+                        ("fs", fs),
+                        ("fields", "f2,f3,f4,f5,f6,f8,f12,f14,f62,f184"),
+                    ],
+                )),
         )
         .await?;
 
@@ -307,11 +310,10 @@ impl AkShareClient {
 
         let response = crate::util::send_and_check(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params("5000", &[
-                    ("fid", "f12"),
-                    ("fs", fs),
-                    ("fields", "f12,f14"),
-                ])),
+                .query(&crate::util::eastmoney_clist_params(
+                    "5000",
+                    &[("fid", "f12"), ("fs", fs), ("fields", "f12,f14")],
+                )),
         )
         .await?;
 

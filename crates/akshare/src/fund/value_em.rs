@@ -33,14 +33,14 @@ impl AkShareClient {
             self.get("https://api.fund.eastmoney.com/FundGuZhi/GetFundGZList")
                 .header("Referer", "https://fund.eastmoney.com/")
                 .query(&[
-                ("type", type_id),
-                ("sort", "3"),
-                ("orderType", "desc"),
-                ("canbuy", "0"),
-                ("pageIndex", "1"),
-                ("pageSize", "20000"),
-                ("_", ts.as_str()),
-                ])
+                    ("type", type_id),
+                    ("sort", "3"),
+                    ("orderType", "desc"),
+                    ("canbuy", "0"),
+                    ("pageIndex", "1"),
+                    ("pageSize", "20000"),
+                    ("_", ts.as_str()),
+                ]),
         )
         .await?;
 

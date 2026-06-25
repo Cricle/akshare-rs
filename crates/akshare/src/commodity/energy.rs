@@ -12,9 +12,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&crate::util::eastmoney_datacenter_params("REPORT_DATE", &[
-                ("reportName", "RPT_ECONOMY_OIL_PRICE"),
-            ]))
+            .query(&crate::util::eastmoney_datacenter_params(
+                "REPORT_DATE",
+                &[("reportName", "RPT_ECONOMY_OIL_PRICE")],
+            ))
             .send()
             .await?
             .json()
@@ -45,9 +46,10 @@ impl AkShareClient {
         let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
         let resp: EmDatacenterResp = self
             .get(url)
-            .query(&crate::util::eastmoney_datacenter_params("TRADE_DATE", &[
-                ("reportName", "RPT_CARBON_TRADING"),
-            ]))
+            .query(&crate::util::eastmoney_datacenter_params(
+                "TRADE_DATE",
+                &[("reportName", "RPT_CARBON_TRADING")],
+            ))
             .send()
             .await?
             .json()

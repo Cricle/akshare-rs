@@ -51,15 +51,15 @@ impl AkShareClient {
                 .header("Origin", "http://index.0256.cn")
                 .header("Referer", "http://index.0256.cn/expx.htm")
                 .form(&[
-                ("marketId", "1"),
-                ("attribute1", "5"),
-                ("exponentTypeId", exp_type),
-                ("cateId", "2"),
-                ("attribute2", "华北"),
-                ("city", ""),
-                ("startLine", ""),
-                ("endLine", ""),
-                ])
+                    ("marketId", "1"),
+                    ("attribute1", "5"),
+                    ("exponentTypeId", exp_type),
+                    ("cateId", "2"),
+                    ("attribute2", "华北"),
+                    ("city", ""),
+                    ("startLine", ""),
+                    ("endLine", ""),
+                ]),
         )
         .await?;
 
@@ -86,15 +86,15 @@ impl AkShareClient {
                 .header("Origin", "http://index.0256.cn")
                 .header("Referer", "http://index.0256.cn/expx.htm")
                 .form(&[
-                ("type", "1"),
-                ("marketId", "1"),
-                ("expTypeId", exp_type),
-                ("startDate1", ""),
-                ("endDate1", ""),
-                ("city", ""),
-                ("startDate3", ""),
-                ("endDate3", ""),
-                ])
+                    ("type", "1"),
+                    ("marketId", "1"),
+                    ("expTypeId", exp_type),
+                    ("startDate1", ""),
+                    ("endDate1", ""),
+                    ("city", ""),
+                    ("startDate3", ""),
+                    ("endDate3", ""),
+                ]),
         )
         .await?;
 

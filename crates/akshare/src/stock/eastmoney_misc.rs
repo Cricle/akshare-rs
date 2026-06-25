@@ -730,8 +730,8 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
+            self.get(url).query(
+                {
                     let mut p = vec![
                         ("reportName", "RPT_F10_FN_MAINFINADATA"),
                         ("columns", "ALL"),
@@ -744,7 +744,9 @@ impl AkShareClient {
                     ];
                     p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
                     p
-                }.as_slice()),
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -785,8 +787,8 @@ impl AkShareClient {
 
         let url = "https://datacenter.eastmoney.com/securities/api/data/v1/get";
         let response = crate::util::send_and_check(
-            self.get(url)
-                .query({
+            self.get(url).query(
+                {
                     let mut p = vec![
                         ("reportName", "RPT_F10_EH_DIVIDEND"),
                         ("columns", "ALL"),
@@ -799,7 +801,9 @@ impl AkShareClient {
                     ];
                     p.extend_from_slice(&crate::util::eastmoney_f10_params("HSF10"));
                     p
-                }.as_slice()),
+                }
+                .as_slice(),
+            ),
         )
         .await?;
 
@@ -825,20 +829,23 @@ impl AkShareClient {
     ) -> Result<Vec<PeerComparison>> {
         let response = crate::util::send_and_check(
             self.get("https://datacenter.eastmoney.com/securities/api/data/v1/get")
-                .query({
-                    let mut p = vec![
-                        ("reportName", report_name),
-                        ("columns", "ALL"),
-                        ("quoteColumns", ""),
-                        ("filter", filter),
-                        ("pageNumber", ""),
-                        ("pageSize", ""),
-                        ("sortTypes", "1"),
-                        ("sortColumns", "PAIMING"),
-                    ];
-                    p.extend_from_slice(&crate::util::eastmoney_f10_params(source));
-                    p
-                }.as_slice()),
+                .query(
+                    {
+                        let mut p = vec![
+                            ("reportName", report_name),
+                            ("columns", "ALL"),
+                            ("quoteColumns", ""),
+                            ("filter", filter),
+                            ("pageNumber", ""),
+                            ("pageSize", ""),
+                            ("sortTypes", "1"),
+                            ("sortColumns", "PAIMING"),
+                        ];
+                        p.extend_from_slice(&crate::util::eastmoney_f10_params(source));
+                        p
+                    }
+                    .as_slice(),
+                ),
         )
         .await?;
 

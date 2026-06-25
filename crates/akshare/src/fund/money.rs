@@ -22,14 +22,14 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
                 .query(&[
-                ("FundType", "0"),
-                ("SortColumn", "SYL_7"),
-                ("Sort", "desc"),
-                ("pageIndex", "1"),
-                ("pageSize", pn.as_str()),
-                ("IsSale", "1"),
+                    ("FundType", "0"),
+                    ("SortColumn", "SYL_7"),
+                    ("Sort", "desc"),
+                    ("pageIndex", "1"),
+                    ("pageSize", pn.as_str()),
+                    ("IsSale", "1"),
                 ])
-                .header("Referer", "https://fund.eastmoney.com/")
+                .header("Referer", "https://fund.eastmoney.com/"),
         )
         .await?;
 
@@ -93,10 +93,9 @@ impl AkShareClient {
 
     /// Fetch money fund daily data (Python: fund_money_fund_daily).
     pub async fn fund_money_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
-        let response = crate::util::send_and_check(
-            self.get("https://fund.eastmoney.com/HBJJ_pjsyl.html")
-        )
-        .await?;
+        let response =
+            crate::util::send_and_check(self.get("https://fund.eastmoney.com/HBJJ_pjsyl.html"))
+                .await?;
 
         let text = response.text().await.map_err(Error::from)?;
         // This endpoint returns HTML; we need to parse the table.
@@ -119,16 +118,16 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://api.fund.eastmoney.com/f10/lsjz")
                 .header(
-                "Referer",
-                format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
+                    "Referer",
+                    format!("https://fundf10.eastmoney.com/jjjz_{symbol}.html"),
                 )
                 .query(&[
-                ("fundCode", symbol),
-                ("pageIndex", "1"),
-                ("pageSize", "10000"),
-                ("startDate", ""),
-                ("endDate", ""),
-                ])
+                    ("fundCode", symbol),
+                    ("pageIndex", "1"),
+                    ("pageSize", "10000"),
+                    ("startDate", ""),
+                    ("endDate", ""),
+                ]),
         )
         .await?;
 
@@ -166,15 +165,15 @@ impl AkShareClient {
         let response = crate::util::send_and_check(
             self.get("https://api.fund.eastmoney.com/FundRank/GetHbRankList")
                 .query(&[
-                ("intCompany", "0"),
-                ("MinsgType", ""),
-                ("IsSale", "1"),
-                ("strSortCol", "SYL_1N"),
-                ("orderType", "desc"),
-                ("pageIndex", "1"),
-                ("pageSize", "10000"),
+                    ("intCompany", "0"),
+                    ("MinsgType", ""),
+                    ("IsSale", "1"),
+                    ("strSortCol", "SYL_1N"),
+                    ("orderType", "desc"),
+                    ("pageIndex", "1"),
+                    ("pageSize", "10000"),
                 ])
-                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html")
+                .header("Referer", "https://fund.eastmoney.com/fundguzhi.html"),
         )
         .await?;
 

@@ -14,10 +14,10 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.get(url)
                 .query(&[
-                ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQXQSCGL_CX_L"),
-                ("TRADE_DATE", formatted.as_str()),
+                    ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQXQSCGL_CX_L"),
+                    ("TRADE_DATE", formatted.as_str()),
                 ])
-                .header("Referer", "http://bond.sse.com.cn/")
+                .header("Referer", "http://bond.sse.com.cn/"),
         )
         .await?;
 
@@ -38,10 +38,10 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.get(url)
                 .query(&[
-                ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQCJGL_CX_L"),
-                ("TRADE_DATE", formatted.as_str()),
+                    ("sqlId", "COMMON_SSEBOND_SCSJ_SCTJ_SCGL_ZQCJGL_CX_L"),
+                    ("TRADE_DATE", formatted.as_str()),
                 ])
-                .header("Referer", "http://bond.sse.com.cn/")
+                .header("Referer", "http://bond.sse.com.cn/"),
         )
         .await?;
 

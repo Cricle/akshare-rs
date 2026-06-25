@@ -33,14 +33,13 @@ impl AkShareClient {
 
         // First request to get page count
         let resp = crate::util::send_and_check(
-            self.get("http://www.kqindex.cn/flzs/table_data")
-                .query(&[
+            self.get("http://www.kqindex.cn/flzs/table_data").query(&[
                 ("category", "0"),
                 ("start", ""),
                 ("end", ""),
                 ("indexType", index_type),
                 ("pageindex", "1"),
-                ])
+            ]),
         )
         .await?;
 
@@ -51,14 +50,13 @@ impl AkShareClient {
         // Fetch remaining pages
         for page in 2..=page_count {
             let resp = crate::util::send_and_check(
-                self.get("http://www.kqindex.cn/flzs/table_data")
-                    .query(&[
+                self.get("http://www.kqindex.cn/flzs/table_data").query(&[
                     ("category", "0"),
                     ("start", ""),
                     ("end", ""),
                     ("indexType", index_type),
                     ("pageindex", &page.to_string()),
-                    ])
+                ]),
             )
             .await?;
 

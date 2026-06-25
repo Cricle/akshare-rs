@@ -13,12 +13,12 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.get("https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx")
                 .query(&[
-                ("t", "8"),
-                ("page", page.as_str()),
-                ("js", "reData"),
-                ("sort", "fcode,asc"),
+                    ("t", "8"),
+                    ("page", page.as_str()),
+                    ("js", "reData"),
+                    ("sort", "fcode,asc"),
                 ])
-                .header("Referer", "https://fund.eastmoney.com/")
+                .header("Referer", "https://fund.eastmoney.com/"),
         )
         .await?;
 
@@ -47,7 +47,7 @@ impl AkShareClient {
     /// Returns a list of fund code, name, and type for all available funds.
     pub async fn fund_name(&self) -> Result<Vec<serde_json::Value>> {
         let resp = crate::util::send_and_check(
-            self.get("https://fund.eastmoney.com/js/fundcode_search.js")
+            self.get("https://fund.eastmoney.com/js/fundcode_search.js"),
         )
         .await?;
 
@@ -104,25 +104,25 @@ impl AkShareClient {
         let resp = crate::util::send_and_check(
             self.get("https://api.fund.eastmoney.com/FundTradeRank/GetRankList")
                 .query(&[
-                ("ft", "zs"),
-                ("sc", "1n"),
-                ("st", "desc"),
-                ("pi", "1"),
-                ("pn", pn.as_str()),
-                ("cp", ""),
-                ("ct", ""),
-                ("cd", ""),
-                ("ms", ""),
-                ("fr", ""),
-                ("plevel", ""),
-                ("fst", ""),
-                ("ftype", ""),
-                ("fr1", s_code),
-                ("fr2", i_code),
-                ("fl", "0"),
-                ("is498", "1"),
+                    ("ft", "zs"),
+                    ("sc", "1n"),
+                    ("st", "desc"),
+                    ("pi", "1"),
+                    ("pn", pn.as_str()),
+                    ("cp", ""),
+                    ("ct", ""),
+                    ("cd", ""),
+                    ("ms", ""),
+                    ("fr", ""),
+                    ("plevel", ""),
+                    ("fst", ""),
+                    ("ftype", ""),
+                    ("fr1", s_code),
+                    ("fr2", i_code),
+                    ("fl", "0"),
+                    ("is498", "1"),
                 ])
-                .header("Referer", "https://fund.eastmoney.com/")
+                .header("Referer", "https://fund.eastmoney.com/"),
         )
         .await?;
 
