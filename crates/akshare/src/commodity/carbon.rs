@@ -213,7 +213,6 @@ fn parse_html_table(body: &str, items: &mut Vec<MacroDataPoint>, name: &str) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::util::extract_table_cells;
 
     #[test]
