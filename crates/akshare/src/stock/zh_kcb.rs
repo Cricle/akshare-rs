@@ -8,6 +8,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::market::eastmoney_secid;
+use crate::types::AdjustType;
 
 use serde::{Deserialize, Serialize};
 
@@ -189,12 +190,7 @@ impl AkShareClient {
         adjust: &str,
     ) -> Result<Vec<KcbDailyCandle>> {
         let secid = eastmoney_secid(symbol)?;
-        let fqt = match adjust {
-            "" => "0",
-            "qfq" => "1",
-            "hfq" => "2",
-            _ => return Err(Error::invalid_input(format!("invalid adjust: {adjust}"))),
-        };
+        let fqt = AdjustType::from_adjust_str(adjust)?.to_eastmoney_str();
 
         let klines = self
             .kline_fetch(

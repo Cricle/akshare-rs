@@ -27,6 +27,7 @@ use serde::{Deserialize, Serialize};
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::value_ext::ValueExt;
+use crate::types::AdjustType;
 
 static RE_TR: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"<tr[^>]*>([\s\S]*?)</tr>").unwrap());
@@ -306,12 +307,7 @@ impl AkShareClient {
         let code = symbol.trim_start_matches('0');
         let code = if code.is_empty() { "0" } else { code };
         let secid = format!("116.{code}");
-        let fqt = match adjust {
-            "" => "0",
-            "qfq" => "1",
-            "hfq" => "2",
-            _ => return Err(Error::invalid_input(format!("invalid adjust: {adjust}"))),
-        };
+        let fqt = AdjustType::from_adjust_str(adjust)?.to_eastmoney_str();
 
         let klines = self
             .kline_fetch(

@@ -13,6 +13,7 @@ use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::value_ext::ValueExt;
 use crate::types::wire::KlineResp;
+use crate::types::AdjustType;
 
 use serde::{Deserialize, Serialize};
 
@@ -128,12 +129,7 @@ impl AkShareClient {
             "monthly" => "103",
             _ => return Err(Error::invalid_input(format!("invalid period: {period}"))),
         };
-        let fqt = match adjust {
-            "" => "0",
-            "qfq" => "1",
-            "hfq" => "2",
-            _ => return Err(Error::invalid_input(format!("invalid adjust: {adjust}"))),
-        };
+        let fqt = AdjustType::from_adjust_str(adjust)?.to_eastmoney_str();
         self.fetch_board_kline(&secid, klt, fqt, start_date, end_date)
             .await
     }
@@ -189,12 +185,7 @@ impl AkShareClient {
             "monthly" => "103",
             _ => return Err(Error::invalid_input(format!("invalid period: {period}"))),
         };
-        let fqt = match adjust {
-            "" => "0",
-            "qfq" => "1",
-            "hfq" => "2",
-            _ => return Err(Error::invalid_input(format!("invalid adjust: {adjust}"))),
-        };
+        let fqt = AdjustType::from_adjust_str(adjust)?.to_eastmoney_str();
         self.fetch_board_kline(&secid, klt, fqt, start_date, end_date)
             .await
     }
