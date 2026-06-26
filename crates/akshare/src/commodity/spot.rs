@@ -80,6 +80,7 @@ impl AkShareClient {
 
 #[cfg(test)]
 mod tests {
+    use crate::types::value_ext::ValueExt;
     use crate::types::wire::EmDatacenterResp;
 
     #[test]
