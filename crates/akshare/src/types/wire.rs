@@ -14,7 +14,24 @@ use serde::Deserialize;
 /// Used by: macro_data, economy, bond, commodity, forex modules.
 #[derive(Debug, Deserialize)]
 pub struct EmDatacenterResp {
+    pub success: Option<bool>,
+    pub message: Option<String>,
+    pub code: Option<i64>,
     pub result: Option<EmDatacenterResult>,
+}
+
+impl EmDatacenterResp {
+    /// Check if the API returned an error and return a descriptive error message.
+    pub fn check_error(&self, report_name: &str) -> Option<String> {
+        if self.success == Some(false) {
+            return Some(format!(
+                "Eastmoney report '{}' unavailable: {}",
+                report_name,
+                self.message.as_deref().unwrap_or("unknown error")
+            ));
+        }
+        None
+    }
 }
 
 #[derive(Debug, Deserialize)]

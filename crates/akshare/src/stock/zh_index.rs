@@ -118,63 +118,89 @@ pub struct CsIndexValue {
 // ---------------------------------------------------------------------------
 
 impl AkShareClient {
-    /// Get index spot data from Eastmoney.
+    /// Get index spot data.
     ///
+    /// Uses Sina `hq.sinajs.cn` API for major A-share indices.
     /// Python equivalent: `stock_zh_index_spot_em()`
     pub async fn stock_zh_index_spot_em(&self) -> Result<Vec<IndexSpotEm>> {
-        #[derive(Deserialize)]
-        struct Env {
-            data: Option<EnvData>,
-        }
-        #[derive(Deserialize)]
-        struct EnvData {
-            diff: Option<Vec<serde_json::Value>>,
-        }
-        let response = crate::util::send_and_check(
-            self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(
-                    "5000",
-                    &[
-                        ("fid", "f3"),
-                        ("fs", "m:1+s:2,m:0+t:5,m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23"),
-                        ("fields", "f2,f3,f4,f5,f6,f12,f13,f14,f15,f16,f17,f18"),
-                    ],
-                )),
-        )
-        .await?;
+        // Major A-share indices on Sina
+        let indices = [
+            ("sh000001", "上证指数"),
+            ("sh000300", "沪深300"),
+            ("sh000016", "上证50"),
+            ("sh000905", "中证500"),
+            ("sh000852", "中证1000"),
+            ("sz399001", "深证成指"),
+            ("sz399005", "中小100"),
+            ("sz399006", "创业板指"),
+            ("sz399303", "国证2000"),
+            ("sz399673", "创业板50"),
+            ("sh000688", "科创50"),
+        ];
 
-        let payload: Env = response.json().await.map_err(Error::from)?;
-        let diff = payload
-            .data
-            .and_then(|d| d.diff)
-            .ok_or_else(|| Error::upstream("eastmoney index spot missing data"))?;
+        let symbols_csv: Vec<&str> = indices.iter().map(|(s, _)| *s).collect();
+        let url = format!("https://hq.sinajs.cn/list={}", symbols_csv.join(","));
 
-        let items: Vec<IndexSpotEm> = diff
-            .iter()
-            .filter_map(|item| {
-                let code = item.get("f12")?.as_str()?.to_string();
-                let name = item.get("f14")?.as_str()?.to_string();
-                Some(IndexSpotEm {
-                    code,
-                    name,
-                    latest_price: item.f64_field(&["f2"]),
-                    change_pct: item.f64_field(&["f3"]),
-                    change_amount: item.f64_field(&["f4"]),
-                    volume: item.f64_field(&["f5"]),
-                    amount: item.f64_field(&["f6"]),
-                    high: item.f64_field(&["f15"]),
-                    low: item.f64_field(&["f16"]),
-                    open: item.f64_field(&["f17"]),
-                    prev_close: item.f64_field(&["f18"]),
-                    internal_id: item
-                        .str_field(&["f13"])
-                        .map(std::string::ToString::to_string),
-                })
-            })
-            .collect();
+        let body = self
+            .get(&url)
+            .header("Referer", "https://finance.sina.com.cn")
+            .send()
+            .await?
+            .text()
+            .await?;
+
+        let mut items = Vec::new();
+        for (i, line) in body.lines().enumerate() {
+            if i >= indices.len() {
+                break;
+            }
+            let data = line
+                .split_once('=')
+                .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
+                .map_or("", |(s, _)| s);
+            if data.is_empty() {
+                continue;
+            }
+            let fields: Vec<&str> = data.split(',').collect();
+            if fields.len() < 10 {
+                continue;
+            }
+            let (symbol, name) = indices[i];
+            let code = &symbol[2..]; // Remove sh/sz prefix
+            let open = fields[1].parse::<f64>().unwrap_or(0.0);
+            let prev_close = fields[2].parse::<f64>().unwrap_or(0.0);
+            let latest_price = fields[3].parse::<f64>().unwrap_or(0.0);
+            let high = fields[4].parse::<f64>().unwrap_or(0.0);
+            let low = fields[5].parse::<f64>().unwrap_or(0.0);
+            let volume = fields[8].parse::<f64>().unwrap_or(0.0);
+            let amount = fields[9].parse::<f64>().unwrap_or(0.0);
+            let change_amount = latest_price - prev_close;
+            let change_pct = if prev_close > 0.0 {
+                (change_amount / prev_close * 10000.0).round() / 100.0
+            } else {
+                0.0
+            };
+            if latest_price == 0.0 {
+                continue;
+            }
+            items.push(IndexSpotEm {
+                code: code.to_string(),
+                name: name.to_string(),
+                latest_price: latest_price.into(),
+                change_pct: change_pct.into(),
+                change_amount: change_amount.into(),
+                volume: volume.into(),
+                amount: amount.into(),
+                high: high.into(),
+                low: low.into(),
+                open: open.into(),
+                prev_close: prev_close.into(),
+                internal_id: None,
+            });
+        }
 
         if items.is_empty() {
-            return Err(Error::not_found("eastmoney returned no index spot data"));
+            return Err(Error::not_found("sina returned no index spot data"));
         }
         Ok(items)
     }

@@ -94,6 +94,24 @@ pub fn sample_kline_str(date: &str) -> String {
     format!("{date},10.00,10.50,10.80,9.90,100000,10500000.0,2.0,1.5,0.15,1.2")
 }
 
+/// Register catch-all mocks for ALL API paths used across the crate.
+/// This enables testing any function without hitting real endpoints.
+pub async fn mount_all_mocks(server: &MockServer) {
+    let any_get = Mock::given(method("GET")).respond_with(
+        ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "rc": 0, "data": {"total": 0, "diff": []}
+        })),
+    );
+    any_get.mount(server).await;
+
+    let any_post = Mock::given(method("POST")).respond_with(
+        ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "rc": 0, "data": {"total": 0, "diff": []}
+        })),
+    );
+    any_post.mount(server).await;
+}
+
 /// Sample MacroDataPoint-style JSON from Eastmoney datacenter.
 pub fn sample_macro_row(date: &str, value: f64, name: &str) -> serde_json::Value {
     serde_json::json!({

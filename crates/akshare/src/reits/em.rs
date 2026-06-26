@@ -4,7 +4,6 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::wire::ClistResp;
 use crate::types::{CandlePoint, ReitSnapshot};
 use crate::util::{parse_csv_line, parse_f64_safe, today_iso};
 
@@ -27,53 +26,95 @@ struct ClistItem {
 // ---------------------------------------------------------------------------
 
 impl AkShareClient {
-    /// Fetch a snapshot list of China REITs from Eastmoney.
+    /// Fetch a snapshot list of China REITs.
     ///
-    /// Returns up to `limit` REITs with latest pricing data from the
-    /// Eastmoney clist API using `fs=b:MK0970` (REITs board).
+    /// Uses Sina `hq.sinajs.cn` API with a known list of listed REITs.
     pub async fn reits_list(&self, limit: usize) -> Result<Vec<ReitSnapshot>> {
-        let pz = limit.clamp(1, 200).to_string();
+        // Known China REITs with their Sina symbols
+        let reits: Vec<(&str, &str)> = vec![
+            ("sh508000", "中金普洛斯REIT"),
+            ("sh508001", "浙商沪杭甬REIT"),
+            ("sh508002", "招商蛇口产业园REIT"),
+            ("sh508003", "博时招商蛇口产园REIT"),
+            ("sh508005", "富国首创水务REIT"),
+            ("sh508006", "东吴苏州工业园REIT"),
+            ("sh508007", "华安张江光大REIT"),
+            ("sh508008", "红土盐田港REIT"),
+            ("sh508009", "中金厦门象屿REIT"),
+            ("sh508010", "国泰君安东久新宜REIT"),
+            ("sh508011", "国泰君安临港创新产业园REIT"),
+            ("sh508018", "中金山东高速REIT"),
+            ("sh508027", "华泰紫金江苏交控REIT"),
+            ("sh508028", "中信建投国家电投REIT"),
+            ("sh508029", "中航京能光伏REIT"),
+            ("sh508056", "华夏基金华润有巢REIT"),
+            ("sz180101", "红土创新深圳安居REIT"),
+            ("sz180102", "中金厦门安居REIT"),
+            ("sz180201", "华夏北京保障房REIT"),
+            ("sz180301", "华夏合肥高新产园REIT"),
+            ("sz180801", "中金普洛斯REIT"),
+            ("sz180901", "国泰君安东久新宜REIT"),
+        ];
+
+        let symbols_csv: Vec<&str> = reits.iter().map(|(s, _)| *s).collect();
+        let url = format!("https://hq.sinajs.cn/list={}", symbols_csv.join(","));
+
+        let body = self
+            .get(&url)
+            .header("Referer", "https://finance.sina.com.cn")
+            .send()
+            .await?
+            .text()
+            .await?;
+
         let today = today_iso();
+        let mut items = Vec::new();
+        for (i, line) in body.lines().enumerate() {
+            if i >= reits.len() {
+                break;
+            }
+            let data = line
+                .split_once('=')
+                .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
+                .map_or("", |(s, _)| s);
+            if data.is_empty() {
+                continue;
+            }
+            let fields: Vec<&str> = data.split(',').collect();
+            if fields.len() < 10 {
+                continue;
+            }
+            let (symbol, default_name) = reits[i];
+            let name = if !fields[0].is_empty() {
+                fields[0].to_string()
+            } else {
+                default_name.to_string()
+            };
+            let close = parse_f64_safe(fields[3]);
+            let prev_close = parse_f64_safe(fields[2]);
+            let change_pct = if prev_close > 0.0 {
+                ((close - prev_close) / prev_close * 10000.0).round() / 100.0
+            } else {
+                0.0
+            };
+            let volume = parse_f64_safe(fields[8]);
+            if close == 0.0 {
+                continue;
+            }
+            items.push(ReitSnapshot {
+                symbol: symbol.to_string(),
+                name,
+                date: today.clone(),
+                close,
+                change_pct,
+                volume,
+                nav: None,
+            });
+        }
 
-        let response = crate::util::send_and_check(
-            self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(
-                    pz.as_str(),
-                    &[
-                        ("fid", "f3"),
-                        ("fs", "b:MK0970"),
-                        ("fields", "f12,f14,f2,f3,f5"),
-                    ],
-                )),
-        )
-        .await?;
-
-        let payload: ClistResp = response.json().await.map_err(Error::from)?;
-        let items = payload
-            .data
-            .and_then(|d| d.diff)
-            .unwrap_or_default()
-            .into_iter()
-            .filter_map(|v| {
-                let item: ClistItem = serde_json::from_value(v).ok()?;
-                let code = item.code?;
-                if code.is_empty() {
-                    return None;
-                }
-                Some(ReitSnapshot {
-                    symbol: code,
-                    name: item.name.unwrap_or_else(|| "未知REIT".to_string()),
-                    date: today.clone(),
-                    close: item.price.unwrap_or(0.0),
-                    change_pct: item.change_pct.unwrap_or(0.0),
-                    volume: item.volume.unwrap_or(0.0),
-                    nav: None,
-                })
-            })
-            .collect::<Vec<_>>();
-
+        items.truncate(limit);
         if items.is_empty() {
-            return Err(Error::not_found("eastmoney returned no REITs"));
+            return Err(Error::not_found("sina returned no REIT data"));
         }
         Ok(items)
     }

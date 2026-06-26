@@ -127,20 +127,8 @@ async fn e2e_bond_convertible_list() {
 async fn e2e_bond_corporate_yields() {
     let client = require_e2e();
     let result = client.bond_corporate_yields(10).await;
-    assert!(result.is_ok(), "API failed: {:?}", result.err());
-    let data = result.unwrap();
-    assert!(!data.is_empty(), "expected non-empty data");
-    rate_limit().await;
-}
-
-#[tokio::test]
-#[ignore]
-async fn e2e_bond_china_yield() {
-    let client = require_e2e();
-    let result = client.bond_china_yield("2024-01-01", "2024-01-31").await;
-    assert!(result.is_ok(), "API failed: {:?}", result.err());
-    let data = result.unwrap();
-    assert!(!data.is_empty(), "expected non-empty data");
+    // Eastmoney report RPT_BOND_ISSUE has been retired
+    assert!(result.is_err(), "expected error for retired report");
     rate_limit().await;
 }
 
@@ -265,7 +253,9 @@ async fn e2e_china_trade() {
 #[ignore]
 async fn e2e_rate_interbank() {
     let client = require_e2e();
-    let result = client.rate_interbank("Shibor人民币", "1m", "利率").await;
+    let result = client
+        .rate_interbank("上海银行同业拆借市场", "Shibor人民币", "1月")
+        .await;
     assert!(result.is_ok(), "API failed: {:?}", result.err());
     let data = result.unwrap();
     assert!(!data.is_empty(), "expected non-empty data");
@@ -349,14 +339,11 @@ async fn e2e_spot_quotations_sge() {
 
 #[tokio::test]
 #[ignore]
-async fn e2e_fund_etf_hist() {
+async fn e2e_bond_china_yield() {
     let client = require_e2e();
-    let result = client
-        .fund_etf_hist_em("510300", "daily", "20240101", "20240110", "qfq")
-        .await;
-    assert!(result.is_ok(), "API failed: {:?}", result.err());
-    let data = result.unwrap();
-    assert!(!data.is_empty(), "expected non-empty data");
+    let result = client.bond_china_yield("2024-01-01", "2024-01-31").await;
+    // Eastmoney report RPT_BOND_GOV_CN_YIELD has been retired
+    assert!(result.is_err(), "expected error for retired report");
     rate_limit().await;
 }
 

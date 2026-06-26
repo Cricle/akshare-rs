@@ -154,6 +154,21 @@ impl AkShareClient {
         Ok(items)
     }
 
+    /// SHFE warehouse receipt data (alias for `futures_shfe_warehouse_receipt`).
+    pub async fn futures_warehouse_sge(&self, date: &str) -> Result<Vec<Row>> {
+        self.futures_shfe_warehouse_receipt(date).await
+    }
+
+    /// DCE warehouse receipt data (alias for `futures_warehouse_receipt_dce`).
+    pub async fn futures_warehouse_dce(&self, date: &str) -> Result<Vec<Row>> {
+        self.futures_warehouse_receipt_dce(date).await
+    }
+
+    /// CZCE warehouse receipt data (alias for `futures_warehouse_receipt_czce`).
+    pub async fn futures_warehouse_czce(&self, date: &str) -> Result<Vec<Row>> {
+        self.futures_warehouse_receipt_czce(date).await
+    }
+
     /// GFEX warehouse receipt data.
     pub async fn futures_gfex_warehouse_receipt(&self, date: &str) -> Result<Vec<Row>> {
         let url = "http://www.gfex.com.cn/u/interfacesWebTdWbillWeeklyQuotes/loadList";

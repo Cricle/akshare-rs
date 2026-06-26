@@ -62,7 +62,10 @@ impl AkShareClient {
             .into_iter()
             .zip(data)
             .filter_map(|(time, val)| {
-                let price = val.as_f64()?;
+                // SGE API returns data as strings, not numbers
+                let price = val
+                    .as_f64()
+                    .or_else(|| val.as_str().and_then(|s| s.parse::<f64>().ok()))?;
                 Some(MacroDataPoint {
                     date: time,
                     value: price,

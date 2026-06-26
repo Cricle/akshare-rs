@@ -15,6 +15,7 @@ pub mod government;
 pub mod issue_cninfo;
 pub mod jsl;
 pub mod nafmii;
+pub mod repo;
 pub mod spot;
 pub mod summary_sse;
 pub mod zh_cov;

@@ -13,10 +13,13 @@ impl AkShareClient {
 
     /// Fetch crypto spot prices from Jin10 data center.
     pub async fn crypto_spot(&self) -> Result<Vec<CryptoSpot>> {
-        let url = "https://cdn.jin10.com/data_center/reports/exchange_rate.json";
+        let url = "https://datacenter-api.jin10.com/crypto_currency/list";
         let resp = self
             .get(url)
             .header("Referer", "https://www.jin10.com")
+            .header("x-app-id", "rU6QIu7JHe2gOUeR")
+            .header("x-csrf-token", "x-csrf-token")
+            .header("x-version", "1.0.0")
             .send()
             .await?;
 
@@ -29,17 +32,17 @@ impl AkShareClient {
 
         let body: serde_json::Value = resp.json().await?;
 
-        // The response format varies; try to extract an array of crypto items
         let items_raw = body
-            .as_array()
+            .get("data")
+            .and_then(|d| d.as_array())
             .cloned()
-            .or_else(|| body.get("data").and_then(|d| d.as_array()).cloned())
+            .or_else(|| body.as_array().cloned())
             .unwrap_or_default();
 
         let mut items = Vec::with_capacity(items_raw.len());
         for v in &items_raw {
-            let symbol = v.str_or(&["symbol", "code"], "");
-            let name = v.str_or(&["name"], "");
+            let symbol = v.str_or(&["symbol", "currency_pair"], "");
+            let name = v.str_or(&["name", "bourse", "market"], "");
 
             if symbol.is_empty() {
                 continue;
@@ -47,7 +50,10 @@ impl AkShareClient {
 
             let price_usd = v.f64_or(&["price", "price_usd"], 0.0);
             let price_cny = v.f64_or(&["cny_price", "price_cny"], 0.0);
-            let change_24h_pct = v.f64_or(&["change", "change_24h"], 0.0);
+            let change_24h_pct = v.f64_or(
+                &["change", "change_24h", "change_percent", "up_down_rate"],
+                0.0,
+            );
             let volume_24h = v.f64_or(&["volume", "volume_24h"], 0.0);
             let market_cap = v.f64_or(&["market_cap"], 0.0);
 

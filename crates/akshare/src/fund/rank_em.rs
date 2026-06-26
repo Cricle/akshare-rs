@@ -27,7 +27,10 @@ impl AkShareClient {
             .find(|(n, _)| *n == symbol)
             .map_or("all", |(_, c)| *c);
 
-        let now = chrono::Utc::now().format("%Y-%m-%d").to_string();
+        let now = chrono::Utc::now();
+        let week_ago = now - chrono::Duration::days(7);
+        let ed = now.format("%Y-%m-%d").to_string();
+        let sd = week_ago.format("%Y-%m-%d").to_string();
         let pn = limit.max(1).to_string();
 
         let resp = crate::util::send_and_check(
@@ -41,8 +44,8 @@ impl AkShareClient {
                     ("gs", "0"),
                     ("sc", "1nzf"),
                     ("st", "desc"),
-                    ("sd", now.as_str()),
-                    ("ed", now.as_str()),
+                    ("sd", sd.as_str()),
+                    ("ed", ed.as_str()),
                     ("qdii", ""),
                     ("tabSubtype", ",,,,,"),
                     ("pi", "1"),
@@ -53,34 +56,71 @@ impl AkShareClient {
         .await?;
 
         let text = resp.text().await.map_err(Error::from)?;
+        if text.is_empty() {
+            return Err(Error::upstream("fund rank: empty response"));
+        }
         let json_start = text.find('{').unwrap_or(0);
         let json_end = text.rfind('}').map_or(text.len(), |i| i + 1);
         let json_str = &text[json_start..json_end];
 
-        let root: serde_json::Value = serde_json::from_str(json_str)
-            .map_err(|e| Error::decode(format!("fund rank JSON parse: {e}")))?;
-
-        let datas = root
-            .get("datas")
-            .and_then(|v| v.as_array())
-            .ok_or_else(|| Error::decode("fund rank missing datas"))?;
+        // The response is JS, not JSON — unquoted keys like `datas:`, `allRecords:`.
+        // Extract just the `datas` array directly to avoid full JS-to-JSON conversion.
+        let datas_start = json_str
+            .find("datas:")
+            .map(|i| i + "datas:".len())
+            .ok_or_else(|| {
+                Error::decode(format!(
+                    "fund rank missing datas field, json_str={}",
+                    &json_str[..json_str.len().min(100)]
+                ))
+            })?;
+        // Find matching ']' for the array
+        let bracket_start = json_str[datas_start..]
+            .find('[')
+            .map(|i| datas_start + i)
+            .ok_or_else(|| Error::decode("fund rank datas not an array"))?;
+        let mut depth = 0i32;
+        let mut bracket_end = bracket_start;
+        for (i, c) in json_str[bracket_start..].char_indices() {
+            match c {
+                '[' => depth += 1,
+                ']' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        bracket_end = bracket_start + i;
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let datas_str = &json_str[bracket_start..=bracket_end];
+        let datas: Vec<serde_json::Value> = serde_json::from_str(datas_str)
+            .map_err(|e| Error::decode(format!("fund rank datas parse: {e}")))?;
 
         let today = crate::util::today_iso();
         let snapshots: Vec<FundSnapshot> = datas
             .iter()
             .take(limit)
             .filter_map(|item| {
-                let arr = item.as_array()?;
-                if arr.len() < 8 {
+                // datas items can be CSV strings or JSON arrays
+                let fields: Vec<&str> = if let Some(s) = item.as_str() {
+                    s.split(',').collect()
+                } else if let Some(arr) = item.as_array() {
+                    arr.iter().map(|v| v.as_str().unwrap_or("")).collect()
+                } else {
+                    return None;
+                };
+                if fields.len() < 8 {
                     return None;
                 }
                 Some(FundSnapshot {
-                    symbol: arr[0].as_str().unwrap_or("").to_string(),
-                    name: arr[1].as_str().unwrap_or("").to_string(),
+                    symbol: fields[0].to_string(),
+                    name: fields[1].to_string(),
                     date: today.clone(),
-                    nav: arr[3].as_str().unwrap_or("0").parse().unwrap_or(0.0),
-                    acc_nav: arr[4].as_str().unwrap_or("0").parse().unwrap_or(0.0),
-                    change_pct: arr[7].as_str().unwrap_or("0").parse().unwrap_or(0.0),
+                    nav: fields[3].parse().unwrap_or(0.0),
+                    acc_nav: fields[4].parse().unwrap_or(0.0),
+                    change_pct: fields[7].parse().unwrap_or(0.0),
                     fund_type: Some(symbol.to_string()),
                 })
             })

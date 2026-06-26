@@ -125,6 +125,18 @@ name = "mock_option"
 required-features = ["mod-option"]
 
 [[test]]
+name = "mock_futures_extra"
+required-features = ["mod-futures"]
+
+[[test]]
+name = "mock_option_extra"
+required-features = ["mod-option"]
+
+[[test]]
+name = "mock_index_extra"
+required-features = ["mod-index"]
+
+[[test]]
 name = "futures_option"
 required-features = ["mod-futures", "mod-option"]
 

@@ -3,81 +3,77 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::MacroDataPoint;
-use crate::types::value_ext::ValueExt;
-use crate::types::wire::EmDatacenterResp;
 
 impl AkShareClient {
-    /// Fetch commodity spot prices from Eastmoney datacenter.
+    /// Fetch commodity spot prices.
     ///
-    /// Returns the most recent `limit` data points of major domestic commodity
-    /// spot prices (gold, silver, copper, etc.) reported by the Shanghai Gold
-    /// Exchange and other spot markets.
+    /// The Eastmoney datacenter report `RPT_SPOT_COMMODITY` has been retired.
+    /// Uses Sina's commodity API to fetch real-time prices for major
+    /// commodities (gold, silver, copper, crude oil, etc.).
     pub async fn commodity_spot_prices(&self, limit: usize) -> Result<Vec<MacroDataPoint>> {
         if limit == 0 {
             return Ok(Vec::new());
         }
 
-        let page_size = limit.min(500).to_string();
-        let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
+        // Sina commodity symbols: gold, silver, copper, crude oil, etc.
+        let sina_symbols = [
+            ("hf_GC", "COMEX黄金"),
+            ("hf_SI", "COMEX白银"),
+            ("hf_HG", "COMEX铜"),
+            ("hf_CL", "WTI原油"),
+            ("hf_OIL", "布伦特原油"),
+            ("hf_NG", "天然气"),
+            ("hf_PL", "铂金"),
+            ("hf_PA", "钯金"),
+        ];
 
-        // Fetch spot commodity quotes from the Eastmoney datacenter.
-        // RPT_SPOT_COMMODITY covers major domestic spot commodity prices.
-        let resp: EmDatacenterResp = self
-            .get(url)
-            .query(&[
-                ("reportName", "RPT_SPOT_COMMODITY"),
-                ("columns", "ALL"),
-                ("pageNumber", "1"),
-                ("pageSize", &page_size),
-                ("sortTypes", "-1"),
-                ("sortColumns", "REPORT_DATE"),
-                ("source", "WEB"),
-                ("client", "WEB"),
-            ])
+        let symbols_csv: Vec<&str> = sina_symbols.iter().map(|(s, _)| *s).collect();
+        let url = format!("https://hq.sinajs.cn/list={}", symbols_csv.join(","));
+
+        let body = self
+            .get(&url)
+            .header("Referer", "https://finance.sina.com.cn")
             .send()
             .await?
-            .json()
+            .text()
             .await?;
 
-        let data = resp.result.map(|r| r.data).unwrap_or_default();
-        let mut items = Vec::with_capacity(data.len().min(limit));
-
-        for v in &data {
-            if items.len() >= limit {
+        let today = crate::util::today_iso();
+        let mut items = Vec::new();
+        for (i, line) in body.lines().enumerate() {
+            if i >= sina_symbols.len() {
                 break;
             }
-            // Try common date field names used across Eastmoney reports.
-            let date = v.str_or(&["REPORT_DATE", "TRADE_DATE", "DATE"], "");
-            if date.is_empty() {
+            let data = line
+                .split_once('=')
+                .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
+                .map_or("", |(s, _)| s);
+            if data.is_empty() {
                 continue;
             }
-
-            // Price may be stored under different column names depending on the
-            // commodity report structure.
-            let value = v.f64_or(
-                &[
-                    "CLOSE_PRICE",
-                    "LATEST_PRICE",
-                    "PRICE",
-                    "INDICATOR_VALUE",
-                    "VALUE",
-                ],
-                0.0,
-            );
-
-            // Use the commodity name if available, otherwise a generic label.
-            let name = v.str_or(
-                &["COMMODITY_NAME", "PRODUCT_NAME", "NAME", "INDICATOR_NAME"],
-                "Commodity Spot",
-            );
-
+            let fields: Vec<&str> = data.split(',').collect();
+            if fields.len() < 10 {
+                continue;
+            }
+            let (_, name) = sina_symbols[i];
+            // Sina commodity format: [0]=name, [1]=price, ...
+            let price = fields[0].parse::<f64>().unwrap_or(0.0);
+            if price == 0.0 {
+                continue;
+            }
             items.push(MacroDataPoint {
-                date: date.get(..10).unwrap_or(date.as_str()).to_string(),
-                value,
-                name,
+                date: today.clone(),
+                value: price,
+                name: name.to_string(),
             });
         }
 
+        items.truncate(limit);
+        if items.is_empty() {
+            return Err(crate::error::Error::not_found(
+                "sina returned no commodity spot data",
+            ));
+        }
         Ok(items)
     }
 }

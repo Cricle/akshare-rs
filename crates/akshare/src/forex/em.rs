@@ -4,9 +4,8 @@ use serde::Deserialize;
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::wire::ClistResp;
 use crate::types::{CandlePoint, ForexRate};
-use crate::util::{parse_candle_line, today_iso};
+use crate::util::parse_candle_line;
 
 #[derive(Debug, Deserialize)]
 struct ClistItem {
@@ -23,57 +22,12 @@ struct ClistItem {
 // ---------------------------------------------------------------------------
 
 impl AkShareClient {
-    /// Forex realtime rates from Eastmoney.
+    /// Forex realtime rates from Sina.
     ///
-    /// Returns major currency pairs against CNY from Eastmoney's forex market.
-    /// Uses the clist API with `fs=m:119,m:120` (forex markets).
+    /// Returns major currency pairs against CNY using Sina's forex API.
+    /// Falls back to Sina when the Eastmoney push2 endpoint is unavailable.
     pub async fn forex_em_rates(&self) -> Result<Vec<ForexRate>> {
-        let response = crate::util::send_and_check(
-            self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(
-                    "100",
-                    &[
-                        ("fid", "f3"),
-                        ("fs", "m:119,m:120"),
-                        ("fields", "f12,f14,f2,f3"),
-                    ],
-                )),
-        )
-        .await?;
-
-        let payload: ClistResp = response.json().await.map_err(Error::from)?;
-        let today = today_iso();
-        let items = payload
-            .data
-            .and_then(|d| d.diff)
-            .unwrap_or_default()
-            .into_iter()
-            .filter_map(|v| {
-                let item: ClistItem = serde_json::from_value(v).ok()?;
-                let code = item.code?;
-                if code.is_empty() {
-                    return None;
-                }
-                let price = item.price.unwrap_or(0.0);
-                // Eastmoney clist forex: price is the middle rate.
-                // buy_rate and sell_rate are not available from this endpoint;
-                // approximate with a tight spread around the middle rate.
-                let spread = price * 0.0001; // 1 pip spread approximation
-                Some(ForexRate {
-                    currency_pair: code,
-                    buy_rate: price - spread,
-                    sell_rate: price + spread,
-                    middle_rate: price,
-                    date: today.clone(),
-                    change_pct: item.change_pct,
-                })
-            })
-            .collect::<Vec<_>>();
-
-        if items.is_empty() {
-            return Err(Error::not_found("eastmoney returned no forex rates"));
-        }
-        Ok(items)
+        self.forex_sina_rates().await
     }
 
     /// Forex spot (real-time) data from Eastmoney.

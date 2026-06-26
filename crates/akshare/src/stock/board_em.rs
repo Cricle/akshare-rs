@@ -283,7 +283,11 @@ impl AkShareClient {
     // -- Private helpers -----------------------------------------------------
 
     /// Resolve board symbol (name or code) to an Eastmoney secid like "90.BK0715".
-    async fn resolve_board_secid(&self, symbol: &str, board_type: &str) -> Result<String> {
+    pub(crate) async fn resolve_board_secid(
+        &self,
+        symbol: &str,
+        board_type: &str,
+    ) -> Result<String> {
         #[derive(Deserialize)]
         struct Env {
             data: Option<EnvData>,

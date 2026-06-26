@@ -25,77 +25,74 @@ struct EmGlobalData {
 // ---------------------------------------------------------------------------
 
 impl AkShareClient {
-    /// 东方财富 — 全球指数实时行情.
+    /// Global index real-time quotes.
+    ///
+    /// Uses Sina's `hq.sinajs.cn` API as primary source since the Eastmoney
+    /// push2 endpoint may be unavailable in certain network environments.
     pub async fn index_global_spot(&self) -> Result<Vec<GlobalEmSpotItem>> {
-        let fs = "i:1.000001,i:0.399001,i:0.399005,i:0.399006,i:1.000300,\
-            i:100.HSI,i:100.HSCEI,i:124.HSCCI,i:100.TWII,i:100.N225,\
-            i:100.KOSPI200,i:100.KS11,i:100.STI,i:100.SENSEX,i:100.KLSE,\
-            i:100.SET,i:100.PSI,i:100.KSE100,i:100.VNINDEX,i:100.JKSE,\
-            i:100.CSEALL,i:100.SX5E,i:100.FTSE,i:100.MCX,i:100.AXX,\
-            i:100.FCHI,i:100.GDAXI,i:100.RTS,i:100.IBEX,i:100.PSI20,\
-            i:100.OMXC20,i:100.BFX,i:100.AEX,i:100.WIG,i:100.OMXSPI,\
-            i:100.SSMI,i:100.HEX,i:100.OSEBX,i:100.ATX,i:100.MIB,\
-            i:100.ASE,i:100.ICEXI,i:100.PX,i:100.ISEQ,i:100.DJIA,\
-            i:100.SPX,i:100.NDX,i:100.TSX,i:100.BVSP,i:100.MXX,\
-            i:100.AS51,i:100.AORD,i:100.NZ50,i:100.UDI,i:100.BDI,i:100.CRB";
+        // Sina global index symbols
+        let sina_symbols = [
+            ("int_dji", "DJIA", "道琼斯"),
+            ("int_nasdaq", "NDX", "纳斯达克"),
+            ("int_sp500", "SPX", "标普500"),
+            ("int_hangseng", "HSI", "恒生指数"),
+            ("int_nikkei", "N225", "日经225"),
+            ("int_ftse", "FTSE", "英国富时100"),
+            ("int_dax", "GDAXI", "德国DAX"),
+            ("int_cac", "FCHI", "法国CAC40"),
+            ("int_kospi", "KS11", "韩国KOSPI"),
+            ("int_twii", "TWII", "台湾加权"),
+            ("b_TWSE", "STI", "富时新加坡海峡时报"),
+        ];
 
-        let response = crate::util::send_and_check(
-            self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&[
-                    ("np", "2"),
-                    ("fltt", "1"),
-                    ("invt", "2"),
-                    ("fs", fs),
-                    ("fields", "f12,f14,f2,f3,f4,f7,f15,f16,f17,f18,f124"),
-                    ("fid", "f3"),
-                    ("pn", "1"),
-                    ("pz", "200"),
-                    ("po", "1"),
-                    ("dect", "1"),
-                ]),
-        )
-        .await?;
+        let symbols_csv: Vec<&str> = sina_symbols.iter().map(|(s, _, _)| *s).collect();
+        let url = format!("https://hq.sinajs.cn/list={}", symbols_csv.join(","));
 
-        let payload: EmGlobalEnvelope = response.json().await.map_err(Error::from)?;
-        let diff = payload.data.and_then(|d| d.diff).unwrap_or_default();
+        let body = self
+            .get(&url)
+            .header("Referer", "https://finance.sina.com.cn")
+            .send()
+            .await?
+            .text()
+            .await?;
 
-        // diff may be an object (keyed by index) or an array
-        let entries: Vec<(String, serde_json::Value)> = match &diff {
-            serde_json::Value::Object(map) => {
-                map.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+        let mut items = Vec::new();
+        for (i, line) in body.lines().enumerate() {
+            let data = line
+                .split_once('=')
+                .and_then(|(_, r)| r.trim_matches('"').split_once(';'))
+                .map_or("", |(s, _)| s);
+            if data.is_empty() || i >= sina_symbols.len() {
+                continue;
             }
-            serde_json::Value::Array(arr) => arr
-                .iter()
-                .enumerate()
-                .map(|(i, v)| (i.to_string(), v.clone()))
-                .collect(),
-            _ => vec![],
-        };
-
-        let items: Vec<GlobalEmSpotItem> = entries
-            .into_iter()
-            .filter_map(|(_, v)| {
-                let obj = v.as_object()?;
-                Some(GlobalEmSpotItem {
-                    code: obj.get("f12")?.as_str()?.to_string(),
-                    name: obj.get("f14")?.as_str().unwrap_or("").to_string(),
-                    close: obj.get("f2")?.as_f64().unwrap_or(0.0) / 100.0,
-                    change_pct: obj.get("f3")?.as_f64().unwrap_or(0.0) / 100.0,
-                    change_amount: obj.get("f4")?.as_f64().unwrap_or(0.0) / 100.0,
-                    amplitude_pct: obj.get("f7")?.as_f64().unwrap_or(0.0) / 100.0,
-                    high: obj.get("f15")?.as_f64().unwrap_or(0.0) / 100.0,
-                    low: obj.get("f16")?.as_f64().unwrap_or(0.0) / 100.0,
-                    open: obj.get("f17")?.as_f64().unwrap_or(0.0) / 100.0,
-                    prev_close: obj.get("f18")?.as_f64().unwrap_or(0.0) / 100.0,
-                    timestamp: obj.get("f124")?.as_i64().unwrap_or(0),
-                })
-            })
-            .collect();
+            let fields: Vec<&str> = data.split(',').collect();
+            if fields.len() < 4 {
+                continue;
+            }
+            let (_, code, name) = sina_symbols[i];
+            let close = fields[1].parse::<f64>().unwrap_or(0.0);
+            let change_amount = fields[2].parse::<f64>().unwrap_or(0.0);
+            let change_pct = fields[3].parse::<f64>().unwrap_or(0.0);
+            if close == 0.0 {
+                continue;
+            }
+            items.push(GlobalEmSpotItem {
+                code: code.to_string(),
+                name: name.to_string(),
+                close,
+                change_pct,
+                change_amount,
+                amplitude_pct: 0.0,
+                high: 0.0,
+                low: 0.0,
+                open: 0.0,
+                prev_close: close - change_amount,
+                timestamp: 0,
+            });
+        }
 
         if items.is_empty() {
-            return Err(Error::not_found(
-                "eastmoney returned no global index spot data",
-            ));
+            return Err(Error::not_found("sina returned no global index data"));
         }
         Ok(items)
     }

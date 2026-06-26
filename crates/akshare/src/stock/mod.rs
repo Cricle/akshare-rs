@@ -36,9 +36,11 @@ pub mod jin10;
 pub mod xueqiu;
 
 // New market-specific modules
+pub mod board_data;
 pub mod board_em;
 pub mod board_ths;
 pub mod hk_extra;
+pub mod trading;
 pub mod us_extra;
 pub mod us_profile;
 pub mod zh_a;

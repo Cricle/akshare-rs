@@ -161,12 +161,66 @@ pub struct HsgtStockRow {
 impl AkShareClient {
     // -- A-share spot data --------------------------------------------------
 
-    /// Get all A-share spot data from Eastmoney (flexible row format).
+    /// Get all A-share spot data (flexible row format).
     ///
+    /// Uses Sina `hq.sinajs.cn` API to fetch real-time quotes.
     /// For the comprehensive typed version, see `feature::spot_em::stock_zh_a_spot_em`.
     pub async fn stock_zh_a_spot_em_flex(&self, limit: usize) -> Result<Vec<SpotRow>> {
-        self.fetch_spot_list("m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048", limit)
-            .await
+        use crate::types::value_ext::ValueExt;
+
+        // Fetch A-share list from Sina market center API
+        let url = "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData";
+        let body: serde_json::Value = self
+            .get(url)
+            .query(&[
+                ("page", "1"),
+                ("num", &limit.min(80).to_string()),
+                ("sort", "symbol"),
+                ("asc", "1"),
+                ("node", "hs_a"),
+            ])
+            .header("Referer", "https://finance.sina.com.cn")
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        let arr = body.as_array().cloned().unwrap_or_default();
+        let mut items = Vec::with_capacity(arr.len());
+        for v in &arr {
+            let code = v.str_or(&["code"], "");
+            if code.is_empty() {
+                continue;
+            }
+            items.push(SpotRow {
+                code: code.to_string(),
+                name: v.str_or(&["name"], "").to_string(),
+                latest_price: v.f64_or(&["trade", "price"], 0.0).into(),
+                change_pct: v.f64_or(&["changepercent"], 0.0).into(),
+                change_amount: v.f64_or(&["pricechange"], 0.0).into(),
+                volume: v.f64_or(&["volume"], 0.0).into(),
+                amount: v.f64_or(&["amount"], 0.0).into(),
+                amplitude_pct: None,
+                turnover_rate: v.f64_or(&["turnoverratio"], 0.0).into(),
+                pe_ratio: v.f64_or(&["per"], 0.0).into(),
+                volume_ratio: None,
+                high: v.f64_or(&["high"], 0.0).into(),
+                low: v.f64_or(&["low"], 0.0).into(),
+                open: v.f64_or(&["open"], 0.0).into(),
+                prev_close: v.f64_or(&["settlement", "yestclose"], 0.0).into(),
+                total_market_cap: v.f64_or(&["mktcap"], 0.0).into(),
+                float_market_cap: v.f64_or(&["nmc"], 0.0).into(),
+                pb_ratio: v.f64_or(&["pb"], 0.0).into(),
+                market: None,
+                extra: std::collections::HashMap::new(),
+            });
+        }
+
+        items.truncate(limit);
+        if items.is_empty() {
+            return Err(Error::not_found("sina returned no A-share spot data"));
+        }
+        Ok(items)
     }
 
     /// Get ST / risk-warning stocks from Eastmoney.

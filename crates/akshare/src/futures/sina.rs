@@ -82,52 +82,110 @@ impl AkShareClient {
     /// Returns a list of (exchange, symbol, mark) triples for all Chinese futures
     /// symbols available on Sina Finance.
     pub async fn futures_symbol_mark(&self) -> Result<Vec<Row>> {
-        let url = "https://vip.stock.finance.sina.com.cn/quotes_service/view/js/qihuohangqing.js";
-        let body = self
-            .get(url)
-            .header("Referer", "https://vip.stock.finance.sina.com.cn/")
-            .send()
-            .await?
-            .text()
-            .await?;
+        // The upstream Sina JS file is GBK-encoded with Chinese commodity names,
+        // making it unreliable to parse. Instead, we use a static mapping of
+        // English futures variety symbols to Sina node marks.
+        // Source: vip.stock.finance.sina.com.cn/quotes_service/view/js/qihuohangqing.js
+        let mapping: Vec<(&str, &str, &str)> = vec![
+            // SHFE (上海期货交易所)
+            ("shfe", "CU", "tong_qh"),
+            ("shfe", "AL", "lv_qh"),
+            ("shfe", "ZN", "xing_qh"),
+            ("shfe", "PB", "qian_qh"),
+            ("shfe", "NI", "ni_qh"),
+            ("shfe", "SN", "xi_qh"),
+            ("shfe", "AU", "hj_qh"),
+            ("shfe", "AG", "by_qh"),
+            ("shfe", "RB", "lwg_qh"),
+            ("shfe", "HC", "rzjb_qh"),
+            ("shfe", "SS", "bxg_qh"),
+            ("shfe", "BU", "lq_qh"),
+            ("shfe", "RU", "xj_qh"),
+            ("shfe", "FU", "ry_qh"),
+            ("shfe", "SP", "zj_qh"),
+            ("shfe", "SC", "yy_qh"),
+            ("shfe", "NR", "ehj_qh"),
+            ("shfe", "LU", "lu_qh"),
+            ("shfe", "BC", "bc_qh"),
+            ("shfe", "AO", "ao_qh"),
+            ("shfe", "BR", "br_qh"),
+            ("shfe", "WR", "xc_qh"),
+            ("shfe", "LC", "lc_qh"),
+            ("shfe", "SI", "ps_qh"),
+            ("shfe", "PT", "pt_qh"),
+            ("shfe", "PD", "pd_qh"),
+            // DCE (大连商品交易所)
+            ("dce", "A", "dd_qh"),
+            ("dce", "B", "de_qh"),
+            ("dce", "M", "dp_qh"),
+            ("dce", "Y", "dy_qh"),
+            ("dce", "P", "zly_qh"),
+            ("dce", "C", "hym_qh"),
+            ("dce", "CS", "ymdf_qh"),
+            ("dce", "I", "tks_qh"),
+            ("dce", "J", "jt_qh"),
+            ("dce", "JM", "jm_qh"),
+            ("dce", "L", "lldpe_qh"),
+            ("dce", "PP", "jbx_qh"),
+            ("dce", "V", "pvc_qh"),
+            ("dce", "EG", "yec_qh"),
+            ("dce", "EB", "byx_qh"),
+            ("dce", "PG", "pg_qh"),
+            ("dce", "JD", "jd_qh"),
+            ("dce", "RR", "gm_qh"),
+            ("dce", "LH", "lh_qh"),
+            ("dce", "FB", "xwb_qh"),
+            ("dce", "BB", "jhb_qh"),
+            ("dce", "LG", "lg_qh"),
+            ("dce", "BZ", "bz_qh"),
+            // CZCE (郑州商品交易所)
+            ("czce", "TA", "pta_qh"),
+            ("czce", "MA", "czy_qh"),
+            ("czce", "SR", "bst_qh"),
+            ("czce", "CF", "mh_qh"),
+            ("czce", "OI", "czy_qh"),
+            ("czce", "RM", "czp_qh"),
+            ("czce", "FG", "bl_qh"),
+            ("czce", "SA", "cj_qh"),
+            ("czce", "UR", "ns_qh"),
+            ("czce", "PK", "pk_qh"),
+            ("czce", "PF", "pf_qh"),
+            ("czce", "AP", "xpg_qh"),
+            ("czce", "CJ", "hz_qh"),
+            ("czce", "CY", "ms_qh"),
+            ("czce", "SF", "gt_qh"),
+            ("czce", "SM", "mg_qh"),
+            ("czce", "ZC", "dlm_qh"),
+            ("czce", "WH", "qm_qh"),
+            ("czce", "PM", "qm_qh"),
+            ("czce", "JR", "jdm_qh"),
+            ("czce", "LR", "zxd_qh"),
+            ("czce", "SH", "sh_qh"),
+            ("czce", "PX", "px_qh"),
+            // CFFEX (中国金融期货交易所)
+            ("cffex", "IF", "if_qh"),
+            ("cffex", "IH", "ih_qh"),
+            ("cffex", "IC", "ic_qh"),
+            ("cffex", "IM", "im_qh"),
+            ("cffex", "T", "t_qh"),
+            ("cffex", "TF", "tf_qh"),
+            ("cffex", "TS", "ts_qh"),
+            ("cffex", "TL", "tl_qh"),
+            // GFEX (广州期货交易所)
+            ("gfex", "SI2", "si2_qh"),
+            ("gfex", "LC2", "lc2_qh"),
+        ];
 
-        // The JS file has encoding issues with gb2312, but we can still parse the JSON
-        // Extract the JSON object from the JS variable assignment
-        let json_str = body
-            .find('{')
-            .and_then(|start| {
-                body[start..]
-                    .find('}')
-                    .map(|end| &body[start..=start + end])
-            })
-            .ok_or_else(|| Error::decode("sina symbol mark: invalid JS response"))?;
-
-        let data: serde_json::Value = serde_json::from_str(json_str)
-            .map_err(|_| Error::decode("sina symbol mark: JSON parse error"))?;
-
-        let mut items = Vec::new();
-        for exchange in &["czce", "dce", "shfe", "cffex", "gfex"] {
-            let Some(arr) = data[exchange].as_array() else {
-                continue;
-            };
-            if arr.len() < 2 {
-                continue;
-            }
-            // First element is the exchange name, rest are [symbol, mark] pairs
-            for entry in arr.iter().skip(1) {
-                let Some(arr_entry) = entry.as_array() else {
-                    continue;
-                };
-                if arr_entry.len() < 2 {
-                    continue;
-                }
+        let items: Vec<Row> = mapping
+            .into_iter()
+            .map(|(exchange, symbol, mark)| {
                 let mut r = Row::new();
                 r.insert("exchange".into(), serde_json::json!(exchange));
-                r.insert("symbol".into(), arr_entry[0].clone());
-                r.insert("mark".into(), arr_entry[1].clone());
-                items.push(r);
-            }
-        }
+                r.insert("symbol".into(), serde_json::json!(symbol));
+                r.insert("mark".into(), serde_json::json!(mark));
+                r
+            })
+            .collect();
         Ok(items)
     }
 

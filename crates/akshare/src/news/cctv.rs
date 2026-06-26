@@ -1,32 +1,27 @@
 //! CCTV news (央视新闻) and Baidu economic news data.
 
 use crate::client::AkShareClient;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::types::Row;
 
 impl AkShareClient {
-    /// CCTV news for a given date.
+    /// CCTV news (latest).
     ///
-    /// `date`: format YYYYMMDD
-    /// Returns news items from the CCTV finance channel.
-    pub async fn news_cctv(&self, date: &str) -> Result<Vec<Row>> {
-        let date_fmt = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..]);
-        let url = "https://api.cctv.cn/getNewsList";
-        let body = self
+    /// The original `api.cctv.cn` endpoint is no longer available.
+    /// Falls back to `news.cctv.com/data/index.json` which returns the
+    /// latest CCTV news headlines. The `date` parameter is accepted for
+    /// API compatibility but ignored by the upstream.
+    pub async fn news_cctv(&self, _date: &str) -> Result<Vec<Row>> {
+        let url = "https://news.cctv.com/data/index.json";
+        let body: serde_json::Value = self
             .get(url)
-            .query(&[
-                ("serviceId", "finance"),
-                ("date", date_fmt.as_str()),
-                ("type", "1"),
-            ])
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
-            .text()
+            .json()
             .await?;
 
-        let resp: serde_json::Value = serde_json::from_str(&body)?;
-        let data = resp["data"]["list"].as_array().cloned().unwrap_or_default();
+        let data = body["rollData"].as_array().cloned().unwrap_or_default();
 
         let mut items = Vec::new();
         for entry in &data {
@@ -38,13 +33,16 @@ impl AkShareClient {
             row.insert("url".into(), entry.get("url").cloned().unwrap_or_default());
             row.insert(
                 "time".into(),
-                entry.get("time").cloned().unwrap_or_default(),
+                entry.get("dateTime").cloned().unwrap_or_default(),
             );
             row.insert(
                 "brief".into(),
                 entry.get("brief").cloned().unwrap_or_default(),
             );
             items.push(row);
+        }
+        if items.is_empty() {
+            return Err(Error::not_found("cctv news: no data returned"));
         }
         Ok(items)
     }

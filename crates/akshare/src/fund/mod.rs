@@ -25,6 +25,7 @@ pub mod open;
 pub mod overview_em;
 pub mod portfolio_em;
 pub mod position_lg;
+pub mod private_fund;
 pub mod qdii;
 pub mod rank_em;
 pub mod rating;

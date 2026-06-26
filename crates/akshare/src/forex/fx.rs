@@ -39,6 +39,12 @@ impl AkShareClient {
             .cloned()
             .unwrap_or_default();
 
+        if data.is_empty() {
+            // The RPT_FE_QUOTATION_BOCCN report may have been retired.
+            // Fall back to China Money CFETS API.
+            return self.fx_spot_quote().await;
+        }
+
         let mut items = Vec::new();
         for v in &data {
             let name = v.str_or(&["CURRENCY_NAME"], "");

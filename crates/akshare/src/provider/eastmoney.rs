@@ -682,9 +682,64 @@ impl AkShareClient {
     /// Generic Eastmoney kline fetch from push2his.
     ///
     /// Returns raw kline strings (comma-separated OHLCV etc.) from the Eastmoney
-    /// kline API. Each string needs to be parsed by the caller with `parse_csv_line`.
+    /// kline API with Sina fallback. Each string needs to be parsed by the caller with `parse_csv_line`.
     #[allow(clippy::too_many_arguments)]
     pub(crate) async fn kline_fetch(
+        &self,
+        secid: &str,
+        klt: &str,
+        fqt: &str,
+        limit: usize,
+        extra: &[(&str, &str)],
+    ) -> Result<Vec<String>> {
+        // Try Eastmoney push2his first
+        let result = self
+            .kline_fetch_eastmoney(secid, klt, fqt, limit, extra)
+            .await;
+        if result.is_ok() {
+            return result;
+        }
+
+        // Fallback to Sina for A-share/HK stocks
+        if let Ok(klines) = self.kline_fetch_sina(secid, klt, limit).await
+            && !klines.is_empty()
+        {
+            return Ok(klines);
+        }
+
+        // Fallback to Tencent for A-share
+        if let Ok(klines) = self.kline_fetch_tencent(secid, klt, fqt, limit).await
+            && !klines.is_empty()
+        {
+            return Ok(klines);
+        }
+
+        // Fallback to Yahoo for US/HK stocks (market 105, 106, 107, 100)
+        let parts: Vec<&str> = secid.split('.').collect();
+        if parts.len() == 2
+            && matches!(parts[0], "105" | "106" | "107" | "100")
+            && let Ok(candles) = self.yahoo_candles(parts[1], limit).await
+            && !candles.is_empty()
+        {
+            let klines: Vec<String> = candles
+                .iter()
+                .map(|c| {
+                    format!(
+                        "{},{},{},{},{},{},0,0,0,0,0",
+                        c.trade_date, c.open, c.close, c.high, c.low, c.volume
+                    )
+                })
+                .collect();
+            return Ok(klines);
+        }
+
+        // Return original error
+        self.kline_fetch_eastmoney(secid, klt, fqt, limit, extra)
+            .await
+    }
+
+    /// Eastmoney push2his kline fetch.
+    async fn kline_fetch_eastmoney(
         &self,
         secid: &str,
         klt: &str,
@@ -710,13 +765,158 @@ impl AkShareClient {
         }
 
         let resp = crate::util::send_and_check(builder).await?;
-
         let payload: KlineResp = resp.json().await.map_err(Error::from)?;
         let klines = payload.data.and_then(|d| d.klines).unwrap_or_default();
 
         if klines.is_empty() {
             return Err(Error::not_found("eastmoney kline returned no data"));
         }
+        Ok(klines)
+    }
+
+    /// Sina kline fallback for A-share stocks.
+    /// Converts Eastmoney secid format (e.g., "1.600000") to Sina symbol (e.g., "sh600000").
+    async fn kline_fetch_sina(&self, secid: &str, klt: &str, limit: usize) -> Result<Vec<String>> {
+        // Parse secid: "1.600000" -> market=1 (SH), code="600000"
+        // "0.000001" -> market=0 (SZ), code="000001"
+        // "100.HSI" -> HK index, skip
+        let parts: Vec<&str> = secid.split('.').collect();
+        if parts.len() != 2 {
+            return Err(Error::invalid_input("invalid secid format"));
+        }
+        let market = parts[0];
+        let code = parts[1];
+
+        // Only support A-share (market 0 or 1)
+        let prefix = match market {
+            "1" => "sh",
+            "0" => "sz",
+            _ => {
+                return Err(Error::unsupported_market(
+                    "sina kline only supports A-share",
+                ));
+            }
+        };
+        let symbol = format!("{prefix}{code}");
+
+        // Map Eastmoney klt to Sina scale
+        let scale = match klt {
+            "1" => "5", // 1-min -> 5-min (Sina minimum)
+            "5" => "5",
+            "15" => "15",
+            "30" => "30",
+            "60" => "60",
+            "101" => "240",  // daily
+            "102" => "1680", // weekly
+            "103" => "7200", // monthly
+            _ => "240",
+        };
+
+        let url = format!(
+            "https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol={symbol}&scale={scale}&ma=no&datalen={limit}"
+        );
+
+        let body: serde_json::Value = self
+            .get(&url)
+            .header("Referer", "https://finance.sina.com.cn")
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        let arr = body.as_array().cloned().unwrap_or_default();
+        let mut klines = Vec::with_capacity(arr.len());
+        for item in &arr {
+            let day = item.get("day").and_then(|v| v.as_str()).unwrap_or("");
+            let open = item.get("open").and_then(|v| v.as_str()).unwrap_or("0");
+            let high = item.get("high").and_then(|v| v.as_str()).unwrap_or("0");
+            let low = item.get("low").and_then(|v| v.as_str()).unwrap_or("0");
+            let close = item.get("close").and_then(|v| v.as_str()).unwrap_or("0");
+            let volume = item.get("volume").and_then(|v| v.as_str()).unwrap_or("0");
+            // Convert to Eastmoney CSV format: date,open,close,high,low,volume,...
+            klines.push(format!(
+                "{day},{open},{close},{high},{low},{volume},0,0,0,0,0"
+            ));
+        }
+
+        Ok(klines)
+    }
+
+    /// Tencent kline fallback.
+    /// Converts Eastmoney secid format to Tencent format.
+    async fn kline_fetch_tencent(
+        &self,
+        secid: &str,
+        klt: &str,
+        fqt: &str,
+        limit: usize,
+    ) -> Result<Vec<String>> {
+        let parts: Vec<&str> = secid.split('.').collect();
+        if parts.len() != 2 {
+            return Err(Error::invalid_input("invalid secid format"));
+        }
+        let market = parts[0];
+        let code = parts[1];
+
+        let prefix = match market {
+            "1" => "sh",
+            "0" => "sz",
+            _ => {
+                return Err(Error::unsupported_market(
+                    "tencent kline only supports A-share",
+                ));
+            }
+        };
+        let symbol = format!("{prefix}{code}");
+
+        // Map klt to period
+        let period = match klt {
+            "101" => "day",
+            "102" => "week",
+            "103" => "month",
+            _ => "day",
+        };
+
+        // Map fqt to adjustment type
+        let adjust = match fqt {
+            "1" => "qfq",
+            "2" => "hfq",
+            _ => "",
+        };
+
+        let url = format!(
+            "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={symbol},{period},,,{limit},{adjust}"
+        );
+
+        let body: serde_json::Value = self.get(&url).send().await?.json().await?;
+
+        let data = body.get("data").and_then(|d| d.get(&*symbol));
+        let klines_array = data
+            .and_then(|d| d.get(period).or_else(|| d.get(format!("qfq{period}"))))
+            .and_then(|k| k.as_array());
+
+        let arr = match klines_array {
+            Some(a) => a.clone(),
+            None => return Ok(Vec::new()),
+        };
+
+        let mut klines = Vec::with_capacity(arr.len());
+        for item in &arr {
+            if let Some(a) = item.as_array()
+                && a.len() >= 6
+            {
+                let day = a[0].as_str().unwrap_or("");
+                let open = a[1].as_str().unwrap_or("0");
+                let close = a[2].as_str().unwrap_or("0");
+                let high = a[3].as_str().unwrap_or("0");
+                let low = a[4].as_str().unwrap_or("0");
+                let volume = a[5].as_str().unwrap_or("0");
+                klines.push(format!(
+                    "{day},{open},{close},{high},{low},{volume},0,0,0,0,0"
+                ));
+            }
+        }
+
         Ok(klines)
     }
 

@@ -6,7 +6,6 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::value_ext::ValueExt;
-use crate::types::wire::ClistResp;
 use crate::types::{BondSnapshot, CandlePoint};
 use crate::util::parse_candle_line;
 
@@ -37,56 +36,60 @@ fn cb_secid(symbol: &str) -> Result<String> {
 }
 
 impl AkShareClient {
-    /// List convertible bonds with real-time snapshot data.
+    /// List convertible bonds with snapshot data.
     ///
-    /// Uses Eastmoney clist API with `fs=b:MK0354` to retrieve all listed
-    /// convertible bonds. Returns up to `limit` items with current price
-    /// and change percentage.
+    /// Uses Eastmoney datacenter API (`RPT_BOND_CB_LIST`) to retrieve
+    /// convertible bond listing data. Returns up to `limit` items.
     pub async fn bond_convertible_list(&self, limit: usize) -> Result<Vec<BondSnapshot>> {
-        let pz = limit.clamp(1, 5000).to_string();
-        let response = crate::util::send_and_check(
-            self.get("https://push2.eastmoney.com/api/qt/clist/get")
-                .query(&crate::util::eastmoney_clist_params(
-                    pz.as_str(),
-                    &[
-                        ("fid", "f3"),
-                        ("fs", "b:MK0354"),
-                        ("fields", "f2,f3,f12,f14"),
-                    ],
-                )),
-        )
-        .await?;
+        use crate::types::wire::EmDatacenterResp;
 
-        let payload: ClistResp = response.json().await.map_err(Error::from)?;
-        let values = payload.data.and_then(|d| d.diff).unwrap_or_default();
+        let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
+        let resp: EmDatacenterResp = self
+            .get(url)
+            .query(&[
+                ("reportName", "RPT_BOND_CB_LIST"),
+                ("columns", "SECURITY_CODE,SECURITY_NAME_ABBR,LISTING_DATE"),
+                ("pageNumber", "1"),
+                ("pageSize", &limit.min(5000).to_string()),
+                ("sortTypes", "-1"),
+                ("sortColumns", "LISTING_DATE"),
+                ("source", "WEB"),
+                ("client", "WEB"),
+            ])
+            .send()
+            .await?
+            .json()
+            .await?;
 
-        if values.is_empty() {
-            return Err(Error::not_found(
-                "eastmoney returned no convertible bond items",
-            ));
+        if let Some(msg) = resp.check_error("RPT_BOND_CB_LIST") {
+            return Err(Error::upstream(msg));
         }
 
+        let data = resp.result.map(|r| r.data).unwrap_or_default();
         let today = crate::util::today_iso();
-        let items: Vec<BondSnapshot> = values
-            .into_iter()
-            .take(limit)
+        let items: Vec<BondSnapshot> = data
+            .iter()
             .filter_map(|v| {
-                let code = v.get("f12")?.as_str()?.to_string();
-                let name = v.str_or(&["f14"], "");
-                let price = v.f64_or(&["f2"], 0.0);
-                let change_pct = v.f64_or(&["f3"], 0.0);
+                let code = v.str_or(&["SECURITY_CODE"], "");
+                if code.is_empty() {
+                    return None;
+                }
                 Some(BondSnapshot {
                     symbol: code,
-                    name,
+                    name: v.str_or(&["SECURITY_NAME_ABBR"], ""),
                     date: today.clone(),
-                    close: price,
-                    change_pct,
+                    close: 0.0,
+                    change_pct: 0.0,
                     yield_rate: None,
                     credit_rating: None,
                 })
             })
+            .take(limit)
             .collect();
 
+        if items.is_empty() {
+            return Err(Error::not_found("no convertible bond data available"));
+        }
         Ok(items)
     }
 

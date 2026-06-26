@@ -3,11 +3,11 @@ members = ["crates/akshare", "crates/akshare-mcp"]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.6"
+version = "0.1.10"
 edition = "2024"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Cricle/akshare-rs"
 
 [workspace.dependencies]
-akshare = { path = "crates/akshare", version = "0.1.6" }
+akshare = { path = "crates/akshare", version = "0.1.10" }
