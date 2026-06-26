@@ -1,29 +1,9 @@
 //! REITs data from Eastmoney.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, ReitSnapshot};
 use crate::util::{parse_csv_line, parse_f64_safe, today_iso};
-
-#[derive(Debug, Deserialize)]
-struct ClistItem {
-    #[serde(rename = "f12")]
-    code: Option<String>,
-    #[serde(rename = "f14")]
-    name: Option<String>,
-    #[serde(rename = "f2")]
-    price: Option<f64>,
-    #[serde(rename = "f3")]
-    change_pct: Option<f64>,
-    #[serde(rename = "f5")]
-    volume: Option<f64>,
-}
-
-// ---------------------------------------------------------------------------
-// Implementation
-// ---------------------------------------------------------------------------
 
 impl AkShareClient {
     /// Fetch a snapshot list of China REITs.

@@ -1,28 +1,8 @@
 //! Eastmoney global index data — spot quotes and daily history.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::CandlePoint;
-
-// ---------------------------------------------------------------------------
-// Wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-struct EmGlobalEnvelope {
-    data: Option<EmGlobalData>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EmGlobalData {
-    diff: Option<serde_json::Value>,
-}
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
 
 impl AkShareClient {
     /// Global index real-time quotes.

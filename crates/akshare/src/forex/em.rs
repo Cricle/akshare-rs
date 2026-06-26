@@ -1,25 +1,9 @@
 //! Forex rates from Eastmoney.
 
-use serde::Deserialize;
-
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, ForexRate};
 use crate::util::parse_candle_line;
-
-#[derive(Debug, Deserialize)]
-struct ClistItem {
-    #[serde(rename = "f12")]
-    code: Option<String>,
-    #[serde(rename = "f2")]
-    price: Option<f64>,
-    #[serde(rename = "f3")]
-    change_pct: Option<f64>,
-}
-
-// ---------------------------------------------------------------------------
-// Implementation
-// ---------------------------------------------------------------------------
 
 impl AkShareClient {
     /// Forex realtime rates from Sina.

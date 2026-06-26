@@ -145,8 +145,8 @@ impl AkShareClient {
     /// Tencent HK financial data (PE, PB, EPS, BVPS, market cap).
     ///
     /// Fields from `qt.gtimg.cn`:
-    /// - [1] name, [3] price, [39] PE_TTM, [44] market_cap (亿),
-    /// - [57] EPS, [58] BVPS, [72] PB
+    /// - \[1\] name, \[3\] price, \[39\] PE_TTM, \[44\] market_cap (亿),
+    /// - \[57\] EPS, \[58\] BVPS, \[72\] PB
     pub(crate) async fn tencent_hk_financial(&self, symbol: &str) -> Result<HkFinancialSnapshot> {
         let code = crate::market::normalize_hk_symbol(symbol)
             .ok_or_else(|| Error::invalid_input(format!("invalid HK symbol: {symbol}")))?;
