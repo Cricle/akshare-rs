@@ -426,14 +426,29 @@ impl MarketDataClient {
         symbol: &str,
         ts_code: &str,
     ) -> anyhow::Result<FundamentalsSnapshot> {
-        let basic_rows = self
+        let tushare_available = self.tushare_token.is_some();
+        if !tushare_available {
+            tracing::warn!(
+                symbol = %symbol,
+                ts_code = %ts_code,
+                "TUSHARE_TOKEN not set; tushare data sources will be unavailable for A-share fundamentals"
+            );
+        }
+
+        let basic_rows = match self
             .tushare_query(
                 "stock_basic",
                 serde_json::json!({ "ts_code": ts_code, "list_status": "L" }),
                 "ts_code,symbol,name,industry,list_date",
             )
             .await
-            .unwrap_or_default();
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::warn!(symbol = %symbol, error = %e, "tushare stock_basic query failed");
+                vec![]
+            }
+        };
         let basic = basic_rows.first();
         let mut search_items = self
             .search_stocks_from_eastmoney(symbol.trim(), Some("A股"), 8)
@@ -452,15 +467,30 @@ impl MarketDataClient {
         let eastmoney_main = self
             .fetch_eastmoney_main_finance_indicator(ts_code)
             .await
+            .inspect_err(|e| {
+                tracing::warn!(symbol = %symbol, error = %e, "eastmoney main finance indicator failed");
+            })
             .ok();
-        let eastmoney_balance = self.fetch_eastmoney_balance_sheet(ts_code).await.ok();
-        let eastmoney_cashflow = self.fetch_eastmoney_cashflow(ts_code).await.ok();
+        let eastmoney_balance = self
+            .fetch_eastmoney_balance_sheet(ts_code)
+            .await
+            .inspect_err(|e| {
+                tracing::warn!(symbol = %symbol, error = %e, "eastmoney balance sheet failed");
+            })
+            .ok();
+        let eastmoney_cashflow = self
+            .fetch_eastmoney_cashflow(ts_code)
+            .await
+            .inspect_err(|e| {
+                tracing::warn!(symbol = %symbol, error = %e, "eastmoney cashflow failed");
+            })
+            .ok();
 
         let today = chrono::Utc::now().format("%Y%m%d").to_string();
         let recent_start = (chrono::Utc::now() - chrono::Duration::days(30))
             .format("%Y%m%d")
             .to_string();
-        let daily_basic_rows = self
+        let daily_basic_rows = match self
             .tushare_query(
                 "daily_basic",
                 serde_json::json!({
@@ -471,47 +501,77 @@ impl MarketDataClient {
                 "ts_code,trade_date,total_share,float_share,total_mv,circ_mv,pe,pb",
             )
             .await
-            .unwrap_or_default();
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::warn!(symbol = %symbol, error = %e, "tushare daily_basic query failed");
+                vec![]
+            }
+        };
         let daily_basic = daily_basic_rows.first();
 
-        let income_rows = self
+        let income_rows = match self
             .tushare_query(
                 "income",
                 serde_json::json!({ "ts_code": ts_code }),
                 "ts_code,ann_date,end_date,total_revenue,revenue,n_income,n_income_attr_p",
             )
             .await
-            .unwrap_or_default();
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::warn!(symbol = %symbol, error = %e, "tushare income query failed");
+                vec![]
+            }
+        };
         let income = income_rows.first();
 
-        let balance_rows = self
+        let balance_rows = match self
             .tushare_query(
                 "balancesheet",
                 serde_json::json!({ "ts_code": ts_code }),
                 "ts_code,ann_date,end_date,total_assets,total_liab,total_hldr_eqy_exc_min_int,total_share,money_cap,lt_borr,st_borr",
             )
             .await
-            .unwrap_or_default();
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::warn!(symbol = %symbol, error = %e, "tushare balancesheet query failed");
+                vec![]
+            }
+        };
         let balance = balance_rows.first();
 
-        let cashflow_rows = self
+        let cashflow_rows = match self
             .tushare_query(
                 "cashflow",
                 serde_json::json!({ "ts_code": ts_code }),
                 "ts_code,ann_date,end_date,n_cashflow_act,free_cashflow",
             )
             .await
-            .unwrap_or_default();
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::warn!(symbol = %symbol, error = %e, "tushare cashflow query failed");
+                vec![]
+            }
+        };
         let cashflow = cashflow_rows.first();
 
-        let fina_indicator_rows = self
+        let fina_indicator_rows = match self
             .tushare_query(
                 "fina_indicator",
                 serde_json::json!({ "ts_code": ts_code }),
                 "ts_code,ann_date,end_date,total_profit,op_of_gr,profit_dedt,ocfps,fcff",
             )
             .await
-            .unwrap_or_default();
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::warn!(symbol = %symbol, error = %e, "tushare fina_indicator query failed");
+                vec![]
+            }
+        };
         let fina_indicator = fina_indicator_rows.first();
 
         let fiscal_year_end = Self::a_share_fiscal_year_end_candidate(
@@ -590,7 +650,7 @@ impl MarketDataClient {
                     .map(|(assets, equity)| assets - equity)
             });
 
-        Ok(FundamentalsSnapshot {
+        let snapshot = FundamentalsSnapshot {
             symbol: symbol.trim().to_uppercase(),
             company_name: info
                 .as_ref()
@@ -763,7 +823,48 @@ impl MarketDataClient {
                     })
                 }),
             diluted_shares_outstanding: None,
-        })
+        };
+
+        // Log data completeness for diagnostics
+        let filled = [
+            snapshot.company_name != symbol.to_string(),
+            snapshot.industry.is_some(),
+            snapshot.shares_outstanding.is_some(),
+            snapshot.market_cap.is_some(),
+            snapshot.net_income_usd.is_some(),
+            snapshot.revenues_usd.is_some(),
+            snapshot.assets_usd.is_some(),
+            snapshot.liabilities_usd.is_some(),
+            snapshot.stockholders_equity_usd.is_some(),
+            snapshot.cash_and_equivalents_usd.is_some(),
+            snapshot.gross_profit_usd.is_some(),
+            snapshot.operating_cash_flow_usd.is_some(),
+            snapshot.free_cash_flow_usd.is_some(),
+        ];
+        let filled_count = filled.iter().filter(|&&v| v).count();
+        let total = filled.len();
+        tracing::info!(
+            symbol = %symbol,
+            ts_code = %ts_code,
+            tushare_available = tushare_available,
+            data_filled = filled_count,
+            data_total = total,
+            completeness_pct = (filled_count * 100 / total),
+            eastmoney_main = eastmoney_main.is_some(),
+            eastmoney_balance = eastmoney_balance.is_some(),
+            eastmoney_cashflow = eastmoney_cashflow.is_some(),
+            "A-share fundamentals fetch complete"
+        );
+        if filled_count < total / 2 {
+            tracing::warn!(
+                symbol = %symbol,
+                data_filled = filled_count,
+                data_total = total,
+                "A-share fundamentals data is less than 50% complete; analysis quality will be degraded"
+            );
+        }
+
+        Ok(snapshot)
     }
 }
 impl MarketDataClient {
@@ -1205,6 +1306,12 @@ impl MarketDataClient {
                 })
                 .unwrap_or_default()
         } else {
+            tracing::warn!(
+                symbol = %symbol,
+                code = payload.code,
+                msg = %payload.msg.as_deref().unwrap_or(""),
+                "tushare stock_basic returned error for A-share individual info"
+            );
             Vec::new()
         };
         let basic = basic_rows.first();
@@ -1419,3 +1526,4 @@ pub(crate) fn test_parse_tencent_candle_row(
 pub(crate) fn test_parse_tencent_quote_market_cap(raw: &str) -> anyhow::Result<Option<f64>> {
     MarketDataClient::parse_tencent_quote_market_cap(raw)
 }
+         
