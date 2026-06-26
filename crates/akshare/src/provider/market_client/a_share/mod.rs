@@ -314,6 +314,47 @@ impl MarketDataClient {
         ]
     }
 
+    async fn fetch_eastmoney_stock_profile(
+        &self,
+        secucode: &str,
+    ) -> anyhow::Result<Option<String>> {
+        let response = self
+            .http
+            .get("https://datacenter-web.eastmoney.com/api/data/v1/get")
+            .query(&[
+                ("reportName", "RPT_F10_ORG_BASICINFO"),
+                ("columns", "SECUCODE,SECURITY_NAME_ABBR,INDUSTRYCSRC1"),
+                ("filter", &format!("(SECUCODE=\"{secucode}\")")),
+                ("pageNumber", "1"),
+                ("pageSize", "1"),
+                ("source", "WEB"),
+                ("client", "WEB"),
+            ])
+            .send()
+            .await
+            .context("failed to fetch Eastmoney stock profile")?;
+
+        if !response.status().is_success() {
+            return Ok(None);
+        }
+
+        let payload: serde_json::Value = response
+            .json()
+            .await
+            .context("failed to decode eastmoney stock profile response")?;
+
+        let industry = payload
+            .get("result")
+            .and_then(|r| r.get("data"))
+            .and_then(|d| d.as_array())
+            .and_then(|arr| arr.first())
+            .and_then(|item| item.get("INDUSTRYCSRC1"))
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+
+        Ok(industry)
+    }
+
     async fn fetch_eastmoney_main_finance_indicator(
         &self,
         secucode: &str,
@@ -458,6 +499,14 @@ impl MarketDataClient {
             .drain(..)
             .find(|item| item.symbol == symbol.trim());
         let info = self.fetch_a_share_individual_info(symbol).await.ok();
+        let eastmoney_industry = self
+            .fetch_eastmoney_stock_profile(ts_code)
+            .await
+            .inspect_err(|e| {
+                tracing::warn!(symbol = %symbol, error = %e, "eastmoney stock profile failed");
+            })
+            .ok()
+            .flatten();
         let quote = self.fetch_a_share_quote_from_eastmoney(symbol).await.ok();
         let quote_market_cap = self
             .fetch_a_share_tencent_market_cap(symbol)
@@ -656,13 +705,15 @@ impl MarketDataClient {
                 .as_ref()
                 .and_then(|value| value.stock_name.clone())
                 .or_else(|| basic.and_then(|row| row.optional_string("name")))
+                .or_else(|| eastmoney_main.as_ref().and_then(|item| item.security_name_abbr.clone()))
                 .or_else(|| search_match.as_ref().map(|item| item.name.clone()))
                 .unwrap_or_else(|| symbol.to_string()),
             cik: ts_code.to_string(),
             industry: info
                 .as_ref()
                 .and_then(|value| value.industry.clone())
-                .or_else(|| basic.and_then(|row| row.optional_string("industry"))),
+                .or_else(|| basic.and_then(|row| row.optional_string("industry")))
+                .or_else(|| eastmoney_industry.clone()),
             currency: eastmoney_main
                 .as_ref()
                 .and_then(|item| item.currency.clone())
@@ -853,6 +904,7 @@ impl MarketDataClient {
             eastmoney_main = eastmoney_main.is_some(),
             eastmoney_balance = eastmoney_balance.is_some(),
             eastmoney_cashflow = eastmoney_cashflow.is_some(),
+            eastmoney_industry = eastmoney_industry.is_some(),
             "A-share fundamentals fetch complete"
         );
         if filled_count < total / 2 {
