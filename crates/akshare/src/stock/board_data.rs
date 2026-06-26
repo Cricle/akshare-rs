@@ -396,10 +396,10 @@ impl AkShareClient {
 /// Convert a single-item diff array from `stock/get` into a `BoardIndexItem`.
 fn diff_to_index_items(diff: &[serde_json::Value]) -> Vec<BoardIndexItem> {
     diff.iter()
-        .filter_map(|item| {
+        .map(|item| {
             let code = item.str_or(&["f57"], "");
             let name = item.str_or(&["f58"], "");
-            Some(BoardIndexItem {
+            BoardIndexItem {
                 code,
                 name,
                 latest_price: item.f64_field(&["f43"]),
@@ -411,7 +411,7 @@ fn diff_to_index_items(diff: &[serde_json::Value]) -> Vec<BoardIndexItem> {
                 low: item.f64_field(&["f45"]),
                 open: item.f64_field(&["f46"]),
                 prev_close: item.f64_field(&["f60"]),
-            })
+            }
         })
         .collect()
 }

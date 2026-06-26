@@ -86,9 +86,14 @@ async fn test_bond_zh_cov_value_analysis() {
 async fn test_bond_convertible_list() {
     let server = MockServer::start().await;
     let body = serde_json::json!({
-        "data": {
-            "diff": [
-                { "f12": "113050", "f14": "TestCB", "f2": 101.5, "f3": 0.5 }
+        "success": true,
+        "result": {
+            "data": [
+                {
+                    "SECURITY_CODE": "113050",
+                    "SECURITY_NAME_ABBR": "TestCB",
+                    "LISTING_DATE": "2024-01-01"
+                }
             ]
         }
     });
@@ -116,27 +121,12 @@ async fn test_bond_convertible_hist() {
 
 #[tokio::test]
 async fn test_bond_china_yield() {
+    // Eastmoney report RPT_BOND_GOV_CN_YIELD is retired; function returns error
     let server = MockServer::start().await;
-    let body = serde_json::json!({
-        "result": {
-            "data": [
-                {
-                    "SOLAR_DATE": "2024-01-02 00:00:00",
-                    "EMG01446460": 2.10,
-                    "EMG01446461": 2.30,
-                    "EMG01446462": 2.45,
-                    "EMG01446463": 2.55,
-                    "EMG01446464": 2.70,
-                    "EMG01446465": 2.80,
-                    "EMG01446466": 3.00
-                }
-            ]
-        }
-    });
-    mock_any_get(&server, ".*", body).await;
+    mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.bond_china_yield("2024-01-01", "2024-01-31").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // ---------------------------------------------------------------------------
@@ -146,23 +136,11 @@ async fn test_bond_china_yield() {
 #[tokio::test]
 async fn test_bond_corporate_yields() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({
-        "result": {
-            "data": [
-                {
-                    "SECURITY_CODE": "123456",
-                    "SECURITY_NAME_ABBR": "TestCorpBond",
-                    "ISSUE_DATE": "2024-01-02",
-                    "ISSUE_PRICE": 100.0,
-                    "COUPON_RATE": 3.5
-                }
-            ]
-        }
-    });
-    mock_any_get(&server, ".*", body).await;
+    // Eastmoney report RPT_BOND_ISSUE is retired; function returns error
+    mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.bond_corporate_yields(10).await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // ---------------------------------------------------------------------------
