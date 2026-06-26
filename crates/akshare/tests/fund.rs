@@ -1328,7 +1328,7 @@ async fn test_fund_fee_em() {
 #[tokio::test]
 async fn test_fund_open_fund_rank_em() {
     let server = MockServer::start().await;
-    let text_body = r#"{"datas":[["000001","华夏成长","type1","type2","2024-01-02","1.0000","2.0000","0.50"]]}"#;
+    let text_body = r#"var rankData = {datas:["000001,华夏成长,type1,type2,2024-01-02,1.0000,2.0000,0.50"],allRecords:1,pageIndex:1,pageNum:1,allPages:1,allNum:1};"#;
     mock_any_get_text(&server, ".*", text_body).await;
     let client = mock_client(&server);
     let result = client.fund_open_fund_rank("全部", 10).await;
