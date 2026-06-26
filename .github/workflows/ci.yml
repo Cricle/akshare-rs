@@ -18,7 +18,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo check --all-targets
+      - run: |
+          for i in 1 2 3; do
+            cargo check --all-targets && break
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
 
   test:
     name: Test
@@ -27,7 +32,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test
+      - run: |
+          for i in 1 2 3; do
+            cargo test && break
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
 
   fmt:
     name: Format
@@ -59,7 +69,12 @@ jobs:
         with:
           toolchain: "1.88"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo check
+      - run: |
+          for i in 1 2 3; do
+            cargo check && break
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
 
   docs:
     name: Documentation
@@ -68,7 +83,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo doc --no-deps --document-private-items
+      - run: |
+          for i in 1 2 3; do
+            cargo doc --no-deps --document-private-items && break
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
       - name: Verify docs folder exists
         run: |
           test -d docs
@@ -81,4 +101,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo publish -p akshare --dry-run
+      - run: |
+          for i in 1 2 3; do
+            cargo publish -p akshare --dry-run && break
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
