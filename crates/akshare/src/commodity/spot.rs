@@ -80,7 +80,7 @@ impl AkShareClient {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::types::wire::EmDatacenterResp;
 
     #[test]
     fn test_parse_spot_response() {
