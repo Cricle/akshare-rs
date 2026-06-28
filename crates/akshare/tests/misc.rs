@@ -18,19 +18,28 @@ use wiremock::{Mock, MockServer, ResponseTemplate};
 #[tokio::test]
 async fn test_forex_boc_rates() {
     let server = MockServer::start().await;
-    let body = em_datacenter_response(&[serde_json::json!({
-        "CURRENCY_NAME": "USD/CNY",
-        "BUYING_RATE": 7.10,
-        "SELLING_RATE": 7.13,
-        "MIDDLE_RATE": 7.11,
-        "DATE": "2024-01-02 00:00:00"
-    })]);
-    mock_any_get(&server, ".*", body).await;
+    // forex_boc_rates() delegates to forex_sina_rates() which expects Sina text format
+    let lines = [
+        r#"var hq_str_fx_susdcny="美元兑人民币,7.0950,7.0980,7.0965,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_seurcny="欧元兑人民币,7.8000,7.8100,7.8050,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_sgbpcny="英镑兑人民币,9.1000,9.1100,9.1050,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_sjpycny="日元兑人民币,0.0480,0.0485,0.0482,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_shkdcny="港币兑人民币,0.9200,0.9250,0.9225,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_saudcny="澳元兑人民币,4.6000,4.6100,4.6050,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_scadcny="加元兑人民币,5.3000,5.3100,5.3050,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_schfcny="瑞郎兑人民币,8.0000,8.0100,8.0050,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_nzdcny="新西兰元兑人民币,4.3000,4.3100,4.3050,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+        r#"var hq_str_fx_ssgdcny="新加坡元兑人民币,5.2000,5.2100,5.2050,2025-01-02 10:00:00,2025-01-02,2025-01-02,10:00:00";"#,
+    ];
+    let body = lines.join("\n");
+    mock_any_get_text(&server, ".*", &body).await;
     let client = mock_client(&server);
     let result = client.forex_boc_rates().await;
     assert!(result.is_ok());
     let items = result.unwrap();
-    assert!(!items.is_empty());
+    assert_eq!(items.len(), 10);
+    assert_eq!(items[0].currency_pair, "USD/CNY");
+    assert!((items[0].buy_rate - 7.095).abs() < 0.001);
 }
 
 // ============================================================================
