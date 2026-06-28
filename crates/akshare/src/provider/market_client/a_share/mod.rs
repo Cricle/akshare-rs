@@ -878,7 +878,7 @@ impl MarketDataClient {
 
         // Log data completeness for diagnostics
         let filled = [
-            snapshot.company_name != symbol.to_string(),
+            snapshot.company_name != symbol,
             snapshot.industry.is_some(),
             snapshot.shares_outstanding.is_some(),
             snapshot.market_cap.is_some(),
