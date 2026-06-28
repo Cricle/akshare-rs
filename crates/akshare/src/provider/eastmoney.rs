@@ -424,11 +424,7 @@ impl AkShareClient {
         sector_code: &str,
         limit: usize,
     ) -> Result<Vec<CapitalFlowPoint>> {
-        let secid = format!(
-            "{}.{}",
-            prefix,
-            sector_code.trim().to_uppercase()
-        );
+        let secid = format!("{}.{}", prefix, sector_code.trim().to_uppercase());
         self.fetch_capital_flow(&secid, limit).await
     }
 

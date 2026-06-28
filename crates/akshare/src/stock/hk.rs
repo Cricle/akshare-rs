@@ -1,6 +1,8 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::{CandlePoint, CapitalFlowPoint, HkFinancialSnapshot, QuoteSnapshot, StockSearchResult};
+use crate::types::{
+    CandlePoint, CapitalFlowPoint, HkFinancialSnapshot, QuoteSnapshot, StockSearchResult,
+};
 
 impl AkShareClient {
     /// Get market cap for an HK stock from Tencent API.

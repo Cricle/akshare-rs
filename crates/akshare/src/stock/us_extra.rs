@@ -1243,9 +1243,7 @@ impl AkShareClient {
         limit: usize,
     ) -> Result<Vec<crate::types::SectorConstituent>> {
         // First, get the sector name from the sector code
-        let sector_name = self
-            .resolve_us_sector_name(sector_code)
-            .await?;
+        let sector_name = self.resolve_us_sector_name(sector_code).await?;
 
         // Fetch US stocks with industry field (f100)
         let mut all_items = Vec::new();
@@ -1281,10 +1279,7 @@ impl AkShareClient {
 
             if let Some(diff) = payload.data.and_then(|d| d.diff) {
                 for v in diff {
-                    let industry = v
-                        .get("f100")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("");
+                    let industry = v.get("f100").and_then(|v| v.as_str()).unwrap_or("");
                     if industry == sector_name {
                         let code = v
                             .get("f12")

@@ -705,7 +705,11 @@ impl MarketDataClient {
                 .as_ref()
                 .and_then(|value| value.stock_name.clone())
                 .or_else(|| basic.and_then(|row| row.optional_string("name")))
-                .or_else(|| eastmoney_main.as_ref().and_then(|item| item.security_name_abbr.clone()))
+                .or_else(|| {
+                    eastmoney_main
+                        .as_ref()
+                        .and_then(|item| item.security_name_abbr.clone())
+                })
                 .or_else(|| search_match.as_ref().map(|item| item.name.clone()))
                 .unwrap_or_else(|| symbol.to_string()),
             cik: ts_code.to_string(),
@@ -1578,4 +1582,3 @@ pub(crate) fn test_parse_tencent_candle_row(
 pub(crate) fn test_parse_tencent_quote_market_cap(raw: &str) -> anyhow::Result<Option<f64>> {
     MarketDataClient::parse_tencent_quote_market_cap(raw)
 }
-         
