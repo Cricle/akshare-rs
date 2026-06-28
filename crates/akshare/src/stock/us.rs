@@ -1,6 +1,6 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::{CandlePoint, QuoteSnapshot};
+use crate::types::{CandlePoint, CapitalFlowPoint, QuoteSnapshot, StockSearchResult};
 
 impl AkShareClient {
     /// Get US stock quote. Derived from the latest candle of `us_candles`.
@@ -72,6 +72,21 @@ impl AkShareClient {
             }
         }
         Ok(None)
+    }
+
+    /// Search US stocks via Eastmoney.
+    pub async fn us_search(&self, query: &str, limit: usize) -> Result<Vec<StockSearchResult>> {
+        self.eastmoney_search(query, Some("美股"), limit).await
+    }
+
+    /// Capital flow for a US stock from Eastmoney.
+    pub async fn us_capital_flow(
+        &self,
+        symbol: &str,
+        limit: usize,
+    ) -> Result<Vec<CapitalFlowPoint>> {
+        let secid = format!("105.{}", symbol.to_uppercase());
+        self.eastmoney_capital_flow(&secid, limit).await
     }
 
     /// 获取美国股票名称列表 (Python: get_us_stock_name)

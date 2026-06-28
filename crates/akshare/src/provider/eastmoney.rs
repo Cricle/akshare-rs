@@ -365,6 +365,73 @@ impl AkShareClient {
         self.fetch_capital_flow(&secid, limit).await
     }
 
+    /// Fetch sector rankings from Eastmoney with a custom `fs` parameter.
+    ///
+    /// This is the parameterized version of `eastmoney_sector_rankings` that
+    /// allows passing market-specific `fs` values (e.g., `m:201+t:2` for HK
+    /// industry sectors, `m:202+t:2` for US industry sectors).
+    pub async fn eastmoney_sector_rankings_by_fs(
+        &self,
+        fs: &str,
+        limit: usize,
+    ) -> Result<Vec<SectorSnapshot>> {
+        let pz = limit.to_string();
+        let response = crate::util::send_and_check(
+            self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&crate::util::eastmoney_clist_params(
+                    pz.as_str(),
+                    &[
+                        ("fid", "f62"),
+                        ("fs", fs),
+                        ("fields", "f12,f14,f2,f3,f62,f184"),
+                    ],
+                )),
+        )
+        .await?;
+
+        let payload: ClistResp = response.json().await.map_err(Error::from)?;
+        let items = payload
+            .data
+            .and_then(|d| d.diff)
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|v| serde_json::from_value::<ClistItem>(v).ok())
+            .map(|item| SectorSnapshot {
+                sector_code: item.code.unwrap_or_default(),
+                sector_name: item.name.unwrap_or_else(|| "未知板块".to_string()),
+                latest_index: item.latest_price.unwrap_or_default(),
+                change_pct: item.change_pct.unwrap_or_default(),
+                main_net_inflow: item.main_net_inflow.unwrap_or_default(),
+                main_net_inflow_ratio_pct: item.main_net_inflow_ratio_pct.unwrap_or_default(),
+            })
+            .collect::<Vec<_>>();
+
+        if items.is_empty() {
+            return Err(Error::not_found(
+                "eastmoney returned no sector ranking items",
+            ));
+        }
+        Ok(items)
+    }
+
+    /// Fetch sector capital flow from Eastmoney with a custom secid prefix.
+    ///
+    /// For A-share sectors, use prefix `90`. For HK sectors, use `201`.
+    /// For US sectors, use `202`.
+    pub async fn eastmoney_sector_capital_flow_by_prefix(
+        &self,
+        prefix: &str,
+        sector_code: &str,
+        limit: usize,
+    ) -> Result<Vec<CapitalFlowPoint>> {
+        let secid = format!(
+            "{}.{}",
+            prefix,
+            sector_code.trim().to_uppercase()
+        );
+        self.fetch_capital_flow(&secid, limit).await
+    }
+
     /// Fetch daily capital flow for an individual stock from Eastmoney.
     ///
     /// `secid` is the Eastmoney secid format (e.g. "1.600000").

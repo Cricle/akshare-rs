@@ -1197,4 +1197,150 @@ impl AkShareClient {
         }
         Ok(data)
     }
+
+    /// Get US sector rankings from Eastmoney.
+    ///
+    /// `sector_type` is "industry" (GICS行业, 11 sectors) or "concept" (概念板块, 184 sectors).
+    pub async fn us_sector_rankings(
+        &self,
+        sector_type: &str,
+        limit: usize,
+    ) -> Result<Vec<crate::types::SectorSnapshot>> {
+        let fs = match sector_type {
+            "industry" => "m:202+t:2",
+            "concept" => "m:202+t:3",
+            other => {
+                return Err(Error::invalid_input(format!(
+                    "unsupported US sector_type: {other}"
+                )));
+            }
+        };
+        self.eastmoney_sector_rankings_by_fs(fs, limit).await
+    }
+
+    /// Get US sector capital flow from Eastmoney.
+    ///
+    /// `sector_code` is the Eastmoney US sector code (e.g., "US9" for communication services).
+    pub async fn us_sector_capital_flow(
+        &self,
+        sector_code: &str,
+        limit: usize,
+    ) -> Result<Vec<crate::types::CapitalFlowPoint>> {
+        self.eastmoney_sector_capital_flow_by_prefix("202", sector_code, limit)
+            .await
+    }
+
+    /// Get US sector constituents from Eastmoney.
+    ///
+    /// `sector_code` is the Eastmoney US sector code (e.g., "US9" for communication services).
+    /// Returns stocks belonging to that sector based on the `f100` industry field.
+    ///
+    /// Note: This fetches the full US stock list and filters client-side by industry name,
+    /// since the Eastmoney `b:{code}` API does not support US sector codes.
+    pub async fn us_sector_constituents(
+        &self,
+        sector_code: &str,
+        limit: usize,
+    ) -> Result<Vec<crate::types::SectorConstituent>> {
+        // First, get the sector name from the sector code
+        let sector_name = self
+            .resolve_us_sector_name(sector_code)
+            .await?;
+
+        // Fetch US stocks with industry field (f100)
+        let mut all_items = Vec::new();
+        for page in 1..=20 {
+            let pz = "1000";
+            let pn = page.to_string();
+            let response = crate::util::send_and_check(
+                self.get("https://push2.eastmoney.com/api/qt/clist/get")
+                    .query(&crate::util::eastmoney_clist_params(
+                        pz,
+                        &[
+                            ("fid", "f3"),
+                            ("fs", "m:105,m:106,m:107+f:!50"),
+                            ("fields", "f12,f14,f2,f3,f62,f100"),
+                            ("pn", pn.as_str()),
+                        ],
+                    )),
+            )
+            .await?;
+
+            let payload: crate::types::wire::ClistResp =
+                response.json().await.map_err(Error::from)?;
+            let items = payload
+                .data
+                .as_ref()
+                .and_then(|d| d.diff.as_ref())
+                .map(|v| v.len())
+                .unwrap_or(0);
+
+            if items == 0 {
+                break;
+            }
+
+            if let Some(diff) = payload.data.and_then(|d| d.diff) {
+                for v in diff {
+                    let industry = v
+                        .get("f100")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("");
+                    if industry == sector_name {
+                        let code = v
+                            .get("f12")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+                        let name = v
+                            .get("f14")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+                        let latest_price = v.get("f2").and_then(serde_json::Value::as_f64);
+                        let change_pct = v.get("f3").and_then(serde_json::Value::as_f64);
+                        let main_net_inflow = v.get("f62").and_then(serde_json::Value::as_f64);
+
+                        all_items.push(crate::types::SectorConstituent {
+                            symbol: code,
+                            name,
+                            latest_price: latest_price.unwrap_or_default(),
+                            change_pct: change_pct.unwrap_or_default(),
+                            main_net_inflow,
+                        });
+                    }
+                }
+            }
+        }
+
+        if all_items.is_empty() {
+            return Err(Error::not_found(format!(
+                "no US stocks found for sector {sector_code} ({sector_name})"
+            )));
+        }
+
+        if all_items.len() > limit {
+            all_items.truncate(limit);
+        }
+        Ok(all_items)
+    }
+
+    /// Resolve US sector code to sector name.
+    async fn resolve_us_sector_name(&self, sector_code: &str) -> Result<String> {
+        let sectors = self.us_sector_rankings("industry", 100).await?;
+        for s in &sectors {
+            if s.sector_code == sector_code {
+                return Ok(s.sector_name.clone());
+            }
+        }
+        // Also try concept sectors
+        let concept_sectors = self.us_sector_rankings("concept", 500).await?;
+        for s in &concept_sectors {
+            if s.sector_code == sector_code {
+                return Ok(s.sector_name.clone());
+            }
+        }
+        Err(Error::not_found(format!(
+            "US sector code {sector_code} not found"
+        )))
+    }
 }

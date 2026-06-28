@@ -67,10 +67,27 @@ Various Eastmoney data endpoints:
 Specific A-share market segments
 
 ### stock::hk / hk_extra
-Hong Kong stock data
+Hong Kong stock data:
+- `hk_quote` — HK stock quote (Tencent → Yahoo fallback)
+- `hk_candles` — HK stock candles (Tencent → Yahoo fallback)
+- `hk_financial` — HK financial snapshot (PE, PB, EPS, market cap)
+- `hk_search` — Search HK stocks via Eastmoney
+- `hk_capital_flow` — HK stock capital flow via Eastmoney
+- `hk_sector_rankings` — HK sector rankings (industry/concept)
+- `hk_sector_capital_flow` — HK sector capital flow
+- `hk_sector_constituents` — HK sector constituent stocks (client-side filter)
 
 ### stock::us / us_extra
-US stock data with multiple source fallbacks
+US stock data with multiple source fallbacks:
+- `us_quote` — US stock quote (derived from candles)
+- `us_candles` — US stock candles (Sina → Yahoo → Stooq fallback)
+- `us_search` — Search US stocks via Eastmoney
+- `us_capital_flow` — US stock capital flow via Eastmoney
+- `us_stock_profile` — US stock profile from Yahoo Finance
+- `us_stock_key_stats` — Key financial stats from Yahoo Finance
+- `us_sector_rankings` — US sector rankings (industry/concept)
+- `us_sector_capital_flow` — US sector capital flow
+- `us_sector_constituents` — US sector constituent stocks (client-side filter)
 
 ### stock::sina_stock
 Sina Finance stock data

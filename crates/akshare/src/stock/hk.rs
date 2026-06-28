@@ -1,6 +1,6 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
-use crate::types::{CandlePoint, HkFinancialSnapshot, QuoteSnapshot};
+use crate::types::{CandlePoint, CapitalFlowPoint, HkFinancialSnapshot, QuoteSnapshot, StockSearchResult};
 
 impl AkShareClient {
     /// Get market cap for an HK stock from Tencent API.
@@ -103,6 +103,23 @@ impl AkShareClient {
     /// Get HK stock financial snapshot (PE, PB, EPS, BVPS, market cap) from Tencent API.
     pub async fn hk_financial(&self, symbol: &str) -> Result<HkFinancialSnapshot> {
         self.tencent_hk_financial(symbol).await
+    }
+
+    /// Search HK stocks via Eastmoney.
+    pub async fn hk_search(&self, query: &str, limit: usize) -> Result<Vec<StockSearchResult>> {
+        self.eastmoney_search(query, Some("港股"), limit).await
+    }
+
+    /// Capital flow for an HK stock from Eastmoney.
+    pub async fn hk_capital_flow(
+        &self,
+        symbol: &str,
+        limit: usize,
+    ) -> Result<Vec<CapitalFlowPoint>> {
+        let code = symbol.trim().trim_start_matches('0');
+        let code = if code.is_empty() { "0" } else { code };
+        let secid = format!("116.{code}");
+        self.eastmoney_capital_flow(&secid, limit).await
     }
 }
 
