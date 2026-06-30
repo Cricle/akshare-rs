@@ -229,6 +229,18 @@ impl MarketDataClient {
                 merged =
                     self.merge_ranked_stock_results(query, normalized_market, merged, us_fallback);
             }
+            Some(MarketKind::AShare) => {
+                let a_share_fallback = self
+                    .search_stocks_from_eastmoney(query, market, limit.saturating_mul(4))
+                    .await
+                    .unwrap_or_default();
+                merged = self.merge_ranked_stock_results(
+                    query,
+                    normalized_market,
+                    merged,
+                    a_share_fallback,
+                );
+            }
             _ => {}
         }
 
