@@ -508,6 +508,7 @@ impl MarketDataClient {
         let map: super::wire::SecTickerLookup = self
             .http
             .get("https://www.sec.gov/files/company_tickers.json")
+            .header("User-Agent", "Mozilla/5.0 (compatible; research-bot)")
             .send()
             .await
             .context("failed to fetch SEC ticker map for US stock search")?
