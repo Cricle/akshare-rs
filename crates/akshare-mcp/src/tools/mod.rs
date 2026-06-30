@@ -475,6 +475,19 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_registry_has_minimum_tools() {
+        let service = AkShareMcpService::new(ToolsConfig::all());
+        let tools = service.list_tools_sync();
+        // Subtract 2 for meta-tools (tools/search and tools/call)
+        let registry_count = tools.len() - 2;
+        assert!(
+            registry_count >= 1400,
+            "Expected at least 1400 registry tools, got {}",
+            registry_count
+        );
+    }
+
     // Backward compat: list_tools_sync helper
     impl AkShareMcpService {
         fn list_tools_sync(&self) -> Vec<Tool> {

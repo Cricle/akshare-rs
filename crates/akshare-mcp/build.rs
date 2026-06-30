@@ -81,7 +81,32 @@ fn generate_registry(tools: &[ToolDef]) -> String {
     }
 
     out.push_str("}\n");
+
+    // Add count assertion
+    out.push_str(&generate_count_assertion(tools));
+
     out
+}
+
+/// Generate a compile-time assertion that verifies tool count.
+fn generate_count_assertion(tools: &[ToolDef]) -> String {
+    let count = tools.len();
+    format!(
+        "\n// Compile-time assertion: verify tool count matches tools.txt\n\
+         #[cfg(test)]\n\
+         mod tool_count_assertion {{\n\
+             #[test]\n\
+             fn test_tool_count_matches_tools_txt() {{\n\
+                 // This number must match the count in tools.txt\n\
+                 let expected = {};\n\
+                 let actual = crate::tools::TOOL_REGISTRY.len();\n\
+                 assert_eq!(actual, expected, \n\
+                     \"Tool count mismatch: tools.txt has {{}} tools but registry has {{}}. \
+                      Did you forget to update tools.txt?\", expected, actual);\n\
+             }}\n\
+         }}\n",
+        count
+    )
 }
 
 /// Convert param type from extraction format to Rust path.
