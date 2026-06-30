@@ -444,3 +444,111 @@ async fn e2e_tool_trade_date_hist() {
     assert!(!data.is_empty(), "expected non-empty data");
     rate_limit().await;
 }
+
+// ===========================================================================
+// Bond (additional)
+// ===========================================================================
+
+#[tokio::test]
+#[ignore]
+async fn e2e_bond_zh_us_rate() {
+    let client = require_e2e();
+    let result = client.bond_zh_us_rate("20240101").await;
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    let data = result.unwrap();
+    assert!(!data.is_empty(), "expected non-empty data");
+    rate_limit().await;
+}
+
+// ===========================================================================
+// Futures (additional)
+// ===========================================================================
+
+#[tokio::test]
+#[ignore]
+async fn e2e_futures_main() {
+    let client = require_e2e();
+    let result = client.futures_main("RB", 10).await;
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    let data = result.unwrap();
+    assert!(!data.is_empty(), "expected non-empty data");
+    rate_limit().await;
+}
+
+// ===========================================================================
+// Option (additional)
+// ===========================================================================
+
+#[tokio::test]
+#[ignore]
+async fn e2e_option_sse_greeks() {
+    let client = require_e2e();
+    let result = client.option_sse_greeks("510050").await;
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    rate_limit().await;
+}
+
+// ===========================================================================
+// Forex (additional)
+// ===========================================================================
+// Note: e2e_forex_boc_rates already exists above.
+
+// ===========================================================================
+// Crypto (additional)
+// ===========================================================================
+
+#[tokio::test]
+#[ignore]
+async fn e2e_crypto_bitcoin() {
+    let client = require_e2e();
+    let result = client.crypto_bitcoin_hold_report().await;
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    let data = result.unwrap();
+    assert!(!data.is_empty(), "expected non-empty data");
+    rate_limit().await;
+}
+
+// ===========================================================================
+// Macro (additional)
+// ===========================================================================
+
+#[tokio::test]
+#[ignore]
+async fn e2e_us_gdp() {
+    let client = require_e2e();
+    let result = client.us_gdp_monthly().await;
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    let data = result.unwrap();
+    assert!(!data.is_empty(), "expected non-empty data");
+    rate_limit().await;
+}
+
+// ===========================================================================
+// News (additional)
+// ===========================================================================
+
+#[tokio::test]
+#[ignore]
+async fn e2e_sogou_news() {
+    let client = require_e2e();
+    let result = client.sogou_news_search("finance", 10).await;
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    let data = result.unwrap();
+    assert!(!data.is_empty(), "expected non-empty data");
+    rate_limit().await;
+}
+
+// ===========================================================================
+// Economy (additional)
+// ===========================================================================
+
+#[tokio::test]
+#[ignore]
+async fn e2e_economy_event() {
+    let client = require_e2e();
+    let result = client.economy_box_office().await;
+    assert!(result.is_ok(), "API failed: {:?}", result.err());
+    let data = result.unwrap();
+    assert!(!data.is_empty(), "expected non-empty data");
+    rate_limit().await;
+}
