@@ -686,7 +686,7 @@ impl MarketDataClient {
                 limit
             ),
             CANDLES_CACHE_TTL_SECS,
-            || self.fetch_a_share_sector_rankings_from_eastmoney(sector_type, limit),
+            || self.fetch_a_share_sector_rankings_from_sina(sector_type, limit),
         )
         .await
     }

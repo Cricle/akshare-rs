@@ -218,16 +218,87 @@ impl MarketDataClient {
             Some(MarketKind::HongKong) => {
                 let hk_fallback = self
                     .search_hk_directory(query, limit.saturating_mul(4))
-                    .await?;
-                merged =
-                    self.merge_ranked_stock_results(query, normalized_market, merged, hk_fallback);
+                    .await
+                    .unwrap_or_default();
+                if hk_fallback.is_empty() {
+                    // Try Sina HK spot as fallback
+                    let sina_hk = self.ak.stock_hk_spot().await.unwrap_or_default();
+                    let query_lower = query.to_lowercase();
+                    let sina_results: Vec<StockSearchResult> = sina_hk
+                        .into_iter()
+                        .filter(|q| {
+                            q.chinese_name.to_lowercase().contains(&query_lower)
+                                || q.code.to_lowercase().contains(&query_lower)
+                                || q.english_name
+                                    .as_ref()
+                                    .map(|n| n.to_lowercase().contains(&query_lower))
+                                    .unwrap_or(false)
+                        })
+                        .take(limit)
+                        .map(|q| StockSearchResult {
+                            symbol: q.code,
+                            name: if q.chinese_name.is_empty() {
+                                q.english_name.unwrap_or_default()
+                            } else {
+                                q.chinese_name
+                            },
+                            market: "港股".to_string(),
+                            exchange: "HK".to_string(),
+                        })
+                        .collect();
+
+                    if sina_results.is_empty() {
+                        let eastmoney_fallback = self
+                            .search_stocks_from_eastmoney(query, market, limit.saturating_mul(4))
+                            .await
+                            .unwrap_or_default();
+                        merged = self.merge_ranked_stock_results(
+                            query,
+                            normalized_market,
+                            merged,
+                            eastmoney_fallback,
+                        );
+                    } else {
+                        merged = self.merge_ranked_stock_results(
+                            query,
+                            normalized_market,
+                            merged,
+                            sina_results,
+                        );
+                    }
+                } else {
+                    merged = self.merge_ranked_stock_results(
+                        query,
+                        normalized_market,
+                        merged,
+                        hk_fallback,
+                    );
+                }
             }
             Some(MarketKind::UsEquity) => {
                 let us_fallback = self
                     .search_us_directory(query, limit.saturating_mul(4))
-                    .await?;
-                merged =
-                    self.merge_ranked_stock_results(query, normalized_market, merged, us_fallback);
+                    .await
+                    .unwrap_or_default();
+                if us_fallback.is_empty() {
+                    let eastmoney_fallback = self
+                        .search_stocks_from_eastmoney(query, market, limit.saturating_mul(4))
+                        .await
+                        .unwrap_or_default();
+                    merged = self.merge_ranked_stock_results(
+                        query,
+                        normalized_market,
+                        merged,
+                        eastmoney_fallback,
+                    );
+                } else {
+                    merged = self.merge_ranked_stock_results(
+                        query,
+                        normalized_market,
+                        merged,
+                        us_fallback,
+                    );
+                }
             }
             Some(MarketKind::AShare) => {
                 let a_share_fallback = self
@@ -398,14 +469,14 @@ impl MarketDataClient {
         }
 
         let response = tokio::time::timeout(
-            Duration::from_secs(3),
+            Duration::from_secs(30),
             self
                 .http
                 .get("https://www.hkex.com.hk/eng/services/trading/securities/securitieslists/ListOfSecurities.xlsx")
                 .send(),
         )
         .await
-            .context("HKEX securities list timed out after 3s")?
+            .context("HKEX securities list timed out after 30s")?
             .context("failed to fetch HKEX securities list")?
             .error_for_status()
             .context("HKEX securities list request failed")?;

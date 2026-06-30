@@ -7,6 +7,49 @@ use super::super::wire::{
 use crate::types::{CapitalFlowPoint, SectorConstituent, SectorSnapshot};
 
 impl MarketDataClient {
+    pub(crate) async fn fetch_a_share_sector_rankings_from_sina(
+        &self,
+        sector_type: &str,
+        limit: usize,
+    ) -> anyhow::Result<Vec<SectorSnapshot>> {
+        let indicator = match sector_type {
+            "industry" => "industry",
+            "concept" => "concept",
+            other => bail!("unsupported sector_type: {}", other),
+        };
+
+        let sina_items = self
+            .ak
+            .stock_sector_spot(indicator)
+            .await
+            .context("failed to fetch sector rankings from Sina")?;
+
+        let mut items: Vec<SectorSnapshot> = sina_items
+            .into_iter()
+            .map(|item| SectorSnapshot {
+                sector_code: item.label.clone(),
+                sector_name: item.sector,
+                latest_index: 0.0,
+                change_pct: item.change_pct.unwrap_or_default(),
+                main_net_inflow: 0.0,
+                main_net_inflow_ratio_pct: 0.0,
+            })
+            .collect();
+
+        // Sort by change_pct descending (Sina doesn't have main_net_inflow)
+        items.sort_by(|a, b| {
+            b.change_pct
+                .partial_cmp(&a.change_pct)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        items.truncate(limit);
+
+        if items.is_empty() {
+            bail!("sina returned no sector ranking items");
+        }
+        Ok(items)
+    }
+
     pub(crate) async fn fetch_a_share_sector_rankings_from_eastmoney(
         &self,
         sector_type: &str,
