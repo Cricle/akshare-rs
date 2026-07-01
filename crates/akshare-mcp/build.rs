@@ -104,12 +104,13 @@ fn generate_param_tests(tools: &[ToolDef]) -> String {
     let mut out = String::from(
         "// Auto-generated parameter validation tests — do not edit.\n\
          // These tests verify that each tool's JSON schema is valid.\n\n\
-         use akshare_mcp::tools::AkShareMcpService;\n\
-         use akshare_mcp::config::ToolsConfig;\n\n\
+         use akshare_mcp::config::ToolsConfig;\n\
+         use akshare_mcp::tools::AkShareMcpService;\n\n\
          fn get_tool_schema(tool_name: &str) -> serde_json::Value {\n\
              let service = AkShareMcpService::new(ToolsConfig::all());\n\
-             let tool = service.get_tool(tool_name)\n\
-                 .expect(&format!(\"Tool '{}' not found\", tool_name));\n\
+             let tool = service\n\
+                 .get_tool(tool_name)\n\
+                 .unwrap_or_else(|| panic!(\"Tool '{}' not found\", tool_name));\n\
              serde_json::to_value(tool.input_schema.clone()).unwrap()\n\
          }\n\n",
     );
@@ -129,23 +130,25 @@ fn generate_param_tests(tools: &[ToolDef]) -> String {
             continue;
         }
 
-        // Verify that the schema has the expected properties
+        out.push_str(&format!("#[test]\nfn {}() {{\n", test_name));
         out.push_str(&format!(
-            "#[test]\n\
-             fn {}() {{\n\
-                 let schema = get_tool_schema(\"{}\");\n\
-                 let properties = schema.get(\"properties\")\n\
-                     .and_then(|p| p.as_object())\n\
-                     .expect(\"Schema should have properties\");\n\
-                 \n\
-                 // Verify all expected fields exist\n",
-            test_name, tool.name
+            "    let schema = get_tool_schema(\"{}\");\n",
+            tool.name
         ));
+        out.push_str(
+            "    let properties = schema\n\
+             .get(\"properties\")\n\
+             .and_then(|p| p.as_object())\n\
+             .expect(\"Schema should have properties\");\n\n\
+             // Verify all expected fields exist\n",
+        );
 
         for field in &fields {
             out.push_str(&format!(
-                "        assert!(properties.contains_key(\"{}\"),\n\
-                \"Schema for '{}' should have field '{}'\");\n",
+                "    assert!(\n\
+                 properties.contains_key(\"{}\"),\n\
+                 \"Schema for '{}' should have field '{}'\"\n\
+                 );\n",
                 field, tool.name, field
             ));
         }
