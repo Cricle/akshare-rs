@@ -1,7 +1,5 @@
 use std::collections::HashSet;
 
-#[cfg(test)]
-use anyhow::Context;
 use chrono::{DateTime, Duration as ChronoDuration, NaiveDate, Utc};
 
 use super::{NewsItem, wire};
@@ -386,19 +384,6 @@ pub(crate) fn latest_preferred_metric(
                     })
             })?
         })
-}
-
-#[cfg(test)]
-pub(crate) fn eastmoney_price(value: Option<f64>) -> anyhow::Result<f64> {
-    value.context("eastmoney price field missing")
-}
-
-#[cfg(test)]
-pub(crate) fn format_eastmoney_trade_date(value: Option<i64>) -> String {
-    value
-        .and_then(|timestamp| chrono::DateTime::from_timestamp(timestamp, 0))
-        .map(|datetime| datetime.format("%Y%m%d").to_string())
-        .unwrap_or_default()
 }
 
 #[cfg(test)]

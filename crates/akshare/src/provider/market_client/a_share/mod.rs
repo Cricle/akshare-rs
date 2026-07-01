@@ -1396,30 +1396,6 @@ impl MarketDataClient {
     }
 }
 impl MarketDataClient {
-    #[cfg(test)]
-    pub(super) fn parse_a_share_candle_line(
-        line: &str,
-    ) -> anyhow::Result<crate::types::CandlePoint> {
-        let fields = line.split(',').collect::<Vec<_>>();
-        if fields.len() < 11 {
-            bail!("unexpected eastmoney candle format: {}", line);
-        }
-
-        Ok(crate::types::CandlePoint {
-            trade_date: fields[0].to_string(),
-            open: fields[1].parse().context("invalid candle open")?,
-            close: fields[2].parse().context("invalid candle close")?,
-            high: fields[3].parse().context("invalid candle high")?,
-            low: fields[4].parse().context("invalid candle low")?,
-            volume: fields[5].parse().context("invalid candle volume")?,
-            amount: fields[6].parse().context("invalid candle amount")?,
-            amplitude_pct: fields[7].parse().context("invalid candle amplitude")?,
-            change_pct: fields[8].parse().context("invalid candle change_pct")?,
-            change_amount: fields[9].parse().context("invalid candle change_amount")?,
-            turnover_pct: fields[10].parse().context("invalid candle turnover_pct")?,
-        })
-    }
-
     pub(super) async fn fetch_a_share_return_since(
         &self,
         symbol: &str,
@@ -1551,29 +1527,4 @@ impl MarketDataClient {
             .context("failed to read tencent market cap response")?;
         Self::parse_tencent_quote_market_cap(&response)
     }
-}
-
-#[cfg(test)]
-pub(crate) fn test_tencent_market_symbol(
-    client: &MarketDataClient,
-    symbol: &str,
-) -> anyhow::Result<String> {
-    client.tencent_market_symbol(symbol)
-}
-
-#[cfg(test)]
-pub(crate) fn test_parse_tencent_quote(symbol: &str, raw: &str) -> anyhow::Result<QuoteSnapshot> {
-    MarketDataClient::parse_tencent_quote(symbol, raw)
-}
-
-#[cfg(test)]
-pub(crate) fn test_parse_tencent_candle_row(
-    value: &serde_json::Value,
-) -> anyhow::Result<crate::types::CandlePoint> {
-    MarketDataClient::parse_tencent_candle_row(value)
-}
-
-#[cfg(test)]
-pub(crate) fn test_parse_tencent_quote_market_cap(raw: &str) -> anyhow::Result<Option<f64>> {
-    MarketDataClient::parse_tencent_quote_market_cap(raw)
 }

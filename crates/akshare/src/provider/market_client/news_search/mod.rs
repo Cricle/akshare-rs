@@ -629,23 +629,6 @@ impl MarketDataClient {
 }
 
 impl MarketDataClient {
-    #[cfg(test)]
-    pub(super) async fn fetch_searxng_news_search(
-        &self,
-        query: &str,
-        language: &str,
-        time_range: Option<&str>,
-    ) -> anyhow::Result<Vec<NewsItem>> {
-        use anyhow::Context;
-        let provider = self
-            .search_providers
-            .iter()
-            .find(|provider| provider.kind == SearchProviderKind::Searxng)
-            .context("SearXNG search provider is not configured")?;
-        self.fetch_news_search_with_scope(provider, query, language, time_range, SearchScope::News)
-            .await
-    }
-
     pub async fn fetch_news_search_evidence(
         &self,
         queries: &[&str],
