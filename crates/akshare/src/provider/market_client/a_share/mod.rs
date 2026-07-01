@@ -1397,7 +1397,6 @@ impl MarketDataClient {
 }
 impl MarketDataClient {
     #[cfg(test)]
-    #[allow(dead_code)]
     pub(super) fn parse_a_share_candle_line(
         line: &str,
     ) -> anyhow::Result<crate::types::CandlePoint> {
@@ -1555,7 +1554,6 @@ impl MarketDataClient {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn test_tencent_market_symbol(
     client: &MarketDataClient,
     symbol: &str,
@@ -1564,13 +1562,11 @@ pub(crate) fn test_tencent_market_symbol(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn test_parse_tencent_quote(symbol: &str, raw: &str) -> anyhow::Result<QuoteSnapshot> {
     MarketDataClient::parse_tencent_quote(symbol, raw)
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn test_parse_tencent_candle_row(
     value: &serde_json::Value,
 ) -> anyhow::Result<crate::types::CandlePoint> {
@@ -1578,7 +1574,6 @@ pub(crate) fn test_parse_tencent_candle_row(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn test_parse_tencent_quote_market_cap(raw: &str) -> anyhow::Result<Option<f64>> {
     MarketDataClient::parse_tencent_quote_market_cap(raw)
 }

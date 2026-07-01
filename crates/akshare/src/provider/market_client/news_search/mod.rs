@@ -630,7 +630,6 @@ impl MarketDataClient {
 
 impl MarketDataClient {
     #[cfg(test)]
-    #[allow(dead_code)]
     pub(super) async fn fetch_searxng_news_search(
         &self,
         query: &str,

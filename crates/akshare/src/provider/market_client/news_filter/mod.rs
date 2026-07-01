@@ -389,13 +389,11 @@ pub(crate) fn latest_preferred_metric(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn eastmoney_price(value: Option<f64>) -> anyhow::Result<f64> {
     value.context("eastmoney price field missing")
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn format_eastmoney_trade_date(value: Option<i64>) -> String {
     value
         .and_then(|timestamp| chrono::DateTime::from_timestamp(timestamp, 0))

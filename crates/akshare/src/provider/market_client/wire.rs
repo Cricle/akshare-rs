@@ -59,39 +59,7 @@ pub(crate) struct EastmoneyKlineEnvelope {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct EastmoneyKlineData {
-    #[allow(dead_code)]
-    pub(crate) code: Option<String>,
-    #[allow(dead_code)]
-    pub(crate) name: Option<String>,
     pub(crate) klines: Option<Vec<String>>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct EastmoneySectorRankingEnvelope {
-    pub(crate) data: Option<EastmoneySectorRankingData>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct EastmoneySectorRankingData {
-    #[allow(dead_code)]
-    pub(crate) total: Option<i64>,
-    pub(crate) diff: Option<Vec<EastmoneySectorRankingItem>>,
-}
-
-#[derive(Debug, Deserialize)]
-pub(crate) struct EastmoneySectorRankingItem {
-    #[serde(rename = "f12")]
-    pub(crate) sector_code: Option<String>,
-    #[serde(rename = "f14")]
-    pub(crate) sector_name: Option<String>,
-    #[serde(rename = "f2")]
-    pub(crate) latest_index: Option<f64>,
-    #[serde(rename = "f3")]
-    pub(crate) change_pct: Option<f64>,
-    #[serde(rename = "f62")]
-    pub(crate) main_net_inflow: Option<f64>,
-    #[serde(rename = "f184")]
-    pub(crate) main_net_inflow_ratio_pct: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -101,8 +69,6 @@ pub(crate) struct EastmoneySectorConstituentEnvelope {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct EastmoneySectorConstituentData {
-    #[allow(dead_code)]
-    pub(crate) total: Option<i64>,
     pub(crate) diff: Option<Vec<EastmoneySectorConstituentItem>>,
 }
 
@@ -168,23 +134,16 @@ pub(crate) struct EastmoneyDatacenterResult<T> {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub(crate) struct EastmoneyMainFinanceIndicatorItem {
-    #[allow(dead_code)]
-    #[serde(rename = "SECUCODE")]
-    pub(crate) secucode: Option<String>,
-    #[allow(dead_code)]
     #[serde(rename = "SECURITY_CODE")]
     pub(crate) security_code: Option<String>,
-    #[allow(dead_code)]
     #[serde(rename = "SECURITY_NAME_ABBR")]
     pub(crate) security_name_abbr: Option<String>,
     #[serde(rename = "REPORT_DATE")]
     pub(crate) report_date: Option<String>,
     #[serde(rename = "STD_REPORT_DATE")]
     pub(crate) std_report_date: Option<String>,
-    #[allow(dead_code)]
-    #[serde(rename = "REPORT_TYPE")]
-    pub(crate) report_type: Option<String>,
     #[serde(rename = "CURRENCY")]
     pub(crate) currency: Option<String>,
     #[serde(rename = "OPERATE_INCOME")]
@@ -229,19 +188,10 @@ pub(crate) struct EastmoneyMainFinanceIndicatorItem {
     pub(crate) capital_expenditure: Option<f64>,
     #[serde(rename = "TOTAL_SHARE")]
     pub(crate) total_share: Option<f64>,
-    #[allow(dead_code)]
-    #[serde(rename = "BASIC_EPS")]
-    pub(crate) basic_eps: Option<f64>,
-    #[allow(dead_code)]
-    #[serde(rename = "DILUTED_EPS")]
-    pub(crate) diluted_eps: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct EastmoneyBalanceSheetItem {
-    #[allow(dead_code)]
-    #[serde(rename = "REPORT_DATE")]
-    pub(crate) report_date: Option<String>,
     #[serde(rename = "TOTAL_ASSETS")]
     pub(crate) total_assets: Option<f64>,
     #[serde(rename = "TOTAL_LIABILITIES")]
@@ -258,9 +208,6 @@ pub(crate) struct EastmoneyBalanceSheetItem {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct EastmoneyCashflowItem {
-    #[allow(dead_code)]
-    #[serde(rename = "REPORT_DATE")]
-    pub(crate) report_date: Option<String>,
     #[serde(rename = "NETCASH_OPERATE")]
     pub(crate) netcash_operate: Option<f64>,
     #[serde(rename = "CONSTRUCT_LONG_ASSET")]

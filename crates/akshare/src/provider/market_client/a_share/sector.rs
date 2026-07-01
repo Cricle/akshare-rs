@@ -1,9 +1,7 @@
 use anyhow::{Context, bail};
 
 use super::super::MarketDataClient;
-use super::super::wire::{
-    EastmoneyKlineEnvelope, EastmoneySectorConstituentEnvelope, EastmoneySectorRankingEnvelope,
-};
+use super::super::wire::{EastmoneyKlineEnvelope, EastmoneySectorConstituentEnvelope};
 use crate::types::{CapitalFlowPoint, SectorConstituent, SectorSnapshot};
 
 impl MarketDataClient {
@@ -46,56 +44,6 @@ impl MarketDataClient {
 
         if items.is_empty() {
             bail!("sina returned no sector ranking items");
-        }
-        Ok(items)
-    }
-
-    pub(crate) async fn fetch_a_share_sector_rankings_from_eastmoney(
-        &self,
-        sector_type: &str,
-        limit: usize,
-    ) -> anyhow::Result<Vec<SectorSnapshot>> {
-        let fs = match sector_type {
-            "industry" => "m:90+t:2",
-            "concept" => "m:90+t:3",
-            other => bail!("unsupported sector_type: {}", other),
-        };
-        let response = self
-            .http
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&crate::util::eastmoney_clist_params(
-                &limit.to_string(),
-                &[
-                    ("fid", "f62"),
-                    ("fs", fs),
-                    ("fields", "f12,f14,f2,f3,f62,f184"),
-                ],
-            ))
-            .send()
-            .await
-            .context("failed to fetch A-share sector rankings from Eastmoney")?
-            .error_for_status()
-            .context("eastmoney sector ranking request failed")?;
-        let payload: EastmoneySectorRankingEnvelope = response
-            .json()
-            .await
-            .context("failed to decode eastmoney sector ranking response")?;
-        let items = payload
-            .data
-            .and_then(|data| data.diff)
-            .unwrap_or_default()
-            .into_iter()
-            .map(|item| SectorSnapshot {
-                sector_code: item.sector_code.unwrap_or_default(),
-                sector_name: item.sector_name.unwrap_or_else(|| "未知板块".to_string()),
-                latest_index: item.latest_index.unwrap_or_default(),
-                change_pct: item.change_pct.unwrap_or_default(),
-                main_net_inflow: item.main_net_inflow.unwrap_or_default(),
-                main_net_inflow_ratio_pct: item.main_net_inflow_ratio_pct.unwrap_or_default(),
-            })
-            .collect::<Vec<_>>();
-        if items.is_empty() {
-            bail!("eastmoney returned no sector ranking items");
         }
         Ok(items)
     }
