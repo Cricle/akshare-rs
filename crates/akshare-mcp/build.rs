@@ -101,20 +101,20 @@ fn load_tools() -> Vec<ToolDef> {
 
 /// Generate parameter validation tests for each tool.
 fn generate_param_tests(tools: &[ToolDef]) -> String {
-    let mut out = String::from(
-        "// Auto-generated parameter validation tests — do not edit.\n\
-         // These tests verify that each tool's JSON schema is valid.\n\n\
-         use akshare_mcp::config::ToolsConfig;\n\
-         use akshare_mcp::tools::AkShareMcpService;\n\n\
-         fn get_tool_schema(tool_name: &str) -> serde_json::Value {\n\
-             let service = AkShareMcpService::new(ToolsConfig::all());\n\
-             let tool = service\n\
-                 .get_tool(tool_name)\n\
-                 .unwrap_or_else(|| panic!(\"Tool '{}' not found\", tool_name));\n\
-             serde_json::to_value(tool.input_schema.clone()).unwrap()\n\
-         }\n\n",
-    );
+    let mut out = String::new();
+    out.push_str("// Auto-generated parameter validation tests — do not edit.\n");
+    out.push_str("// These tests verify that each tool's JSON schema is valid.\n\n");
+    out.push_str("use akshare_mcp::config::ToolsConfig;\n");
+    out.push_str("use akshare_mcp::tools::AkShareMcpService;\n\n");
+    out.push_str("fn get_tool_schema(tool_name: &str) -> serde_json::Value {\n");
+    out.push_str("    let service = AkShareMcpService::new(ToolsConfig::all());\n");
+    out.push_str("    let tool = service\n");
+    out.push_str("        .get_tool(tool_name)\n");
+    out.push_str("        .unwrap_or_else(|| panic!(\"Tool '{}' not found\", tool_name));\n");
+    out.push_str("    serde_json::to_value(tool.input_schema.clone()).unwrap()\n");
+    out.push_str("}\n\n");
 
+    let mut first = true;
     for tool in tools {
         let test_name = format!("test_param_schema_{}", tool.name.replace('-', "_"));
         let ptype = normalize_param_type(&tool.param_type);
@@ -130,32 +130,34 @@ fn generate_param_tests(tools: &[ToolDef]) -> String {
             continue;
         }
 
-        out.push_str(&format!("#[test]\nfn {}() {{\n", test_name));
+        if !first {
+            out.push('\n');
+        }
+        first = false;
+
+        out.push_str("#[test]\n");
+        out.push_str(&format!("fn {}() {{\n", test_name));
         out.push_str(&format!(
             "    let schema = get_tool_schema(\"{}\");\n",
             tool.name
         ));
-        out.push_str(
-            "    let properties = schema\n\
-             .get(\"properties\")\n\
-             .and_then(|p| p.as_object())\n\
-             .expect(\"Schema should have properties\");\n\n\
-             // Verify all expected fields exist\n",
-        );
+        out.push_str("    let properties = schema\n");
+        out.push_str("        .get(\"properties\")\n");
+        out.push_str("        .and_then(|p| p.as_object())\n");
+        out.push_str("        .expect(\"Schema should have properties\");\n\n");
+        out.push_str("    // Verify all expected fields exist\n");
 
         for field in &fields {
             out.push_str(&format!(
-                "    assert!(\n\
-                 properties.contains_key(\"{}\"),\n\
-                 \"Schema for '{}' should have field '{}'\"\n\
-                 );\n",
+                "    assert!(\n        properties.contains_key(\"{}\"),\n        \"Schema for '{}' should have field '{}'\"\n    );\n",
                 field, tool.name, field
             ));
         }
 
-        out.push_str("}\n\n");
+        out.push('}');
     }
 
+    out.push('\n');
     out
 }
 
