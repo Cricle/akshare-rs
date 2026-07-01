@@ -16,6 +16,12 @@ fn main() {
     let code = generate_registry(&tools);
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     fs::write(out_dir.join("tool_registry.rs"), code).unwrap();
+
+    // Generate parameter validation tests
+    let param_tests = generate_param_tests(&tools);
+    let tests_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("tests");
+    fs::create_dir_all(&tests_dir).unwrap();
+    fs::write(tests_dir.join("param_validation.rs"), param_tests).unwrap();
 }
 
 struct ToolDef {
@@ -26,6 +32,38 @@ struct ToolDef {
     client_call: String,
 }
 
+/// Validate that client call expressions are well-formed.
+fn validate_client_call(call: &str, name: &str) -> Result<(), String> {
+    // Check that call starts with self.client.
+    if !call.starts_with("self.client.") {
+        return Err(format!(
+            "Tool '{}': client call must start with 'self.client.', got '{}'",
+            name, call
+        ));
+    }
+
+    // Check for balanced parentheses
+    let open_count = call.chars().filter(|&c| c == '(').count();
+    let close_count = call.chars().filter(|&c| c == ')').count();
+    if open_count != close_count {
+        return Err(format!(
+            "Tool '{}': unbalanced parentheses in client call '{}'",
+            name, call
+        ));
+    }
+
+    // Check for balanced quotes (double quotes)
+    let quote_count = call.chars().filter(|&c| c == '"').count();
+    if quote_count % 2 != 0 {
+        return Err(format!(
+            "Tool '{}': unbalanced quotes in client call '{}'",
+            name, call
+        ));
+    }
+
+    Ok(())
+}
+
 /// Load tool definitions from `tools.txt`.
 /// Format: TOOL_NAME|PARAM_TYPE|CATEGORY|DESCRIPTION|CLIENT_CALL
 fn load_tools() -> Vec<ToolDef> {
@@ -33,7 +71,7 @@ fn load_tools() -> Vec<ToolDef> {
     let path = PathBuf::from(manifest).join("tools.txt");
     let content = fs::read_to_string(&path).unwrap_or_default();
 
-    content
+    let tools: Vec<ToolDef> = content
         .lines()
         .filter(|line| !line.trim().is_empty() && !line.starts_with('#'))
         .filter_map(|line| {
@@ -49,7 +87,73 @@ fn load_tools() -> Vec<ToolDef> {
                 client_call: parts[4].trim().to_string(),
             })
         })
-        .collect()
+        .collect();
+
+    // Validate all client calls
+    for tool in &tools {
+        if let Err(e) = validate_client_call(&tool.client_call, &tool.name) {
+            panic!("tools.txt validation error: {}", e);
+        }
+    }
+
+    tools
+}
+
+/// Generate parameter validation tests for each tool.
+fn generate_param_tests(tools: &[ToolDef]) -> String {
+    let mut out = String::from(
+        "// Auto-generated parameter validation tests — do not edit.\n\
+         // These tests verify that each tool's JSON schema is valid.\n\n\
+         use akshare_mcp::tools::AkShareMcpService;\n\
+         use akshare_mcp::config::ToolsConfig;\n\n\
+         fn get_tool_schema(tool_name: &str) -> serde_json::Value {\n\
+             let service = AkShareMcpService::new(ToolsConfig::all());\n\
+             let tool = service.get_tool(tool_name)\n\
+                 .expect(&format!(\"Tool '{}' not found\", tool_name));\n\
+             serde_json::to_value(tool.input_schema.clone()).unwrap()\n\
+         }\n\n",
+    );
+
+    for tool in tools {
+        let test_name = format!("test_param_schema_{}", tool.name.replace('-', "_"));
+        let ptype = normalize_param_type(&tool.param_type);
+
+        // Skip EmptyParams - no validation needed
+        if ptype == "stock::EmptyParams" {
+            continue;
+        }
+
+        // Get fields from param type
+        let fields = param_fields(&ptype);
+        if fields.is_empty() {
+            continue;
+        }
+
+        // Verify that the schema has the expected properties
+        out.push_str(&format!(
+            "#[test]\n\
+             fn {}() {{\n\
+                 let schema = get_tool_schema(\"{}\");\n\
+                 let properties = schema.get(\"properties\")\n\
+                     .and_then(|p| p.as_object())\n\
+                     .expect(\"Schema should have properties\");\n\
+                 \n\
+                 // Verify all expected fields exist\n",
+            test_name, tool.name
+        ));
+
+        for field in &fields {
+            out.push_str(&format!(
+                "        assert!(properties.contains_key(\"{}\"),\n\
+                \"Schema for '{}' should have field '{}'\");\n",
+                field, tool.name, field
+            ));
+        }
+
+        out.push_str("}\n\n");
+    }
+
+    out
 }
 
 /// Generate `register_tool!` invocations for all tools.

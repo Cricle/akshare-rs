@@ -234,6 +234,41 @@ impl AkShareMcpService {
             .map(|(name, entry)| (name.to_string(), entry.description.to_string()))
             .collect()
     }
+
+    /// Get a single tool by name (public API for tests and external callers).
+    pub fn get_tool(&self, name: &str) -> Option<Tool> {
+        if name == "tools/search" || name == "tools/call" {
+            return Self::meta_tools()
+                .into_iter()
+                .find(|t| t.name.as_ref() == name);
+        }
+        TOOL_REGISTRY.get(name).and_then(|entry| {
+            if self.is_category_enabled(entry.category) {
+                Some(Tool::new_with_raw(
+                    name.to_string(),
+                    Some(entry.description.into()),
+                    entry.schema.clone(),
+                ))
+            } else {
+                None
+            }
+        })
+    }
+
+    /// List all tools synchronously (including meta-tools).
+    pub fn list_tools_sync(&self) -> Vec<Tool> {
+        let mut tools = Self::meta_tools();
+        for (name, entry) in TOOL_REGISTRY.iter() {
+            if self.is_category_enabled(entry.category) {
+                tools.push(Tool::new_with_raw(
+                    *name,
+                    Some(entry.description.into()),
+                    entry.schema.clone(),
+                ));
+            }
+        }
+        tools
+    }
 }
 
 // ── MCP handler ──────────────────────────────────────────────────────
@@ -486,22 +521,5 @@ mod tests {
             "Expected at least 1400 registry tools, got {}",
             registry_count
         );
-    }
-
-    // Backward compat: list_tools_sync helper
-    impl AkShareMcpService {
-        fn list_tools_sync(&self) -> Vec<Tool> {
-            let mut tools = Self::meta_tools();
-            for (name, entry) in TOOL_REGISTRY.iter() {
-                if self.is_category_enabled(entry.category) {
-                    tools.push(Tool::new_with_raw(
-                        *name,
-                        Some(entry.description.into()),
-                        entry.schema.clone(),
-                    ));
-                }
-            }
-            tools
-        }
     }
 }
