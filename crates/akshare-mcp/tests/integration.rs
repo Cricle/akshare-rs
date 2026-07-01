@@ -4,6 +4,142 @@ use rmcp::{ClientHandler, ServiceExt};
 struct TestClient;
 impl ClientHandler for TestClient {}
 
+#[tokio::test]
+async fn test_all_tools_comprehensive() {
+    let service =
+        akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
+
+    // Get all tools
+    let tools = service.list_tools_sync();
+    let registry_tools: Vec<_> = tools
+        .iter()
+        .filter(|t| t.name.as_ref() != "tools/search" && t.name.as_ref() != "tools/call")
+        .collect();
+
+    // Verify minimum count
+    assert!(
+        registry_tools.len() >= 1400,
+        "Expected at least 1400 tools, got {}",
+        registry_tools.len()
+    );
+
+    // Verify each tool has required fields
+    for tool in &registry_tools {
+        // Check name is not empty
+        assert!(!tool.name.as_ref().is_empty(), "Tool should have a name");
+
+        // Check description exists
+        assert!(
+            tool.description.is_some(),
+            "Tool '{}' should have a description",
+            tool.name
+        );
+
+        // Check schema exists (not empty)
+        assert!(
+            !tool.input_schema.is_empty(),
+            "Tool '{}' should have a schema",
+            tool.name
+        );
+
+        // Verify schema is valid JSON
+        let schema_json = serde_json::to_value(&*tool.input_schema);
+        assert!(
+            schema_json.is_ok(),
+            "Tool '{}' schema should be valid JSON",
+            tool.name
+        );
+    }
+
+    // Verify all categories are represented
+    let categories: Vec<&str> = registry_tools
+        .iter()
+        .filter_map(|t| {
+            // Extract category from tool name prefix
+            let name = t.name.as_ref();
+            if name.starts_with("stock_")
+                || name.starts_with("a_share_")
+                || name.starts_with("hk_")
+                || name.starts_with("us_")
+            {
+                Some("stock")
+            } else if name.starts_with("bond_") {
+                Some("bond")
+            } else if name.starts_with("fund_") {
+                Some("fund")
+            } else if name.starts_with("futures_") {
+                Some("futures")
+            } else if name.starts_with("option_") {
+                Some("option")
+            } else if name.starts_with("forex_") || name.starts_with("currency_") {
+                Some("forex")
+            } else if name.starts_with("crypto_") {
+                Some("crypto")
+            } else if name.starts_with("index_") {
+                Some("index")
+            } else if name.starts_with("macro_") {
+                Some("macro_data")
+            } else if name.starts_with("news_") {
+                Some("news")
+            } else if name.starts_with("economy_") {
+                Some("economy")
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    // Verify we have tools in each expected category
+    let expected_categories = [
+        "stock",
+        "bond",
+        "fund",
+        "futures",
+        "option",
+        "forex",
+        "crypto",
+        "index",
+        "macro_data",
+        "news",
+        "economy",
+    ];
+    for cat in &expected_categories {
+        assert!(
+            categories.contains(cat),
+            "Should have tools in category '{}'",
+            cat
+        );
+    }
+}
+
+#[tokio::test]
+async fn test_all_tools_have_valid_handlers() {
+    let service =
+        akshare_mcp::tools::AkShareMcpService::new(akshare_mcp::config::ToolsConfig::all());
+
+    // Get all tools
+    let tools = service.list_tools_sync();
+    let registry_tools: Vec<_> = tools
+        .iter()
+        .filter(|t| t.name.as_ref() != "tools/search" && t.name.as_ref() != "tools/call")
+        .collect();
+
+    // Verify each tool has a description
+    for tool in &registry_tools {
+        assert!(
+            tool.description.is_some(),
+            "Tool '{}' should have a description",
+            tool.name
+        );
+    }
+
+    assert!(
+        registry_tools.len() >= 1400,
+        "Expected at least 1400 tools, got {}",
+        registry_tools.len()
+    );
+}
+
 fn make_init_request() -> rmcp::model::ClientRequest {
     rmcp::model::ClientRequest::InitializeRequest(rmcp::model::Request::new(
         rmcp::model::InitializeRequestParams::new(
