@@ -106,12 +106,20 @@ impl AkShareClient {
         let inner_param = serde_json::json!({
             "uid": "",
             "keyword": query,
-            "type": ["cmsArticleWebOld"],
+            "type": ["cmsArticleWebOld", "cmsArticleWeb"],
             "client": "web",
             "clientType": "web",
             "clientVersion": "curr",
             "param": {
                 "cmsArticleWebOld": {
+                    "searchScope": scope,
+                    "sort": "default",
+                    "pageIndex": 1,
+                    "pageSize": page_size,
+                    "preTag": "<em>",
+                    "postTag": "</em>",
+                },
+                "cmsArticleWeb": {
                     "searchScope": scope,
                     "sort": "default",
                     "pageIndex": 1,
@@ -140,13 +148,35 @@ impl AkShareClient {
         let root: serde_json::Value = serde_json::from_str(json_str)
             .map_err(|e| Error::decode(format!("JSON parse: {e}")))?;
 
-        let list = root
+        let list_old = root
             .pointer("/result/cmsArticleWebOld")
             .and_then(|v| v.as_array())
             .cloned()
             .unwrap_or_default();
+        let list_web = root
+            .pointer("/result/cmsArticleWeb")
+            .and_then(|v| v.as_array())
+            .cloned()
+            .unwrap_or_default();
 
-        Ok(parse_search_entries(&list, limit))
+        // Merge both article type results, deduplicate by title
+        let mut merged = Vec::with_capacity(list_old.len() + list_web.len());
+        merged.extend_from_slice(&list_old);
+        let existing_titles: std::collections::HashSet<&str> = list_old
+            .iter()
+            .filter_map(|v| v.get("title").and_then(|t| t.as_str()))
+            .collect();
+        for entry in list_web {
+            if let Some(title) = entry.get("title").and_then(|t| t.as_str()) {
+                if !existing_titles.contains(title) {
+                    merged.push(entry.clone());
+                }
+            } else {
+                merged.push(entry.clone());
+            }
+        }
+
+        Ok(parse_search_entries(&merged, limit))
     }
 }
 

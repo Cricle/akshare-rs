@@ -819,30 +819,57 @@ macro_test!(test_mock_germany_cpi_monthly, germany_cpi_monthly);
 macro_test!(test_mock_germany_cpi_yearly, germany_cpi_yearly);
 macro_test!(test_mock_germany_gdp, germany_gdp);
 macro_test!(test_mock_germany_ifo, germany_ifo);
-macro_test!(test_mock_germany_retail_sale_monthly, germany_retail_sale_monthly);
-macro_test!(test_mock_germany_retail_sale_yearly, germany_retail_sale_yearly);
+macro_test!(
+    test_mock_germany_retail_sale_monthly,
+    germany_retail_sale_monthly
+);
+macro_test!(
+    test_mock_germany_retail_sale_yearly,
+    germany_retail_sale_yearly
+);
 macro_test!(test_mock_germany_trade_adjusted, germany_trade_adjusted);
 
 macro_test!(test_mock_germany_zew, germany_zew);
 macro_test!(test_mock_macro_crypto_spot, macro_crypto_spot);
-macro_test!(test_mock_macro_germany_cpi_monthly, macro_germany_cpi_monthly);
+macro_test!(
+    test_mock_macro_germany_cpi_monthly,
+    macro_germany_cpi_monthly
+);
 macro_test!(test_mock_macro_germany_cpi_yearly, macro_germany_cpi_yearly);
 macro_test!(test_mock_macro_germany_gdp, macro_germany_gdp);
 macro_test!(test_mock_macro_germany_ifo, macro_germany_ifo);
-macro_test!(test_mock_macro_germany_retail_sale_monthly, macro_germany_retail_sale_monthly);
-macro_test!(test_mock_macro_germany_retail_sale_yearly, macro_germany_retail_sale_yearly);
-macro_test!(test_mock_macro_germany_trade_adjusted, macro_germany_trade_adjusted);
+macro_test!(
+    test_mock_macro_germany_retail_sale_monthly,
+    macro_germany_retail_sale_monthly
+);
+macro_test!(
+    test_mock_macro_germany_retail_sale_yearly,
+    macro_germany_retail_sale_yearly
+);
+macro_test!(
+    test_mock_macro_germany_trade_adjusted,
+    macro_germany_trade_adjusted
+);
 macro_test!(test_mock_macro_germany_zew, macro_germany_zew);
 
 macro_test!(test_mock_macro_stock_finance, macro_stock_finance);
 macro_test!(test_mock_macro_swiss_cpi_yearly, macro_swiss_cpi_yearly);
-macro_test!(test_mock_macro_swiss_gbd_bank_rate, macro_swiss_gbd_bank_rate);
+macro_test!(
+    test_mock_macro_swiss_gbd_bank_rate,
+    macro_swiss_gbd_bank_rate
+);
 macro_test!(test_mock_macro_swiss_gbd_yearly, macro_swiss_gbd_yearly);
-macro_test!(test_mock_macro_swiss_gdp_quarterly, macro_swiss_gdp_quarterly);
+macro_test!(
+    test_mock_macro_swiss_gdp_quarterly,
+    macro_swiss_gdp_quarterly
+);
 macro_test!(test_mock_macro_swiss_svme, macro_swiss_svme);
 macro_test!(test_mock_macro_swiss_trade, macro_swiss_trade);
 macro_test!(test_mock_macro_uk_bank_rate, macro_uk_bank_rate);
-macro_test!(test_mock_macro_uk_core_cpi_monthly, macro_uk_core_cpi_monthly);
+macro_test!(
+    test_mock_macro_uk_core_cpi_monthly,
+    macro_uk_core_cpi_monthly
+);
 macro_test!(test_mock_macro_uk_core_cpi_yearly, macro_uk_core_cpi_yearly);
 
 macro_test!(test_mock_macro_uk_cpi_monthly, macro_uk_cpi_monthly);
@@ -853,11 +880,20 @@ macro_test!(test_mock_macro_uk_halifax_monthly, macro_uk_halifax_monthly);
 macro_test!(test_mock_macro_uk_halifax_yearly, macro_uk_halifax_yearly);
 macro_test!(test_mock_macro_uk_retail_monthly, macro_uk_retail_monthly);
 macro_test!(test_mock_macro_uk_retail_yearly, macro_uk_retail_yearly);
-macro_test!(test_mock_macro_uk_rightmove_monthly, macro_uk_rightmove_monthly);
-macro_test!(test_mock_macro_uk_rightmove_yearly, macro_uk_rightmove_yearly);
+macro_test!(
+    test_mock_macro_uk_rightmove_monthly,
+    macro_uk_rightmove_monthly
+);
+macro_test!(
+    test_mock_macro_uk_rightmove_yearly,
+    macro_uk_rightmove_yearly
+);
 
 macro_test!(test_mock_macro_uk_trade, macro_uk_trade);
-macro_test!(test_mock_macro_uk_unemployment_rate, macro_uk_unemployment_rate);
+macro_test!(
+    test_mock_macro_uk_unemployment_rate,
+    macro_uk_unemployment_rate
+);
 macro_test!(test_mock_swiss_bank_rate, swiss_bank_rate);
 macro_test!(test_mock_swiss_cpi_yearly, swiss_cpi_yearly);
 macro_test!(test_mock_swiss_gdp_quarterly, swiss_gdp_quarterly);

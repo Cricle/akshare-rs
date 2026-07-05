@@ -229,7 +229,9 @@ async fn test_market_fetch_gdfx_holding_detail() {
     let server = wiremock::MockServer::start().await;
     mount_mocks(&server).await;
     let client = common::mock_market_client(&server).await;
-    let _ = client.fetch_gdfx_holding_detail("test", "test", "test").await;
+    let _ = client
+        .fetch_gdfx_holding_detail("test", "test", "test")
+        .await;
 }
 
 #[tokio::test]
@@ -285,7 +287,9 @@ async fn test_market_fetch_block_trade_industry_daily() {
     let server = wiremock::MockServer::start().await;
     mount_mocks(&server).await;
     let client = common::mock_market_client(&server).await;
-    let _ = client.fetch_block_trade_industry_daily("test", "test").await;
+    let _ = client
+        .fetch_block_trade_industry_daily("test", "test")
+        .await;
 }
 
 #[tokio::test]

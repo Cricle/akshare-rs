@@ -208,5 +208,7 @@ pub async fn mock_market_client(server: &MockServer) -> akshare::MarketDataClien
         tushare_token: None,
         search_providers: vec![],
     };
-    akshare::MarketDataClient::from_config(&config).await.unwrap()
+    akshare::MarketDataClient::from_config(&config)
+        .await
+        .unwrap()
 }

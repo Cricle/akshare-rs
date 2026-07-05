@@ -105,7 +105,9 @@ mt1!(t_bond_convertible_list, bond_convertible_list, 10);
 async fn t_reits_hist_em() {
     let s = wiremock::MockServer::start().await;
     mount_mocks(&s).await;
-    let _ = common::mock_client(&s).reits_hist_em("508018", "daily", "20250101", "20250601", "qfq").await;
+    let _ = common::mock_client(&s)
+        .reits_hist_em("508018", "daily", "20250101", "20250601", "qfq")
+        .await;
 }
 
 // hk/us search & capital flow
@@ -116,48 +118,117 @@ mt2!(t_us_capital_flow, us_capital_flow, "105.MSFT", 10);
 
 // hk/us sector
 mt2!(t_hk_sector_rankings, hk_sector_rankings, "industry", 10);
-mt2!(t_hk_sector_capital_flow, hk_sector_capital_flow, "BK0475", 10);
-mt2!(t_hk_sector_constituents, hk_sector_constituents, "BK0475", 10);
+mt2!(
+    t_hk_sector_capital_flow,
+    hk_sector_capital_flow,
+    "BK0475",
+    10
+);
+mt2!(
+    t_hk_sector_constituents,
+    hk_sector_constituents,
+    "BK0475",
+    10
+);
 mt2!(t_us_sector_rankings, us_sector_rankings, "industry", 10);
-mt2!(t_us_sector_capital_flow, us_sector_capital_flow, "BK0475", 10);
-mt2!(t_us_sector_constituents, us_sector_constituents, "BK0475", 10);
+mt2!(
+    t_us_sector_capital_flow,
+    us_sector_capital_flow,
+    "BK0475",
+    10
+);
+mt2!(
+    t_us_sector_constituents,
+    us_sector_constituents,
+    "BK0475",
+    10
+);
 
 // macro_data
-mt3!(t_macro_china_nbs_nation, macro_china_nbs_nation, "月度数据", "A01", "A0101");
+mt3!(
+    t_macro_china_nbs_nation,
+    macro_china_nbs_nation,
+    "月度数据",
+    "A01",
+    "A0101"
+);
 #[tokio::test]
 async fn t_macro_china_nbs_region() {
     let s = wiremock::MockServer::start().await;
     mount_mocks(&s).await;
-    let _ = common::mock_client(&s).macro_china_nbs_region("分省月度数据", "A01", "A0101", "202501").await;
+    let _ = common::mock_client(&s)
+        .macro_china_nbs_region("分省月度数据", "A01", "A0101", "202501")
+        .await;
 }
 mt3!(t_rate_interbank, rate_interbank, "shibor", "隔夜", "利率");
 
 // economy / air
-mt3!(t_air_quality_hist, air_quality_hist, "北京", "20250101", "20250601");
-mt3!(t_air_quality_watch_point, air_quality_watch_point, "北京", "20250101", "20250601");
+mt3!(
+    t_air_quality_hist,
+    air_quality_hist,
+    "北京",
+    "20250101",
+    "20250601"
+);
+mt3!(
+    t_air_quality_watch_point,
+    air_quality_watch_point,
+    "北京",
+    "20250101",
+    "20250601"
+);
 
 // provider / eastmoney
-mt2!(t_eastmoney_sector_rankings_by_fs, eastmoney_sector_rankings_by_fs, "m:90+t2", 10);
-mt3!(t_eastmoney_sector_capital_flow_by_prefix, eastmoney_sector_capital_flow_by_prefix, "90", "BK0475", 10);
+mt2!(
+    t_eastmoney_sector_rankings_by_fs,
+    eastmoney_sector_rankings_by_fs,
+    "m:90+t2",
+    10
+);
+mt3!(
+    t_eastmoney_sector_capital_flow_by_prefix,
+    eastmoney_sector_capital_flow_by_prefix,
+    "90",
+    "BK0475",
+    10
+);
 
 // news (complex signatures — inline)
 #[tokio::test]
 async fn t_finnhub_company_news() {
     let s = wiremock::MockServer::start().await;
     mount_mocks(&s).await;
-    let _ = common::mock_client(&s).finnhub_company_news("AAPL", "2025-01-01", "2025-01-07", "test_key").await;
+    let _ = common::mock_client(&s)
+        .finnhub_company_news("AAPL", "2025-01-01", "2025-01-07", "test_key")
+        .await;
 }
 
 #[tokio::test]
 async fn t_gdelt_news_search() {
     let s = wiremock::MockServer::start().await;
     mount_mocks(&s).await;
-    let _ = common::mock_client(&s).gdelt_news_search("finance", "https://api.gdeltproject.org/api/v2/doc/doc", None, None, 10).await;
+    let _ = common::mock_client(&s)
+        .gdelt_news_search(
+            "finance",
+            "https://api.gdeltproject.org/api/v2/doc/doc",
+            None,
+            None,
+            10,
+        )
+        .await;
 }
 
 #[tokio::test]
 async fn t_gdelt_news_search_owned() {
     let s = wiremock::MockServer::start().await;
     mount_mocks(&s).await;
-    let _ = common::mock_client(&s).gdelt_news_search_owned("finance", "https://api.gdeltproject.org/api/v2/doc/doc", None, None, 10).await;
+    let _ = common::mock_client(&s)
+        .gdelt_news_search_owned(
+            "finance",
+            "https://api.gdeltproject.org/api/v2/doc/doc",
+            None,
+            None,
+            10,
+        )
+        .await;
 }

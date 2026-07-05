@@ -1274,11 +1274,15 @@ impl AkShareClient {
 
             let bd_str;
             let ed_str;
-            if let Some(bd) = begin_date && bd.len() >= 8 {
+            if let Some(bd) = begin_date
+                && bd.len() >= 8
+            {
                 bd_str = format!("{}-{}-{}", &bd[..4], &bd[4..6], &bd[6..8]);
                 params.push(("begin_time", bd_str.as_str()));
             }
-            if let Some(ed) = end_date && ed.len() >= 8 {
+            if let Some(ed) = end_date
+                && ed.len() >= 8
+            {
                 ed_str = format!("{}-{}-{}", &ed[..4], &ed[4..6], &ed[6..8]);
                 params.push(("end_time", ed_str.as_str()));
             }

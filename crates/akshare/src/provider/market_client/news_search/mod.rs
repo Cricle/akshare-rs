@@ -374,11 +374,13 @@ impl MarketDataClient {
                     .or_else(|| url.as_deref().and_then(extract_site_name_from_url))
                     .unwrap_or("GDELT")
                     .to_string();
-                let summary = item
-                    .get("seendate")
-                    .and_then(|value| value.as_str())
-                    .map(|value| format!("GDELT seen date: {value}"))
-                    .unwrap_or_default();
+                let domain = item
+                    .get("domain")
+                    .and_then(|v| v.as_str())
+                    .filter(|v| !v.trim().is_empty());
+                let summary = domain
+                    .map(|d| format!("GDELT | {} | {}", d, title))
+                    .unwrap_or_else(|| format!("GDELT | {}", title));
                 let published_at = item
                     .get("seendate")
                     .and_then(|value| value.as_str())
