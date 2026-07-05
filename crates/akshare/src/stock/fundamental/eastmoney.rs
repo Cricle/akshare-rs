@@ -904,6 +904,9 @@ impl AkShareClient {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+        if start_date.len() < 8 || end_date.len() < 8 {
+            return Ok(vec![]);
+        }
         let sd = format!(
             "{}-{}-{}",
             &start_date[..4],
@@ -973,6 +976,9 @@ impl AkShareClient {
         symbol: &str,
         date: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
+        if date.len() < 8 {
+            return Ok(vec![]);
+        }
         let date_str = format!("{}-{}-{}", &date[..4], &date[4..6], &date[6..8]);
         let filter = format!(r#"(SECURITY_CODE="{symbol}")(FREE_DATE='{date_str}')"#);
         let data = fetch_datacenter_all(
@@ -1268,11 +1274,11 @@ impl AkShareClient {
 
             let bd_str;
             let ed_str;
-            if let Some(bd) = begin_date {
+            if let Some(bd) = begin_date && bd.len() >= 8 {
                 bd_str = format!("{}-{}-{}", &bd[..4], &bd[4..6], &bd[6..8]);
                 params.push(("begin_time", bd_str.as_str()));
             }
-            if let Some(ed) = end_date {
+            if let Some(ed) = end_date && ed.len() >= 8 {
                 ed_str = format!("{}-{}-{}", &ed[..4], &ed[4..6], &ed[6..8]);
                 params.push(("end_time", ed_str.as_str()));
             }

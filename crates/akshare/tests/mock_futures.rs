@@ -393,3 +393,13 @@ async fn test_mock_futures_foreign_commodity_realtime() {
     let result = client.futures_foreign_commodity_realtime(&["CL"]).await;
     let _ = result;
 }
+
+// ===== Additional futures test =====
+#[tokio::test]
+async fn test_mock_get_roll_yield_bar() {
+    let server = wiremock::MockServer::start().await;
+    mount_mocks(&server).await;
+    let client = common::mock_client(&server);
+    let result = client.get_roll_yield_bar("2024-01-01", Some("test"), Some("test"), Some("test")).await;
+    let _ = result;
+}

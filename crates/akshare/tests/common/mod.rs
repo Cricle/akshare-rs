@@ -198,3 +198,15 @@ pub async fn mount_json_mocks(server: &MockServer, data: serde_json::Value) {
         .mount(server)
         .await;
 }
+
+/// Create a [`MarketDataClient`](akshare::MarketDataClient) pointed at a mock server.
+#[cfg(feature = "market-client")]
+pub async fn mock_market_client(server: &MockServer) -> akshare::MarketDataClient {
+    use akshare::DataConfig;
+    let config = DataConfig {
+        mock_uri: Some(server.uri()),
+        tushare_token: None,
+        search_providers: vec![],
+    };
+    akshare::MarketDataClient::from_config(&config).await.unwrap()
+}

@@ -71,6 +71,8 @@ pub use cache::{Singleflight, SingleflightGuard, SingleflightResult};
 
 /// Configuration for constructing a `MarketDataClient`.
 pub struct DataConfig {
+    /// When set, all HTTP requests through the inner AkShareClient are redirected to this base URL (for testing).
+    pub mock_uri: Option<String>,
     pub tushare_token: Option<String>,
     pub search_providers: Vec<SearchProviderConfig>,
 }
@@ -371,6 +373,7 @@ fn rewrite_query_for_gdelt(query: &str, language: &str) -> String {
 impl MarketDataClient {
     pub async fn new() -> anyhow::Result<Self> {
         Self::from_config(&DataConfig {
+            mock_uri: None,
             tushare_token: std::env::var("TUSHARE_TOKEN")
                 .ok()
                 .filter(|v| !v.is_empty()),
@@ -491,7 +494,10 @@ impl MarketDataClient {
         if let Some(proxy_url) = outbound_proxy_url.as_deref() {
             ak_builder = ak_builder.proxy(proxy_url);
         }
-        let ak = ak_builder.build();
+        let mut ak = ak_builder.build();
+        if let Some(ref mock_uri) = config.mock_uri {
+            ak.mock_uri = Some(mock_uri.clone());
+        }
 
         Ok(Self {
             http,
