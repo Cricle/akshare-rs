@@ -431,7 +431,7 @@ impl MarketDataClient {
                 end_date,
                 super::GeneralSearchIntent::CompanyEvidence,
                 Self::US_COMPANY_SEARCH_GENERAL_QUERY_LIMIT,
-                Some(SearchProviderKind::Uapis),
+                None, // Try all available providers, not just Uapis
                 Some(Self::US_COMPANY_SEARCH_NEWS_QUERY_LIMIT),
                 Some(Self::US_COMPANY_SEARCH_GENERAL_QUERY_LIMIT),
                 Self::US_COMPANY_SEARCH_BATCH_SIZE,
@@ -524,7 +524,7 @@ impl MarketDataClient {
                     end_date,
                     super::GeneralSearchIntent::CompanyEvidence,
                     2,
-                    Some(SearchProviderKind::Uapis),
+                    None, // Try all available providers
                     Some(6),
                     Some(2),
                     Self::US_COMPANY_SEARCH_BATCH_SIZE,
@@ -1295,6 +1295,7 @@ impl MarketDataClient {
                 let map: SecTickerLookup = self
                     .http
                     .get("https://www.sec.gov/files/company_tickers.json")
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
                     .send()
                     .await
                     .context("failed to fetch SEC ticker map")?

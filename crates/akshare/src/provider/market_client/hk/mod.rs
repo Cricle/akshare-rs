@@ -5,7 +5,7 @@ mod test_helpers;
 use super::news_filter::{build_dated_news_query, merge_ranked_news};
 use super::{
     CandlesWithProvider, CompanySearchContext, FundamentalsSnapshot, GeneralSearchIntent,
-    MarketDataClient, NewsItem, QuoteWithProvider, SearchProviderKind, StockSearchResult,
+    MarketDataClient, NewsItem, QuoteWithProvider, StockSearchResult,
 };
 use anyhow::{Context, bail};
 use chrono::{Days, NaiveDate};
@@ -558,7 +558,7 @@ impl MarketDataClient {
                 end_date,
                 GeneralSearchIntent::CompanyEvidence,
                 Self::HK_COMPANY_SEARCH_GENERAL_QUERY_LIMIT,
-                Some(SearchProviderKind::Uapis),
+                None, // Try all available providers, not just Uapis
                 Some(Self::HK_COMPANY_SEARCH_NEWS_QUERY_LIMIT),
                 Some(Self::HK_COMPANY_SEARCH_GENERAL_QUERY_LIMIT),
                 Self::HK_COMPANY_SEARCH_BATCH_SIZE,
@@ -606,7 +606,7 @@ impl MarketDataClient {
                     end_date,
                     GeneralSearchIntent::MacroEvidence,
                     Self::HK_COMPANY_SEARCH_GENERAL_QUERY_LIMIT,
-                    Some(SearchProviderKind::Uapis),
+                    None, // Try all available providers
                     Some(Self::HK_COMPANY_SEARCH_NEWS_QUERY_LIMIT),
                     Some(Self::HK_COMPANY_SEARCH_GENERAL_QUERY_LIMIT),
                     Self::HK_COMPANY_SEARCH_BATCH_SIZE,
