@@ -106,10 +106,9 @@ impl AkShareClient {
                 // datas items can be CSV strings or JSON arrays
                 let fields: Vec<&str> = if let Some(s) = item.as_str() {
                     s.split(',').collect()
-                } else if let Some(arr) = item.as_array() {
-                    arr.iter().map(|v| v.as_str().unwrap_or("")).collect()
                 } else {
-                    return None;
+                    let arr = item.as_array()?;
+                    arr.iter().map(|v| v.as_str().unwrap_or("")).collect()
                 };
                 if fields.len() < 8 {
                     return None;
