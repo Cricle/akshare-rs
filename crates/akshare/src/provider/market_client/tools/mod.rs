@@ -1,3 +1,4 @@
+mod fundamentals;
 mod indicators;
 mod market_data;
 mod news;
@@ -163,6 +164,14 @@ impl TradingToolbox {
             "get_global_news" => self.get_global_news(symbol, market_type, arguments).await,
             "get_insider_transactions" => {
                 self.get_insider_transactions(symbol, scenario_data, arguments)
+                    .await
+            }
+            "get_analyst_consensus" => {
+                self.get_analyst_consensus(symbol, scenario_data, arguments)
+                    .await
+            }
+            "get_shareholder_analysis" => {
+                self.get_shareholder_analysis(symbol, scenario_data, arguments)
                     .await
             }
             other => anyhow::bail!("unsupported tool: {other}"),

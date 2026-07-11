@@ -312,7 +312,18 @@ impl MarketDataClient {
                     a_share_fallback,
                 );
             }
-            _ => {}
+            _ => {
+                let eastmoney_fallback = self
+                    .search_stocks_from_eastmoney(query, market, limit.saturating_mul(4))
+                    .await
+                    .unwrap_or_default();
+                merged = self.merge_ranked_stock_results(
+                    query,
+                    normalized_market,
+                    merged,
+                    eastmoney_fallback,
+                );
+            }
         }
 
         // Direct lookup fallback for codes not found in suggest API (e.g. certain indices)
@@ -579,7 +590,7 @@ impl MarketDataClient {
         let map: super::wire::SecTickerLookup = self
             .http
             .get("https://www.sec.gov/files/company_tickers.json")
-            .header("User-Agent", "Mozilla/5.0 (compatible; research-bot)")
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
             .send()
             .await
             .context("failed to fetch SEC ticker map for US stock search")?

@@ -462,7 +462,7 @@ impl MarketDataClient {
 
     pub async fn from_config(config: &DataConfig) -> anyhow::Result<Self> {
         let mut http_builder = reqwest::Client::builder()
-            .user_agent("akshare-rust/0.1")
+            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
             .http1_only()
             .connect_timeout(Duration::from_secs(10))
             .timeout(Duration::from_secs(30))
