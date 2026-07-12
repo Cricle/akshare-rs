@@ -4,6 +4,7 @@
 
 use std::fmt;
 
+/// Classification of errors returned by API methods.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorKind {
     UnsupportedMarket,
@@ -32,6 +33,9 @@ impl ErrorKind {
     }
 }
 
+/// Error type returned by all akshare-rs API methods.
+///
+/// Use [`Error::kind`] to classify the error for programmatic handling.
 #[derive(Debug)]
 pub struct Error {
     kind: ErrorKind,

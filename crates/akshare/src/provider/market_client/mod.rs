@@ -77,6 +77,10 @@ pub struct DataConfig {
     pub search_providers: Vec<SearchProviderConfig>,
 }
 
+/// High-level market data client with caching and multi-provider news search.
+///
+/// Wraps [`AkShareClient`](crate::AkShareClient) with singleflight deduplication
+/// and multi-provider news aggregation. Use [`MarketDataClient::new`] to construct.
 #[derive(Clone)]
 pub struct MarketDataClient {
     http: reqwest_middleware::ClientWithMiddleware,
@@ -94,6 +98,7 @@ pub(crate) enum SearchProviderKind {
     Uapis,
 }
 
+/// Configuration for a news/web search provider.
 #[derive(Debug, Clone)]
 pub struct SearchProviderConfig {
     kind: SearchProviderKind,
@@ -113,6 +118,7 @@ pub enum GeneralSearchIntent {
     MacroEvidence,
 }
 
+/// Classification of data-fetching errors.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DataErrorKind {
     UnsupportedMarket,
@@ -136,6 +142,7 @@ impl DataErrorKind {
     }
 }
 
+/// Error returned by [`MarketDataClient`] fetch methods.
 #[derive(Debug)]
 pub struct DataError {
     kind: DataErrorKind,

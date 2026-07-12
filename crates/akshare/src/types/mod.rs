@@ -8,6 +8,7 @@ pub mod wire;
 
 use serde::{Deserialize, Serialize};
 
+/// Market classification (A-share, Hong Kong, US equity).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MarketKind {
     AShare,
@@ -47,6 +48,7 @@ impl AdjustType {
     }
 }
 
+/// Real-time or end-of-day quote for a single stock.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QuoteSnapshot {
     pub symbol: String,
@@ -58,6 +60,7 @@ pub struct QuoteSnapshot {
     pub volume: i64,
 }
 
+/// Single OHLCV candle with derived metrics (amplitude, change, turnover).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CandlePoint {
     pub trade_date: String,
@@ -73,6 +76,7 @@ pub struct CandlePoint {
     pub turnover_pct: f64,
 }
 
+/// A single news article from a data provider.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewsItem {
     pub published_at: String,
@@ -106,6 +110,7 @@ pub struct NewsFetchResult {
     pub cacheable: bool,
 }
 
+/// Daily capital flow data — net inflows by position size.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CapitalFlowPoint {
     pub trade_date: String,
@@ -248,6 +253,7 @@ pub struct HkFinancialSnapshot {
     pub amount_hkd: Option<f64>,
 }
 
+/// Sector index snapshot with capital flow data.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SectorSnapshot {
     pub sector_code: String,
@@ -258,6 +264,7 @@ pub struct SectorSnapshot {
     pub main_net_inflow_ratio_pct: f64,
 }
 
+/// A stock belonging to a sector.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SectorConstituent {
     pub symbol: String,
@@ -267,6 +274,7 @@ pub struct SectorConstituent {
     pub main_net_inflow: Option<f64>,
 }
 
+/// Stock search result — symbol, name, market, and exchange.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StockSearchResult {
     pub symbol: String,
@@ -275,6 +283,7 @@ pub struct StockSearchResult {
     pub exchange: String,
 }
 
+/// Full announcement content with PDF link.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnnouncementDetail {
     pub art_code: String,
@@ -285,6 +294,7 @@ pub struct AnnouncementDetail {
     pub source: String,
 }
 
+/// Announcement list item (summary without full content).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnnouncementItem {
     pub art_code: String,
@@ -295,6 +305,7 @@ pub struct AnnouncementItem {
     pub source: String,
 }
 
+/// Dragon-tiger billboard (龙虎榜) entry.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BillboardEntry {
     pub trade_date: String,
@@ -310,6 +321,7 @@ pub struct BillboardEntry {
     pub reason: Option<String>,
 }
 
+/// Billboard seat detail — trading department activity.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BillboardSeatDetail {
     pub trade_date: String,
@@ -321,6 +333,7 @@ pub struct BillboardSeatDetail {
     pub explanation: Option<String>,
 }
 
+/// Exchange trade calendar entry — open/closed status per date.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TradeCalendarItem {
     pub exchange: String,
@@ -329,6 +342,7 @@ pub struct TradeCalendarItem {
     pub previous_trade_date: Option<String>,
 }
 
+/// Single macroeconomic data point (date, value, indicator name).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MacroDataPoint {
     pub date: String,
@@ -336,6 +350,7 @@ pub struct MacroDataPoint {
     pub name: String,
 }
 
+/// Market index snapshot (e.g., SSE Composite, CSI 300).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IndexSnapshot {
     pub symbol: String,
@@ -347,6 +362,7 @@ pub struct IndexSnapshot {
     pub amount: f64,
 }
 
+/// Mutual fund snapshot with NAV and change data.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FundSnapshot {
     pub symbol: String,
@@ -359,6 +375,7 @@ pub struct FundSnapshot {
     pub fund_type: Option<String>,
 }
 
+/// Bond snapshot with yield and credit rating.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BondSnapshot {
     pub symbol: String,
@@ -371,6 +388,7 @@ pub struct BondSnapshot {
     pub credit_rating: Option<String>,
 }
 
+/// Futures contract snapshot with open interest.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FuturesSnapshot {
     pub symbol: String,
@@ -384,6 +402,7 @@ pub struct FuturesSnapshot {
     pub settlement_price: Option<f64>,
 }
 
+/// Options contract snapshot with strike and expiry.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptionSnapshot {
     pub symbol: String,
@@ -399,6 +418,7 @@ pub struct OptionSnapshot {
     pub expiry_date: Option<String>,
 }
 
+/// Foreign exchange rate pair.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ForexRate {
     pub currency_pair: String,
@@ -410,6 +430,7 @@ pub struct ForexRate {
     pub change_pct: Option<f64>,
 }
 
+/// Cryptocurrency spot price with 24h change.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CryptoSpot {
     pub symbol: String,
@@ -421,6 +442,7 @@ pub struct CryptoSpot {
     pub market_cap: f64,
 }
 
+/// REIT (real estate investment trust) snapshot.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReitSnapshot {
     pub symbol: String,

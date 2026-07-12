@@ -112,6 +112,19 @@ impl Default for AkShareClient {
     }
 }
 
+/// Builder for [`AkShareClient`] with custom configuration.
+///
+/// # Example
+///
+/// ```rust
+/// use akshare::AkShareClient;
+/// use std::time::Duration;
+///
+/// let client = AkShareClient::builder()
+///     .timeout(Duration::from_secs(60))
+///     .proxy("http://127.0.0.1:7890")
+///     .build();
+/// ```
 pub struct AkShareClientBuilder {
     tushare_token: Option<String>,
     user_agent: String,

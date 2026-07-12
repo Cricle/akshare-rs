@@ -24,11 +24,17 @@ pub struct ScenarioData {
     pub quote: Option<QuoteSnapshot>,
 }
 
+/// Agentic tool executor for LLM-driven stock analysis.
+///
+/// Provides tools for fetching candles, fundamentals, news, and computing
+/// technical indicators. Each tool returns a string output suitable for
+/// LLM consumption.
 #[derive(Clone)]
 pub struct TradingToolbox {
     market_data: MarketDataClient,
 }
 
+/// A tool call queued for execution by the LLM agent loop.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct PendingToolCall {
     pub tool_name: String,
@@ -37,6 +43,7 @@ pub struct PendingToolCall {
     pub reason: String,
 }
 
+/// Result of a tool execution, returned to the LLM as context.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ToolObservation {
     pub tool_name: String,
