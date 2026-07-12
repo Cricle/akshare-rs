@@ -57,6 +57,7 @@ pub struct ClistResp {
 }
 
 #[derive(Debug, Deserialize)]
+/// Data payload from an Eastmoney clist API response.
 pub struct ClistRespData {
     pub diff: Option<Vec<serde_json::Value>>,
     #[serde(default)]
@@ -76,6 +77,7 @@ pub struct KlineResp {
 }
 
 #[derive(Debug, Deserialize)]
+/// Data payload from an Eastmoney kline API response.
 pub struct KlineRespData {
     pub klines: Option<Vec<String>>,
 }

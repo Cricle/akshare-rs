@@ -24,6 +24,7 @@ pub struct DataFetchDiagnosis {
 }
 
 impl DataFetchDiagnosis {
+    /// Create a new empty diagnosis for the given data type and symbol.
     pub fn new(data_type: &str, symbol: &str) -> Self {
         Self {
             data_type: data_type.to_string(),
@@ -67,6 +68,7 @@ pub struct NamedProvider<T> {
 }
 
 impl<T> NamedProvider<T> {
+    /// Create a new named provider with an async fetcher function.
     pub fn new<F, Fut>(name: impl Into<String>, fetcher: F) -> Self
     where
         F: Fn() -> Fut + Send + Sync + 'static,

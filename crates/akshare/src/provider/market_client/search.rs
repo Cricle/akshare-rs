@@ -112,6 +112,7 @@ pub(crate) fn is_preferred_equity_listing(item: &StockSearchResult) -> bool {
     true
 }
 
+/// Score a stock search result against a query string for relevance ranking.
 pub fn stock_search_score(query: &str, item: &StockSearchResult) -> i32 {
     let symbol = normalize_search_text(&item.symbol);
     let name = normalize_search_text(&item.name);

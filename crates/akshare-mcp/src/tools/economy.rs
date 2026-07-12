@@ -3,6 +3,7 @@ use rmcp::schemars;
 // ── Existing ────────────────────────────────────────────────────
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for nlp queries.
 pub struct NlpParams {
     pub question: String,
 }
@@ -10,17 +11,20 @@ pub struct NlpParams {
 // ── New param types ─────────────────────────────────────────────
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for city queries.
 pub struct CityParam {
     pub city: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for date city queries.
 pub struct DateCityParam {
     pub date: String,
     pub city: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for air hist queries.
 pub struct AirHistParam {
     pub city: String,
     #[serde(default)]
@@ -30,33 +34,39 @@ pub struct AirHistParam {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for symbol queries.
 pub struct SymbolParam {
     pub symbol: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for date queries.
 pub struct DateParam {
     pub date: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for year queries.
 pub struct YearParam {
     pub year: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for symbol indicator queries.
 pub struct SymbolIndicatorParam {
     pub symbol: String,
     pub indicator: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for symbol index queries.
 pub struct SymbolIndexParam {
     pub symbol: String,
     pub index: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for migration area queries.
 pub struct MigrationAreaParam {
     pub area: String,
     pub indicator: String,
@@ -64,24 +74,28 @@ pub struct MigrationAreaParam {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for migration scale queries.
 pub struct MigrationScaleParam {
     pub area: String,
     pub indicator: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for hurun queries.
 pub struct HurunParam {
     pub indicator: String,
     pub year: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for nlp ownthink queries.
 pub struct NlpOwnthinkParam {
     pub word: String,
     pub indicator: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for symbol date queries.
 pub struct SymbolDateParam {
     pub symbol: String,
     pub date: String,

@@ -131,6 +131,7 @@ pub enum DataErrorKind {
 }
 
 impl DataErrorKind {
+    /// Return this error kind as a static string.
     pub fn as_str(self) -> &'static str {
         match self {
             Self::UnsupportedMarket => "unsupported_market",
@@ -394,6 +395,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Load search provider configurations from environment variables.
     pub fn load_search_providers() -> Vec<SearchProviderConfig> {
         let provider_names = std::env::var("SEARCH_PROVIDERS")
             .ok()

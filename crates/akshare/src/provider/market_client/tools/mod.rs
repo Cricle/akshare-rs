@@ -64,6 +64,7 @@ struct ToolExecutionResult {
 impl TradingToolbox {
     const TECHNICAL_HISTORY_MIN_BARS: usize = 320;
 
+    /// Create a new trading toolbox from a market data client.
     pub fn new(market_data: MarketDataClient) -> Self {
         Self { market_data }
     }

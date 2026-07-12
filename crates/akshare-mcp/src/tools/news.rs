@@ -57,7 +57,7 @@ pub struct NewsQueryTimeoutParams {
 pub struct GdeltNewsSearchParams {
     pub query: String,
     /// GDELT API endpoint URL.
-    /// Default: "https://api.gdeltproject.org/api/v2/doc/doc"
+    /// Default: `<https://api.gdeltproject.org/api/v2/doc/doc>`
     #[serde(default = "default_gdelt_base_url")]
     pub base_url: String,
     /// Optional language hint: "zh-CN" for Chinese, "en-US" for English.

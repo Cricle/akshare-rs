@@ -19,6 +19,7 @@ pub enum ErrorKind {
 
 impl ErrorKind {
     #[must_use]
+    /// Return the error kind as a static string.
     pub const fn as_str(&self) -> &'static str {
         match self {
             Self::UnsupportedMarket => "unsupported_market",
@@ -52,6 +53,7 @@ impl Error {
     }
 
     #[must_use]
+    /// Return the error kind for programmatic classification.
     pub const fn kind(&self) -> ErrorKind {
         self.kind
     }

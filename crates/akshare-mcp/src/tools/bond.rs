@@ -1,17 +1,20 @@
 use rmcp::schemars;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond rate queries.
 pub struct BondRateParams {
     pub start_date: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond limit queries.
 pub struct BondLimitParams {
     #[serde(default = "default_limit")]
     pub limit: usize,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond yield queries.
 pub struct BondYieldParams {
     pub start_date: String,
     pub end_date: String,
@@ -26,11 +29,13 @@ const fn default_page() -> usize {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond symbol queries.
 pub struct BondSymbolParams {
     pub symbol: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond symbol limit queries.
 pub struct BondSymbolLimitParams {
     pub symbol: String,
     #[serde(default = "default_limit")]
@@ -38,12 +43,14 @@ pub struct BondSymbolLimitParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond indicator period queries.
 pub struct BondIndicatorPeriodParams {
     pub indicator: String,
     pub period: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond close return queries.
 pub struct BondCloseReturnParams {
     pub symbol: String,
     pub period: String,
@@ -52,24 +59,28 @@ pub struct BondCloseReturnParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond symbol indicator queries.
 pub struct BondSymbolIndicatorParams {
     pub symbol: String,
     pub indicator: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond symbol period queries.
 pub struct BondSymbolPeriodParams {
     pub symbol: String,
     pub period: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond page queries.
 pub struct BondPageParams {
     #[serde(default = "default_page")]
     pub page: usize,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for bond date queries.
 pub struct BondDateParams {
     pub date: String,
 }

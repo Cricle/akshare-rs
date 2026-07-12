@@ -217,6 +217,7 @@ pub(crate) fn normalize_news_text(value: &str) -> String {
     value.split_whitespace().collect::<String>().to_lowercase()
 }
 
+/// Normalize a news date string to YYYY-MM-DD format if parseable.
 pub fn normalized_news_date(value: &str) -> Option<String> {
     let trimmed = value.trim();
     if trimmed.is_empty() {
