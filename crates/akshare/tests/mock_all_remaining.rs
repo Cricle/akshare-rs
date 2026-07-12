@@ -35,7 +35,6 @@ macro_rules! mt2 {
         }
     };
 }
-#[allow(unused_macros)]
 macro_rules! mt3 {
     ($t:ident, $m:ident, $a:expr, $b:expr, $c:expr) => {
         #[tokio::test]

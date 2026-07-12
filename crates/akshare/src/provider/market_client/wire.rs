@@ -134,10 +134,7 @@ pub(crate) struct EastmoneyDatacenterResult<T> {
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 pub(crate) struct EastmoneyMainFinanceIndicatorItem {
-    #[serde(rename = "SECURITY_CODE")]
-    pub(crate) security_code: Option<String>,
     #[serde(rename = "SECURITY_NAME_ABBR")]
     pub(crate) security_name_abbr: Option<String>,
     #[serde(rename = "REPORT_DATE")]
@@ -686,9 +683,6 @@ fn latest_strict_annual_metric(units: &MetricUnits) -> Option<&MetricValue> {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct CompanySubmissionsResponse {
-    #[serde(default)]
-    #[allow(dead_code)]
-    pub(crate) sic: Option<String>,
     #[serde(default, rename = "sicDescription")]
     pub(crate) sic_description: Option<String>,
     pub(crate) filings: FilingsSection,
