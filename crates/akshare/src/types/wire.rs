@@ -34,6 +34,7 @@ impl EmDatacenterResp {
     }
 }
 
+/// Result payload from Eastmoney datacenter API.
 #[derive(Debug, Deserialize)]
 pub struct EmDatacenterResult {
     #[serde(default)]

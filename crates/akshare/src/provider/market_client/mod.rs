@@ -201,6 +201,7 @@ pub(crate) struct UsSecurityDirectoryEntry {
 }
 
 impl SearchProviderConfig {
+    /// Create a SearXNG search provider config.
     pub fn searxng(name: impl Into<String>, base_url: impl Into<String>) -> Self {
         Self {
             kind: SearchProviderKind::Searxng,
@@ -209,6 +210,7 @@ impl SearchProviderConfig {
         }
     }
 
+    /// Create a GDELT search provider config.
     pub fn gdelt(name: impl Into<String>, base_url: impl Into<String>) -> Self {
         Self {
             kind: SearchProviderKind::Gdelt,
@@ -217,6 +219,7 @@ impl SearchProviderConfig {
         }
     }
 
+    /// Create a Baidu search provider config.
     pub fn baidu(name: impl Into<String>) -> Self {
         Self {
             kind: SearchProviderKind::Baidu,
@@ -225,6 +228,7 @@ impl SearchProviderConfig {
         }
     }
 
+    /// Create a UAPI search provider config.
     pub fn uapis(name: impl Into<String>) -> Self {
         Self {
             kind: SearchProviderKind::Uapis,

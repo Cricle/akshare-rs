@@ -40,6 +40,7 @@ pub(crate) fn stock_market_key(value: &str) -> &'static str {
     }
 }
 
+/// Normalize search text by removing whitespace and special characters.
 pub fn normalize_search_text(value: &str) -> String {
     value
         .chars()
@@ -48,6 +49,7 @@ pub fn normalize_search_text(value: &str) -> String {
         .collect::<String>()
 }
 
+/// Determine preferred search language based on query content (CJK vs Latin).
 pub fn preferred_search_language_for_query(query: &str) -> &'static str {
     let has_cjk = query.chars().any(is_cjk_character);
     let has_ascii_alpha = query.chars().any(|ch| ch.is_ascii_alphabetic());
