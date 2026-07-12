@@ -10,11 +10,11 @@ use tracing::Instrument;
 use super::cache::SingleflightResult;
 use super::{
     AnnouncementDetail, AnnouncementItem, CANDLES_CACHE_TTL_SECS, CANDLES_CACHE_VERSION,
-    CandlePoint, CandlesWithProvider, CapitalFlowPoint,
-    FUNDAMENTALS_CACHE_TTL_SECS, FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot,
-    GLOBAL_NEWS_CACHE_VERSION, INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient,
-    MarketKind, NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult,
-    NewsItem, QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, QuoteWithProvider,
+    CandlePoint, CandlesWithProvider, CapitalFlowPoint, FUNDAMENTALS_CACHE_TTL_SECS,
+    FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot, GLOBAL_NEWS_CACHE_VERSION,
+    INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient, MarketKind,
+    NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult, NewsItem,
+    QUOTE_CACHE_TTL_SECS, QUOTE_CACHE_VERSION, QuoteSnapshot, QuoteWithProvider,
     SEARCH_CACHE_TTL_SECS, SEARCH_CACHE_VERSION, SectorConstituent, SectorSnapshot,
     StockSearchResult, TradeCalendarItem,
 };
@@ -690,11 +690,10 @@ impl MarketDataClient {
             .context("failed to fetch HK capital flow from Eastmoney")?
             .error_for_status()
             .context("eastmoney HK capital flow request failed")?;
-        let payload: crate::provider::market_client::wire::EastmoneyKlineEnvelope =
-            response
-                .json()
-                .await
-                .context("failed to decode eastmoney HK capital flow response")?;
+        let payload: crate::provider::market_client::wire::EastmoneyKlineEnvelope = response
+            .json()
+            .await
+            .context("failed to decode eastmoney HK capital flow response")?;
         let data = payload
             .data
             .context("eastmoney HK capital flow response missing data")?;
@@ -822,9 +821,7 @@ impl MarketDataClient {
                         .unwrap_or_else(|| symbol.trim().to_uppercase());
                     self.fetch_a_share_announcements(&ts_code, limit).await
                 }
-                MarketKind::HongKong => {
-                    self.fetch_hk_announcements(symbol, limit).await
-                }
+                MarketKind::HongKong => self.fetch_hk_announcements(symbol, limit).await,
                 MarketKind::UsEquity => Ok(Vec::new()),
             };
             let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
