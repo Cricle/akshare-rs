@@ -7,6 +7,7 @@ use super::super::{MarketDataClient, NewsItem};
 use crate::types::TencentSnapshotTestResult;
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn test_hk_yahoo_symbol(
     client: &MarketDataClient,
     symbol: &str,
@@ -15,6 +16,7 @@ pub(crate) fn test_hk_yahoo_symbol(
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn test_hk_standard_code(
     client: &MarketDataClient,
     symbol: &str,
@@ -23,12 +25,13 @@ pub(crate) fn test_hk_standard_code(
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn test_hk_search_aliases(client: &MarketDataClient, company_name: &str) -> Vec<String> {
     client.hk_search_aliases(company_name)
 }
 
 #[cfg(test)]
-#[allow(clippy::too_many_arguments)]
+#[allow(dead_code, clippy::too_many_arguments)]
 pub(crate) fn test_hk_company_news_queries(
     client: &MarketDataClient,
     standard_code: &str,
@@ -53,16 +56,19 @@ pub(crate) fn test_hk_company_news_queries(
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn test_parse_hkex_title_search_results(html: &str) -> Vec<NewsItem> {
     super::news::parse_hkex_title_search_results(html)
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn test_hkex_item_is_high_value(item: &NewsItem) -> bool {
     super::news::hkex_item_is_high_value(item)
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn test_parse_hk_tencent_snapshot(
     raw: &str,
 ) -> anyhow::Result<TencentSnapshotTestResult> {
