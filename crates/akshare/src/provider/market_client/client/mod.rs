@@ -10,7 +10,7 @@ use tracing::Instrument;
 use super::cache::SingleflightResult;
 use super::{
     AnnouncementDetail, AnnouncementItem, CANDLES_CACHE_TTL_SECS, CANDLES_CACHE_VERSION,
-    CandlePoint, CandlesWithProvider, CapitalFlowPoint, DataError, DataErrorKind,
+    CandlePoint, CandlesWithProvider, CapitalFlowPoint,
     FUNDAMENTALS_CACHE_TTL_SECS, FUNDAMENTALS_CACHE_VERSION, FundamentalsSnapshot,
     GLOBAL_NEWS_CACHE_VERSION, INSIDER_CACHE_TTL_SECS, MARKET_DATA_CACHE_PREFIX, MarketDataClient,
     MarketKind, NEWS_CACHE_TTL_SECS, NEWS_CACHE_VERSION, NewsFetchAttempt, NewsFetchResult,
@@ -604,38 +604,17 @@ impl MarketDataClient {
         let span = tracing::info_span!("market_data.fetch", data_type = "capital_flow", symbol);
         async {
             let start = std::time::Instant::now();
-            if self.normalize_a_share_symbol(symbol).is_some() {
-                let market = self.detect_market(symbol);
-                let normalized_symbol = self.cache_symbol(symbol, market);
-                let cache_key =
-                    format!("{MARKET_DATA_CACHE_PREFIX}:capital-flow:{normalized_symbol}:{limit}");
-                if let Some(cached) = self.cache_get_json(&cache_key).await {
-                    let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
-                    let meter = opentelemetry::global::meter("stock-analyzer");
-                    let attrs = vec![
-                        KeyValue::new("market_data.type", "capital_flow"),
-                        KeyValue::new("market_data.symbol", symbol.to_string()),
-                        KeyValue::new("market_data.outcome", "success"),
-                    ];
-                    meter
-                        .u64_counter("market_data_fetch_total")
-                        .build()
-                        .add(1, &attrs);
-                    meter
-                        .f64_histogram("market_data_fetch_duration_ms")
-                        .build()
-                        .record(dur_ms, &attrs);
-                    return Ok(cached);
-                }
-                let fetch_result = self.fetch_a_share_capital_flow(symbol, limit).await;
+            let market = self.detect_market(symbol);
+            let normalized_symbol = self.cache_symbol(symbol, market);
+            let cache_key =
+                format!("{MARKET_DATA_CACHE_PREFIX}:capital-flow:{normalized_symbol}:{limit}");
+            if let Some(cached) = self.cache_get_json(&cache_key).await {
                 let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
                 let meter = opentelemetry::global::meter("stock-analyzer");
-                let ok = fetch_result.is_ok();
-                let outcome = if ok { "success" } else { "error" };
                 let attrs = vec![
                     KeyValue::new("market_data.type", "capital_flow"),
                     KeyValue::new("market_data.symbol", symbol.to_string()),
-                    KeyValue::new("market_data.outcome", outcome),
+                    KeyValue::new("market_data.outcome", "success"),
                 ];
                 meter
                     .u64_counter("market_data_fetch_total")
@@ -645,45 +624,92 @@ impl MarketDataClient {
                     .f64_histogram("market_data_fetch_duration_ms")
                     .build()
                     .record(dur_ms, &attrs);
-                if !ok {
-                    meter
-                        .u64_counter("market_data_fetch_errors_total")
-                        .build()
-                        .add(1, &attrs);
-                }
-                let items = fetch_result?;
-                self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
-                    .await;
-                Ok(items)
-            } else {
-                let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
-                let meter = opentelemetry::global::meter("stock-analyzer");
-                let attrs = vec![
-                    KeyValue::new("market_data.type", "capital_flow"),
-                    KeyValue::new("market_data.symbol", symbol.to_string()),
-                    KeyValue::new("market_data.outcome", "error"),
-                ];
-                meter
-                    .u64_counter("market_data_fetch_total")
-                    .build()
-                    .add(1, &attrs);
-                meter
-                    .f64_histogram("market_data_fetch_duration_ms")
-                    .build()
-                    .record(dur_ms, &attrs);
+                return Ok(cached);
+            }
+            let fetch_result = match market {
+                MarketKind::AShare => self.fetch_a_share_capital_flow(symbol, limit).await,
+                MarketKind::HongKong => self.fetch_hk_capital_flow(symbol, limit).await,
+                MarketKind::UsEquity => Ok(Vec::new()),
+            };
+            let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
+            let meter = opentelemetry::global::meter("stock-analyzer");
+            let ok = fetch_result.is_ok();
+            let outcome = if ok { "success" } else { "error" };
+            let attrs = vec![
+                KeyValue::new("market_data.type", "capital_flow"),
+                KeyValue::new("market_data.symbol", symbol.to_string()),
+                KeyValue::new("market_data.outcome", outcome),
+            ];
+            meter
+                .u64_counter("market_data_fetch_total")
+                .build()
+                .add(1, &attrs);
+            meter
+                .f64_histogram("market_data_fetch_duration_ms")
+                .build()
+                .record(dur_ms, &attrs);
+            if !ok {
                 meter
                     .u64_counter("market_data_fetch_errors_total")
                     .build()
                     .add(1, &attrs);
-                Err(DataError::new(
-                    DataErrorKind::UnsupportedMarket,
-                    format!("capital flow is unsupported for symbol {symbol}"),
-                )
-                .into())
             }
+            let items = fetch_result?;
+            self.cache_set_json(&cache_key, CANDLES_CACHE_TTL_SECS, &items)
+                .await;
+            Ok(items)
         }
         .instrument(span)
         .await
+    }
+
+    /// Fetch capital flow for an HK stock via Eastmoney (secid prefix 116).
+    async fn fetch_hk_capital_flow(
+        &self,
+        symbol: &str,
+        limit: usize,
+    ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
+        let code = symbol.trim().trim_start_matches('0');
+        let code = if code.is_empty() { "0" } else { code };
+        let secid = format!("116.{code}");
+        let response = self
+            .http
+            .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
+            .query(&[
+                ("secid", secid.as_str()),
+                ("klt", "101"),
+                ("lmt", &limit.to_string()),
+                ("fields1", "f1,f2,f3,f7"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63",
+                ),
+            ])
+            .send()
+            .await
+            .context("failed to fetch HK capital flow from Eastmoney")?
+            .error_for_status()
+            .context("eastmoney HK capital flow request failed")?;
+        let payload: crate::provider::market_client::wire::EastmoneyKlineEnvelope =
+            response
+                .json()
+                .await
+                .context("failed to decode eastmoney HK capital flow response")?;
+        let data = payload
+            .data
+            .context("eastmoney HK capital flow response missing data")?;
+        let klines = data
+            .klines
+            .context("eastmoney HK capital flow response missing klines")?;
+        let mut items = klines
+            .into_iter()
+            .map(|line| Self::parse_a_share_capital_flow_line(&line))
+            .collect::<anyhow::Result<Vec<_>>>()?;
+        if items.is_empty() {
+            anyhow::bail!("eastmoney returned no HK capital flow items");
+        }
+        items.truncate(limit);
+        Ok(items)
     }
 
     /// Fetch A-share sector/concept board rankings.
@@ -765,38 +791,19 @@ impl MarketDataClient {
         let span = tracing::info_span!("market_data.fetch", data_type = "announcements", symbol);
         async {
             let start = std::time::Instant::now();
-            if let Some(ts_code) = self.normalize_a_share_symbol(symbol) {
-                let cache_key = format!(
-                    "{MARKET_DATA_CACHE_PREFIX}:announcements:{}:{}",
-                    ts_code, limit
-                );
-                if let Some(cached) = self.cache_get_json(&cache_key).await {
-                    let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
-                    let meter = opentelemetry::global::meter("stock-analyzer");
-                    let attrs = vec![
-                        KeyValue::new("market_data.type", "announcements"),
-                        KeyValue::new("market_data.symbol", symbol.to_string()),
-                        KeyValue::new("market_data.outcome", "success"),
-                    ];
-                    meter
-                        .u64_counter("market_data_fetch_total")
-                        .build()
-                        .add(1, &attrs);
-                    meter
-                        .f64_histogram("market_data_fetch_duration_ms")
-                        .build()
-                        .record(dur_ms, &attrs);
-                    return Ok(cached);
-                }
-                let fetch_result = self.fetch_a_share_announcements(&ts_code, limit).await;
+            let market = self.detect_market(symbol);
+            let normalized_symbol = self.cache_symbol(symbol, market);
+            let cache_key = format!(
+                "{MARKET_DATA_CACHE_PREFIX}:announcements:{}:{}",
+                normalized_symbol, limit
+            );
+            if let Some(cached) = self.cache_get_json(&cache_key).await {
                 let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
                 let meter = opentelemetry::global::meter("stock-analyzer");
-                let ok = fetch_result.is_ok();
-                let outcome = if ok { "success" } else { "error" };
                 let attrs = vec![
                     KeyValue::new("market_data.type", "announcements"),
                     KeyValue::new("market_data.symbol", symbol.to_string()),
-                    KeyValue::new("market_data.outcome", outcome),
+                    KeyValue::new("market_data.outcome", "success"),
                 ];
                 meter
                     .u64_counter("market_data_fetch_total")
@@ -806,45 +813,125 @@ impl MarketDataClient {
                     .f64_histogram("market_data_fetch_duration_ms")
                     .build()
                     .record(dur_ms, &attrs);
-                if !ok {
-                    meter
-                        .u64_counter("market_data_fetch_errors_total")
-                        .build()
-                        .add(1, &attrs);
+                return Ok(cached);
+            }
+            let fetch_result = match market {
+                MarketKind::AShare => {
+                    let ts_code = self
+                        .normalize_a_share_symbol(symbol)
+                        .unwrap_or_else(|| symbol.trim().to_uppercase());
+                    self.fetch_a_share_announcements(&ts_code, limit).await
                 }
-                let items = fetch_result?;
-                self.cache_set_json(&cache_key, NEWS_CACHE_TTL_SECS, &items)
-                    .await;
-                Ok(items)
-            } else {
-                let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
-                let meter = opentelemetry::global::meter("stock-analyzer");
-                let attrs = vec![
-                    KeyValue::new("market_data.type", "announcements"),
-                    KeyValue::new("market_data.symbol", symbol.to_string()),
-                    KeyValue::new("market_data.outcome", "error"),
-                ];
-                meter
-                    .u64_counter("market_data_fetch_total")
-                    .build()
-                    .add(1, &attrs);
-                meter
-                    .f64_histogram("market_data_fetch_duration_ms")
-                    .build()
-                    .record(dur_ms, &attrs);
+                MarketKind::HongKong => {
+                    self.fetch_hk_announcements(symbol, limit).await
+                }
+                MarketKind::UsEquity => Ok(Vec::new()),
+            };
+            let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
+            let meter = opentelemetry::global::meter("stock-analyzer");
+            let ok = fetch_result.is_ok();
+            let outcome = if ok { "success" } else { "error" };
+            let attrs = vec![
+                KeyValue::new("market_data.type", "announcements"),
+                KeyValue::new("market_data.symbol", symbol.to_string()),
+                KeyValue::new("market_data.outcome", outcome),
+            ];
+            meter
+                .u64_counter("market_data_fetch_total")
+                .build()
+                .add(1, &attrs);
+            meter
+                .f64_histogram("market_data_fetch_duration_ms")
+                .build()
+                .record(dur_ms, &attrs);
+            if !ok {
                 meter
                     .u64_counter("market_data_fetch_errors_total")
                     .build()
                     .add(1, &attrs);
-                Err(DataError::new(
-                    DataErrorKind::UnsupportedMarket,
-                    format!("announcements are unsupported for symbol {symbol}"),
-                )
-                .into())
             }
+            let items = fetch_result?;
+            self.cache_set_json(&cache_key, NEWS_CACHE_TTL_SECS, &items)
+                .await;
+            Ok(items)
         }
         .instrument(span)
         .await
+    }
+
+    /// Fetch announcements for an HK stock via Eastmoney.
+    async fn fetch_hk_announcements(
+        &self,
+        symbol: &str,
+        limit: usize,
+    ) -> anyhow::Result<Vec<AnnouncementItem>> {
+        let code = symbol.trim().trim_start_matches('0');
+        let code = if code.is_empty() { "0" } else { code };
+        let page_size = limit.clamp(1, 100).to_string();
+
+        let response = self
+            .http
+            .get("https://np-anotice-stock.eastmoney.com/api/security/ann")
+            .query(&[
+                ("page_size", page_size.as_str()),
+                ("page_index", "1"),
+                ("ann_type", "A"),
+                ("client_source", "web"),
+                ("stock_list", code),
+            ])
+            .send()
+            .await
+            .context("failed to fetch HK announcements from Eastmoney")?
+            .error_for_status()
+            .context("eastmoney HK announcements request failed")?;
+
+        #[derive(serde::Deserialize)]
+        struct Envelope {
+            data: Option<Data>,
+        }
+        #[derive(serde::Deserialize)]
+        struct Data {
+            list: Option<Vec<WireItem>>,
+        }
+        #[derive(serde::Deserialize)]
+        struct WireItem {
+            #[serde(default)]
+            art_code: Option<String>,
+            #[serde(default)]
+            title: Option<String>,
+            #[serde(default)]
+            notice_date: Option<String>,
+        }
+
+        let payload: Envelope = response
+            .json()
+            .await
+            .context("failed to decode eastmoney HK announcements response")?;
+        let mut items = payload
+            .data
+            .and_then(|d| d.list)
+            .unwrap_or_default()
+            .into_iter()
+            .map(|item| {
+                let art_code = item.art_code.unwrap_or_default();
+                AnnouncementItem {
+                    url: (!art_code.is_empty()).then(|| {
+                        format!("https://data.eastmoney.com/notices/detail/{code}/{art_code}.html")
+                    }),
+                    art_code,
+                    symbol: code.to_string(),
+                    title: item.title.unwrap_or_else(|| "公司公告".to_string()),
+                    published_at: item.notice_date.unwrap_or_default(),
+                    source: "Eastmoney 公告".to_string(),
+                }
+            })
+            .collect::<Vec<_>>();
+
+        if items.is_empty() {
+            anyhow::bail!("eastmoney returned no HK announcement items");
+        }
+        items.truncate(limit);
+        Ok(items)
     }
 
     /// Search stocks by keyword across markets.

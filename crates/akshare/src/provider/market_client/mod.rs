@@ -577,7 +577,8 @@ impl MarketDataClient {
     pub fn capital_flow_source(&self, symbol: &str) -> &'static str {
         match self.detect_market(symbol) {
             MarketKind::AShare => "akshare:eastmoney_fund_flow",
-            _ => "akshare:unsupported",
+            MarketKind::HongKong => "akshare:eastmoney_fund_flow",
+            MarketKind::UsEquity => "akshare:unavailable",
         }
     }
 
