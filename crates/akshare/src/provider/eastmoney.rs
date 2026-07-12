@@ -746,7 +746,6 @@ impl AkShareClient {
     ///
     /// Returns raw kline strings (comma-separated OHLCV etc.) from the Eastmoney
     /// kline API with Sina fallback. Each string needs to be parsed by the caller with `parse_csv_line`.
-    #[allow(clippy::too_many_arguments)]
     pub(crate) async fn kline_fetch(
         &self,
         secid: &str,
