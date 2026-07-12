@@ -112,6 +112,7 @@ pub(crate) enum SearchScope {
     General,
 }
 
+/// Intent of a general web search (company-specific or macro evidence).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GeneralSearchIntent {
     CompanyEvidence,

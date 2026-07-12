@@ -207,11 +207,13 @@ impl MarketDataClient {
 // Cache Stampede Protection (Singleflight)
 // ============================================================
 
+/// Result of entering a singleflight group — either the leader or a waiter.
 pub enum SingleflightResult<'a> {
     Leader(SingleflightGuard<'a>),
     Waiting,
 }
 
+/// RAII guard for singleflight leadership — notifies waiters on drop.
 pub struct SingleflightGuard<'a> {
     singleflight: &'a Singleflight,
     key: String,
@@ -228,6 +230,7 @@ impl Drop for SingleflightGuard<'_> {
     }
 }
 
+/// Singleflight deduplication — ensures only one in-flight request per key.
 pub struct Singleflight {
     in_flight: Arc<std::sync::Mutex<HashMap<String, Arc<Notify>>>>,
 }
@@ -247,6 +250,7 @@ impl Default for Singleflight {
 }
 
 impl Singleflight {
+    /// Create a new singleflight instance.
     pub fn new() -> Self {
         Self {
             in_flight: Arc::new(std::sync::Mutex::new(HashMap::new())),

@@ -15,6 +15,7 @@ pub struct AkShareClient {
 }
 
 impl AkShareClient {
+    /// Create a client with default settings (30s timeout, no proxy).
     #[must_use]
     pub fn new() -> Self {
         Self::builder().build()
@@ -94,6 +95,7 @@ impl AkShareClient {
         url.to_string()
     }
 
+    /// Start building a client with custom configuration.
     #[must_use]
     pub fn builder() -> AkShareClientBuilder {
         AkShareClientBuilder {
@@ -134,36 +136,42 @@ pub struct AkShareClientBuilder {
 }
 
 impl AkShareClientBuilder {
+    /// Set the Tushare API token for Tushare data sources.
     #[must_use]
     pub fn tushare_token(mut self, token: impl Into<String>) -> Self {
         self.tushare_token = Some(token.into());
         self
     }
 
+    /// Set the User-Agent header for HTTP requests.
     #[must_use]
     pub fn user_agent(mut self, ua: impl Into<String>) -> Self {
         self.user_agent = ua.into();
         self
     }
 
+    /// Set the overall request timeout (default: 30s).
     #[must_use]
     pub const fn timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
     }
 
+    /// Set the TCP connect timeout (default: 10s).
     #[must_use]
     pub const fn connect_timeout(mut self, timeout: Duration) -> Self {
         self.connect_timeout = timeout;
         self
     }
 
+    /// Set an HTTP proxy for all requests.
     #[must_use]
     pub fn proxy(mut self, proxy: impl Into<String>) -> Self {
         self.proxy = Some(proxy.into());
         self
     }
 
+    /// Build the [`AkShareClient`] with the configured settings.
     #[must_use]
     pub fn build(self) -> AkShareClient {
         let mut builder = reqwest::Client::builder()

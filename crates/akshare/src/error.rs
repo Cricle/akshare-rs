@@ -43,6 +43,7 @@ pub struct Error {
 }
 
 impl Error {
+    /// Create a new error with the given kind and message.
     pub fn new(kind: ErrorKind, message: impl Into<String>) -> Self {
         Self {
             kind,
@@ -55,26 +56,32 @@ impl Error {
         self.kind
     }
 
+    /// Convenience constructor for [`ErrorKind::UnsupportedMarket`].
     pub fn unsupported_market(msg: impl Into<String>) -> Self {
         Self::new(ErrorKind::UnsupportedMarket, msg)
     }
 
+    /// Convenience constructor for [`ErrorKind::NotFound`].
     pub fn not_found(msg: impl Into<String>) -> Self {
         Self::new(ErrorKind::NotFound, msg)
     }
 
+    /// Convenience constructor for [`ErrorKind::Upstream`].
     pub fn upstream(msg: impl Into<String>) -> Self {
         Self::new(ErrorKind::Upstream, msg)
     }
 
+    /// Convenience constructor for [`ErrorKind::Decode`].
     pub fn decode(msg: impl Into<String>) -> Self {
         Self::new(ErrorKind::Decode, msg)
     }
 
+    /// Convenience constructor for [`ErrorKind::InvalidInput`].
     pub fn invalid_input(msg: impl Into<String>) -> Self {
         Self::new(ErrorKind::InvalidInput, msg)
     }
 
+    /// Convenience constructor for [`ErrorKind::MissingCredentials`].
     pub fn missing_credentials(msg: impl Into<String>) -> Self {
         Self::new(ErrorKind::MissingCredentials, msg)
     }
@@ -88,6 +95,7 @@ impl fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
+/// Type alias for `Result<T, Error>`.
 pub type Result<T> = std::result::Result<T, Error>;
 
 impl From<reqwest::Error> for Error {

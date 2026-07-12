@@ -7,6 +7,7 @@ pub fn fmt_date(date: &str) -> String {
     }
 }
 
+/// Normalize a trade date string to "YYYY-MM-DD" format.
 pub fn normalize_trade_date(value: &str) -> String {
     if value.len() >= 8 {
         fmt_date(value)
@@ -15,28 +16,34 @@ pub fn normalize_trade_date(value: &str) -> String {
     }
 }
 
+/// Parse a string to f64, returning 0.0 on failure.
 pub fn parse_f64_safe(value: &str) -> f64 {
     value.trim().parse::<f64>().unwrap_or(0.0)
 }
 
+/// Parse a string to i64, returning 0 on failure.
 pub fn parse_i64_safe(value: &str) -> i64 {
     value.trim().parse::<i64>().unwrap_or(0)
 }
 
+/// Get today's date in "YYYYMMDD" format.
 pub fn today_yyyymmdd() -> String {
     chrono::Utc::now().format("%Y%m%d").to_string()
 }
 
+/// Get today's date in "YYYY-MM-DD" format.
 pub fn today_iso() -> String {
     chrono::Utc::now().format("%Y-%m-%d").to_string()
 }
 
+/// Get the date N days ago in "YYYYMMDD" format.
 pub fn days_ago_yyyymmdd(days: i64) -> String {
     (chrono::Utc::now() - chrono::Duration::days(days))
         .format("%Y%m%d")
         .to_string()
 }
 
+/// Split a CSV line by comma and trim whitespace from each field.
 pub fn parse_csv_line(line: &str) -> Vec<&str> {
     line.split(',').map(str::trim).collect()
 }
@@ -66,6 +73,7 @@ pub fn parse_candle_line(line: &str) -> crate::Result<crate::types::CandlePoint>
     })
 }
 
+/// Compute change_amount and change_pct from consecutive candle closes.
 pub fn apply_change_metrics(items: &mut [crate::types::CandlePoint]) {
     for index in 1..items.len() {
         let prev_close = items[index - 1].close;
@@ -92,6 +100,7 @@ pub fn sort_and_limit(
     }
 }
 
+/// Calculate amplitude percentage: (high - low) / low * 100.
 pub fn amplitude_pct(high: f64, low: f64) -> f64 {
     if low > 0.0 {
         ((high - low) / low) * 100.0
