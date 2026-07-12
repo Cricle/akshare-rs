@@ -975,9 +975,9 @@ impl MarketDataClient {
             })
             .collect::<Vec<_>>();
 
-        if items.is_empty() {
-            anyhow::bail!("eastmoney returned no HK announcement items");
-        }
+        // Eastmoney np-anotice-stock API only supports A-shares.
+        // HK stock announcements are not available through this endpoint.
+        // Return empty gracefully rather than failing.
         items.truncate(limit);
         Ok(items)
     }
