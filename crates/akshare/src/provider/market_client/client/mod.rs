@@ -672,43 +672,15 @@ impl MarketDataClient {
         let code = symbol.trim().trim_start_matches('0');
         let code = if code.is_empty() { "0" } else { code };
         let secid = format!("116.{code}");
-        let response = self
-            .http
-            .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
-            .query(&[
-                ("secid", secid.as_str()),
-                ("klt", "101"),
-                ("lmt", &limit.to_string()),
-                ("fields1", "f1,f2,f3,f7"),
-                (
-                    "fields2",
-                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63",
-                ),
-            ])
-            .send()
-            .await
-            .context("failed to fetch HK capital flow from Eastmoney")?
-            .error_for_status()
-            .context("eastmoney HK capital flow request failed")?;
-        let payload: crate::provider::market_client::wire::EastmoneyKlineEnvelope = response
-            .json()
-            .await
-            .context("failed to decode eastmoney HK capital flow response")?;
-        let data = payload
-            .data
-            .context("eastmoney HK capital flow response missing data")?;
-        let klines = data
-            .klines
-            .context("eastmoney HK capital flow response missing klines")?;
-        let mut items = klines
-            .into_iter()
-            .map(|line| Self::parse_a_share_capital_flow_line(&line))
-            .collect::<anyhow::Result<Vec<_>>>()?;
-        if items.is_empty() {
-            anyhow::bail!("eastmoney returned no HK capital flow items");
+        let result = self.fetch_capital_flow_primary(&secid, limit).await;
+        match result {
+            Ok(items) => Ok(items),
+            Err(_) => {
+                // Fallback: use clist endpoint for current-day data
+                self.fetch_capital_flow_from_clist(code, "m:128+t:3,m:128+t:4")
+                    .await
+            }
         }
-        items.truncate(limit);
-        Ok(items)
     }
 
     /// Fetch capital flow for a US stock via Eastmoney (secid prefix 105).
@@ -723,11 +695,28 @@ impl MarketDataClient {
     ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
         let code = symbol.trim().to_uppercase();
         let secid = format!("105.{code}");
+        let result = self.fetch_capital_flow_primary(&secid, limit).await;
+        match result {
+            Ok(items) => Ok(items),
+            Err(_) => {
+                // Fallback: use clist endpoint for current-day data
+                self.fetch_capital_flow_from_clist(&code, "m:105+t:3,m:106+t:3,m:107+t:3")
+                    .await
+            }
+        }
+    }
+
+    /// Shared primary capital flow fetch via push2his fflow/daykline endpoint.
+    async fn fetch_capital_flow_primary(
+        &self,
+        secid: &str,
+        limit: usize,
+    ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
         let response = self
             .http
             .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
             .query(&[
-                ("secid", secid.as_str()),
+                ("secid", secid),
                 ("klt", "101"),
                 ("lmt", &limit.to_string()),
                 ("fields1", "f1,f2,f3,f7"),
@@ -738,28 +727,122 @@ impl MarketDataClient {
             ])
             .send()
             .await
-            .context("failed to fetch US capital flow from Eastmoney")?
+            .context("failed to fetch capital flow from Eastmoney")?
             .error_for_status()
-            .context("eastmoney US capital flow request failed")?;
+            .context("eastmoney capital flow request failed")?;
         let payload: crate::provider::market_client::wire::EastmoneyKlineEnvelope = response
             .json()
             .await
-            .context("failed to decode eastmoney US capital flow response")?;
+            .context("failed to decode eastmoney capital flow response")?;
         let data = payload
             .data
-            .context("eastmoney US capital flow response missing data")?;
+            .context("eastmoney capital flow response missing data")?;
         let klines = data
             .klines
-            .context("eastmoney US capital flow response missing klines")?;
+            .context("eastmoney capital flow response missing klines")?;
         let mut items = klines
             .into_iter()
             .map(|line| Self::parse_a_share_capital_flow_line(&line))
             .collect::<anyhow::Result<Vec<_>>>()?;
         if items.is_empty() {
-            anyhow::bail!("eastmoney returned no US capital flow items");
+            anyhow::bail!("eastmoney returned no capital flow items");
         }
         items.truncate(limit);
         Ok(items)
+    }
+
+    /// Fallback: fetch current-day capital flow from the clist endpoint.
+    ///
+    /// Uses `push2.eastmoney.com/api/qt/clist/get` which returns fund flow
+    /// data for all stocks. Filters by `target_code` in the response.
+    /// Returns at most 1 data point (today's flow).
+    pub(crate) async fn fetch_capital_flow_from_clist(
+        &self,
+        target_code: &str,
+        market_fs: &str,
+    ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
+        #[derive(serde::Deserialize)]
+        struct ClistEnv {
+            data: Option<ClistData>,
+        }
+        #[derive(serde::Deserialize)]
+        struct ClistData {
+            diff: Option<Vec<serde_json::Value>>,
+        }
+
+        let response = self
+            .http
+            .get("https://push2.eastmoney.com/api/qt/clist/get")
+            .query(&[
+                ("pn", "1"),
+                ("pz", "5000"),
+                ("po", "1"),
+                ("np", "1"),
+                ("ut", "bd1d9ddb04089700cf9c27f6f7426281"),
+                ("fltt", "2"),
+                ("invt", "2"),
+                ("fid", "f62"),
+                ("fs", market_fs),
+                (
+                    "fields",
+                    "f12,f14,f2,f3,f62,f184,f66,f69,f72,f75,f78,f81,f84,f87",
+                ),
+            ])
+            .send()
+            .await
+            .context("failed to fetch capital flow from clist")?
+            .error_for_status()
+            .context("clist capital flow request failed")?;
+
+        let payload: ClistEnv = response
+            .json()
+            .await
+            .context("failed to decode clist capital flow response")?;
+
+        let diff = payload.data.and_then(|d| d.diff).unwrap_or_default();
+
+        let normalized_target = target_code.trim().to_uppercase();
+        for item in &diff {
+            let code = item
+                .get("f12")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_uppercase();
+            if code != normalized_target {
+                continue;
+            }
+            let today = chrono::Utc::now().format("%Y-%m-%d").to_string();
+            let close = item.get("f2").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let change_pct = item.get("f3").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let main_net_inflow = item.get("f62").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let main_pct = item.get("f184").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let super_large = item.get("f66").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let super_large_pct = item.get("f69").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let large = item.get("f72").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let large_pct = item.get("f75").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let medium = item.get("f78").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let medium_pct = item.get("f81").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let small = item.get("f84").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let small_pct = item.get("f87").and_then(|v| v.as_f64()).unwrap_or(0.0);
+
+            return Ok(vec![CapitalFlowPoint {
+                trade_date: today,
+                main_net_inflow,
+                small_net_inflow: small,
+                medium_net_inflow: medium,
+                large_net_inflow: large,
+                super_large_net_inflow: super_large,
+                main_net_inflow_ratio_pct: main_pct,
+                small_net_inflow_ratio_pct: small_pct,
+                medium_net_inflow_ratio_pct: medium_pct,
+                large_net_inflow_ratio_pct: large_pct,
+                super_large_net_inflow_ratio_pct: super_large_pct,
+                close,
+                change_pct,
+            }]);
+        }
+
+        anyhow::bail!("stock {target_code} not found in clist capital flow response");
     }
 
     /// Fetch A-share sector/concept board rankings.

@@ -11,11 +11,32 @@ impl MarketDataClient {
         limit: usize,
     ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
         let secid = self.eastmoney_secid(symbol)?;
+        let result = self.fetch_a_share_capital_flow_primary(&secid, limit).await;
+        match result {
+            Ok(items) => Ok(items),
+            Err(_) => {
+                // Fallback: use clist endpoint for current-day data
+                let code = symbol
+                    .split_once('.')
+                    .map(|(c, _)| c)
+                    .unwrap_or(symbol)
+                    .to_string();
+                self.fetch_capital_flow_from_clist(&code, "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23")
+                    .await
+            }
+        }
+    }
+
+    async fn fetch_a_share_capital_flow_primary(
+        &self,
+        secid: &str,
+        limit: usize,
+    ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
         let response = self
             .http
             .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
             .query(&[
-                ("secid", secid.as_str()),
+                ("secid", secid),
                 ("klt", "101"),
                 ("lmt", &limit.to_string()),
                 ("fields1", "f1,f2,f3,f7"),
