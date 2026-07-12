@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 #[cfg(test)]
 use rust_decimal::prelude::ToPrimitive;
 
