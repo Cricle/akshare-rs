@@ -47,30 +47,37 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch rate macro data.
     pub async fn macro_australia_bank_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.australia_bank_rate().await
     }
 
+    /// Fetch cpi quarterly macro data.
     pub async fn macro_australia_cpi_quarterly(&self) -> Result<Vec<MacroDataPoint>> {
         self.australia_cpi_quarterly().await
     }
 
+    /// Fetch cpi yearly macro data.
     pub async fn macro_australia_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.australia_cpi_yearly().await
     }
 
+    /// Fetch ppi quarterly macro data.
     pub async fn macro_australia_ppi_quarterly(&self) -> Result<Vec<MacroDataPoint>> {
         self.australia_ppi_quarterly().await
     }
 
+    /// Fetch retail rate monthly macro data.
     pub async fn macro_australia_retail_rate_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.australia_retail_rate_monthly().await
     }
 
+    /// Fetch trade macro data.
     pub async fn macro_australia_trade(&self) -> Result<Vec<MacroDataPoint>> {
         self.australia_trade().await
     }
 
+    /// Fetch unemployment rate macro data.
     pub async fn macro_australia_unemployment_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.australia_unemployment_rate().await
     }

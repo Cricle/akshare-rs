@@ -62,10 +62,12 @@ impl AkShareClient {
     }
 
     // Python-compatible aliases
+    /// Fetch cons gold macro data.
     pub async fn macro_cons_gold(&self) -> Result<Vec<MacroDataPoint>> {
         self.gold_etf_holding().await
     }
 
+    /// Fetch cons silver macro data.
     pub async fn macro_cons_silver(&self) -> Result<Vec<MacroDataPoint>> {
         self.silver_etf_holding().await
     }

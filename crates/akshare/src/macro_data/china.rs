@@ -669,234 +669,292 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch agricultural index macro data.
     pub async fn macro_china_agricultural_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_agricultural_index().await
     }
 
+    /// Fetch agricultural product macro data.
     pub async fn macro_china_agricultural_product(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_agricultural_product().await
     }
 
+    /// Fetch financing macro data.
     pub async fn macro_china_bank_financing(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_bank_financing().await
     }
 
+    /// Fetch bdti index macro data.
     pub async fn macro_china_bdti_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_bdti_index().await
     }
 
+    /// Fetch bsi index macro data.
     pub async fn macro_china_bsi_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_bsi_index().await
     }
 
+    /// Fetch commodity price index macro data.
     pub async fn macro_china_commodity_price_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_commodity_price_index().await
     }
 
+    /// Fetch construction index macro data.
     pub async fn macro_china_construction_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_construction_index().await
     }
 
+    /// Fetch construction price index macro data.
     pub async fn macro_china_construction_price_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_construction_price_index().await
     }
 
+    /// Fetch consumer goods retail macro data.
     pub async fn macro_china_consumer_goods_retail(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_consumer_goods_retail().await
     }
 
+    /// Fetch cpi macro data.
     pub async fn macro_china_cpi(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_cpi().await
     }
 
+    /// Fetch cpi monthly macro data.
     pub async fn macro_china_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_cpi_monthly().await
     }
 
+    /// Fetch cpi yearly macro data.
     pub async fn macro_china_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_cpi_yearly().await
     }
 
+    /// Fetch energy index macro data.
     pub async fn macro_china_energy_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_energy_index().await
     }
 
+    /// Fetch enterprise boom index macro data.
     pub async fn macro_china_enterprise_boom_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_enterprise_boom_index().await
     }
 
+    /// Fetch exports yoy macro data.
     pub async fn macro_china_exports_yoy(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_exports_yoy().await
     }
 
+    /// Fetch fdi macro data.
     pub async fn macro_china_fdi(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_fdi().await
     }
 
+    /// Fetch fx gold macro data.
     pub async fn macro_china_fx_gold(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_fx_gold().await
     }
 
+    /// Fetch fx reserves yearly macro data.
     pub async fn macro_china_fx_reserves_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_fx_reserves_yearly().await
     }
 
+    /// Fetch gdp macro data.
     pub async fn macro_china_gdp(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_gdp().await
     }
 
+    /// Fetch gdp yearly macro data.
     pub async fn macro_china_gdp_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_gdp_yearly().await
     }
 
+    /// Fetch imports yoy macro data.
     pub async fn macro_china_imports_yoy(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_imports_yoy().await
     }
 
+    /// Fetch industrial production yoy macro data.
     pub async fn macro_china_industrial_production_yoy(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_industrial_production_yoy().await
     }
 
+    /// Fetch insurance income macro data.
     pub async fn macro_china_insurance_income(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_insurance_income().await
     }
 
+    /// Fetch lpi index macro data.
     pub async fn macro_china_lpi_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_lpi_index().await
     }
 
+    /// Fetch lpr macro data.
     pub async fn macro_china_lpr(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_lpr().await
     }
 
+    /// Fetch m2 yearly macro data.
     pub async fn macro_china_m2_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_m2_yearly().await
     }
 
+    /// Fetch mobile number macro data.
     pub async fn macro_china_mobile_number(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_mobile_number().await
     }
 
+    /// Fetch money supply macro data.
     pub async fn macro_china_money_supply(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_money_supply().await
     }
 
+    /// Fetch national tax receipts macro data.
     pub async fn macro_china_national_tax_receipts(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_national_tax_receipts().await
     }
 
+    /// Fetch new financial credit macro data.
     pub async fn macro_china_new_financial_credit(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_new_financial_credit().await
     }
 
+    /// Fetch new house price macro data.
     pub async fn macro_china_new_house_price(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_new_house_price().await
     }
 
+    /// Fetch non man pmi macro data.
     pub async fn macro_china_non_man_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_non_man_pmi().await
     }
 
+    /// Fetch pmi macro data.
     pub async fn macro_china_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_pmi().await
     }
 
+    /// Fetch ppi macro data.
     pub async fn macro_china_ppi(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_ppi().await
     }
 
+    /// Fetch ppi yearly macro data.
     pub async fn macro_china_ppi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_ppi_yearly().await
     }
 
+    /// Fetch real estate macro data.
     pub async fn macro_china_real_estate(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_real_estate().await
     }
 
+    /// Fetch reserve requirement ratio macro data.
     pub async fn macro_china_reserve_requirement_ratio(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_reserve_requirement_ratio().await
     }
 
+    /// Fetch stock market cap macro data.
     pub async fn macro_china_stock_market_cap(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_stock_market_cap().await
     }
 
+    /// Fetch vegetable basket macro data.
     pub async fn macro_china_vegetable_basket(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_vegetable_basket().await
     }
 
+    /// Fetch yw electronic index macro data.
     pub async fn macro_china_yw_electronic_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_yw_electronic_index().await
     }
 
+    /// Fetch au report macro data.
     pub async fn macro_china_au_report(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_sge_report().await
     }
 
+    /// Fetch shibor all macro data.
     pub async fn macro_china_shibor_all(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_shibor().await
     }
 
+    /// Fetch market info macro data.
     pub async fn macro_china_hk_market_info(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_hibor().await
     }
 
+    /// Fetch rmb macro data.
     pub async fn macro_china_rmb(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_rmb_central_parity().await
     }
 
+    /// Fetch market margin sz macro data.
     pub async fn macro_china_market_margin_sz(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_margin_sz().await
     }
 
+    /// Fetch market margin sh macro data.
     pub async fn macro_china_market_margin_sh(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_margin_sh().await
     }
 
+    /// Fetch trade balance macro data.
     pub async fn macro_china_trade_balance(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_trade_balance_jin10().await
     }
 
+    /// Fetch pmi yearly macro data.
     pub async fn macro_china_pmi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_pmi_jin10().await
     }
 
+    /// Fetch cx pmi yearly macro data.
     pub async fn macro_china_cx_pmi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_caixin_pmi().await
     }
 
+    /// Fetch cx services pmi yearly macro data.
     pub async fn macro_china_cx_services_pmi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_caixin_services_pmi().await
     }
 
+    /// Fetch czsr macro data.
     pub async fn macro_china_czsr(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_fiscal_revenue().await
     }
 
+    /// Fetch gdzctz macro data.
     pub async fn macro_china_gdzctz(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_fixed_asset_investment().await
     }
 
+    /// Fetch gyzjz macro data.
     pub async fn macro_china_gyzjz(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_industrial_growth().await
     }
 
+    /// Fetch hgjck macro data.
     pub async fn macro_china_hgjck(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_trade().await
     }
 
+    /// Fetch whxd macro data.
     pub async fn macro_china_whxd(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_fx_loans().await
     }
 
+    /// Fetch wbck macro data.
     pub async fn macro_china_wbck(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_fx_deposits().await
     }
 
+    /// Fetch xfzxx macro data.
     pub async fn macro_china_xfzxx(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_consumer_confidence().await
     }
 
+    /// Fetch qyspjg macro data.
     pub async fn macro_china_qyspjg(&self) -> Result<Vec<MacroDataPoint>> {
         self.china_goods_index().await
     }

@@ -42,26 +42,32 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch cpi yearly macro data.
     pub async fn macro_swiss_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.swiss_cpi_yearly().await
     }
 
+    /// Fetch gdp quarterly macro data.
     pub async fn macro_swiss_gdp_quarterly(&self) -> Result<Vec<MacroDataPoint>> {
         self.swiss_gdp_quarterly().await
     }
 
+    /// Fetch svme macro data.
     pub async fn macro_swiss_svme(&self) -> Result<Vec<MacroDataPoint>> {
         self.swiss_svme().await
     }
 
+    /// Fetch trade macro data.
     pub async fn macro_swiss_trade(&self) -> Result<Vec<MacroDataPoint>> {
         self.swiss_trade().await
     }
 
+    /// Fetch gbd yearly macro data.
     pub async fn macro_swiss_gbd_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.swiss_gdp_yearly().await
     }
 
+    /// Fetch gbd bank rate macro data.
     pub async fn macro_swiss_gbd_bank_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.swiss_bank_rate().await
     }

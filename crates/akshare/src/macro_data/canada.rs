@@ -62,42 +62,52 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch rate macro data.
     pub async fn macro_canada_bank_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_bank_rate().await
     }
 
+    /// Fetch core cpi monthly macro data.
     pub async fn macro_canada_core_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_core_cpi_monthly().await
     }
 
+    /// Fetch core cpi yearly macro data.
     pub async fn macro_canada_core_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_core_cpi_yearly().await
     }
 
+    /// Fetch cpi monthly macro data.
     pub async fn macro_canada_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_cpi_monthly().await
     }
 
+    /// Fetch cpi yearly macro data.
     pub async fn macro_canada_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_cpi_yearly().await
     }
 
+    /// Fetch gdp monthly macro data.
     pub async fn macro_canada_gdp_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_gdp_monthly().await
     }
 
+    /// Fetch new house rate macro data.
     pub async fn macro_canada_new_house_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_new_house_rate().await
     }
 
+    /// Fetch retail rate monthly macro data.
     pub async fn macro_canada_retail_rate_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_retail_rate_monthly().await
     }
 
+    /// Fetch trade macro data.
     pub async fn macro_canada_trade(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_trade().await
     }
 
+    /// Fetch unemployment rate macro data.
     pub async fn macro_canada_unemployment_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.canada_unemployment_rate().await
     }

@@ -65,46 +65,57 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch australia interest rate macro data.
     pub async fn macro_bank_australia_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_australia_interest_rate().await
     }
 
+    /// Fetch brazil interest rate macro data.
     pub async fn macro_bank_brazil_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_brazil_interest_rate().await
     }
 
+    /// Fetch china interest rate macro data.
     pub async fn macro_bank_china_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_china_interest_rate().await
     }
 
+    /// Fetch euro interest rate macro data.
     pub async fn macro_bank_euro_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_euro_interest_rate().await
     }
 
+    /// Fetch india interest rate macro data.
     pub async fn macro_bank_india_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_india_interest_rate().await
     }
 
+    /// Fetch japan interest rate macro data.
     pub async fn macro_bank_japan_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_japan_interest_rate().await
     }
 
+    /// Fetch newzealand interest rate macro data.
     pub async fn macro_bank_newzealand_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_newzealand_interest_rate().await
     }
 
+    /// Fetch russia interest rate macro data.
     pub async fn macro_bank_russia_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_russia_interest_rate().await
     }
 
+    /// Fetch switzerland interest rate macro data.
     pub async fn macro_bank_switzerland_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_switzerland_interest_rate().await
     }
 
+    /// Fetch usa interest rate macro data.
     pub async fn macro_bank_usa_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_usa_interest_rate().await
     }
 
+    /// Fetch english interest rate macro data.
     pub async fn macro_bank_english_interest_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.bank_england_interest_rate().await
     }

@@ -37,22 +37,27 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch rate macro data.
     pub async fn macro_japan_bank_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.japan_bank_rate().await
     }
 
+    /// Fetch core cpi yearly macro data.
     pub async fn macro_japan_core_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.japan_core_cpi_yearly().await
     }
 
+    /// Fetch cpi yearly macro data.
     pub async fn macro_japan_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.japan_cpi_yearly().await
     }
 
+    /// Fetch unemployment rate macro data.
     pub async fn macro_japan_unemployment_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.japan_unemployment_rate().await
     }
 
+    /// Fetch head indicator macro data.
     pub async fn macro_japan_head_indicator(&self) -> Result<Vec<MacroDataPoint>> {
         self.japan_leading_indicator().await
     }

@@ -309,190 +309,237 @@ impl AkShareClient {
 // ---------------------------------------------------------------------------
 
 impl AkShareClient {
+    /// Fetch usa phs macro data.
     pub async fn macro_usa_phs(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_pending_home_sales().await
     }
 
+    /// Fetch usa cpi yoy macro data.
     pub async fn macro_usa_cpi_yoy(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_cpi_yoy().await
     }
 
+    /// Fetch usa gdp monthly macro data.
     pub async fn macro_usa_gdp_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_gdp_monthly().await
     }
 
+    /// Fetch usa cpi monthly macro data.
     pub async fn macro_usa_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_cpi_monthly().await
     }
 
+    /// Fetch usa core cpi monthly macro data.
     pub async fn macro_usa_core_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_core_cpi_monthly().await
     }
 
+    /// Fetch usa personal spending macro data.
     pub async fn macro_usa_personal_spending(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_personal_spending().await
     }
 
+    /// Fetch usa retail sales macro data.
     pub async fn macro_usa_retail_sales(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_retail_sales().await
     }
 
+    /// Fetch usa import price macro data.
     pub async fn macro_usa_import_price(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_import_price().await
     }
 
+    /// Fetch usa export price macro data.
     pub async fn macro_usa_export_price(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_export_price().await
     }
 
+    /// Fetch usa lmci macro data.
     pub async fn macro_usa_lmci(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_lmci().await
     }
 
+    /// Fetch usa unemployment rate macro data.
     pub async fn macro_usa_unemployment_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_unemployment_rate().await
     }
 
+    /// Fetch usa job cuts macro data.
     pub async fn macro_usa_job_cuts(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_job_cuts().await
     }
 
+    /// Fetch usa non farm macro data.
     pub async fn macro_usa_non_farm(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_non_farm().await
     }
 
+    /// Fetch usa adp employment macro data.
     pub async fn macro_usa_adp_employment(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_adp_employment().await
     }
 
+    /// Fetch usa core pce price macro data.
     pub async fn macro_usa_core_pce_price(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_core_pce_price().await
     }
 
+    /// Fetch usa real consumer spending macro data.
     pub async fn macro_usa_real_consumer_spending(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_real_consumer_spending().await
     }
 
+    /// Fetch usa trade balance macro data.
     pub async fn macro_usa_trade_balance(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_trade_balance().await
     }
 
+    /// Fetch usa current account macro data.
     pub async fn macro_usa_current_account(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_current_account().await
     }
 
+    /// Fetch usa ppi macro data.
     pub async fn macro_usa_ppi(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_ppi().await
     }
 
+    /// Fetch usa core ppi macro data.
     pub async fn macro_usa_core_ppi(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_core_ppi().await
     }
 
+    /// Fetch usa api crude stock macro data.
     pub async fn macro_usa_api_crude_stock(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_api_crude_stock().await
     }
 
+    /// Fetch usa pmi macro data.
     pub async fn macro_usa_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_pmi().await
     }
 
+    /// Fetch usa ism pmi macro data.
     pub async fn macro_usa_ism_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_ism_pmi().await
     }
 
+    /// Fetch usa industrial production macro data.
     pub async fn macro_usa_industrial_production(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_industrial_production().await
     }
 
+    /// Fetch usa durable goods orders macro data.
     pub async fn macro_usa_durable_goods_orders(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_durable_goods_orders().await
     }
 
+    /// Fetch usa factory orders macro data.
     pub async fn macro_usa_factory_orders(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_factory_orders().await
     }
 
+    /// Fetch usa services pmi macro data.
     pub async fn macro_usa_services_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_services_pmi().await
     }
 
+    /// Fetch usa business inventories macro data.
     pub async fn macro_usa_business_inventories(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_business_inventories().await
     }
 
+    /// Fetch usa ism non pmi macro data.
     pub async fn macro_usa_ism_non_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_ism_non_pmi().await
     }
 
+    /// Fetch usa nahb house market index macro data.
     pub async fn macro_usa_nahb_house_market_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_nahb_house_market_index().await
     }
 
+    /// Fetch usa house starts macro data.
     pub async fn macro_usa_house_starts(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_house_starts().await
     }
 
+    /// Fetch usa new home sales macro data.
     pub async fn macro_usa_new_home_sales(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_new_home_sales().await
     }
 
+    /// Fetch usa building permits macro data.
     pub async fn macro_usa_building_permits(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_building_permits().await
     }
 
+    /// Fetch usa exist home sales macro data.
     pub async fn macro_usa_exist_home_sales(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_exist_home_sales().await
     }
 
+    /// Fetch usa house price index macro data.
     pub async fn macro_usa_house_price_index(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_house_price_index().await
     }
 
+    /// Fetch usa spcs20 macro data.
     pub async fn macro_usa_spcs20(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_spcs20().await
     }
 
+    /// Fetch usa pending home sales macro data.
     pub async fn macro_usa_pending_home_sales(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_pending_home_sales().await
     }
 
+    /// Fetch usa cb consumer confidence macro data.
     pub async fn macro_usa_cb_consumer_confidence(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_cb_consumer_confidence().await
     }
 
+    /// Fetch usa nfib small business macro data.
     pub async fn macro_usa_nfib_small_business(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_nfib_small_business().await
     }
 
+    /// Fetch usa michigan consumer sentiment macro data.
     pub async fn macro_usa_michigan_consumer_sentiment(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_michigan_consumer_sentiment().await
     }
 
+    /// Fetch usa eia crude rate macro data.
     pub async fn macro_usa_eia_crude_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_eia_crude_rate().await
     }
 
+    /// Fetch usa initial jobless macro data.
     pub async fn macro_usa_initial_jobless(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_initial_jobless().await
     }
 
+    /// Fetch usa rig count macro data.
     pub async fn macro_usa_rig_count(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_rig_count().await
     }
 
+    /// Fetch usa cftc nc holding macro data.
     pub async fn macro_usa_cftc_nc_holding(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_cftc_nc_holding().await
     }
 
+    /// Fetch usa cftc c holding macro data.
     pub async fn macro_usa_cftc_c_holding(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_cftc_c_holding().await
     }
 
+    /// Fetch usa cftc merchant currency holding macro data.
     pub async fn macro_usa_cftc_merchant_currency_holding(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_cftc_merchant_currency_holding().await
     }
 
+    /// Fetch usa cftc merchant goods holding macro data.
     pub async fn macro_usa_cftc_merchant_goods_holding(&self) -> Result<Vec<MacroDataPoint>> {
         self.us_cftc_merchant_goods_holding().await
     }

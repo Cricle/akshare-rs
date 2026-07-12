@@ -153,66 +153,82 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch cpi mom macro data.
     pub async fn macro_euro_cpi_mom(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_cpi_mom().await
     }
 
+    /// Fetch cpi yoy macro data.
     pub async fn macro_euro_cpi_yoy(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_cpi_yoy().await
     }
 
+    /// Fetch current account mom macro data.
     pub async fn macro_euro_current_account_mom(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_current_account_mom().await
     }
 
+    /// Fetch employment change qoq macro data.
     pub async fn macro_euro_employment_change_qoq(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_employment_change_qoq().await
     }
 
+    /// Fetch gdp yoy macro data.
     pub async fn macro_euro_gdp_yoy(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_gdp_yoy().await
     }
 
+    /// Fetch industrial production mom macro data.
     pub async fn macro_euro_industrial_production_mom(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_industrial_production_mom().await
     }
 
+    /// Fetch lme holding macro data.
     pub async fn macro_euro_lme_holding(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_lme_holding().await
     }
 
+    /// Fetch lme stock macro data.
     pub async fn macro_euro_lme_stock(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_lme_stock().await
     }
 
+    /// Fetch manufacturing pmi macro data.
     pub async fn macro_euro_manufacturing_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_manufacturing_pmi().await
     }
 
+    /// Fetch ppi mom macro data.
     pub async fn macro_euro_ppi_mom(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_ppi_mom().await
     }
 
+    /// Fetch retail sales mom macro data.
     pub async fn macro_euro_retail_sales_mom(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_retail_sales_mom().await
     }
 
+    /// Fetch sentix investor confidence macro data.
     pub async fn macro_euro_sentix_investor_confidence(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_sentix_investor_confidence().await
     }
 
+    /// Fetch services pmi macro data.
     pub async fn macro_euro_services_pmi(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_services_pmi().await
     }
 
+    /// Fetch trade balance macro data.
     pub async fn macro_euro_trade_balance(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_trade_balance().await
     }
 
+    /// Fetch zew economic sentiment macro data.
     pub async fn macro_euro_zew_economic_sentiment(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_zew_economic_sentiment().await
     }
 
+    /// Fetch unemployment rate mom macro data.
     pub async fn macro_euro_unemployment_rate_mom(&self) -> Result<Vec<MacroDataPoint>> {
         self.euro_unemployment_rate().await
     }

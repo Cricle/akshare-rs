@@ -87,62 +87,77 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch rate macro data.
     pub async fn macro_uk_bank_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_bank_rate().await
     }
 
+    /// Fetch core cpi monthly macro data.
     pub async fn macro_uk_core_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_core_cpi_monthly().await
     }
 
+    /// Fetch core cpi yearly macro data.
     pub async fn macro_uk_core_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_core_cpi_yearly().await
     }
 
+    /// Fetch cpi monthly macro data.
     pub async fn macro_uk_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_cpi_monthly().await
     }
 
+    /// Fetch cpi yearly macro data.
     pub async fn macro_uk_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_cpi_yearly().await
     }
 
+    /// Fetch gdp quarterly macro data.
     pub async fn macro_uk_gdp_quarterly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_gdp_quarterly().await
     }
 
+    /// Fetch gdp yearly macro data.
     pub async fn macro_uk_gdp_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_gdp_yearly().await
     }
 
+    /// Fetch halifax monthly macro data.
     pub async fn macro_uk_halifax_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_halifax_monthly().await
     }
 
+    /// Fetch halifax yearly macro data.
     pub async fn macro_uk_halifax_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_halifax_yearly().await
     }
 
+    /// Fetch retail monthly macro data.
     pub async fn macro_uk_retail_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_retail_monthly().await
     }
 
+    /// Fetch retail yearly macro data.
     pub async fn macro_uk_retail_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_retail_yearly().await
     }
 
+    /// Fetch rightmove monthly macro data.
     pub async fn macro_uk_rightmove_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_rightmove_monthly().await
     }
 
+    /// Fetch rightmove yearly macro data.
     pub async fn macro_uk_rightmove_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_rightmove_yearly().await
     }
 
+    /// Fetch trade macro data.
     pub async fn macro_uk_trade(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_trade().await
     }
 
+    /// Fetch unemployment rate macro data.
     pub async fn macro_uk_unemployment_rate(&self) -> Result<Vec<MacroDataPoint>> {
         self.uk_unemployment_rate().await
     }

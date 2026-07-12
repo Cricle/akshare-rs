@@ -52,34 +52,42 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch cpi monthly macro data.
     pub async fn macro_germany_cpi_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_cpi_monthly().await
     }
 
+    /// Fetch cpi yearly macro data.
     pub async fn macro_germany_cpi_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_cpi_yearly().await
     }
 
+    /// Fetch gdp macro data.
     pub async fn macro_germany_gdp(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_gdp().await
     }
 
+    /// Fetch ifo macro data.
     pub async fn macro_germany_ifo(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_ifo().await
     }
 
+    /// Fetch retail sale monthly macro data.
     pub async fn macro_germany_retail_sale_monthly(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_retail_sale_monthly().await
     }
 
+    /// Fetch retail sale yearly macro data.
     pub async fn macro_germany_retail_sale_yearly(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_retail_sale_yearly().await
     }
 
+    /// Fetch trade adjusted macro data.
     pub async fn macro_germany_trade_adjusted(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_trade_adjusted().await
     }
 
+    /// Fetch zew macro data.
     pub async fn macro_germany_zew(&self) -> Result<Vec<MacroDataPoint>> {
         self.germany_zew().await
     }

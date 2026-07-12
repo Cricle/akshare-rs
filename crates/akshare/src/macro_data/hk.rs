@@ -57,38 +57,47 @@ impl AkShareClient {
 
 // Python-compatible aliases
 impl AkShareClient {
+    /// Fetch building amount macro data.
     pub async fn macro_china_hk_building_amount(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_building_amount().await
     }
 
+    /// Fetch building volume macro data.
     pub async fn macro_china_hk_building_volume(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_building_volume().await
     }
 
+    /// Fetch cpi macro data.
     pub async fn macro_china_hk_cpi(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_cpi().await
     }
 
+    /// Fetch cpi ratio macro data.
     pub async fn macro_china_hk_cpi_ratio(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_cpi_ratio().await
     }
 
+    /// Fetch ppi macro data.
     pub async fn macro_china_hk_ppi(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_ppi().await
     }
 
+    /// Fetch trade diff ratio macro data.
     pub async fn macro_china_hk_trade_diff_ratio(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_trade_diff_ratio().await
     }
 
+    /// Fetch gbp macro data.
     pub async fn macro_china_hk_gbp(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_gdp().await
     }
 
+    /// Fetch gbp ratio macro data.
     pub async fn macro_china_hk_gbp_ratio(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_gdp_ratio().await
     }
 
+    /// Fetch rate of unemployment macro data.
     pub async fn macro_china_hk_rate_of_unemployment(&self) -> Result<Vec<MacroDataPoint>> {
         self.hk_unemployment_rate().await
     }

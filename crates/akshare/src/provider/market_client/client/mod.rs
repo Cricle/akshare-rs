@@ -41,6 +41,7 @@ const ESG_CACHE_TTL_SECS: u64 = 24 * 60 * 60;
 const INDUSTRY_CACHE_TTL_SECS: u64 = 24 * 60 * 60;
 
 impl MarketDataClient {
+    /// Fetch real-time quote snapshot for a stock symbol.
     pub async fn fetch_quote(&self, symbol: &str) -> anyhow::Result<QuoteSnapshot> {
         let start = std::time::Instant::now();
         let result = self
@@ -72,6 +73,7 @@ impl MarketDataClient {
         result
     }
 
+    /// Fetch quote with provider attribution for diagnostics.
     pub async fn fetch_quote_with_provider(
         &self,
         symbol: &str,
@@ -152,6 +154,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch fundamental data (financials, valuation) for a stock.
     pub async fn fetch_fundamentals(&self, symbol: &str) -> anyhow::Result<FundamentalsSnapshot> {
         let span = tracing::info_span!("market_data.fetch", data_type = "fundamentals", symbol);
         async {
@@ -209,6 +212,7 @@ impl MarketDataClient {
         }.instrument(span).await
     }
 
+    /// Fetch company-specific news articles.
     pub async fn fetch_news(
         &self,
         symbol: &str,
@@ -251,6 +255,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch news with fetch attempt diagnostics.
     pub async fn fetch_news_with_diagnostics(
         &self,
         symbol: &str,
@@ -262,6 +267,7 @@ impl MarketDataClient {
             .await
     }
 
+    /// Fetch news with custom query and diagnostics.
     pub async fn fetch_news_with_diagnostics_query(
         &self,
         symbol: &str,
@@ -329,6 +335,7 @@ impl MarketDataClient {
         }.instrument(span).await
     }
 
+    /// Fetch global/market news articles.
     pub async fn fetch_global_news(
         &self,
         market_hint_symbol: &str,
@@ -380,6 +387,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch global news with fetch attempt diagnostics.
     pub async fn fetch_global_news_with_diagnostics(
         &self,
         market_hint_symbol: &str,
@@ -423,6 +431,7 @@ impl MarketDataClient {
 }
 
 impl MarketDataClient {
+    /// Fetch insider transaction data for a stock.
     pub async fn fetch_insider_transactions(&self, symbol: &str) -> anyhow::Result<Vec<NewsItem>> {
         let span = tracing::info_span!("market_data.fetch", data_type = "insider", symbol);
         async {
@@ -481,6 +490,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch historical candlestick (OHLCV) data.
     pub async fn fetch_candles(
         &self,
         symbol: &str,
@@ -523,6 +533,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch candles with provider attribution for diagnostics.
     pub async fn fetch_candles_with_provider(
         &self,
         symbol: &str,
@@ -584,6 +595,7 @@ impl MarketDataClient {
         }.instrument(span).await
     }
 
+    /// Fetch capital flow (money flow) data for a stock.
     pub async fn fetch_capital_flow(
         &self,
         symbol: &str,
@@ -674,6 +686,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch A-share sector/concept board rankings.
     pub async fn fetch_a_share_sector_rankings(
         &self,
         sector_type: &str,
@@ -691,6 +704,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch constituent stocks of a sector/concept board.
     pub async fn fetch_a_share_sector_constituents(
         &self,
         sector_code: &str,
@@ -708,6 +722,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch capital flow data for A-share sectors.
     pub async fn fetch_a_share_sector_capital_flow(
         &self,
         sector_code: &str,
@@ -725,6 +740,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch detail of a specific announcement.
     pub async fn fetch_announcement_detail(
         &self,
         art_code: &str,
@@ -740,6 +756,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch company announcements/filings.
     pub async fn fetch_announcements(
         &self,
         symbol: &str,
@@ -830,6 +847,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Search stocks by keyword across markets.
     pub async fn search_stocks(
         &self,
         query: &str,
@@ -885,6 +903,7 @@ impl MarketDataClient {
         }.instrument(span).await
     }
 
+    /// Fetch trade calendar (market open/close dates).
     pub async fn fetch_trade_calendar(
         &self,
         exchange: &str,
@@ -927,6 +946,7 @@ impl MarketDataClient {
 }
 
 impl MarketDataClient {
+    /// Fetch price return since a given date.
     pub async fn fetch_return_since(
         &self,
         symbol: &str,
@@ -1025,6 +1045,7 @@ impl MarketDataClient {
     // Limit-Up/Down Pools (涨停/跌停股池)
     // -----------------------------------------------------------------------
 
+    /// Fetch limit-up (涨停) stock pool for a date.
     pub async fn fetch_zt_pool(&self, date: &str) -> anyhow::Result<Vec<ZtPool>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool:{}", date),
@@ -1034,6 +1055,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch limit-up pool with first-board data.
     pub async fn fetch_zt_pool_dtgc(&self, date: &str) -> anyhow::Result<Vec<ZtPoolDtgc>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-dtgc:{}", date),
@@ -1043,6 +1065,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch previous-day limit-up pool.
     pub async fn fetch_zt_pool_previous(&self, date: &str) -> anyhow::Result<Vec<ZtPoolPrevious>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-prev:{}", date),
@@ -1052,6 +1075,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch strong limit-up pool.
     pub async fn fetch_zt_pool_strong(&self, date: &str) -> anyhow::Result<Vec<ZtPoolStrong>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-strong:{}", date),
@@ -1061,6 +1085,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch sub-new (次新) limit-up pool.
     pub async fn fetch_zt_pool_sub_new(&self, date: &str) -> anyhow::Result<Vec<ZtPoolSubNew>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-subnew:{}", date),
@@ -1070,6 +1095,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch limit-up pool with opened-board data.
     pub async fn fetch_zt_pool_zbgc(&self, date: &str) -> anyhow::Result<Vec<ZtPoolZbgc>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:zt-pool-zbgc:{}", date),
@@ -1083,6 +1109,7 @@ impl MarketDataClient {
     // Earnings (业绩)
     // -----------------------------------------------------------------------
 
+    /// Fetch earnings forecast data.
     pub async fn fetch_earnings_forecast(
         &self,
         date: &str,
@@ -1095,6 +1122,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch earnings quick report data.
     pub async fn fetch_earnings_quick_report(
         &self,
         date: &str,
@@ -1107,6 +1135,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch full earnings report.
     pub async fn fetch_earnings_report(&self, date: &str) -> anyhow::Result<Vec<EarningsReport>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:earnings-report:{}", date),
@@ -1120,6 +1149,7 @@ impl MarketDataClient {
     // Analyst (分析师)
     // -----------------------------------------------------------------------
 
+    /// Fetch analyst ranking data.
     pub async fn fetch_analyst_rank(&self, year: &str) -> anyhow::Result<Vec<AnalystRank>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:analyst-rank:{}", year),
@@ -1129,6 +1159,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch detail for a specific analyst.
     pub async fn fetch_analyst_detail(
         &self,
         analyst_id: &str,
@@ -1149,6 +1180,7 @@ impl MarketDataClient {
     // Shareholder Analysis (股东分析)
     // -----------------------------------------------------------------------
 
+    /// Fetch gdfx free holding statistics data.
     pub async fn fetch_gdfx_free_holding_statistics(
         &self,
         date: &str,
@@ -1161,6 +1193,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch gdfx holding statistics data.
     pub async fn fetch_gdfx_holding_statistics(
         &self,
         date: &str,
@@ -1173,6 +1206,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch gdfx free holding change data.
     pub async fn fetch_gdfx_free_holding_change(
         &self,
         date: &str,
@@ -1185,6 +1219,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch shareholder holding changes.
     pub async fn fetch_gdfx_holding_change(
         &self,
         date: &str,
@@ -1197,6 +1232,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch gdfx free top10 data.
     pub async fn fetch_gdfx_free_top10(
         &self,
         symbol: &str,
@@ -1214,6 +1250,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch top 10 shareholders data.
     pub async fn fetch_gdfx_top10(
         &self,
         symbol: &str,
@@ -1231,6 +1268,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch gdfx free holding detail data.
     pub async fn fetch_gdfx_free_holding_detail(
         &self,
         date: &str,
@@ -1243,6 +1281,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch shareholder holding details.
     pub async fn fetch_gdfx_holding_detail(
         &self,
         date: &str,
@@ -1264,6 +1303,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch gdfx free holding analyse data.
     pub async fn fetch_gdfx_free_holding_analyse(
         &self,
         date: &str,
@@ -1276,6 +1316,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch gdfx holding analyse data.
     pub async fn fetch_gdfx_holding_analyse(
         &self,
         date: &str,
@@ -1288,6 +1329,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch gdfx free teamwork data.
     pub async fn fetch_gdfx_free_teamwork(
         &self,
         symbol: &str,
@@ -1303,6 +1345,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch shareholder teamwork data.
     pub async fn fetch_gdfx_teamwork(&self, symbol: &str) -> anyhow::Result<Vec<GdfxTeamwork>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdfx-team:{}", symbol.trim()),
@@ -1316,6 +1359,7 @@ impl MarketDataClient {
     // Block Trades (大宗交易)
     // -----------------------------------------------------------------------
 
+    /// Fetch block trade daily data.
     pub async fn fetch_block_trade_daily(
         &self,
         start_date: &str,
@@ -1332,6 +1376,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch block trade industry data.
     pub async fn fetch_block_trade_industry(
         &self,
         start_date: &str,
@@ -1348,6 +1393,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch block trade industry daily data.
     pub async fn fetch_block_trade_industry_daily(
         &self,
         start_date: &str,
@@ -1368,6 +1414,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch block trade seat ranking data.
     pub async fn fetch_block_trade_seat_ranking(
         &self,
         start_date: &str,
@@ -1392,6 +1439,7 @@ impl MarketDataClient {
     // Hot Stocks (雪球热度)
     // -----------------------------------------------------------------------
 
+    /// Fetch hot follow xq data.
     pub async fn fetch_hot_follow_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:hot-follow:{}", symbol.trim()),
@@ -1401,6 +1449,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch hot tweet xq data.
     pub async fn fetch_hot_tweet_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:hot-tweet:{}", symbol.trim()),
@@ -1410,6 +1459,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch hot deal xq data.
     pub async fn fetch_hot_deal_xq(&self, symbol: &str) -> anyhow::Result<Vec<HotStockXq>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:hot-deal:{}", symbol.trim()),
@@ -1423,6 +1473,7 @@ impl MarketDataClient {
     // Order Book Changes (盘口异动)
     // -----------------------------------------------------------------------
 
+    /// Fetch pankou changes data.
     pub async fn fetch_pankou_changes(&self, symbol: &str) -> anyhow::Result<Vec<PankouChange>> {
         super::akshare_rust::a_share::fetch_pankou_changes(self, symbol).await
     }
@@ -1431,6 +1482,7 @@ impl MarketDataClient {
     // Dividends (分红送配)
     // -----------------------------------------------------------------------
 
+    /// Fetch dividends data.
     pub async fn fetch_dividends(&self, date: &str) -> anyhow::Result<Vec<DividendInfo>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:dividends:{}", date),
@@ -1440,6 +1492,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch dividend detail data.
     pub async fn fetch_dividend_detail(&self, symbol: &str) -> anyhow::Result<Vec<DividendInfo>> {
         self.cached_fetch(
             &format!(
@@ -1456,6 +1509,7 @@ impl MarketDataClient {
     // Pledge Data (股权质押)
     // -----------------------------------------------------------------------
 
+    /// Fetch pledge profile data.
     pub async fn fetch_pledge_profile(&self) -> anyhow::Result<Vec<GpzyProfile>> {
         let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:pledge-profile");
         if let Some(cached) = self.cache_get_json(&cache_key).await {
@@ -1467,6 +1521,7 @@ impl MarketDataClient {
         Ok(items)
     }
 
+    /// Fetch pledge ratio data.
     pub async fn fetch_pledge_ratio(&self) -> anyhow::Result<Vec<GpzyPledgeRatio>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-ratio"),
@@ -1476,6 +1531,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch pledge detail data.
     pub async fn fetch_pledge_detail(&self) -> anyhow::Result<Vec<GpzyPledgeDetail>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-detail"),
@@ -1485,6 +1541,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch pledge ratio detail data.
     pub async fn fetch_pledge_ratio_detail(
         &self,
         symbol: &str,
@@ -1500,6 +1557,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch pledge distribute bank data.
     pub async fn fetch_pledge_distribute_bank(&self) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-dist-bank"),
@@ -1509,6 +1567,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch pledge distribute company data.
     pub async fn fetch_pledge_distribute_company(
         &self,
     ) -> anyhow::Result<Vec<GpzyDistributeEntry>> {
@@ -1520,6 +1579,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch pledge industry data.
     pub async fn fetch_pledge_industry(&self) -> anyhow::Result<Vec<GpzyIndustry>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:pledge-industry"),
@@ -1533,6 +1593,7 @@ impl MarketDataClient {
     // Institutional Research (机构调研)
     // -----------------------------------------------------------------------
 
+    /// Fetch institutional research data.
     pub async fn fetch_institutional_research(&self, date: &str) -> anyhow::Result<Vec<JgdyTj>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:jgdy-tj:{}", date),
@@ -1542,6 +1603,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch institutional research detail data.
     pub async fn fetch_institutional_research_detail(
         &self,
         date: &str,
@@ -1558,6 +1620,7 @@ impl MarketDataClient {
     // ESG Ratings
     // -----------------------------------------------------------------------
 
+    /// Fetch esg msci data.
     pub async fn fetch_esg_msci(&self) -> anyhow::Result<Vec<EsgRating>> {
         let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:esg-msci");
         if let Some(cached) = self.cache_get_json(&cache_key).await {
@@ -1569,6 +1632,7 @@ impl MarketDataClient {
         Ok(items)
     }
 
+    /// Fetch esg rft data.
     pub async fn fetch_esg_rft(&self) -> anyhow::Result<Vec<EsgRating>> {
         let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:esg-rft");
         if let Some(cached) = self.cache_get_json(&cache_key).await {
@@ -1580,6 +1644,7 @@ impl MarketDataClient {
         Ok(items)
     }
 
+    /// Fetch esg zd data.
     pub async fn fetch_esg_zd(&self) -> anyhow::Result<Vec<EsgRating>> {
         let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:esg-zd");
         if let Some(cached) = self.cache_get_json(&cache_key).await {
@@ -1591,6 +1656,7 @@ impl MarketDataClient {
         Ok(items)
     }
 
+    /// Fetch esg hz data.
     pub async fn fetch_esg_hz(&self) -> anyhow::Result<Vec<EsgRating>> {
         let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:esg-hz");
         if let Some(cached) = self.cache_get_json(&cache_key).await {
@@ -1606,6 +1672,7 @@ impl MarketDataClient {
     // Financial Reports (三大报表)
     // -----------------------------------------------------------------------
 
+    /// Fetch balance sheet data.
     pub async fn fetch_balance_sheet(&self, date: &str) -> anyhow::Result<Vec<BalanceSheet>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:balance-sheet:{}", date),
@@ -1615,6 +1682,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch profit/income statement data.
     pub async fn fetch_profit_sheet(&self, date: &str) -> anyhow::Result<Vec<ProfitSheet>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:profit-sheet:{}", date),
@@ -1624,6 +1692,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch cash flow statement data.
     pub async fn fetch_cash_flow_sheet(&self, date: &str) -> anyhow::Result<Vec<CashFlowSheet>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:cash-flow-sheet:{}", date),
@@ -1637,6 +1706,7 @@ impl MarketDataClient {
     // Stock Comments (千股千评)
     // -----------------------------------------------------------------------
 
+    /// Fetch stock comments data.
     pub async fn fetch_stock_comments(&self) -> anyhow::Result<Vec<StockComment>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:stock-comments"),
@@ -1646,6 +1716,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch institutional participation in comments.
     pub async fn fetch_comment_org_participation(
         &self,
         symbol: &str,
@@ -1658,6 +1729,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch historical comment scores.
     pub async fn fetch_comment_hist_score(
         &self,
         symbol: &str,
@@ -1670,6 +1742,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch comment focus index data.
     pub async fn fetch_comment_focus_index(
         &self,
         symbol: &str,
@@ -1682,6 +1755,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch comment desire index data.
     pub async fn fetch_comment_desire_index(
         &self,
         symbol: &str,
@@ -1701,6 +1775,7 @@ impl MarketDataClient {
     // Shareholder Changes (高管持股变动)
     // -----------------------------------------------------------------------
 
+    /// Fetch executive shareholding data.
     pub async fn fetch_executive_shareholding(&self, symbol: &str) -> anyhow::Result<Vec<Ggcg>> {
         self.cached_fetch(
             &format!(
@@ -1717,6 +1792,7 @@ impl MarketDataClient {
     // Shareholder Count (股东户数)
     // -----------------------------------------------------------------------
 
+    /// Fetch shareholder count data.
     pub async fn fetch_shareholder_count(&self, date: &str) -> anyhow::Result<Vec<Gdhs>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:gdhs:{}", date),
@@ -1726,6 +1802,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch shareholder count detail data.
     pub async fn fetch_shareholder_count_detail(
         &self,
         symbol: &str,
@@ -1742,6 +1819,7 @@ impl MarketDataClient {
     // Industry Classification (行业分类)
     // -----------------------------------------------------------------------
 
+    /// Fetch industry classification data.
     pub async fn fetch_industry_category(&self) -> anyhow::Result<Vec<IndustryCategory>> {
         let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:industry-category");
         if let Some(cached) = self.cache_get_json(&cache_key).await {
@@ -1759,6 +1837,7 @@ impl MarketDataClient {
     // HK Spot (Sina)
     // -----------------------------------------------------------------------
 
+    /// Fetch hk spot data.
     pub async fn fetch_hk_spot(&self) -> anyhow::Result<Vec<HkSpotQuote>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-spot"),
@@ -1772,6 +1851,7 @@ impl MarketDataClient {
     // HK Famous Stocks (Eastmoney)
     // -----------------------------------------------------------------------
 
+    /// Fetch hk famous spot data.
     pub async fn fetch_hk_famous_spot(&self) -> anyhow::Result<Vec<HkFamousStock>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-famous-spot"),
@@ -1785,6 +1865,7 @@ impl MarketDataClient {
     // HK Hot Rank (Eastmoney)
     // -----------------------------------------------------------------------
 
+    /// Fetch HK stock hot ranking.
     pub async fn fetch_hk_hot_rank(&self) -> anyhow::Result<Vec<HkHotRank>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-hot-rank"),
@@ -1794,6 +1875,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch hk hot rank latest data.
     pub async fn fetch_hk_hot_rank_latest(
         &self,
         symbol: &str,
@@ -1809,6 +1891,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch HK stock hot ranking details.
     pub async fn fetch_hk_hot_rank_detail(
         &self,
         symbol: &str,
@@ -1824,6 +1907,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch hk hot rank realtime data.
     pub async fn fetch_hk_hot_rank_realtime(
         &self,
         symbol: &str,
@@ -1843,6 +1927,7 @@ impl MarketDataClient {
     // HK Dividends (Eastmoney + THS)
     // -----------------------------------------------------------------------
 
+    /// Fetch hk dividend payout data.
     pub async fn fetch_hk_dividend_payout(
         &self,
         symbol: &str,
@@ -1858,6 +1943,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch hk fhpx detail data.
     pub async fn fetch_hk_fhpx_detail(&self, symbol: &str) -> anyhow::Result<Vec<HkFhpxDetailThs>> {
         self.cached_fetch(
             &format!(
@@ -1870,6 +1956,7 @@ impl MarketDataClient {
         .await
     }
 
+    /// Fetch hk dividend yield data.
     pub async fn fetch_hk_dividend_yield(&self) -> anyhow::Result<Vec<HkGxlLg>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:hk-dividend-yield"),
@@ -1883,6 +1970,7 @@ impl MarketDataClient {
     // HK Financial Indicators (Eastmoney)
     // -----------------------------------------------------------------------
 
+    /// Fetch hk financial indicators data.
     pub async fn fetch_hk_financial_indicators(
         &self,
         symbol: &str,
@@ -1902,6 +1990,7 @@ impl MarketDataClient {
     // HK Valuation (Baidu)
     // -----------------------------------------------------------------------
 
+    /// Fetch HK stock valuation data.
     pub async fn fetch_hk_valuation(
         &self,
         symbol: &str,
@@ -1925,6 +2014,7 @@ impl MarketDataClient {
     // US Spot (Sina / Eastmoney)
     // -----------------------------------------------------------------------
 
+    /// Fetch us spot data.
     pub async fn fetch_us_spot(&self) -> anyhow::Result<Vec<UsSpotSina>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:us-spot"),
@@ -1938,6 +2028,7 @@ impl MarketDataClient {
     // US Famous Stocks (Eastmoney)
     // -----------------------------------------------------------------------
 
+    /// Fetch us famous spot data.
     pub async fn fetch_us_famous_spot(&self, category: &str) -> anyhow::Result<Vec<UsFamousStock>> {
         self.cached_fetch(
             &format!(
@@ -1954,6 +2045,7 @@ impl MarketDataClient {
     // US Pink Sheet Stocks (Eastmoney)
     // -----------------------------------------------------------------------
 
+    /// Fetch us pink spot data.
     pub async fn fetch_us_pink_spot(&self) -> anyhow::Result<Vec<UsPinkStock>> {
         self.cached_fetch(
             &format!("{MARKET_DATA_CACHE_PREFIX}:us-pink-spot"),
@@ -1967,6 +2059,7 @@ impl MarketDataClient {
     // US Valuation (Baidu)
     // -----------------------------------------------------------------------
 
+    /// Fetch US stock valuation data.
     pub async fn fetch_us_valuation(
         &self,
         symbol: &str,
@@ -1990,6 +2083,7 @@ impl MarketDataClient {
     // Xueqiu Spot (works for HK and US symbols)
     // -----------------------------------------------------------------------
 
+    /// Fetch xq spot data.
     pub async fn fetch_xq_spot(&self, symbol: &str) -> anyhow::Result<XqStockSpot> {
         let cache_key = format!("{MARKET_DATA_CACHE_PREFIX}:xq-spot:{}", symbol.trim());
         if let Some(cached) = self.cache_get_json(&cache_key).await {
