@@ -578,7 +578,7 @@ impl MarketDataClient {
         match self.detect_market(symbol) {
             MarketKind::AShare => "akshare:eastmoney_fund_flow",
             MarketKind::HongKong => "akshare:eastmoney_fund_flow",
-            MarketKind::UsEquity => "akshare:unavailable",
+            MarketKind::UsEquity => "akshare:eastmoney_fund_flow",
         }
     }
 

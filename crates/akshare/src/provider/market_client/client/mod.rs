@@ -629,7 +629,7 @@ impl MarketDataClient {
             let fetch_result = match market {
                 MarketKind::AShare => self.fetch_a_share_capital_flow(symbol, limit).await,
                 MarketKind::HongKong => self.fetch_hk_capital_flow(symbol, limit).await,
-                MarketKind::UsEquity => Ok(Vec::new()),
+                MarketKind::UsEquity => self.fetch_us_capital_flow(symbol, limit).await,
             };
             let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
             let meter = opentelemetry::global::meter("stock-analyzer");
@@ -706,6 +706,57 @@ impl MarketDataClient {
             .collect::<anyhow::Result<Vec<_>>>()?;
         if items.is_empty() {
             anyhow::bail!("eastmoney returned no HK capital flow items");
+        }
+        items.truncate(limit);
+        Ok(items)
+    }
+
+    /// Fetch capital flow for a US stock via Eastmoney (secid prefix 105).
+    ///
+    /// Uses the same Eastmoney push2his API as A-share/HK stocks.
+    /// Market codes: 105 = NASDAQ, 106 = NYSE, 107 = AMEX.
+    /// Defaults to 105 (NASDAQ) since most major US stocks trade there.
+    async fn fetch_us_capital_flow(
+        &self,
+        symbol: &str,
+        limit: usize,
+    ) -> anyhow::Result<Vec<CapitalFlowPoint>> {
+        let code = symbol.trim().to_uppercase();
+        let secid = format!("105.{code}");
+        let response = self
+            .http
+            .get("https://push2his.eastmoney.com/api/qt/stock/fflow/daykline/get")
+            .query(&[
+                ("secid", secid.as_str()),
+                ("klt", "101"),
+                ("lmt", &limit.to_string()),
+                ("fields1", "f1,f2,f3,f7"),
+                (
+                    "fields2",
+                    "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64,f65",
+                ),
+            ])
+            .send()
+            .await
+            .context("failed to fetch US capital flow from Eastmoney")?
+            .error_for_status()
+            .context("eastmoney US capital flow request failed")?;
+        let payload: crate::provider::market_client::wire::EastmoneyKlineEnvelope = response
+            .json()
+            .await
+            .context("failed to decode eastmoney US capital flow response")?;
+        let data = payload
+            .data
+            .context("eastmoney US capital flow response missing data")?;
+        let klines = data
+            .klines
+            .context("eastmoney US capital flow response missing klines")?;
+        let mut items = klines
+            .into_iter()
+            .map(|line| Self::parse_a_share_capital_flow_line(&line))
+            .collect::<anyhow::Result<Vec<_>>>()?;
+        if items.is_empty() {
+            anyhow::bail!("eastmoney returned no US capital flow items");
         }
         items.truncate(limit);
         Ok(items)
@@ -822,7 +873,7 @@ impl MarketDataClient {
                     self.fetch_a_share_announcements(&ts_code, limit).await
                 }
                 MarketKind::HongKong => self.fetch_hk_announcements(symbol, limit).await,
-                MarketKind::UsEquity => Ok(Vec::new()),
+                MarketKind::UsEquity => self.fetch_us_announcements(symbol, limit).await,
             };
             let dur_ms = start.elapsed().as_secs_f64() * 1000.0;
             let meter = opentelemetry::global::meter("stock-analyzer");
@@ -928,6 +979,132 @@ impl MarketDataClient {
             anyhow::bail!("eastmoney returned no HK announcement items");
         }
         items.truncate(limit);
+        Ok(items)
+    }
+
+    /// Fetch announcements for a US stock via SEC EDGAR.
+    ///
+    /// Uses the SEC EDGAR full-text search API (no API key required).
+    /// Returns 8-K, 10-K, 10-Q, 6-K, and other material filings.
+    async fn fetch_us_announcements(
+        &self,
+        symbol: &str,
+        limit: usize,
+    ) -> anyhow::Result<Vec<AnnouncementItem>> {
+        let ticker = symbol.trim().to_uppercase();
+
+        // Step 1: Look up CIK from SEC EDGAR company_tickers.json
+        let cik_response = self
+            .http
+            .get("https://www.sec.gov/files/company_tickers.json")
+            .header("User-Agent", "akshare-rs research@example.com")
+            .send()
+            .await
+            .context("failed to fetch SEC EDGAR company tickers")?
+            .error_for_status()
+            .context("SEC EDGAR company tickers request failed")?;
+
+        let tickers: std::collections::HashMap<String, serde_json::Value> = cik_response
+            .json()
+            .await
+            .context("failed to decode SEC EDGAR company tickers")?;
+
+        let cik = tickers
+            .values()
+            .find_map(|v| {
+                let t = v.get("ticker")?.as_str()?;
+                if t == ticker {
+                    let cik_num = v.get("cik_str")?.as_i64()?;
+                    Some(format!("{:010}", cik_num))
+                } else {
+                    None
+                }
+            })
+            .ok_or_else(|| anyhow::anyhow!("ticker {ticker} not found in SEC EDGAR"))?;
+
+        // Step 2: Fetch recent filings from SEC EDGAR submissions API
+        let url = format!("https://data.sec.gov/submissions/CIK{cik}.json");
+        let response = self
+            .http
+            .get(&url)
+            .header("User-Agent", "akshare-rs research@example.com")
+            .send()
+            .await
+            .context("failed to fetch SEC EDGAR submissions")?
+            .error_for_status()
+            .context("SEC EDGAR submissions request failed")?;
+
+        #[derive(serde::Deserialize)]
+        struct EdgarSubmissions {
+            filings: EdgarFilings,
+        }
+        #[derive(serde::Deserialize)]
+        struct EdgarFilings {
+            recent: EdgarRecent,
+        }
+        #[derive(serde::Deserialize)]
+        struct EdgarRecent {
+            form: Vec<String>,
+            #[serde(rename = "filingDate")]
+            filing_date: Vec<String>,
+            #[serde(rename = "primaryDocDescription")]
+            primary_doc_description: Vec<String>,
+            #[serde(rename = "accessionNumber")]
+            accession_number: Vec<String>,
+        }
+
+        let submissions: EdgarSubmissions = response
+            .json()
+            .await
+            .context("failed to decode SEC EDGAR submissions")?;
+
+        // Filter for material filing types
+        let material_forms: std::collections::HashSet<&str> = [
+            "8-K", "10-K", "10-Q", "6-K", "20-F", "40-F", "S-1", "S-3", "DEF 14A",
+        ]
+        .into_iter()
+        .collect();
+
+        let mut items = Vec::new();
+        let recent = &submissions.filings.recent;
+        let count = recent.form.len().min(recent.filing_date.len());
+
+        for i in 0..count {
+            if items.len() >= limit {
+                break;
+            }
+            let form = &recent.form[i];
+            if !material_forms.contains(form.as_str()) {
+                continue;
+            }
+            let date = &recent.filing_date[i];
+            let desc = recent
+                .primary_doc_description
+                .get(i)
+                .and_then(|d| if d.is_empty() { None } else { Some(d.as_str()) })
+                .unwrap_or(form.as_str());
+            let accession = &recent.accession_number[i];
+            let accession_dashless = accession.replace('-', "");
+            let url = format!(
+                "https://www.sec.gov/Archives/edgar/data/{}/{}/{}",
+                cik.trim_start_matches('0'),
+                accession_dashless,
+                accession
+            );
+
+            items.push(AnnouncementItem {
+                url: Some(url),
+                art_code: accession.clone(),
+                symbol: ticker.clone(),
+                title: format!("{form}: {desc}"),
+                published_at: date.clone(),
+                source: "SEC EDGAR".to_string(),
+            });
+        }
+
+        if items.is_empty() {
+            anyhow::bail!("SEC EDGAR returned no announcement items for {ticker}");
+        }
         Ok(items)
     }
 
