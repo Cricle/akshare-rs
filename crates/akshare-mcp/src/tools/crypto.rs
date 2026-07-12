@@ -1,6 +1,7 @@
 use rmcp::schemars;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for crypto date queries.
 pub struct CryptoDateParams {
     pub date: String,
 }

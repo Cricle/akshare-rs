@@ -3,6 +3,7 @@ use rmcp::schemars;
 // ── Existing param types ──────────────────────────────────────────────
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for index hk daily queries.
 pub struct IndexHkDailyParams {
     pub symbol: String,
     /// Eastmoney internal market id (e.g. "100", "124"). Get from index_hk_spot_em.
@@ -12,11 +13,13 @@ pub struct IndexHkDailyParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for index symbol queries.
 pub struct IndexSymbolParams {
     pub symbol: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for index candles queries.
 pub struct IndexCandlesParams {
     pub symbol: String,
     #[serde(default = "default_limit")]
@@ -24,6 +27,7 @@ pub struct IndexCandlesParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for index hist queries.
 pub struct IndexHistParams {
     pub symbol: String,
     pub start_date: String,

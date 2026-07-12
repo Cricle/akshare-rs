@@ -165,6 +165,7 @@ pub struct AkShareMcpService {
 
 impl AkShareMcpService {
     #[must_use]
+    /// Create a new instance with the given parameters.
     pub fn new(tools_config: ToolsConfig) -> Self {
         Self {
             client: AkShareClient::new(),

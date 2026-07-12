@@ -1,17 +1,20 @@
 use rmcp::schemars;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option symbol queries.
 pub struct OptionSymbolParams {
     pub symbol: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option hist queries.
 pub struct OptionHistParams {
     pub symbol: String,
     pub date: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option chain queries.
 pub struct OptionChainParams {
     pub symbol: String,
     #[serde(default = "default_limit")]
@@ -19,36 +22,42 @@ pub struct OptionChainParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option symbol date queries.
 pub struct OptionSymbolDateParams {
     pub symbol: String,
     pub date: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option symbol month queries.
 pub struct OptionSymbolMonthParams {
     pub symbol: String,
     pub end_month: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option symbol year queries.
 pub struct OptionSymbolYearParams {
     pub symbol: String,
     pub year: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option symbol contract queries.
 pub struct OptionSymbolContractParams {
     pub symbol: String,
     pub contract: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option symbol exchange queries.
 pub struct OptionSymbolExchangeParams {
     pub symbol: String,
     pub exchange: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option lhb queries.
 pub struct OptionLhbParams {
     pub symbol: String,
     pub indicator: String,
@@ -56,6 +65,7 @@ pub struct OptionLhbParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option sse codes queries.
 pub struct OptionSseCodesParams {
     pub symbol: String,
     pub trade_date: String,
@@ -63,6 +73,7 @@ pub struct OptionSseCodesParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for option sse expire day queries.
 pub struct OptionSseExpireDayParams {
     pub trade_date: String,
     pub symbol: String,

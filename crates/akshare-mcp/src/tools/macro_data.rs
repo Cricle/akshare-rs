@@ -1,12 +1,14 @@
 use rmcp::schemars;
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for macro date queries.
 pub struct MacroDateParams {
     /// Date in YYYYMMDD format
     pub date: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for macro date range queries.
 pub struct MacroDateRangeParams {
     /// Start date in YYYYMMDD format
     pub start_date: String,
@@ -15,12 +17,14 @@ pub struct MacroDateRangeParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for macro symbol queries.
 pub struct MacroSymbolParams {
     /// Symbol name, e.g. "回购定盘利率" or "银银间回购定盘利率"
     pub symbol: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for macro nbs nation queries.
 pub struct MacroNbsNationParams {
     /// Data kind: "月度数据", "季度数据", or "年度数据"
     pub kind: String,
@@ -31,6 +35,7 @@ pub struct MacroNbsNationParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for macro nbs region queries.
 pub struct MacroNbsRegionParams {
     /// Data kind: "分省月度数据", "分省季度数据", or "分省年度数据"
     pub kind: String,
@@ -43,6 +48,7 @@ pub struct MacroNbsRegionParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for macro interbank queries.
 pub struct MacroInterbankParams {
     /// Market name, e.g. "上海银行同业拆借市场", "中国银行同业拆借市场", etc.
     pub market: String,

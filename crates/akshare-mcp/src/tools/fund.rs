@@ -3,6 +3,7 @@ use rmcp::schemars;
 // ── Existing param types ──────────────────────────────────────────────
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for fund hk hist queries.
 pub struct FundHkHistParams {
     /// HK fund code (from fund_hk_rank_em)
     pub code: String,
@@ -16,6 +17,7 @@ fn default_query_type() -> String {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for fund hist queries.
 pub struct FundHistParams {
     pub symbol: String,
     #[serde(default = "default_limit")]
@@ -23,6 +25,7 @@ pub struct FundHistParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for fund rank queries.
 pub struct FundRankParams {
     pub symbol: String,
     #[serde(default = "default_limit")]

@@ -3,6 +3,7 @@ use rmcp::schemars;
 // ── Existing (kept as-is) ───────────────────────────────────────────────
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for currency queries.
 pub struct CurrencyParams {
     pub symbol: String,
     pub start_date: String,
@@ -12,6 +13,7 @@ pub struct CurrencyParams {
 // ── New param types ────────────────────────────────────────────────────
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for forex hist em queries.
 pub struct ForexHistEmParams {
     /// Eastmoney forex secid, e.g. "133.USDCNY" or "119.EURCNY"
     pub symbol: String,
@@ -34,6 +36,7 @@ fn default_period() -> String {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for forex em hist queries.
 pub struct ForexEmHistParams {
     /// Eastmoney forex secid, e.g. "133.USDCNY" or "119.EURCNY"
     pub symbol: String,
@@ -47,6 +50,7 @@ fn default_forex_limit() -> usize {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for currency latest queries.
 pub struct CurrencyLatestParams {
     /// Base currency code, e.g. "USD"
     pub base: String,
@@ -58,6 +62,7 @@ pub struct CurrencyLatestParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for currency history queries.
 pub struct CurrencyHistoryParams {
     /// Base currency code, e.g. "USD"
     pub base: String,
@@ -71,6 +76,7 @@ pub struct CurrencyHistoryParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for currency time series queries.
 pub struct CurrencyTimeSeriesParams {
     /// Base currency code, e.g. "USD"
     pub base: String,
@@ -86,6 +92,7 @@ pub struct CurrencyTimeSeriesParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for currency currencies queries.
 pub struct CurrencyCurrenciesParams {
     /// Currency type filter (e.g. "fiat")
     #[serde(default)]
@@ -96,6 +103,7 @@ pub struct CurrencyCurrenciesParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for currency convert queries.
 pub struct CurrencyConvertParams {
     /// Source currency code, e.g. "USD"
     pub from: String,
@@ -109,6 +117,7 @@ pub struct CurrencyConvertParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for currency pair queries.
 pub struct CurrencyPairParams {
     /// FX currency pair code, e.g. "USDCNY"
     pub pair: String,

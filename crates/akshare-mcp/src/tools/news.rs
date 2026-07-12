@@ -3,11 +3,13 @@ use rmcp::schemars;
 // ── Existing param types ──────────────────────────────────────────────
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for news date queries.
 pub struct NewsDateParams {
     pub date: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for news search queries.
 pub struct NewsSearchParams {
     pub query: String,
     #[serde(default = "default_limit")]
@@ -15,11 +17,13 @@ pub struct NewsSearchParams {
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for news symbol queries.
 pub struct NewsSymbolParams {
     pub symbol: String,
 }
 
 #[derive(serde::Deserialize, schemars::JsonSchema)]
+/// MCP tool parameters for stock news search queries.
 pub struct StockNewsSearchParams {
     pub symbol: String,
     #[serde(default = "default_limit")]
