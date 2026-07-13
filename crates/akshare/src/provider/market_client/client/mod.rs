@@ -2445,4 +2445,572 @@ impl MarketDataClient {
             .await;
         Ok(items)
     }
+
+    // -----------------------------------------------------------------------
+    // US Fundamentals Fallback (Yahoo Finance + Finnhub)
+    // -----------------------------------------------------------------------
+
+    /// Fetch US equity fundamentals from Yahoo Finance quoteSummary API.
+    pub async fn fetch_us_fundamentals_yahoo(
+        &self,
+        symbol: &str,
+    ) -> anyhow::Result<FundamentalsSnapshot> {
+        let url = format!(
+            "https://query1.finance.yahoo.com/v10/finance/quoteSummary/{}?modules=financialData,defaultKeyStatistics",
+            symbol
+        );
+        let resp = self
+            .http
+            .get(&url)
+            .send()
+            .await
+            .context("Yahoo Finance request failed")?;
+        if !resp.status().is_success() {
+            anyhow::bail!("Yahoo Finance returned status {}", resp.status());
+        }
+        let body: YahooQuoteSummaryResponse = resp
+            .json()
+            .await
+            .context("failed to parse Yahoo Finance response")?;
+        let result = body
+            .quote_summary
+            .result
+            .into_iter()
+            .next()
+            .context("Yahoo Finance returned no results")?;
+        let financial = &result.financial_data;
+        let stats = &result.default_key_statistics;
+
+        Ok(FundamentalsSnapshot {
+            symbol: symbol.to_string(),
+            company_name: String::new(),
+            cik: String::new(),
+            industry: None,
+            currency: financial
+                .financial_currency
+                .clone()
+                .unwrap_or_else(|| "USD".to_string()),
+            fiscal_year_end: None,
+            shares_outstanding: stats.shares_outstanding.map(|v| v as i64),
+            market_cap: financial.market_cap.as_ref().and_then(|v| v.raw),
+            net_income_usd: financial.net_income_to_common.as_ref().and_then(|v| v.raw),
+            revenues_usd: financial.total_revenue.as_ref().and_then(|v| v.raw),
+            assets_usd: financial.total_assets.as_ref().and_then(|v| v.raw),
+            liabilities_usd: financial.total_liabilities.as_ref().and_then(|v| v.raw),
+            stockholders_equity_usd: financial
+                .total_stockholder_equity
+                .as_ref()
+                .and_then(|v| v.raw),
+            cash_and_equivalents_usd: None,
+            gross_profit_usd: financial.gross_profit.as_ref().and_then(|v| v.raw),
+            operating_income_usd: financial.operating_income.as_ref().and_then(|v| v.raw),
+            operating_expenses_usd: None,
+            operating_cash_flow_usd: financial.operating_cashflow.as_ref().and_then(|v| v.raw),
+            capital_expenditure_usd: None,
+            free_cash_flow_usd: financial.free_cashflow.as_ref().and_then(|v| v.raw),
+            long_term_debt_usd: None,
+            current_debt_usd: None,
+            total_debt_usd: None,
+            diluted_shares_outstanding: None,
+        })
+    }
+
+    /// Fetch US equity fundamentals from Finnhub (financials-reported + metrics + profile).
+    /// Reads API keys from `FALLBACK_FINNHUB_API_KEYS` env var (comma-separated).
+    pub async fn fetch_us_fundamentals_finnhub(
+        &self,
+        symbol: &str,
+    ) -> anyhow::Result<FundamentalsSnapshot> {
+        let api_keys = Self::finnhub_api_keys();
+        if api_keys.is_empty() {
+            anyhow::bail!("no Finnhub API keys configured (FALLBACK_FINNHUB_API_KEYS)");
+        }
+
+        // Fetch financials-reported and metrics concurrently
+        let (financials, metrics, profile) = tokio::join!(
+            self.fetch_finnhub_financials(symbol, &api_keys),
+            self.fetch_finnhub_metrics(symbol, &api_keys),
+            self.fetch_finnhub_profile(symbol, &api_keys),
+        );
+
+        let mut result = match (financials, metrics) {
+            (Some(mut fin), Some(met)) => {
+                fin.market_cap = met.market_cap;
+                if met.net_income_usd.is_some() {
+                    fin.net_income_usd = met.net_income_usd;
+                }
+                if met.revenues_usd.is_some() {
+                    fin.revenues_usd = met.revenues_usd;
+                }
+                if met.gross_profit_usd.is_some() {
+                    fin.gross_profit_usd = met.gross_profit_usd;
+                }
+                if met.operating_income_usd.is_some() {
+                    fin.operating_income_usd = met.operating_income_usd;
+                }
+                if met.stockholders_equity_usd.is_some() {
+                    fin.stockholders_equity_usd = met.stockholders_equity_usd;
+                }
+                if met.total_debt_usd.is_some() {
+                    fin.total_debt_usd = met.total_debt_usd;
+                }
+                fin
+            }
+            (Some(fin), None) => fin,
+            (None, Some(met)) => met,
+            (None, None) => anyhow::bail!("all Finnhub fundamentals sources failed"),
+        };
+
+        if let Some(prof) = profile {
+            if result.company_name.is_empty() || result.company_name == result.cik {
+                result.company_name = prof.name;
+            }
+            if result.industry.is_none() {
+                result.industry = Some(prof.industry);
+            }
+            if result.shares_outstanding.is_none() {
+                result.shares_outstanding = prof.shares_outstanding;
+            }
+        }
+
+        Ok(result)
+    }
+
+    /// Fetch US company news from Finnhub.
+    /// Reads API keys from `FALLBACK_FINNHUB_API_KEYS` env var (comma-separated).
+    pub async fn fetch_us_news_finnhub(
+        &self,
+        symbol: &str,
+        from: &str,
+        to: &str,
+    ) -> anyhow::Result<Vec<NewsItem>> {
+        let api_keys = Self::finnhub_api_keys();
+        if api_keys.is_empty() {
+            anyhow::bail!("no Finnhub API keys configured");
+        }
+        for api_key in &api_keys {
+            let url = format!(
+                "https://finnhub.io/api/v1/company-news?symbol={}&from={}&to={}&token={}",
+                symbol, from, to, api_key
+            );
+            let resp = match self.http.get(&url).send().await {
+                Ok(r) => r,
+                Err(e) => {
+                    tracing::debug!(symbol, error = %e, "Finnhub news request error");
+                    continue;
+                }
+            };
+            let status = resp.status();
+            if status.as_u16() == 429 || status.as_u16() == 401 {
+                tracing::debug!(
+                    symbol,
+                    status = %status,
+                    "Finnhub news rate limited, trying next key"
+                );
+                continue;
+            }
+            if !status.is_success() {
+                anyhow::bail!("Finnhub news returned status {}", status);
+            }
+            let articles: Vec<serde_json::Value> = resp
+                .json()
+                .await
+                .context("failed to parse Finnhub news response")?;
+            let items: Vec<NewsItem> = articles
+                .into_iter()
+                .filter_map(|item| {
+                    let headline = item.get("headline")?.as_str()?;
+                    if headline.is_empty() {
+                        return None;
+                    }
+                    Some(NewsItem {
+                        published_at: item
+                            .get("datetime")
+                            .and_then(|v| v.as_i64())
+                            .and_then(|ts| chrono::DateTime::from_timestamp(ts, 0))
+                            .map(|dt| dt.format("%Y-%m-%d").to_string())
+                            .unwrap_or_default(),
+                        title: headline.to_string(),
+                        summary: item
+                            .get("summary")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string(),
+                        source: item
+                            .get("source")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("Finnhub")
+                            .to_string(),
+                        url: item
+                            .get("url")
+                            .and_then(|v| v.as_str())
+                            .map(|s| s.to_string()),
+                    })
+                })
+                .collect();
+            return Ok(items);
+        }
+        anyhow::bail!("all Finnhub news API keys failed")
+    }
+
+    // ── Finnhub helpers ──────────────────────────────────────────────────
+
+    fn finnhub_api_keys() -> Vec<String> {
+        std::env::var("FALLBACK_FINNHUB_API_KEYS")
+            .ok()
+            .map(|s| {
+                s.split(',')
+                    .map(|k| k.trim().to_string())
+                    .filter(|k| !k.is_empty())
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    async fn fetch_finnhub_financials(
+        &self,
+        symbol: &str,
+        api_keys: &[String],
+    ) -> Option<FundamentalsSnapshot> {
+        for api_key in api_keys {
+            let url = format!(
+                "https://finnhub.io/api/v1/stock/financials-reported?symbol={}&token={}",
+                symbol, api_key
+            );
+            let resp = match self.http.get(&url).send().await {
+                Ok(r) => r,
+                Err(e) => {
+                    tracing::debug!(symbol, error = %e, "Finnhub financials-reported error");
+                    continue;
+                }
+            };
+            let status = resp.status();
+            if status.as_u16() == 429 || status.as_u16() == 401 {
+                continue;
+            }
+            if !status.is_success() {
+                return None;
+            }
+            let body: FinnhubFinancialsReportedResponse = resp.json().await.ok()?;
+            let report = body.data.first()?.report.as_ref()?;
+
+            let assets_usd = find_finnhub_value(&report.bs, "us-gaap_Assets");
+            let liabilities_usd = find_finnhub_value(&report.bs, "us-gaap_Liabilities");
+            let stockholders_equity_usd =
+                find_finnhub_value(&report.bs, "us-gaap_StockholdersEquity");
+            let cash_and_equivalents_usd =
+                find_finnhub_value(&report.bs, "us-gaap_CashAndCashEquivalentsAtCarryingValue");
+            let long_term_debt_usd =
+                find_finnhub_value(&report.bs, "us-gaap_LongTermDebtNoncurrent");
+            let current_debt_usd = find_finnhub_value(&report.bs, "us-gaap_LongTermDebtCurrent");
+            let total_debt_usd = match (long_term_debt_usd, current_debt_usd) {
+                (Some(lt), Some(ct)) => Some(lt + ct),
+                (Some(lt), None) => Some(lt),
+                (None, Some(ct)) => Some(ct),
+                _ => None,
+            };
+            let operating_cash_flow_usd = find_finnhub_value(
+                &report.cf,
+                "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+            );
+            let capital_expenditure_usd = find_finnhub_value(
+                &report.cf,
+                "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment",
+            );
+            let free_cash_flow_usd = match (operating_cash_flow_usd, capital_expenditure_usd) {
+                (Some(ocf), Some(capex)) => Some(ocf - capex),
+                _ => None,
+            };
+            let revenues_usd = find_finnhub_value(
+                &report.ic,
+                "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+            );
+            let gross_profit_usd = find_finnhub_value(&report.ic, "us-gaap_GrossProfit");
+            let operating_income_usd =
+                find_finnhub_value(&report.ic, "us-gaap_OperatingIncomeLoss");
+            let net_income_usd = find_finnhub_value(&report.ic, "us-gaap_NetIncomeLoss");
+
+            return Some(FundamentalsSnapshot {
+                symbol: symbol.to_string(),
+                company_name: body.cik.clone().unwrap_or_default(),
+                cik: body.cik.unwrap_or_default(),
+                industry: None,
+                currency: "USD".to_string(),
+                fiscal_year_end: None,
+                shares_outstanding: None,
+                market_cap: None,
+                net_income_usd,
+                revenues_usd,
+                assets_usd,
+                liabilities_usd,
+                stockholders_equity_usd,
+                cash_and_equivalents_usd,
+                gross_profit_usd,
+                operating_income_usd,
+                operating_expenses_usd: None,
+                operating_cash_flow_usd,
+                capital_expenditure_usd,
+                free_cash_flow_usd,
+                long_term_debt_usd,
+                current_debt_usd,
+                total_debt_usd,
+                diluted_shares_outstanding: None,
+            });
+        }
+        None
+    }
+
+    async fn fetch_finnhub_metrics(
+        &self,
+        symbol: &str,
+        api_keys: &[String],
+    ) -> Option<FundamentalsSnapshot> {
+        for api_key in api_keys {
+            let url = format!(
+                "https://finnhub.io/api/v1/stock/metric?symbol={}&metric=all&token={}",
+                symbol, api_key
+            );
+            let resp = match self.http.get(&url).send().await {
+                Ok(r) => r,
+                Err(e) => {
+                    tracing::debug!(symbol, error = %e, "Finnhub metrics error");
+                    continue;
+                }
+            };
+            let status = resp.status();
+            if status.as_u16() == 429 || status.as_u16() == 401 {
+                continue;
+            }
+            if !status.is_success() {
+                return None;
+            }
+            let body: FinnhubMetricResponse = resp.json().await.ok()?;
+            let m = &body.metric;
+
+            let market_cap = m.market_cap;
+            let net_income_usd = match (market_cap, m.pe_ttm) {
+                (Some(mc), Some(pe)) if pe > 0.0 => Some(mc / pe),
+                _ => None,
+            };
+            let revenues_usd = match (market_cap, m.ps_ttm) {
+                (Some(mc), Some(ps)) if ps > 0.0 => Some(mc / ps),
+                _ => None,
+            };
+            let gross_profit_usd = match (revenues_usd, m.gross_margin_ttm) {
+                (Some(rev), Some(margin)) => Some(rev * margin / 100.0),
+                _ => None,
+            };
+            let operating_income_usd = match (revenues_usd, m.operating_margin_ttm) {
+                (Some(rev), Some(margin)) => Some(rev * margin / 100.0),
+                _ => None,
+            };
+            let stockholders_equity_usd = match (market_cap, m.pb) {
+                (Some(mc), Some(pb)) if pb > 0.0 => Some(mc / pb),
+                _ => None,
+            };
+            let total_debt_usd =
+                match (stockholders_equity_usd, m.total_debt_total_equity_quarterly) {
+                    (Some(eq), Some(ratio)) => Some(eq * ratio),
+                    _ => None,
+                };
+
+            return Some(FundamentalsSnapshot {
+                symbol: symbol.to_string(),
+                company_name: String::new(),
+                cik: String::new(),
+                industry: None,
+                currency: "USD".to_string(),
+                fiscal_year_end: None,
+                shares_outstanding: None,
+                market_cap,
+                net_income_usd,
+                revenues_usd,
+                assets_usd: None,
+                liabilities_usd: None,
+                stockholders_equity_usd,
+                cash_and_equivalents_usd: None,
+                gross_profit_usd,
+                operating_income_usd,
+                operating_expenses_usd: None,
+                operating_cash_flow_usd: None,
+                capital_expenditure_usd: None,
+                free_cash_flow_usd: None,
+                long_term_debt_usd: None,
+                current_debt_usd: None,
+                total_debt_usd,
+                diluted_shares_outstanding: None,
+            });
+        }
+        None
+    }
+
+    async fn fetch_finnhub_profile(
+        &self,
+        symbol: &str,
+        api_keys: &[String],
+    ) -> Option<FinnhubProfileData> {
+        for api_key in api_keys {
+            let url = format!(
+                "https://finnhub.io/api/v1/stock/profile2?symbol={}&token={}",
+                symbol, api_key
+            );
+            let resp = match self.http.get(&url).send().await {
+                Ok(r) => r,
+                Err(e) => {
+                    tracing::debug!(symbol, error = %e, "Finnhub profile error");
+                    continue;
+                }
+            };
+            let status = resp.status();
+            if status.as_u16() == 429 || status.as_u16() == 401 {
+                continue;
+            }
+            if !status.is_success() {
+                return None;
+            }
+            let profile: FinnhubProfileResponse = resp.json().await.ok()?;
+            return Some(FinnhubProfileData {
+                name: profile.name.unwrap_or_default(),
+                industry: profile.industry.unwrap_or_default(),
+                shares_outstanding: profile
+                    .share_outstanding
+                    .map(|v| (v * 1_000_000.0).round() as i64),
+            });
+        }
+        None
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Yahoo Finance response types
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+struct YahooQuoteSummaryResponse {
+    #[serde(rename = "quoteSummary")]
+    quote_summary: YahooQuoteSummary,
+}
+
+#[derive(serde::Deserialize)]
+struct YahooQuoteSummary {
+    result: Vec<YahooQuoteSummaryResult>,
+}
+
+#[derive(serde::Deserialize)]
+struct YahooQuoteSummaryResult {
+    #[serde(rename = "financialData")]
+    financial_data: YahooFinancialData,
+    #[serde(rename = "defaultKeyStatistics")]
+    default_key_statistics: YahooDefaultKeyStatistics,
+}
+
+#[derive(serde::Deserialize)]
+struct YahooFinancialData {
+    #[serde(rename = "financialCurrency")]
+    financial_currency: Option<String>,
+    #[serde(rename = "marketCap")]
+    market_cap: Option<YahooRawValue>,
+    #[serde(rename = "netIncomeToCommon")]
+    net_income_to_common: Option<YahooRawValue>,
+    #[serde(rename = "totalRevenue")]
+    total_revenue: Option<YahooRawValue>,
+    #[serde(rename = "totalAssets")]
+    total_assets: Option<YahooRawValue>,
+    #[serde(rename = "totalLiabilities")]
+    total_liabilities: Option<YahooRawValue>,
+    #[serde(rename = "totalStockholderEquity")]
+    total_stockholder_equity: Option<YahooRawValue>,
+    #[serde(rename = "grossProfit")]
+    gross_profit: Option<YahooRawValue>,
+    #[serde(rename = "operatingIncome")]
+    operating_income: Option<YahooRawValue>,
+    #[serde(rename = "operatingCashflow")]
+    operating_cashflow: Option<YahooRawValue>,
+    #[serde(rename = "freeCashflow")]
+    free_cashflow: Option<YahooRawValue>,
+}
+
+#[derive(serde::Deserialize)]
+struct YahooDefaultKeyStatistics {
+    #[serde(rename = "sharesOutstanding")]
+    shares_outstanding: Option<f64>,
+}
+
+#[derive(serde::Deserialize)]
+struct YahooRawValue {
+    raw: Option<f64>,
+}
+
+// ---------------------------------------------------------------------------
+// Finnhub response types
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+struct FinnhubMetricResponse {
+    metric: FinnhubMetric,
+}
+
+#[derive(serde::Deserialize)]
+struct FinnhubMetric {
+    #[serde(rename = "marketCapitalization")]
+    market_cap: Option<f64>,
+    #[serde(rename = "peTTM")]
+    pe_ttm: Option<f64>,
+    #[serde(rename = "psTTM")]
+    ps_ttm: Option<f64>,
+    #[serde(rename = "grossMarginTTM")]
+    gross_margin_ttm: Option<f64>,
+    #[serde(rename = "operatingMarginTTM")]
+    operating_margin_ttm: Option<f64>,
+    #[serde(rename = "pb")]
+    pb: Option<f64>,
+    #[serde(rename = "totalDebt/totalEquityQuarterly")]
+    total_debt_total_equity_quarterly: Option<f64>,
+}
+
+#[derive(serde::Deserialize)]
+struct FinnhubFinancialsReportedResponse {
+    cik: Option<String>,
+    data: Vec<FinnhubFinancialsReportedData>,
+}
+
+#[derive(serde::Deserialize)]
+struct FinnhubFinancialsReportedData {
+    report: Option<FinnhubFinancialsReport>,
+}
+
+#[derive(serde::Deserialize)]
+struct FinnhubFinancialsReport {
+    bs: Option<Vec<FinnhubReportEntry>>,
+    cf: Option<Vec<FinnhubReportEntry>>,
+    ic: Option<Vec<FinnhubReportEntry>>,
+}
+
+#[derive(serde::Deserialize)]
+struct FinnhubReportEntry {
+    concept: String,
+    value: Option<f64>,
+}
+
+#[derive(serde::Deserialize)]
+struct FinnhubProfileResponse {
+    name: Option<String>,
+    #[serde(rename = "finnhubIndustry")]
+    industry: Option<String>,
+    #[serde(rename = "shareOutstanding")]
+    share_outstanding: Option<f64>,
+}
+
+struct FinnhubProfileData {
+    name: String,
+    industry: String,
+    shares_outstanding: Option<i64>,
+}
+
+fn find_finnhub_value(entries: &Option<Vec<FinnhubReportEntry>>, concept: &str) -> Option<f64> {
+    entries
+        .as_ref()?
+        .iter()
+        .find(|e| e.concept == concept)?
+        .value
 }
