@@ -573,7 +573,15 @@ impl MarketDataClient {
                 vec![]
             }
         };
-        let income = income_rows.first();
+        // Prefer annual reports (end_date ends in 1231) to avoid quarterly income skewing PE
+        let income = income_rows
+            .iter()
+            .find(|row| {
+                row.optional_string("end_date")
+                    .map(|d| d.ends_with("1231"))
+                    .unwrap_or(false)
+            })
+            .or_else(|| income_rows.first());
 
         let balance_rows = match self
             .tushare_query(
@@ -589,7 +597,14 @@ impl MarketDataClient {
                 vec![]
             }
         };
-        let balance = balance_rows.first();
+        let balance = balance_rows
+            .iter()
+            .find(|row| {
+                row.optional_string("end_date")
+                    .map(|d| d.ends_with("1231"))
+                    .unwrap_or(false)
+            })
+            .or_else(|| balance_rows.first());
 
         let cashflow_rows = match self
             .tushare_query(
@@ -605,7 +620,14 @@ impl MarketDataClient {
                 vec![]
             }
         };
-        let cashflow = cashflow_rows.first();
+        let cashflow = cashflow_rows
+            .iter()
+            .find(|row| {
+                row.optional_string("end_date")
+                    .map(|d| d.ends_with("1231"))
+                    .unwrap_or(false)
+            })
+            .or_else(|| cashflow_rows.first());
 
         let fina_indicator_rows = match self
             .tushare_query(
@@ -621,7 +643,14 @@ impl MarketDataClient {
                 vec![]
             }
         };
-        let fina_indicator = fina_indicator_rows.first();
+        let fina_indicator = fina_indicator_rows
+            .iter()
+            .find(|row| {
+                row.optional_string("end_date")
+                    .map(|d| d.ends_with("1231"))
+                    .unwrap_or(false)
+            })
+            .or_else(|| fina_indicator_rows.first());
 
         let fiscal_year_end = Self::a_share_fiscal_year_end_candidate(
             income
