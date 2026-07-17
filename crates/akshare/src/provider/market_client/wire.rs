@@ -133,7 +133,7 @@ pub(crate) struct EastmoneyDatacenterResult<T> {
     pub(crate) data: Option<Vec<T>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub(crate) struct EastmoneyMainFinanceIndicatorItem {
     #[serde(rename = "SECURITY_NAME_ABBR")]
     pub(crate) security_name_abbr: Option<String>,
@@ -275,6 +275,10 @@ impl TushareRow {
     pub(crate) fn new(fields: &[String], items: Vec<serde_json::Value>) -> Self {
         let values = fields.iter().cloned().zip(items).collect::<HashMap<_, _>>();
         Self { values }
+    }
+
+    pub(crate) fn set_f64(&mut self, key: &str, value: f64) {
+        self.values.insert(key.to_string(), serde_json::json!(value));
     }
 
     pub(crate) fn string(&self, key: &str) -> anyhow::Result<String> {
