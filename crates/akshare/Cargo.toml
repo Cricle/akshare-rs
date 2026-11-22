@@ -31,7 +31,7 @@ mod-spot = []
 mod-news = []
 mod-bank = []
 mod-cal = []
-mod-ta = []
+mod-ta = ["dep:fin-primitives"]
 mod-tool = []
 
 # --- Category features (aggregated) ---
@@ -63,6 +63,7 @@ tokio = { version = "1", features = ["time"] }
 sha2 = "0.10"
 calamine = "0.37"
 rust_decimal = { version = "1", features = ["serde-with-str"] }
+fin-primitives = { version = "4.0.1", default-features = false, features = ["indicators"], optional = true }
 
 # Optional deps for market-client feature
 reqwest-middleware = { version = "0.4", features = ["json"], optional = true }
