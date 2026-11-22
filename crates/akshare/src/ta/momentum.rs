@@ -2,26 +2,15 @@ use crate::types::Ohlcv;
 
 use super::types::KdjValues;
 
-/// Relative Strength Index over `period` bars (default 14).
+/// Relative Strength Index over `period` bars (default 14), Wilder-smoothed as in
+/// TA-Lib, stockstats and TradingView.
 pub fn rsi<T: Ohlcv>(candles: &[T], period: usize) -> Option<f64> {
     if candles.len() <= period {
         return None;
     }
-    let mut gains = 0.0f64;
-    let mut losses = 0.0f64;
-    for pair in candles[candles.len() - period - 1..].windows(2) {
-        let change = pair[1].close() - pair[0].close();
-        if change >= 0.0 {
-            gains += change;
-        } else {
-            losses += change.abs();
-        }
-    }
-    if losses == 0.0 {
-        return Some(100.0);
-    }
-    let rs = gains / losses;
-    Some(100.0 - 100.0 / (1.0 + rs))
+    let closes: Vec<f64> = candles.iter().map(|c| c.close()).collect();
+    let last = *fin_primitives::signals::batch_f64::rsi(&closes, period).last()?;
+    (!last.is_nan()).then_some(last)
 }
 
 /// Stochastic KDJ over `period` bars (default 9).
@@ -124,6 +113,18 @@ mod tests {
             .map(|i| make_candle(i as f64, 0.0, i as f64))
             .collect();
         assert!(rsi(&candles, 14).is_none());
+    }
+
+    #[test]
+    fn rsi_matches_wilder_reference() {
+        // Wilder's 14-day RSI sample series (StockCharts); the plain sum ratio gave 59.81.
+        let closes = [
+            44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03,
+            45.61, 46.28, 46.28, 46.00, 46.03, 46.41, 46.22, 45.64,
+        ];
+        let candles: Vec<_> = closes.iter().map(|&c| make_candle(c, c, c)).collect();
+        let r = rsi(&candles, 14).unwrap();
+        assert!((r - 57.915).abs() < 1e-3, "rsi = {r}");
     }
 
     #[test]
