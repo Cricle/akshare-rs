@@ -16,6 +16,7 @@ use crate::error::{Error, Result};
 use crate::market::eastmoney_secid;
 use crate::types::AdjustType;
 use crate::types::value_ext::ValueExt;
+use crate::util::send_and_check_text;
 
 use serde::{Deserialize, Serialize};
 
@@ -684,22 +685,17 @@ impl AkShareClient {
 
         for page in 0..100 {
             let page_str = page.to_string();
-            let response = self
-                .get("http://stock.gtimg.cn/data/index.php")
-                .query(&[
+            let Ok(text) = send_and_check_text(
+                self.get("http://stock.gtimg.cn/data/index.php").query(&[
                     ("appn", "detail"),
                     ("action", "data"),
                     ("c", tx_symbol.as_str()),
                     ("p", page_str.as_str()),
-                ])
-                .send()
-                .await;
-
-            let Ok(response) = response else {
-                break;
-            };
-
-            let Ok(text) = response.text().await else {
+                ]),
+                Some(encoding_rs::GB18030),
+            )
+            .await
+            else {
                 break;
             };
 

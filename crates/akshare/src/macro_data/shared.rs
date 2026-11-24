@@ -7,6 +7,7 @@ use crate::error::Result;
 use crate::types::MacroDataPoint;
 use crate::types::value_ext::ValueExt;
 use crate::types::wire::EmDatacenterResp;
+use crate::util::send_and_check_json;
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -36,16 +37,10 @@ pub(crate) async fn fetch_em_report(
     name_label: &str,
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
-    let resp: EmDatacenterResp = client
-        .get(url)
-        .query(&crate::util::eastmoney_datacenter_params(
-            sort_column,
-            &[("reportName", report_name)],
-        ))
-        .send()
-        .await?
-        .json()
-        .await?;
+    let resp: EmDatacenterResp = send_and_check_json(client.get(url).query(
+        &crate::util::eastmoney_datacenter_params(sort_column, &[("reportName", report_name)]),
+    ))
+    .await?;
 
     let data = resp.result.map(|r| r.data).unwrap_or_default();
     let mut items = Vec::with_capacity(data.len());
@@ -79,23 +74,18 @@ pub(crate) async fn fetch_em_indicator(
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://datacenter-web.eastmoney.com/api/data/v1/get";
     let filter = format!(r#"(INDICATOR_ID="{indicator_id}")"#);
-    let resp: EmDatacenterResp = client
-        .get(url)
-        .query(&[
-            ("reportName", report_name),
-            ("columns", "ALL"),
-            ("filter", filter.as_str()),
-            ("pageNumber", "1"),
-            ("pageSize", "5000"),
-            ("sortTypes", "-1"),
-            ("sortColumns", "REPORT_DATE"),
-            ("source", "WEB"),
-            ("client", "WEB"),
-        ])
-        .send()
-        .await?
-        .json()
-        .await?;
+    let resp: EmDatacenterResp = send_and_check_json(client.get(url).query(&[
+        ("reportName", report_name),
+        ("columns", "ALL"),
+        ("filter", filter.as_str()),
+        ("pageNumber", "1"),
+        ("pageSize", "5000"),
+        ("sortTypes", "-1"),
+        ("sortColumns", "REPORT_DATE"),
+        ("source", "WEB"),
+        ("client", "WEB"),
+    ]))
+    .await?;
 
     let data = resp.result.map(|r| r.data).unwrap_or_default();
     let mut items = Vec::with_capacity(data.len());
@@ -137,16 +127,15 @@ pub(crate) async fn fetch_jin10_report(
     name_label: &str,
 ) -> Result<Vec<MacroDataPoint>> {
     let url = "https://datacenter-api.jin10.com/reports/list_v2";
-    let resp: Jin10Resp = client
-        .get(url)
-        .query(&[("max_date", ""), ("category", "ec"), ("attr_id", attr_id)])
-        .header("x-app-id", "rU6QIu7JHe2gOUeR")
-        .header("x-csrf-token", "x-csrf-token")
-        .header("x-version", "1.0.0")
-        .send()
-        .await?
-        .json()
-        .await?;
+    let resp: Jin10Resp = send_and_check_json(
+        client
+            .get(url)
+            .query(&[("max_date", ""), ("category", "ec"), ("attr_id", attr_id)])
+            .header("x-app-id", "rU6QIu7JHe2gOUeR")
+            .header("x-csrf-token", "x-csrf-token")
+            .header("x-version", "1.0.0"),
+    )
+    .await?;
 
     let values = resp.data.map(|d| d.values).unwrap_or_default();
     let mut items = Vec::with_capacity(values.len());

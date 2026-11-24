@@ -13,6 +13,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::value_ext::ValueExt;
+use crate::util::send_and_check_text;
 
 static RE_TABLE: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"(?is)<table[^>]*>(.*?)</table>").unwrap());
@@ -151,7 +152,7 @@ async fn fetch_html_table(
     if let Some(ref_url) = referer {
         req = req.header("Referer", ref_url);
     }
-    let html = req.send().await?.text().await?;
+    let html = send_and_check_text(req, Some(encoding_rs::GB18030)).await?;
     let tables = parse_html_tables(&html);
 
     if table_index >= tables.len() {
@@ -367,7 +368,7 @@ impl AkShareClient {
     /// Sina historical dividend summary for all stocks.
     pub async fn stock_history_dividend(&self) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/go.php/vInvestConsult/kind/lsfh/index.phtml?p=1&num=50000";
-        let html = self.get(url).send().await?.text().await?;
+        let html = send_and_check_text(self.get(url), Some(encoding_rs::GB18030)).await?;
         let tables = parse_html_tables(&html);
 
         // The dividend table is typically the first table
@@ -393,7 +394,7 @@ impl AkShareClient {
         let url = format!(
             "https://vip.stock.finance.sina.com.cn/corp/go.php/vISSUE_ShareBonus/stockid/{symbol}.phtml"
         );
-        let html = self.get(&url).send().await?.text().await?;
+        let html = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let tables = parse_html_tables(&html);
 
         let table_index = if indicator == "分红" { 12 } else { 13 };
@@ -408,17 +409,15 @@ impl AkShareClient {
         if let Some(detail_date) = date {
             let detail_url =
                 "https://vip.stock.finance.sina.com.cn/corp/view/vISSUE_ShareBonusDetail.php";
-            let detail_html = self
-                .get(detail_url)
-                .query(&[
+            let detail_html = send_and_check_text(
+                self.get(detail_url).query(&[
                     ("stockid", symbol),
                     ("type", "1"),
                     ("end_date", detail_date),
-                ])
-                .send()
-                .await?
-                .text()
-                .await?;
+                ]),
+                Some(encoding_rs::GB18030),
+            )
+            .await?;
             let detail_tables = parse_html_tables(&detail_html);
             if detail_tables.len() > 12 {
                 let (h, r) = &detail_tables[12];
@@ -452,7 +451,7 @@ impl AkShareClient {
         let url = format!(
             "https://vip.stock.finance.sina.com.cn/corp/go.php/vISSUE_AddStock/stockid/{symbol}.phtml"
         );
-        let html = self.get(&url).send().await?.text().await?;
+        let html = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let tables = parse_html_tables(&html);
 
         if tables.len() <= 12 {
@@ -539,7 +538,7 @@ impl AkShareClient {
         let url = format!(
             "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CirculateStockHolder/stockid/{symbol}.phtml"
         );
-        let html = self.get(&url).send().await?.text().await?;
+        let html = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let tables = parse_html_tables(&html);
 
         if tables.len() <= 13 {
@@ -558,7 +557,7 @@ impl AkShareClient {
         let url = format!(
             "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_FundStockHolder/stockid/{symbol}.phtml"
         );
-        let html = self.get(&url).send().await?.text().await?;
+        let html = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let tables = parse_html_tables(&html);
 
         if tables.len() <= 13 {
@@ -577,7 +576,7 @@ impl AkShareClient {
         let url = format!(
             "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockHolder/stockid/{stock}.phtml"
         );
-        let html = self.get(&url).send().await?.text().await?;
+        let html = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let tables = parse_html_tables(&html);
 
         if tables.len() <= 13 {
@@ -604,7 +603,7 @@ impl AkShareClient {
         let url = format!(
             "https://money.finance.sina.com.cn/corp/go.php/vFD_FinancialGuideLine/stockid/{symbol}/ctrl/2020/displaytype/4.phtml"
         );
-        let html = self.get(&url).send().await?.text().await?;
+        let html = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
 
         // Extract year list from the page
         let mut year_list = Vec::new();
@@ -629,8 +628,8 @@ impl AkShareClient {
             let year_url = format!(
                 "https://money.finance.sina.com.cn/corp/go.php/vFD_FinancialGuideLine/stockid/{symbol}/ctrl/{year}/displaytype/4.phtml"
             );
-            let year_html = self.get(&year_url).send().await?.text().await?;
-            let tables = parse_html_tables(&year_html);
+            let html = send_and_check_text(self.get(&year_url), Some(encoding_rs::GB18030)).await?;
+            let tables = parse_html_tables(&html);
 
             // The financial table is typically at index 12
             if tables.len() <= 12 {
@@ -709,18 +708,16 @@ impl AkShareClient {
 
         let url =
             "https://vip.stock.finance.sina.com.cn/q/go.php/vComStockHold/kind/jgcg/index.phtml";
-        let html = self
-            .get(url)
-            .query(&[
+        let html = send_and_check_text(
+            self.get(url).query(&[
                 ("p", "1"),
                 ("num", "10000"),
                 ("reportdate", report_date),
                 ("quarter", quarter),
-            ])
-            .send()
-            .await?
-            .text()
-            .await?;
+            ]),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let tables = parse_html_tables(&html);
         if tables.is_empty() {
@@ -741,13 +738,12 @@ impl AkShareClient {
         quarter: &str,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>> {
         let url = "https://vip.stock.finance.sina.com.cn/q/api/jsonp.php/var%20details=/ComStockHoldService.getJGCGDetail";
-        let body = self
-            .get(url)
-            .query(&[("symbol", stock), ("quarter", quarter)])
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = send_and_check_text(
+            self.get(url)
+                .query(&[("symbol", stock), ("quarter", quarter)]),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         // Parse JSONP: var details=({...});
         let json_start = body.find('{').unwrap_or(0);
@@ -814,13 +810,11 @@ impl AkShareClient {
         let base_url = "http://stock.finance.sina.com.cn/stock/go.php/vIR_RatingNewest/index.phtml";
 
         // First, get the page to find the correct URL for the requested symbol
-        let index_html = self
-            .get(base_url)
-            .query(&[("num", "40"), ("p", "1")])
-            .send()
-            .await?
-            .text()
-            .await?;
+        let index_html = send_and_check_text(
+            self.get(base_url).query(&[("num", "40"), ("p", "1")]),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         // Extract the URL map from the left menu
         // Look for links in the menu that match our symbol
@@ -839,13 +833,11 @@ impl AkShareClient {
             )));
         };
 
-        let html = self
-            .get(&url)
-            .query(&[("num", "10000"), ("p", "1")])
-            .send()
-            .await?
-            .text()
-            .await?;
+        let html = send_and_check_text(
+            self.get(&url).query(&[("num", "10000"), ("p", "1")]),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let tables = parse_html_tables(&html);
         if tables.is_empty() {
@@ -867,13 +859,11 @@ impl AkShareClient {
         let url = format!(
             "http://stock.finance.sina.com.cn/stock/go.php/vIR_StockSearch/key/{symbol}.phtml"
         );
-        let html = self
-            .get(&url)
-            .query(&[("num", "5000"), ("p", "1")])
-            .send()
-            .await?
-            .text()
-            .await?;
+        let html = send_and_check_text(
+            self.get(&url).query(&[("num", "5000"), ("p", "1")]),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let tables = parse_html_tables(&html);
         if tables.is_empty() {

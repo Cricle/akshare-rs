@@ -3,6 +3,7 @@ use crate::error::{Error, Result};
 use crate::types::{
     CandlePoint, CapitalFlowPoint, HkFinancialSnapshot, QuoteSnapshot, StockSearchResult,
 };
+use crate::util::send_and_check_text;
 
 impl AkShareClient {
     /// Get market cap for an HK stock from Tencent API.
@@ -13,13 +14,11 @@ impl AkShareClient {
         let code = format!("{code:0>5}");
 
         let url = format!("https://qt.gtimg.cn/q=r_hk{code}");
-        let resp = self
-            .get(&url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await?
-            .text()
-            .await?;
+        let resp = send_and_check_text(
+            self.get(&url).header("User-Agent", "Mozilla/5.0"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         // Parse Tencent response: v_r_hkXXXXX="field0~field1~...~fieldN";
         if let Some(start) = resp.find('"')

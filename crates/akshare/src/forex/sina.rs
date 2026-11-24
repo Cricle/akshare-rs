@@ -3,7 +3,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::ForexRate;
-use crate::util::parse_f64_safe;
+use crate::util::{parse_f64_safe, send_and_check_text};
 
 /// Sina forex symbols for major currency pairs against CNY.
 const SINA_FOREX_SYMBOLS: &[&str] = &[
@@ -36,13 +36,12 @@ impl AkShareClient {
         let symbols_csv = SINA_FOREX_SYMBOLS.join(",");
         let url = format!("https://hq.sinajs.cn/list={symbols_csv}");
 
-        let body = self
-            .get(&url)
-            .header("Referer", "https://finance.sina.com.cn")
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = send_and_check_text(
+            self.get(&url)
+                .header("Referer", "https://finance.sina.com.cn"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let mut items = Vec::new();
         for (idx, line) in body.lines().enumerate() {

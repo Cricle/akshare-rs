@@ -278,7 +278,8 @@ impl TushareRow {
     }
 
     pub(crate) fn set_f64(&mut self, key: &str, value: f64) {
-        self.values.insert(key.to_string(), serde_json::json!(value));
+        self.values
+            .insert(key.to_string(), serde_json::json!(value));
     }
 
     pub(crate) fn string(&self, key: &str) -> anyhow::Result<String> {

@@ -5,6 +5,7 @@ use crate::error::{Error, Result};
 use crate::types::{CandlePoint, HkFinancialSnapshot, QuoteSnapshot};
 use crate::util::{
     amplitude_pct, apply_change_metrics, normalize_trade_date, parse_f64_safe, parse_i64_safe,
+    send_and_check_json, send_and_check_text,
 };
 
 /// Parse a JSON Value to f64, handling both number and string types.
@@ -19,7 +20,7 @@ impl AkShareClient {
     pub(crate) async fn tencent_a_share_quote(&self, symbol: &str) -> Result<QuoteSnapshot> {
         let ts = crate::market::tencent_market_symbol(symbol)?;
         let url = format!("https://qt.gtimg.cn/q={ts}");
-        let body = self.get(&url).send().await?.text().await?;
+        let body = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let line = body
             .lines()
             .find(|l| l.contains("v_"))
@@ -61,7 +62,7 @@ impl AkShareClient {
             "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={ts},{period},,,{limit},{adjust}"
         );
 
-        let resp: Resp = self.get(&url).send().await?.json().await?;
+        let resp: Resp = send_and_check_json(self.get(&url)).await?;
         let data = resp
             .data
             .ok_or_else(|| Error::upstream("empty tencent kline data"))?;
@@ -116,7 +117,7 @@ impl AkShareClient {
         let code = crate::market::normalize_hk_symbol(symbol)
             .ok_or_else(|| Error::invalid_input(format!("invalid HK symbol: {symbol}")))?;
         let url = format!("https://qt.gtimg.cn/q=r_hk{code}");
-        let body = self.get(&url).send().await?.text().await?;
+        let body = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let line = body
             .lines()
             .find(|l| l.contains("v_"))
@@ -151,7 +152,7 @@ impl AkShareClient {
         let code = crate::market::normalize_hk_symbol(symbol)
             .ok_or_else(|| Error::invalid_input(format!("invalid HK symbol: {symbol}")))?;
         let url = format!("https://qt.gtimg.cn/q=r_hk{code}");
-        let body = self.get(&url).send().await?.text().await?;
+        let body = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         let line = body
             .lines()
             .find(|l| l.contains("v_"))
@@ -199,7 +200,7 @@ impl AkShareClient {
             "https://web.ifzq.gtimg.cn/appstock/app/hkfqkline/get?_var=kline_dayqfq&param={hk_symbol},day,,,{limit},qfq"
         );
 
-        let resp_text = self.get(&url).send().await?.text().await?;
+        let resp_text = send_and_check_text(self.get(&url), Some(encoding_rs::GB18030)).await?;
         // Parse JSONP response: kline_dayqfq={...}
         let json_str = if let Some(start) = resp_text.find('{') {
             &resp_text[start..]

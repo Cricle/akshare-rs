@@ -121,12 +121,21 @@ async fn test_bond_convertible_hist() {
 
 #[tokio::test]
 async fn test_bond_china_yield() {
-    // Eastmoney report RPT_BOND_GOV_CN_YIELD is retired; function returns error
     let server = MockServer::start().await;
-    mock_any_get(&server, ".*", serde_json::json!({})).await;
+    let html = r#"<html><table><tr><td>说明</td></tr></table><table>
+        <tr><th>日期</th><th>3月</th><th>6月</th><th>1年</th><th>3年</th><th>5年</th><th>7年</th><th>10年</th><th>30年</th></tr>
+        <tr><td>2024-01-02</td><td>1.8</td><td>1.9</td><td>2.0</td><td>2.1</td><td>2.2</td><td>2.3</td><td>2.4</td><td>2.5</td></tr>
+    </table></html>"#;
+    mock_any_get_text(&server, ".*", html).await;
     let client = mock_client(&server);
-    let result = client.bond_china_yield("2024-01-01", "2024-01-31").await;
-    assert!(result.is_err());
+    let result = client
+        .bond_china_yield("2024-01-01", "2024-01-31")
+        .await
+        .expect("fixture should parse");
+    assert_eq!(result.len(), 8);
+    assert_eq!(result[0].date, "2024-01-02");
+    assert_eq!(result[0].symbol, "3月");
+    assert_eq!(result[0].yield_rate, Some(1.8));
 }
 
 // ---------------------------------------------------------------------------

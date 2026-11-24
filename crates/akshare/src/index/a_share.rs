@@ -177,25 +177,12 @@ impl AkShareClient {
     ///
     /// `symbol` uses Sina format, e.g. "sh000300", "sz399006".
     pub async fn stock_zh_index_daily(&self, symbol: &str) -> Result<Vec<CandlePoint>> {
-        // Sina uses JS-encoded data; try to parse the response directly
-        let url =
-            format!("https://finance.sina.com.cn/realstock/company/{symbol}/hisdata/klc_kl.js");
-        let response =
-            crate::util::send_and_check(self.get(&url).query(&[("d", "2020_2_4")])).await?;
-
-        let body = response.text().await.map_err(Error::from)?;
-        // The response is JS-encoded; we can't decode it without a JS runtime.
-        // Return an error suggesting alternatives.
-        if body.contains("function d(") || body.contains("eval(") {
-            return Err(Error::upstream(
-                "sina index daily data requires JS decoding; \
-                 use index_a_share_candles() via Eastmoney instead",
-            ));
-        }
-
-        Err(Error::upstream(format!(
-            "unexpected sina response format for {symbol}"
-        )))
+        let normalized = symbol
+            .trim()
+            .strip_prefix("sh")
+            .or_else(|| symbol.trim().strip_prefix("sz"))
+            .unwrap_or(symbol.trim());
+        self.index_a_share_candles(normalized, 5000).await
     }
 }
 

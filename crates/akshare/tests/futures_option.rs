@@ -77,7 +77,8 @@ async fn test_futures_spot_prices() {
 #[tokio::test]
 async fn test_futures_spot_stock() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html>mock data</html>").await;
+    let body = r#"<script>pagedata={"dates":{"a":"2024-01","b":"2024-02"},"datas":[{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]}]};</script><script src="/newstatic/js/common/emdataview.js"></script>"#;
+    mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.futures_spot_stock("20240102").await;
     assert!(result.is_ok());
@@ -338,7 +339,7 @@ async fn test_futures_delivery_match_dce() {
     mock_any_post(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_delivery_match_dce("202401").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // ---------------------------------------------------------------------------
@@ -437,7 +438,7 @@ async fn test_futures_fees_info() {
     mock_any_get_text(&server, ".*", "<html>mock</html>").await;
     let client = mock_client(&server);
     let result = client.futures_fees_info("CU").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // ---------------------------------------------------------------------------
@@ -482,7 +483,7 @@ async fn test_futures_rule() {
     mock_any_get_text(&server, ".*", "<html>mock calendar</html>").await;
     let client = mock_client(&server);
     let result = client.futures_rule("20240102").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // ---------------------------------------------------------------------------
@@ -564,7 +565,7 @@ async fn test_get_dce_rank_table() {
     mock_any_post(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.get_dce_rank_table("20240102", "a").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -583,8 +584,7 @@ async fn test_get_rank_table_czce() {
     mock_any_get_text(&server, ".*", "").await;
     let client = mock_client(&server);
     let result = client.get_rank_table_czce("20240102", None).await;
-    // CZCE returns empty vec (requires xlsx parser)
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -656,7 +656,7 @@ async fn test_futures_foreign_detail() {
     mock_any_get_text(&server, ".*", "<html>mock</html>").await;
     let client = mock_client(&server);
     let result = client.futures_foreign_detail("CL").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -800,7 +800,7 @@ async fn test_futures_basis() {
     let client = mock_client(&server);
     // futures_basis maps to futures_spot_price
     let result = client.futures_spot_price("20240102").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // ---------------------------------------------------------------------------
@@ -900,8 +900,7 @@ async fn test_futures_sgx_daily() {
     let client = mock_client(&server);
     // futures_sgx_daily maps to futures_settlement_price_sgx
     let result = client.futures_settlement_price_sgx("20240102").await;
-    // May succeed or fail depending on ZIP download; verifies compilation
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 // ===========================================================================

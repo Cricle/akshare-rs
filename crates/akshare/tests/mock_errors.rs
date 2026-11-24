@@ -5,6 +5,27 @@ use wiremock::matchers::{method, path_regex};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 #[tokio::test]
+async fn unavailable_stubs_are_explicit() {
+    let client = common::mock_client(&wiremock::MockServer::start().await);
+
+    assert_eq!(
+        client.stock_esg_rate("600000").await.unwrap_err().kind(),
+        ErrorKind::NotFound
+    );
+    assert_eq!(
+        client.stock_ipo_benefit().await.unwrap_err().kind(),
+        ErrorKind::Unavailable
+    );
+    assert_eq!(
+        client
+            .stock_info_sz_name_code("A股列表")
+            .await
+            .unwrap_err()
+            .kind(),
+        ErrorKind::NotFound
+    );
+}
+#[tokio::test]
 async fn test_mock_error_em_datacenter_http_404() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
@@ -20,9 +41,7 @@ async fn test_mock_error_em_datacenter_http_404() {
     let client = common::mock_client(&server);
     let result = client.macro_china_gdp().await;
     assert!(result.is_err());
-    // fetch_em_report does not call error_for_status(), so a 404 body
-    // fails JSON deserialization and maps to Upstream (not NotFound).
-    assert_eq!(result.unwrap_err().kind(), ErrorKind::Upstream);
+    assert_eq!(result.unwrap_err().kind(), ErrorKind::NotFound);
 }
 
 #[tokio::test]
@@ -41,9 +60,7 @@ async fn test_mock_error_em_datacenter_http_403() {
     let client = common::mock_client(&server);
     let result = client.macro_china_gdp().await;
     assert!(result.is_err());
-    // fetch_em_report does not call error_for_status(), so a 403 body
-    // fails JSON deserialization and maps to Upstream (not Restricted).
-    assert_eq!(result.unwrap_err().kind(), ErrorKind::Upstream);
+    assert_eq!(result.unwrap_err().kind(), ErrorKind::Restricted);
 }
 
 #[tokio::test]

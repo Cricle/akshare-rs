@@ -12,6 +12,8 @@ pub enum ErrorKind {
     Restricted,
     MissingCredentials,
     NotFound,
+    /// The upstream endpoint is retired or requires an unsupported runtime capability.
+    Unavailable,
     Upstream,
     InvalidInput,
     Decode,
@@ -27,6 +29,7 @@ impl ErrorKind {
             Self::Restricted => "restricted",
             Self::MissingCredentials => "missing_credentials",
             Self::NotFound => "not_found",
+            Self::Unavailable => "unavailable",
             Self::Upstream => "upstream_error",
             Self::InvalidInput => "invalid_input",
             Self::Decode => "decode_error",
@@ -66,6 +69,11 @@ impl Error {
     /// Convenience constructor for [`ErrorKind::NotFound`].
     pub fn not_found(msg: impl Into<String>) -> Self {
         Self::new(ErrorKind::NotFound, msg)
+    }
+
+    /// Convenience constructor for [`ErrorKind::Unavailable`].
+    pub fn unavailable(msg: impl Into<String>) -> Self {
+        Self::new(ErrorKind::Unavailable, msg)
     }
 
     /// Convenience constructor for [`ErrorKind::Upstream`].

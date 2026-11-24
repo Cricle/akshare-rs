@@ -803,17 +803,9 @@ impl AkShareClient {
     /// Spot-futures comparison data from 100ppi.com (生意社).
     ///
     /// Returns a placeholder noting HTML scraping is required.
-    pub async fn futures_spot_sys(&self, symbol: &str, indicator: &str) -> Result<Vec<Row>> {
-        let mut items = Vec::new();
-        let mut r = Row::new();
-        r.insert("symbol".into(), serde_json::json!(symbol));
-        r.insert("indicator".into(), serde_json::json!(indicator));
-        r.insert("source".into(), serde_json::json!("100ppi.com"));
-        r.insert(
-            "note".into(),
-            serde_json::json!("requires HTML scraping from 100ppi.com"),
-        );
-        items.push(r);
-        Ok(items)
+    pub async fn futures_spot_sys(&self, _symbol: &str, _indicator: &str) -> Result<Vec<Row>> {
+        Err(Error::unavailable(
+            "futures_spot_sys requires 100ppi HTML table parsing",
+        ))
     }
 }

@@ -5,6 +5,7 @@ use crate::error::{Error, Result};
 use crate::types::CandlePoint;
 use crate::util::{
     amplitude_pct, apply_change_metrics, normalize_trade_date, parse_f64_safe, parse_i64_safe,
+    send_and_check_text,
 };
 
 impl AkShareClient {
@@ -13,16 +14,14 @@ impl AkShareClient {
         let stooq_sym = symbol.to_lowercase();
         let url = format!("https://stooq.com/q/d/l/?s={stooq_sym}&i=d");
 
-        let body = self
-            .get(&url)
-            .header(
+        let body = send_and_check_text(
+            self.get(&url).header(
                 "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            )
-            .send()
-            .await?
-            .text()
-            .await?;
+            ),
+            None,
+        )
+        .await?;
 
         let mut items = Vec::new();
         for line in body.lines().skip(1) {

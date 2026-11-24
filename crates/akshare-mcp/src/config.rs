@@ -226,7 +226,26 @@ impl ToolsConfig {
     }
 }
 
+fn is_loopback_bind(bind: &str) -> bool {
+    let host = bind.rsplit_once(':').map_or(bind, |(host, _)| host);
+    matches!(
+        host.trim_matches(['[', ']']),
+        "127.0.0.1" | "localhost" | "::1"
+    )
+}
+
 impl Config {
+    /// Validate settings that could expose an unauthenticated HTTP server.
+    pub fn validate_http_security(&self) -> anyhow::Result<()> {
+        if self.http.mcp_key.is_empty() && !is_loopback_bind(&self.http.bind) {
+            anyhow::bail!(
+                "http.mcp_key must be set when binding MCP HTTP server to {}",
+                self.http.bind
+            );
+        }
+        Ok(())
+    }
+
     /// Load configuration from a TOML file.
     pub fn load(path: &Path) -> anyhow::Result<Self> {
         let content = std::fs::read_to_string(path)?;
@@ -301,6 +320,23 @@ mcp_key = "test-key"
         assert!(result.is_err());
     }
 
+    #[test]
+    fn test_non_loopback_requires_key() {
+        let config: Config = toml::from_str(
+            r#"
+[http]
+bind = "0.0.0.0:8080"
+"#,
+        )
+        .unwrap();
+        assert!(config.validate_http_security().is_err());
+    }
+
+    #[test]
+    fn test_loopback_may_skip_key() {
+        let config: Config = toml::from_str("").unwrap();
+        assert!(config.validate_http_security().is_ok());
+    }
     #[test]
     fn test_default_tools_config() {
         let cfg = ToolsConfig::default();

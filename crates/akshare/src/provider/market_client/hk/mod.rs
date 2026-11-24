@@ -1,6 +1,5 @@
 mod news;
 mod tencent;
-mod test_helpers;
 
 use super::news_filter::{build_dated_news_query, merge_ranked_news};
 use super::{

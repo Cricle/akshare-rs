@@ -5,7 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, HkIndexSpotItem};
-use crate::util::parse_f64_safe;
+use crate::util::{parse_f64_safe, send_and_check_text};
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -36,15 +36,12 @@ impl AkShareClient {
             hkSSEMEGA,hkVHSI";
         let url = format!("https://hq.sinajs.cn/rn=mtf2t&list={symbols}");
 
-        let body = self
-            .get(&url)
-            .header("Referer", "https://vip.stock.finance.sina.com.cn/")
-            .send()
-            .await
-            .map_err(Error::from)?
-            .text()
-            .await
-            .map_err(Error::from)?;
+        let body = send_and_check_text(
+            self.get(&url)
+                .header("Referer", "https://vip.stock.finance.sina.com.cn/"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let mut items = Vec::new();
         for line in body.lines() {

@@ -3,8 +3,9 @@
 //! Covers CZCE, DCE, SHFE, and GFEX warehouse receipt daily data.
 
 use crate::client::AkShareClient;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::types::Row;
+use crate::util::read_spreadsheet_rows;
 
 impl AkShareClient {
     /// CZCE warehouse receipt data.
@@ -14,23 +15,34 @@ impl AkShareClient {
         let url = format!(
             "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataWhsheet.{ext}"
         );
-        let _body = self
+        let bytes = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
+            .error_for_status()?
             .bytes()
             .await?;
-
+        let rows = read_spreadsheet_rows(&bytes)?;
         let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("czce"));
-        row.insert("date".into(), serde_json::json!(date));
-        row.insert(
-            "note".into(),
-            serde_json::json!("XLS/XLSX binary - requires spreadsheet parser"),
-        );
-        items.push(row);
+        for row in rows.into_iter().skip(1) {
+            if row.len() < 4 || row[0].trim().is_empty() {
+                continue;
+            }
+            let mut item = Row::new();
+            item.insert("variety".into(), serde_json::json!(row[0]));
+            item.insert("warehouse".into(), serde_json::json!(row[1]));
+            item.insert("previous_receipt_qty".into(), serde_json::json!(row[2]));
+            item.insert("receipt_qty".into(), serde_json::json!(row[3]));
+            if let Some(change) = row.get(4) {
+                item.insert("change".into(), serde_json::json!(change));
+            }
+            item.insert("date".into(), serde_json::json!(date));
+            items.push(item);
+        }
+        if items.is_empty() {
+            return Err(Error::not_found("CZCE returned no warehouse receipt data"));
+        }
         Ok(items)
     }
 

@@ -3,7 +3,9 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, QuoteSnapshot};
-use crate::util::{amplitude_pct, apply_change_metrics, parse_f64_safe, parse_i64_safe};
+use crate::util::{
+    amplitude_pct, apply_change_metrics, parse_f64_safe, parse_i64_safe, send_and_check_text,
+};
 
 impl AkShareClient {
     /// Sina A-share realtime quote.
@@ -20,13 +22,12 @@ impl AkShareClient {
         };
         let sina_symbol = format!("{prefix}{code}");
         let url = format!("https://hq.sinajs.cn/list={sina_symbol}");
-        let body = self
-            .get(&url)
-            .header("Referer", "https://finance.sina.com.cn")
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = send_and_check_text(
+            self.get(&url)
+                .header("Referer", "https://finance.sina.com.cn"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let data = body
             .split_once('=')
@@ -68,13 +69,12 @@ impl AkShareClient {
         let url = format!(
             "https://stock.finance.sina.com.cn/usstock/api/jsonp.php/IO.XSRV2.CallbackList/US_MinKService.getDailyK?symbol={symbol}&_var=kline_dayqfq&range={limit}d"
         );
-        let body = self
-            .get(&url)
-            .header("Referer", "https://finance.sina.com.cn")
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = send_and_check_text(
+            self.get(&url)
+                .header("Referer", "https://finance.sina.com.cn"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let json_str = body
             .split_once('(')

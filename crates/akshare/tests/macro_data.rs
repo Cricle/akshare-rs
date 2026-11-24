@@ -1,7 +1,11 @@
 mod common;
 
+use std::io::Write;
+
 use wiremock::matchers::{method, path_regex};
 use wiremock::{Mock, MockServer, ResponseTemplate};
+use zip::ZipWriter;
+use zip::write::SimpleFileOptions;
 
 // ---------------------------------------------------------------------------
 // Helper: mount GET + POST catch-all returning em_datacenter_response
@@ -22,9 +26,77 @@ async fn mount_em_mocks(server: &MockServer) {
         .await;
 }
 
-// ---------------------------------------------------------------------------
-// Macro: generate a no-arg test that calls one method
-// ---------------------------------------------------------------------------
+fn cnbs_xlsx_fixture() -> Vec<u8> {
+    fn cell(reference: &str, value: &str, numeric: bool) -> String {
+        if numeric {
+            format!(r#"<c r="{reference}" t="n"><v>{value}</v></c>"#)
+        } else {
+            format!(r#"<c r="{reference}" t="inlineStr"><is><t>{value}</t></is></c>"#)
+        }
+    }
+    let rows = [
+        format!(r#"<row r="1">{}</row>"#, cell("A1", "NIFD CNBS", false)),
+        format!(
+            r#"<row r="2">{}</row>"#,
+            [
+                ("A2", "Period", false),
+                ("B2", "Household", false),
+                ("C2", "Non-financial corporations", false),
+                ("D2", "General government", false),
+                ("E2", "Central government", false),
+                ("F2", "Local government", false),
+                ("G2", "Non financial sector", false),
+                ("H2", "Financial sector(asset side)", false),
+                ("I2", "Financial sector(liability side)", false),
+            ]
+            .into_iter()
+            .map(|(r, v, n)| cell(r, v, n))
+            .collect::<String>()
+        ),
+        format!(
+            r#"<row r="3">{}</row>"#,
+            [
+                ("A3", "2005-03-31", false),
+                ("B3", "17.6", true),
+                ("C3", "104.6", true),
+                ("D3", "26.4", true),
+                ("E3", "18", true),
+                ("F3", "8.4", true),
+                ("G3", "148.6", true),
+                ("H3", "20.9", true),
+                ("I3", "21.1", true),
+            ]
+            .into_iter()
+            .map(|(r, v, n)| cell(r, v, n))
+            .collect::<String>()
+        ),
+    ];
+    let sheet = format!(
+        r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>{}</sheetData></worksheet>"#,
+        rows.join("")
+    );
+    let workbook = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Data" sheetId="1" r:id="rId1"/></sheets></workbook>"#;
+    let rels = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>"#;
+    let workbook_rels = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>"#;
+    let content_types = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>"#;
+    let mut output = std::io::Cursor::new(Vec::new());
+    let mut zip = ZipWriter::new(&mut output);
+    let options = SimpleFileOptions::default();
+    for (name, content) in [
+        ("[Content_Types].xml", content_types),
+        ("_rels/.rels", rels),
+        ("xl/workbook.xml", workbook),
+        ("xl/_rels/workbook.xml.rels", workbook_rels),
+        ("xl/worksheets/sheet1.xml", sheet.as_str()),
+    ] {
+        zip.start_file(name, options)
+            .expect("start xlsx fixture entry");
+        zip.write_all(content.as_bytes())
+            .expect("write xlsx fixture entry");
+    }
+    zip.finish().expect("finish xlsx fixture");
+    output.into_inner()
+}
 
 macro_rules! macro_test {
     ($test_name:ident, $method:ident) => {
@@ -317,7 +389,23 @@ macro_test!(test_macro_china_freight_index, macro_china_freight_index);
 // China — Other / special methods
 // ===========================================================================
 
-macro_test!(test_macro_cnbs, macro_cnbs);
+#[tokio::test]
+async fn test_macro_cnbs() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path_regex(".*"))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(cnbs_xlsx_fixture()))
+        .mount(&server)
+        .await;
+    let client = common::mock_client(&server);
+    let result = client
+        .macro_cnbs()
+        .await
+        .expect("CNBS fixture should parse");
+    assert_eq!(result.len(), 8);
+    assert_eq!(result[0].date, "2005-03");
+    assert_eq!(result[0].value, 17.6);
+}
 macro_test!(test_macro_china_shrzgm, macro_china_shrzgm);
 macro_test!(test_macro_rmb_loan, macro_rmb_loan);
 macro_test!(test_macro_rmb_deposit, macro_rmb_deposit);

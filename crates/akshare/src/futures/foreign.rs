@@ -2,7 +2,9 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::futures::contract_detail::parse_sina_contract_detail;
 use crate::types::{FuturesKlinePoint, Row};
+use crate::util::send_and_check_text;
 
 impl AkShareClient {
     /// Foreign futures historical daily kline from Sina.
@@ -362,22 +364,29 @@ impl AkShareClient {
     }
 
     /// Foreign futures contract detail from Sina.
+    ///
+    /// `symbol`: Sina foreign futures code (e.g., "ZSD", "HG", "CL"). The page
+    /// shares the same specification-table layout as domestic Sina contracts.
     pub async fn futures_foreign_detail(&self, symbol: &str) -> Result<Vec<Row>> {
+        let symbol = symbol.trim();
+        if symbol.is_empty() {
+            return Err(Error::invalid_input("symbol must not be empty"));
+        }
         let url = format!("https://finance.sina.com.cn/futures/quotes/{symbol}.shtml");
-        let body = self
-            .get(&url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = send_and_check_text(
+            self.get(&url)
+                .header("User-Agent", "Mozilla/5.0")
+                .header("Referer", "https://finance.sina.com.cn"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("symbol".into(), serde_json::json!(symbol));
-        row.insert("source".into(), serde_json::json!("sina_foreign"));
-        row.insert("html_len".into(), serde_json::json!(body.len()));
-        items.push(row);
+        let items = parse_sina_contract_detail(&body);
+        if items.is_empty() {
+            return Err(Error::not_found(format!(
+                "Sina foreign futures contract detail not found for {symbol}"
+            )));
+        }
         Ok(items)
     }
 }

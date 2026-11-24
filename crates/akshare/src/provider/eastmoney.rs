@@ -8,7 +8,7 @@ use crate::types::{
     AnnouncementDetail, AnnouncementItem, BillboardEntry, BillboardSeatDetail, CandlePoint,
     CapitalFlowPoint, SectorConstituent, SectorSnapshot, StockSearchResult,
 };
-use crate::util::{parse_candle_line, parse_csv_line, parse_f64_safe};
+use crate::util::{parse_candle_line, parse_csv_line, parse_f64_safe, send_and_check_json};
 
 use serde::Deserialize;
 
@@ -683,8 +683,7 @@ impl AkShareClient {
                 builder = builder.query(&[(k, v)]);
             }
 
-            let resp = crate::util::send_and_check(builder).await?;
-            let payload: EmDatacenterResp = resp.json().await.map_err(Error::from)?;
+            let payload: EmDatacenterResp = crate::util::send_and_check_json(builder).await?;
             let result = payload
                 .result
                 .ok_or_else(|| Error::upstream("eastmoney datacenter missing result"))?;
@@ -711,8 +710,8 @@ impl AkShareClient {
         params: &[(&str, &str)],
     ) -> Result<serde_json::Value> {
         let url = format!("https://push2ex.eastmoney.com/{path}");
-        let resp = crate::util::send_and_check(self.get(&url).query(params)).await?;
-        let payload: serde_json::Value = resp.json().await.map_err(Error::from)?;
+        let payload: serde_json::Value =
+            crate::util::send_and_check_json(self.get(&url).query(params)).await?;
         Ok(payload)
     }
 
@@ -724,7 +723,7 @@ impl AkShareClient {
         page_size: &str,
         sort_field: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        let resp = crate::util::send_and_check(
+        let payload: ClistResp = crate::util::send_and_check_json(
             self.get("https://push2.eastmoney.com/api/qt/clist/get")
                 .query(&crate::util::eastmoney_clist_params(
                     page_size,
@@ -732,8 +731,6 @@ impl AkShareClient {
                 )),
         )
         .await?;
-
-        let payload: ClistResp = resp.json().await.map_err(Error::from)?;
         let items = payload.data.and_then(|d| d.diff).unwrap_or_default();
 
         if items.is_empty() {
@@ -826,8 +823,7 @@ impl AkShareClient {
             builder = builder.query(&[(k, v)]);
         }
 
-        let resp = crate::util::send_and_check(builder).await?;
-        let payload: KlineResp = resp.json().await.map_err(Error::from)?;
+        let payload: KlineResp = crate::util::send_and_check_json(builder).await?;
         let klines = payload.data.and_then(|d| d.klines).unwrap_or_default();
 
         if klines.is_empty() {
@@ -950,7 +946,7 @@ impl AkShareClient {
             "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={symbol},{period},,,{limit},{adjust}"
         );
 
-        let body: serde_json::Value = self.get(&url).send().await?.json().await?;
+        let body: serde_json::Value = send_and_check_json(self.get(&url)).await?;
 
         let data = body.get("data").and_then(|d| d.get(&*symbol));
         let klines_array = data
@@ -1026,14 +1022,13 @@ impl AkShareClient {
             "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}DateAjaxNew"
         );
         let code_lower = code.to_lowercase();
-        let resp = crate::util::send_and_check(self.get(&date_url).query(&[
-            ("companyType", company_type.as_str()),
-            ("reportDateType", date_type),
-            ("code", code_lower.as_str()),
-        ]))
-        .await?;
-
-        let date_json: serde_json::Value = resp.json().await.map_err(Error::from)?;
+        let date_json: serde_json::Value =
+            crate::util::send_and_check_json(self.get(&date_url).query(&[
+                ("companyType", company_type.as_str()),
+                ("reportDateType", date_type),
+                ("code", code_lower.as_str()),
+            ]))
+            .await?;
         let dates = date_json
             .get("data")
             .and_then(|d| d.as_array())
@@ -1060,16 +1055,15 @@ impl AkShareClient {
             let data_url = format!(
                 "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/{report_type}AjaxNew"
             );
-            let resp = crate::util::send_and_check(self.get(&data_url).query(&[
-                ("companyType", company_type.as_str()),
-                ("reportDateType", date_type),
-                ("reportType", "1"),
-                ("dates", dates_param.as_str()),
-                ("code", code_lower.as_str()),
-            ]))
-            .await?;
-
-            let json: serde_json::Value = resp.json().await.map_err(Error::from)?;
+            let json: serde_json::Value =
+                crate::util::send_and_check_json(self.get(&data_url).query(&[
+                    ("companyType", company_type.as_str()),
+                    ("reportDateType", date_type),
+                    ("reportType", "1"),
+                    ("dates", dates_param.as_str()),
+                    ("code", code_lower.as_str()),
+                ]))
+                .await?;
             if let Some(data) = json.get("data").and_then(|d| d.as_array()) {
                 all_data.extend(data.clone());
             }
