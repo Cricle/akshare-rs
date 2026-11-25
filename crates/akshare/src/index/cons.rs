@@ -6,6 +6,7 @@
 
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
+use crate::util::{read_spreadsheet_rows, zero_pad_code};
 
 impl AkShareClient {
     /// 新浪 — 股票指数成份股 (新版接口).
@@ -116,19 +117,39 @@ impl AkShareClient {
     ///
     /// Scrapes HTML pages; returns raw JSON values.
     pub async fn index_stock_cons(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        Err(Error::upstream(format!(
-            "index_stock_cons for {symbol} requires HTML scraping with pagination; \
-             use index_stock_cons_sina() or a dedicated HTML parser"
-        )))
+        self.index_stock_cons_sina(symbol).await
     }
 
     /// 中证指数网站 — 成份股目录.
     ///
     /// The upstream returns an XLS file which cannot be parsed in pure Rust.
-    pub async fn index_stock_cons_csindex(&self, _symbol: &str) -> Result<Vec<serde_json::Value>> {
-        Err(Error::upstream(
-            "csindex constituents are returned as XLS — not supported in pure Rust",
-        ))
+    pub async fn index_stock_cons_csindex(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
+        let url = format!(
+            "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/{symbol}cons.xls"
+        );
+        let bytes = crate::util::send_and_check(self.get(&url))
+            .await?
+            .bytes()
+            .await?;
+        let rows = read_spreadsheet_rows(&bytes)?;
+        Ok(rows
+            .into_iter()
+            .skip(1)
+            .filter(|row| row.len() >= 9)
+            .map(|row| {
+                serde_json::json!({
+                    "date": row[0],
+                    "index_code": zero_pad_code(&row[1]),
+                    "index_name": row[2],
+                    "index_name_en": row[3],
+                    "security_code": zero_pad_code(&row[4]),
+                    "security_name": row[5],
+                    "security_name_en": row[6],
+                    "exchange": row[7],
+                    "exchange_en": row[8],
+                })
+            })
+            .collect())
     }
 
     /// 中证指数网站 — 样本权重.
@@ -136,11 +157,35 @@ impl AkShareClient {
     /// The upstream returns an XLS file which cannot be parsed in pure Rust.
     pub async fn index_stock_cons_weight_csindex(
         &self,
-        _symbol: &str,
+        symbol: &str,
     ) -> Result<Vec<serde_json::Value>> {
-        Err(Error::upstream(
-            "csindex weights are returned as XLS — not supported in pure Rust",
-        ))
+        let url = format!(
+            "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/{symbol}closeweight.xls"
+        );
+        let bytes = crate::util::send_and_check(self.get(&url))
+            .await?
+            .bytes()
+            .await?;
+        let rows = read_spreadsheet_rows(&bytes)?;
+        Ok(rows
+            .into_iter()
+            .skip(1)
+            .filter(|row| row.len() >= 10)
+            .map(|row| {
+                serde_json::json!({
+                    "date": row[0],
+                    "index_code": zero_pad_code(&row[1]),
+                    "index_name": row[2],
+                    "index_name_en": row[3],
+                    "security_code": zero_pad_code(&row[4]),
+                    "security_name": row[5],
+                    "security_name_en": row[6],
+                    "exchange": row[7],
+                    "exchange_en": row[8],
+                    "weight": row[9],
+                })
+            })
+            .collect())
     }
 }
 

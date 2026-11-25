@@ -78,7 +78,8 @@ async fn test_get_dce_rank_table() {
     mock_any_post(&server, ".*", serde_json::json!({"data": []})).await;
     let client = mock_client(&server);
     let result = client.get_dce_rank_table("20240315", "a").await;
-    result.unwrap();
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::Decode);
 }
 
 #[tokio::test]
@@ -193,11 +194,9 @@ async fn test_get_shfe_rank_table() {
 #[tokio::test]
 async fn test_get_rank_table_czce() {
     let server = MockServer::start().await;
-    // CZCE uses XLS binary; the method returns Ok(vec![]) after download
-    mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.get_rank_table_czce("20240315", None).await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -475,7 +474,7 @@ async fn test_futures_czce_position_rank() {
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_czce_position_rank("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -495,7 +494,7 @@ async fn test_futures_dce_position_rank() {
     mock_any_post(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_dce_position_rank("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -542,7 +541,7 @@ async fn test_futures_hold_pos_sina() {
     mock_any_get_text(
         &server,
         ".*",
-        "<html><table><tr><td>test data</td></tr></table></html>",
+        "<html><table><tr><th>名次</th><th>会员简称</th><th>成交量</th><th>比上交易增减</th></tr><tr><td>1</td><td>测试会员</td><td>100</td><td>5</td></tr></table></html>",
     )
     .await;
     let client = mock_client(&server);
@@ -590,7 +589,7 @@ async fn test_futures_delivery_dce() {
     mock_any_post(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_delivery_dce("202403").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -599,7 +598,7 @@ async fn test_futures_to_spot_dce() {
     mock_any_post(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_to_spot_dce("202403").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -608,7 +607,7 @@ async fn test_futures_delivery_match_czce() {
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_delivery_match_czce("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -617,7 +616,7 @@ async fn test_futures_delivery_czce() {
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_delivery_czce("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -626,7 +625,7 @@ async fn test_futures_delivery_match_dce() {
     mock_any_post(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_delivery_match_dce("202403").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -635,7 +634,7 @@ async fn test_futures_to_spot_czce() {
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_to_spot_czce("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 // ===========================================================================
@@ -687,7 +686,7 @@ async fn test_futures_warehouse_receipt_czce() {
     mock_any_get(&server, ".*", serde_json::json!({})).await;
     let client = mock_client(&server);
     let result = client.futures_warehouse_receipt_czce("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -754,7 +753,7 @@ async fn test_futures_spot_price() {
     .await;
     let client = mock_client(&server);
     let result = client.futures_spot_price("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -765,7 +764,8 @@ async fn test_futures_spot_price_daily() {
     let result = client
         .futures_spot_price_daily("20240301", "20240315")
         .await;
-    result.unwrap();
+    assert!(result.is_ok());
+    assert!(result.unwrap().is_empty());
 }
 
 #[tokio::test]
@@ -774,7 +774,7 @@ async fn test_futures_spot_price_previous() {
     mock_any_get_text(&server, ".*", "<html>100ppi sf2 data</html>").await;
     let client = mock_client(&server);
     let result = client.futures_spot_price_previous("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 // ===========================================================================
@@ -1170,7 +1170,7 @@ async fn test_futures_inventory_99() {
     mock_any_get_text(&server, ".*", "<html>99qh inventory data</html>").await;
     let client = mock_client(&server);
     let result = client.futures_inventory_99("豆一").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 // ===========================================================================
@@ -1273,7 +1273,7 @@ async fn test_futures_foreign_detail() {
     mock_any_get_text(&server, ".*", "<html>GC contract details</html>").await;
     let client = mock_client(&server);
     let result = client.futures_foreign_detail("GC").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 // ===========================================================================
@@ -1286,7 +1286,7 @@ async fn test_futures_fees_info_openctp() {
     mock_any_get_text(&server, ".*", "<html><table>fee data</table></html>").await;
     let client = mock_client(&server);
     let result = client.futures_fees_info_openctp().await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -1323,7 +1323,7 @@ async fn test_futures_fees_info() {
     mock_any_get_text(&server, ".*", "<html>9qihuo fee table</html>").await;
     let client = mock_client(&server);
     let result = client.futures_fees_info("rb").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -1332,7 +1332,7 @@ async fn test_futures_comm_info() {
     mock_any_get_text(&server, ".*", "<html>9qihuo commission data</html>").await;
     let client = mock_client(&server);
     let result = client.futures_comm_info("所有").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 // ===========================================================================
@@ -1345,7 +1345,7 @@ async fn test_futures_contract_detail_sina() {
     mock_any_get_text(&server, ".*", "<html>Sina contract details</html>").await;
     let client = mock_client(&server);
     let result = client.futures_contract_detail_sina("rb2405").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -1659,7 +1659,7 @@ async fn test_futures_spot_sys() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     let result = client.futures_spot_sys("rb", "price").await;
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // ===========================================================================
@@ -1689,19 +1689,19 @@ async fn test_futures_news_shmet() {
 #[tokio::test]
 async fn test_futures_rule_gtja() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html>GTJA trading calendar</html>").await;
+    mock_any_get_text(&server, ".*", "<html><table><tr><th>品种</th><th>交易规则</th></tr><tr><td>铜</td><td>正常</td></tr></table></html>").await;
     let client = mock_client(&server);
     let result = client.futures_rule_gtja("20240315").await;
-    result.unwrap();
+    assert!(result.is_ok());
 }
 
 #[tokio::test]
 async fn test_futures_rule() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html>GTJA rules</html>").await;
+    mock_any_get_text(&server, ".*", "<html><table><tr><th>品种</th><th>交易规则</th></tr><tr><td>铜</td><td>正常</td></tr></table></html>").await;
     let client = mock_client(&server);
     let result = client.futures_rule("20240315").await;
-    result.unwrap();
+    assert!(result.is_ok());
 }
 
 #[tokio::test]
@@ -1735,7 +1735,7 @@ async fn test_futures_settlement_price_sgx() {
     mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.futures_settlement_price_sgx("20240315").await;
-    result.unwrap();
+    assert!(result.is_err());
 }
 
 // ===========================================================================
@@ -1870,8 +1870,9 @@ async fn test_futures_hist_table_em() {
 #[tokio::test]
 async fn test_futures_spot_stock_em() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html>eastmoney spot stock data</html>").await;
+    let body = r#"<script>pagedata={"dates":{"a":"2024-01","b":"2024-02"},"datas":[{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]},{"list":[]}]};</script><script src="/newstatic/js/common/emdataview.js"></script>"#;
+    mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.futures_spot_stock_em("能源").await;
-    result.unwrap();
+    assert!(result.is_ok());
 }

@@ -420,10 +420,60 @@ impl AkShareClient {
     ///
     /// Returns ETF fund shares data from Shenzhen Stock Exchange.
     pub async fn fund_etf_scale_szse(&self) -> Result<Vec<serde_json::Value>> {
-        // SZSE returns xlsx content; cannot parse in pure Rust without a library.
-        Err(Error::decode(
-            "SZSE ETF scale data requires xlsx parsing (not supported in pure Rust)",
-        ))
+        let bytes = self
+            .get("https://fund.szse.cn/api/report/ShowReport")
+            .query(&[
+                ("SHOWTYPE", "xlsx"),
+                ("CATALOGID", "1000_lf"),
+                ("TABKEY", "tab1"),
+                ("random", "0.07610353191740105"),
+            ])
+            .header(
+                "Referer",
+                "https://fund.szse.cn/marketdata/fundslist/index.html",
+            )
+            .header("User-Agent", "Mozilla/5.0")
+            .send()
+            .await?
+            .error_for_status()?
+            .bytes()
+            .await?;
+        let rows = crate::util::read_spreadsheet_rows(&bytes)?;
+        if rows.is_empty() {
+            return Ok(Vec::new());
+        }
+        let headers = rows[0]
+            .iter()
+            .map(|value| value.trim().to_string())
+            .collect::<Vec<_>>();
+        Ok(rows
+            .into_iter()
+            .skip(1)
+            .filter(|row| !row.iter().all(|value| value.trim().is_empty()))
+            .map(|row| {
+                let mut item = serde_json::Map::new();
+                for (index, header) in headers.iter().enumerate() {
+                    if header.is_empty() {
+                        continue;
+                    }
+                    let key = if header == "当前规模(份)" {
+                        "基金份额"
+                    } else {
+                        header.as_str()
+                    };
+                    let value = row.get(index).map(String::as_str).unwrap_or("").trim();
+                    let value = if key == "基金代码" {
+                        serde_json::json!(crate::util::zero_pad_code(value))
+                    } else if key == "基金份额" {
+                        serde_json::json!(value.replace(',', "").parse::<f64>().unwrap_or(0.0))
+                    } else {
+                        serde_json::json!(value)
+                    };
+                    item.insert(key.to_string(), value);
+                }
+                serde_json::Value::Object(item)
+            })
+            .collect())
     }
 
     // --- THS functions ---

@@ -3,7 +3,8 @@
 use super::helpers::{json_str, json_str_opt};
 use super::types::{DelistInfo, NameChangeInfo, NewsEntry};
 use crate::client::AkShareClient;
-use crate::error::Result;
+use crate::error::{Error, Result};
+use crate::util::{read_spreadsheet_rows, zero_pad_code};
 
 impl AkShareClient {
     /// 东方财富-财经早餐
@@ -339,28 +340,47 @@ impl AkShareClient {
     ///
     /// `symbol` is one of: "A股列表", "B股列表", "CDR列表", "AB股列表"
     pub async fn stock_info_sz_name_code(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
-        let indicator_map = std::collections::HashMap::from([
-            ("A股列表", "tab1"),
-            ("B股列表", "tab2"),
-            ("CDR列表", "tab3"),
-            ("AB股列表", "tab4"),
-        ]);
-        let tab_key = indicator_map.get(symbol).unwrap_or(&"tab1");
-        let resp = self
-            .get("https://www.szse.cn/api/report/ShowReport")
+        let tab_key = match symbol {
+            "A股列表" => "tab1",
+            "B股列表" => "tab2",
+            "CDR列表" => "tab3",
+            "AB股列表" => "tab4",
+            _ => return Err(Error::invalid_input(format!("unknown SZSE list: {symbol}"))),
+        };
+        let url = "https://www.szse.cn/api/report/ShowReport";
+        let bytes = self
+            .get(url)
             .query(&[
                 ("SHOWTYPE", "xlsx"),
                 ("CATALOGID", "1110"),
-                ("TABKEY", *tab_key),
+                ("TABKEY", tab_key),
                 ("random", "0.6935816432433362"),
             ])
+            .header("Referer", "https://www.szse.cn/")
             .send()
             .await?
-            .error_for_status()?;
-        let bytes = resp.bytes().await?;
-        // Parse XLSX - return raw bytes info for now
-        // In a full implementation, we'd parse the XLSX file
-        Ok(vec![serde_json::json!({"raw_length": bytes.len()})])
+            .error_for_status()?
+            .bytes()
+            .await?;
+        let rows = read_spreadsheet_rows(&bytes)?;
+        let mut items = Vec::new();
+        for row in rows.into_iter().skip(1) {
+            if row.len() < 3 {
+                continue;
+            }
+            let mut value = serde_json::Map::new();
+            value.insert("板块".into(), serde_json::json!(row[0]));
+            value.insert("代码".into(), serde_json::json!(zero_pad_code(&row[1])));
+            value.insert("简称".into(), serde_json::json!(row[2]));
+            if let Some(date) = row.get(3) {
+                value.insert("上市日期".into(), serde_json::json!(date));
+            }
+            items.push(serde_json::Value::Object(value));
+        }
+        if items.is_empty() {
+            return Err(Error::not_found("SZSE returned no stock list data"));
+        }
+        Ok(items)
     }
 
     /// 北京证券交易所-股票列表 (Python: stock_info_bj_name_code)

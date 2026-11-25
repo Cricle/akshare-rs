@@ -4,6 +4,163 @@ use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{FundMoneyRankItem, FundNavHistory, FundSnapshot};
 use serde::Deserialize;
+use serde_json::{Value, json};
+
+fn is_date_cell(value: &str) -> bool {
+    let trimmed = value.trim();
+    let bytes = trimmed.as_bytes();
+    bytes.len() == 10
+        && bytes[4] == b'-'
+        && bytes[7] == b'-'
+        && bytes
+            .iter()
+            .enumerate()
+            .all(|(index, byte)| index == 4 || index == 7 || byte.is_ascii_digit())
+}
+
+/// Extract a balanced `[...]` literal that follows `key` in a JavaScript blob.
+fn extract_js_array<'a>(text: &'a str, key: &str) -> Option<&'a str> {
+    let key_pos = text.find(key)?;
+    let after_key = &text[key_pos + key.len()..];
+    let start = after_key.find('[')?;
+    let bytes = after_key.as_bytes();
+    let mut depth = 0_i32;
+    let mut quote: Option<u8> = None;
+    let mut escaped = false;
+    for (index, byte) in bytes.iter().enumerate().skip(start) {
+        if let Some(active) = quote {
+            if escaped {
+                escaped = false;
+            } else if *byte == b'\\' {
+                escaped = true;
+            } else if *byte == active {
+                quote = None;
+            }
+            continue;
+        }
+        match *byte {
+            b'"' | b'\'' => quote = Some(*byte),
+            b'[' => depth += 1,
+            b']' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(&after_key[start..=index]);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+fn parse_js_string_array(text: &str, keys: &[&str]) -> Vec<String> {
+    for key in keys {
+        let Some(raw) = extract_js_array(text, key) else {
+            continue;
+        };
+        if let Ok(Value::Array(items)) = serde_json::from_str::<Value>(raw) {
+            let values: Vec<String> = items
+                .into_iter()
+                .filter_map(|item| item.as_str().map(str::to_string))
+                .collect();
+            if !values.is_empty() {
+                return values;
+            }
+        }
+    }
+    Vec::new()
+}
+
+fn money_column_names(dates: &[String]) -> Vec<String> {
+    if dates.len() >= 6 {
+        vec![
+            "基金代码".to_string(),
+            "基金简称".to_string(),
+            format!("{}-万份收益", dates[0]),
+            format!("{}-7日年化%", dates[1]),
+            format!("{}-单位净值", dates[2]),
+            format!("{}-万份收益", dates[3]),
+            format!("{}-7日年化%", dates[4]),
+            format!("{}-单位净值", dates[5]),
+            "日涨幅".to_string(),
+            "成立日期".to_string(),
+            "基金经理".to_string(),
+            "手续费".to_string(),
+            "可购全部".to_string(),
+        ]
+    } else {
+        vec![
+            "基金代码".to_string(),
+            "基金简称".to_string(),
+            "万份收益".to_string(),
+            "7日年化%".to_string(),
+            "单位净值".to_string(),
+            "万份收益-前一日".to_string(),
+            "7日年化%-前一日".to_string(),
+            "单位净值-前一日".to_string(),
+            "日涨幅".to_string(),
+            "成立日期".to_string(),
+            "基金经理".to_string(),
+            "手续费".to_string(),
+            "可购全部".to_string(),
+        ]
+    }
+}
+
+fn clean_fund_name(name: &str) -> String {
+    name.replace("基金吧档案", "")
+        .replace("基金吧", "")
+        .trim()
+        .to_string()
+}
+
+fn money_rows_from_datas(datas: &[Value], names: &[String]) -> Vec<Value> {
+    let mut result = Vec::new();
+    for item in datas {
+        if let Some(object) = item.as_object() {
+            let mut row = serde_json::Map::new();
+            for name in names {
+                if let Some(value) = object.get(name) {
+                    row.insert(name.clone(), value.clone());
+                }
+            }
+            if !row.is_empty() {
+                result.push(Value::Object(row));
+            }
+            continue;
+        }
+        let Some(values) = item.as_array() else {
+            continue;
+        };
+        let mut offset = 0_usize;
+        if values.len() > names.len()
+            && values
+                .first()
+                .and_then(Value::as_i64)
+                .is_some_and(|rank| rank > 0)
+            && values
+                .get(1)
+                .and_then(Value::as_str)
+                .is_some_and(|code| code.chars().all(|ch| ch.is_ascii_digit()))
+        {
+            offset = 1;
+        }
+        let mut row = serde_json::Map::new();
+        for (index, name) in names.iter().enumerate() {
+            let value = values.get(index + offset).cloned().unwrap_or(Value::Null);
+            row.insert(name.clone(), value);
+        }
+        if let Some(name) = row.get_mut("基金简称")
+            && let Some(text) = name.as_str()
+        {
+            *name = Value::String(clean_fund_name(text));
+        }
+        if !row.is_empty() {
+            result.push(Value::Object(row));
+        }
+    }
+    result
+}
 
 #[derive(Debug, Deserialize)]
 struct HbRankEnvelope {
@@ -91,24 +248,96 @@ impl AkShareClient {
         Ok(snapshots)
     }
 
-    /// Fetch money fund daily data (Python: fund_money_fund_daily).
+    /// Fetch money fund daily data (Python: `fund_money_fund_daily`).
+    ///
+    /// The page historically embedded a `rankData` JavaScript object; current
+    /// deployments render the same data into the `#oTable` HTML table.  Both
+    /// layouts are supported.
     pub async fn fund_money_fund_daily(&self) -> Result<Vec<serde_json::Value>> {
-        let response =
-            crate::util::send_and_check(self.get("https://fund.eastmoney.com/HBJJ_pjsyl.html"))
-                .await?;
+        let text = crate::util::send_and_check_text(
+            self.get("https://fund.eastmoney.com/HBJJ_pjsyl.html"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
-        let text = response.text().await.map_err(Error::from)?;
-        // This endpoint returns HTML; we need to parse the table.
-        // Return raw HTML extraction attempt or error.
-        if text.is_empty() {
-            return Err(Error::not_found("no money fund daily data"));
+        // Preferred layout: `var rankData = {datas: [...], ...};`.
+        if text.contains("rankData")
+            && let Some(raw_datas) = extract_js_array(&text, "datas")
+            && let Ok(Value::Array(datas)) = serde_json::from_str::<Value>(raw_datas)
+            && !datas.is_empty()
+        {
+            let mut dates = parse_js_string_array(&text, &["showDay", "showDayArr", "dates"]);
+            if dates.is_empty() {
+                dates = parse_js_string_array(&text, &["dateArr", "day"]);
+            }
+            let names = money_column_names(&dates);
+            let rows = money_rows_from_datas(&datas, &names);
+            if !rows.is_empty() {
+                return Ok(rows);
+            }
         }
-        // Extract data from HTML table using simple parsing
-        // The HTML contains a table with fund data; we return a placeholder error
-        // since full HTML parsing requires a dedicated library.
-        Err(Error::decode(
-            "money fund daily data requires HTML table parsing",
-        ))
+
+        // Fallback: parse the HTML table embedded in the page.
+        let tables = crate::util::parse_html_tables(&text);
+        for table in tables {
+            let Some(header_index) = table
+                .iter()
+                .position(|row| row.iter().any(|cell| cell.trim().contains("基金代码")))
+            else {
+                continue;
+            };
+            let header = &table[header_index];
+            let code_index = header
+                .iter()
+                .position(|cell| cell.trim().contains("基金代码"));
+            let name_index = header
+                .iter()
+                .position(|cell| cell.trim().contains("基金简称"));
+            let (Some(code_index), Some(name_index)) = (code_index, name_index) else {
+                continue;
+            };
+
+            let dates: Vec<String> = header
+                .iter()
+                .filter(|cell| is_date_cell(cell))
+                .map(|cell| cell.trim().to_string())
+                .collect();
+            let names = money_column_names(&dates);
+            let base = code_index.min(name_index);
+
+            let mut rows = Vec::new();
+            for row in table.iter().skip(header_index + 1) {
+                if row.iter().all(|cell| cell.trim().is_empty()) {
+                    continue;
+                }
+                // Skip the second header row (万份收益 / 7日年化% / 单位净值 …).
+                if row.iter().any(|cell| {
+                    let value = cell.trim();
+                    value == "万份收益" || value == "7日年化%" || value == "单位净值"
+                }) {
+                    continue;
+                }
+                let code = row.get(code_index).map(String::as_str).unwrap_or("");
+                let name = row.get(name_index).map(String::as_str).unwrap_or("");
+                if code.trim().is_empty() && name.trim().is_empty() {
+                    continue;
+                }
+
+                let mut object = serde_json::Map::new();
+                object.insert("基金代码".to_string(), json!(code.trim()));
+                object.insert("基金简称".to_string(), json!(clean_fund_name(name)));
+                for (offset, column) in names.iter().enumerate().skip(2) {
+                    let value = row.get(base + offset).map(|cell| cell.trim()).unwrap_or("");
+                    object.insert(column.clone(), json!(value));
+                }
+                rows.push(Value::Object(object));
+            }
+            if !rows.is_empty() {
+                return Ok(rows);
+            }
+        }
+
+        Err(Error::not_found("no money fund daily data"))
     }
 
     /// Fetch money fund info (historical NAV) from Eastmoney.

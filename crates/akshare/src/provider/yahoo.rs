@@ -5,7 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::CandlePoint;
-use crate::util::{amplitude_pct, apply_change_metrics};
+use crate::util::{amplitude_pct, apply_change_metrics, send_and_check_json};
 
 // ---------------------------------------------------------------------------
 // Wire types
@@ -65,16 +65,11 @@ impl AkShareClient {
             "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval={interval}&range={range}"
         );
 
-        let resp: YfChartResponse = self
-            .get(&url)
-            .header(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            )
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: YfChartResponse = send_and_check_json(self.get(&url).header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        ))
+        .await?;
 
         let result = resp
             .chart

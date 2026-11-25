@@ -535,10 +535,9 @@ async fn test_stock_industry_change_cninfo() {
 #[tokio::test]
 async fn test_stock_industry_clf_hist_sw() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body>SW Index</body></html>").await;
     let client = mock_client(&server);
     let result = client.stock_industry_clf_hist_sw("801010").await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::Unavailable);
 }
 
 #[tokio::test]
@@ -649,7 +648,7 @@ async fn test_stock_lhb_detail_daily_sina() {
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
     let result = client.stock_lhb_detail_daily("20240101").await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 #[tokio::test]
@@ -658,7 +657,7 @@ async fn test_stock_lhb_ggtj_sina() {
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
     let result = client.stock_lhb_ggtj().await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 #[tokio::test]
@@ -667,7 +666,7 @@ async fn test_stock_lhb_jgmx_sina() {
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
     let result = client.stock_lhb_jgmx().await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 #[tokio::test]
@@ -676,7 +675,7 @@ async fn test_stock_lhb_jgzz_sina() {
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
     let result = client.stock_lhb_jgzz("5").await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 #[tokio::test]
@@ -685,7 +684,7 @@ async fn test_stock_lhb_yytj_sina() {
     mock_any_get_text(&server, ".*", "<html></html>").await;
     let client = mock_client(&server);
     let result = client.stock_lhb_yytj("5").await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 // ===========================================================================
@@ -926,6 +925,58 @@ async fn test_stock_cyq_em() {
     assert!(result.is_ok());
 }
 
+/// Values below were produced by running the upstream `CYQCalculator` JS
+/// (see akshare/stock/flow/stock_cyq_em.py) over the same three klines.
+#[tokio::test]
+async fn test_stock_cyq_em_chip_distribution() {
+    let server = MockServer::start().await;
+    let klines = [
+        "2024-01-02,10.00,10.50,10.80,9.90,100000,0,0,0,0,2.5",
+        "2024-01-03,10.60,10.20,10.90,10.10,120000,0,0,0,0,3.0",
+        "2024-01-04,10.10,11.00,11.20,10.00,90000,0,0,0,0,1.5",
+    ];
+    mock_any_get(&server, ".*", em_kline_response(&klines)).await;
+    let client = mock_client(&server);
+
+    let rows = client.stock_cyq("000001", "qfq").await.unwrap();
+    assert_eq!(rows.len(), 3);
+    assert_eq!(rows[0].date, "2024-01-02");
+
+    let close_enough = |actual: f64, expected: f64| {
+        assert!(
+            (actual - expected).abs() < 1e-9,
+            "expected {expected}, got {actual}"
+        );
+    };
+
+    close_enough(rows[0].benefit_part, 0.8066666666666795);
+    close_enough(rows[0].avg_cost, 10.33);
+    close_enough(rows[0].pct_90_low, 10.03);
+    close_enough(rows[0].pct_90_high, 10.65);
+    close_enough(rows[0].pct_90_concentration, 0.02998065764023207);
+    close_enough(rows[0].pct_70_low, 10.13);
+    close_enough(rows[0].pct_70_high, 10.54);
+    close_enough(rows[0].pct_70_concentration, 0.019835510401548143);
+
+    close_enough(rows[1].benefit_part, 0.1258009655475009);
+    close_enough(rows[1].avg_cost, 10.42);
+    close_enough(rows[1].pct_90_low, 10.10);
+    close_enough(rows[1].pct_90_high, 10.73);
+    close_enough(rows[1].pct_90_concentration, 0.030244839174267922);
+    close_enough(rows[1].pct_70_low, 10.22);
+    close_enough(rows[1].pct_70_high, 10.62);
+    close_enough(rows[1].pct_70_concentration, 0.019193857965451068);
+
+    close_enough(rows[2].benefit_part, 0.9888946050048294);
+    close_enough(rows[2].avg_cost, 10.45);
+    close_enough(rows[2].pct_90_low, 10.12);
+    close_enough(rows[2].pct_90_high, 10.82);
+    close_enough(rows[2].pct_90_concentration, 0.03342884431709643);
+    close_enough(rows[2].pct_70_low, 10.23);
+    close_enough(rows[2].pct_70_high, 10.68);
+    close_enough(rows[2].pct_70_concentration, 0.021520803443328518);
+}
+
 #[tokio::test]
 async fn test_stock_dividend_cninfo() {
     let server = MockServer::start().await;
@@ -949,7 +1000,23 @@ async fn test_stock_ebs_lg() {
 #[tokio::test]
 async fn test_stock_esg_rate_sina() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "<html><body>ESG</body></html>").await;
+    let body = serde_json::json!({
+        "result": {
+            "data": {
+                "total": "1",
+                "data": [{
+                    "symbol": "600000",
+                    "name": "浦发银行",
+                    "esg_score": "75.5",
+                    "environment_score": "70",
+                    "social_score": "78",
+                    "governance_score": "80",
+                    "rating_date": "2024-01-01"
+                }]
+            }
+        }
+    });
+    mock_any_get(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.stock_esg_rate("600000").await;
     assert!(result.is_ok());
@@ -982,9 +1049,8 @@ async fn test_stock_gddh_em() {
 async fn test_stock_ipo_benefit_ths() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    // No HTTP needed, returns hardcoded
     let result = client.stock_ipo_benefit().await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::Unavailable);
 }
 
 #[tokio::test]
@@ -1069,7 +1135,17 @@ async fn test_stock_news_main_cx() {
 #[tokio::test]
 async fn test_stock_price_js() {
     let server = MockServer::start().await;
-    mock_any_get_text(&server, ".*", "").await;
+    let mut fields = vec![""; 45];
+    fields[0] = "sh600000";
+    fields[1] = "浦发银行";
+    fields[3] = "10.5";
+    fields[5] = "10.0";
+    fields[6] = "1000";
+    fields[30] = "2024-01-01";
+    fields[33] = "11.0";
+    fields[34] = "9.5";
+    let quote = format!(r#"v_sh600000="{};";"#, fields.join("~"));
+    mock_any_get_text(&server, ".*", &quote).await;
     let client = mock_client(&server);
     let result = client.stock_price_js("sh600000").await;
     assert!(result.is_ok());
@@ -1143,18 +1219,16 @@ async fn test_stock_sector_detail() {
 async fn test_stock_sgt_reference_exchange_rate_sse() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    // No HTTP needed, returns hardcoded
     let result = client.stock_sgt_reference_exchange_rate_sse().await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 #[tokio::test]
 async fn test_stock_sgt_settlement_exchange_rate_sse() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    // No HTTP needed, returns hardcoded
     let result = client.stock_sgt_settlement_exchange_rate_sse().await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 #[tokio::test]
@@ -2475,18 +2549,16 @@ async fn test_stock_cg_lawsuit_cninfo() {
 async fn test_stock_sgt_reference_exchange_rate_szse() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    // No HTTP needed, returns hardcoded
     let result = client.stock_sgt_reference_exchange_rate_szse().await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 #[tokio::test]
 async fn test_stock_sgt_settlement_exchange_rate_szse() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
-    // No HTTP needed, returns hardcoded
     let result = client.stock_sgt_settlement_exchange_rate_szse().await;
-    assert!(result.is_ok());
+    assert_eq!(result.unwrap_err().kind(), akshare::ErrorKind::NotFound);
 }
 
 // ============================================================================

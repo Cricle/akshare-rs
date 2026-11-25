@@ -583,29 +583,37 @@ impl MarketDataClient {
                         .map(|d| d.ends_with("1231"))
                         .unwrap_or(false)
                 })
-                .and_then(|row| {
-                    row.optional_string("end_date")
-                        .map(|d| d[..4].to_string())
-                })
+                .and_then(|row| row.optional_string("end_date").map(|d| d[..4].to_string()))
                 .or_else(|| {
-                    income_rows.first()?.optional_string("end_date")
+                    income_rows
+                        .first()?
+                        .optional_string("end_date")
                         .map(|d| d[..4].to_string())
                 });
             match latest_fiscal_year {
                 Some(ref year) => {
-                    let year_rows: Vec<_> = income_rows.iter().filter(|row| {
-                        row.optional_string("end_date")
-                            .map(|d| d.starts_with(year))
-                            .unwrap_or(false)
-                    }).collect();
-                    let total_ni: f64 = year_rows.iter().filter_map(|row| {
-                        row.optional_f64("n_income_attr_p")
-                            .or_else(|| row.optional_f64("n_income"))
-                    }).sum();
-                    let total_rev: f64 = year_rows.iter().filter_map(|row| {
-                        row.optional_f64("total_revenue")
-                            .or_else(|| row.optional_f64("revenue"))
-                    }).sum();
+                    let year_rows: Vec<_> = income_rows
+                        .iter()
+                        .filter(|row| {
+                            row.optional_string("end_date")
+                                .map(|d| d.starts_with(year))
+                                .unwrap_or(false)
+                        })
+                        .collect();
+                    let total_ni: f64 = year_rows
+                        .iter()
+                        .filter_map(|row| {
+                            row.optional_f64("n_income_attr_p")
+                                .or_else(|| row.optional_f64("n_income"))
+                        })
+                        .sum();
+                    let total_rev: f64 = year_rows
+                        .iter()
+                        .filter_map(|row| {
+                            row.optional_f64("total_revenue")
+                                .or_else(|| row.optional_f64("revenue"))
+                        })
+                        .sum();
                     if total_ni > 0.0 || total_rev > 0.0 {
                         let base = year_rows.last().or(year_rows.first()).map(|r| (*r).clone());
                         base.map(|mut row| {
@@ -621,7 +629,8 @@ impl MarketDataClient {
                 }
                 None => None,
             }
-        }.or_else(|| income_rows.first().cloned());
+        }
+        .or_else(|| income_rows.first().cloned());
 
         let balance_rows = match self
             .tushare_query(
@@ -693,9 +702,14 @@ impl MarketDataClient {
             .or_else(|| fina_indicator_rows.first());
 
         let fiscal_year_end = Self::a_share_fiscal_year_end_candidate(
-            income.as_ref()
+            income
+                .as_ref()
                 .and_then(|row| row.optional_string("end_date"))
-                .or_else(|| balance.as_ref().and_then(|row| row.optional_string("end_date")))
+                .or_else(|| {
+                    balance
+                        .as_ref()
+                        .and_then(|row| row.optional_string("end_date"))
+                })
                 .or_else(|| {
                     eastmoney_main.as_ref().and_then(|row| {
                         row.report_date
@@ -796,28 +810,34 @@ impl MarketDataClient {
             market_cap: provisional_market_cap,
             net_income_usd: {
                 // Prefer latest standalone quarter from tushare, annualized
-                let tushare_latest_q = income_rows.iter().filter_map(|row| {
-                    let ni = row.optional_f64("n_income_attr_p")
-                        .or_else(|| row.optional_f64("n_income"))?;
-                    let end_date = row.optional_string("end_date")?;
-                    let month = end_date.get(4..6)?;
-                    let multiplier: f64 = match month {
-                        "03" => 4.0,
-                        "06" => 2.0,
-                        "09" => 4.0 / 3.0,
-                        "12" => 1.0,
-                        _ => return None,
-                    };
-                    // Sort key: end_date descending, prefer latest quarter
-                    Some((end_date, ni * multiplier))
-                }).max_by(|a, b| a.0.cmp(&b.0)).map(|(_, v)| v);
+                let tushare_latest_q = income_rows
+                    .iter()
+                    .filter_map(|row| {
+                        let ni = row
+                            .optional_f64("n_income_attr_p")
+                            .or_else(|| row.optional_f64("n_income"))?;
+                        let end_date = row.optional_string("end_date")?;
+                        let month = end_date.get(4..6)?;
+                        let multiplier: f64 = match month {
+                            "03" => 4.0,
+                            "06" => 2.0,
+                            "09" => 4.0 / 3.0,
+                            "12" => 1.0,
+                            _ => return None,
+                        };
+                        // Sort key: end_date descending, prefer latest quarter
+                        Some((end_date, ni * multiplier))
+                    })
+                    .max_by(|a, b| a.0.cmp(&b.0))
+                    .map(|(_, v)| v);
 
                 // Fallback: eastmoney cumulative income, annualized by quarter
-                let eastmoney_annualized = eastmoney_main
-                    .as_ref()
-                    .and_then(|item| {
-                        let raw = item.parent_net_profit.or(item.holder_profit)?;
-                        let multiplier = item.report_date.as_ref().and_then(|d| {
+                let eastmoney_annualized = eastmoney_main.as_ref().and_then(|item| {
+                    let raw = item.parent_net_profit.or(item.holder_profit)?;
+                    let multiplier = item
+                        .report_date
+                        .as_ref()
+                        .and_then(|d| {
                             let month = d.get(5..7)?;
                             match month {
                                 "03" => Some(4.0),
@@ -826,9 +846,10 @@ impl MarketDataClient {
                                 "12" => Some(1.0),
                                 _ => None,
                             }
-                        }).unwrap_or(1.0);
-                        Some(raw * multiplier)
-                    });
+                        })
+                        .unwrap_or(1.0);
+                    Some(raw * multiplier)
+                });
 
                 // Last resort: annual sum from tushare
                 let annual_sum = income.as_ref().and_then(|row| {
@@ -839,32 +860,44 @@ impl MarketDataClient {
                 tushare_latest_q.or(eastmoney_annualized).or(annual_sum)
             },
             revenues_usd: {
-                let tushare_rev_q = income_rows.iter().filter_map(|row| {
-                    let rev = row.optional_f64("total_revenue")
-                        .or_else(|| row.optional_f64("revenue"))?;
-                    let end_date = row.optional_string("end_date")?;
-                    let month = end_date.get(4..6)?;
-                    let multiplier: f64 = match month {
-                        "03" => 4.0, "06" => 2.0, "09" => 4.0 / 3.0, "12" => 1.0,
-                        _ => return None,
-                    };
-                    Some((end_date, rev * multiplier))
-                }).max_by(|a, b| a.0.cmp(&b.0)).map(|(_, v)| v);
+                let tushare_rev_q = income_rows
+                    .iter()
+                    .filter_map(|row| {
+                        let rev = row
+                            .optional_f64("total_revenue")
+                            .or_else(|| row.optional_f64("revenue"))?;
+                        let end_date = row.optional_string("end_date")?;
+                        let month = end_date.get(4..6)?;
+                        let multiplier: f64 = match month {
+                            "03" => 4.0,
+                            "06" => 2.0,
+                            "09" => 4.0 / 3.0,
+                            "12" => 1.0,
+                            _ => return None,
+                        };
+                        Some((end_date, rev * multiplier))
+                    })
+                    .max_by(|a, b| a.0.cmp(&b.0))
+                    .map(|(_, v)| v);
 
-                let eastmoney_rev = eastmoney_main
-                    .as_ref()
-                    .and_then(|item| {
-                        let raw = item.total_operate_reve.or(item.operate_income)?;
-                        let multiplier = item.report_date.as_ref().and_then(|d| {
+                let eastmoney_rev = eastmoney_main.as_ref().and_then(|item| {
+                    let raw = item.total_operate_reve.or(item.operate_income)?;
+                    let multiplier = item
+                        .report_date
+                        .as_ref()
+                        .and_then(|d| {
                             let month = d.get(5..7)?;
                             match month {
-                                "03" => Some(4.0), "06" => Some(2.0),
-                                "09" => Some(4.0 / 3.0), "12" => Some(1.0),
+                                "03" => Some(4.0),
+                                "06" => Some(2.0),
+                                "09" => Some(4.0 / 3.0),
+                                "12" => Some(1.0),
                                 _ => None,
                             }
-                        }).unwrap_or(1.0);
-                        Some(raw * multiplier)
-                    });
+                        })
+                        .unwrap_or(1.0);
+                    Some(raw * multiplier)
+                });
 
                 let annual_rev = income.as_ref().and_then(|row| {
                     row.optional_f64("total_revenue")
@@ -873,7 +906,8 @@ impl MarketDataClient {
 
                 tushare_rev_q.or(eastmoney_rev).or(annual_rev)
             },
-            assets_usd: balance.as_ref()
+            assets_usd: balance
+                .as_ref()
                 .and_then(|row| row.optional_f64("total_assets"))
                 .or_else(|| {
                     eastmoney_main
@@ -881,7 +915,8 @@ impl MarketDataClient {
                         .and_then(|item| item.totalassets.or(item.total_assets))
                 })
                 .or(eastmoney_assets),
-            liabilities_usd: balance.as_ref()
+            liabilities_usd: balance
+                .as_ref()
                 .and_then(|row| row.optional_f64("total_liab"))
                 .or_else(|| {
                     eastmoney_main
@@ -889,7 +924,8 @@ impl MarketDataClient {
                         .and_then(|item| item.totliab.or(item.total_liabilities))
                 })
                 .or(eastmoney_liabilities),
-            stockholders_equity_usd: balance.as_ref()
+            stockholders_equity_usd: balance
+                .as_ref()
                 .and_then(|row| row.optional_f64("total_hldr_eqy_exc_min_int"))
                 .or_else(|| {
                     eastmoney_main
@@ -897,7 +933,8 @@ impl MarketDataClient {
                         .and_then(|item| item.total_parent_equity)
                 })
                 .or(eastmoney_equity),
-            cash_and_equivalents_usd: balance.as_ref()
+            cash_and_equivalents_usd: balance
+                .as_ref()
                 .and_then(|row| row.optional_f64("money_cap"))
                 .or_else(|| {
                     eastmoney_balance
@@ -908,9 +945,12 @@ impl MarketDataClient {
             gross_profit_usd: eastmoney_main
                 .as_ref()
                 .and_then(|item| item.gross_profit.or(item.mlr)),
-            operating_income_usd: fina_indicator.as_ref().and_then(|row| row.optional_f64("op_of_gr")),
+            operating_income_usd: fina_indicator
+                .as_ref()
+                .and_then(|row| row.optional_f64("op_of_gr")),
             operating_expenses_usd: None,
-            operating_cash_flow_usd: cashflow.as_ref()
+            operating_cash_flow_usd: cashflow
+                .as_ref()
                 .and_then(|row| row.optional_f64("n_cashflow_act"))
                 .or_else(|| {
                     eastmoney_main.as_ref().and_then(|item| {
@@ -936,9 +976,14 @@ impl MarketDataClient {
                         .and_then(|item| item.construct_long_asset)
                         .map(f64::abs)
                 }),
-            free_cash_flow_usd: cashflow.as_ref()
+            free_cash_flow_usd: cashflow
+                .as_ref()
                 .and_then(|row| row.optional_f64("free_cashflow"))
-                .or_else(|| fina_indicator.as_ref().and_then(|row| row.optional_f64("fcff")))
+                .or_else(|| {
+                    fina_indicator
+                        .as_ref()
+                        .and_then(|row| row.optional_f64("fcff"))
+                })
                 .or_else(|| {
                     eastmoney_main.as_ref().and_then(|item| {
                         match (item.netcash_operate, item.capital_expenditure.map(f64::abs)) {

@@ -1072,13 +1072,78 @@ impl AkShareClient {
         Ok(items)
     }
 
-    /// Get Eniu HK indicators (stub - requires authentication).
+    /// Get Eniu HK indicators using the upstream indicator names.
     ///
-    /// Python equivalent: `stock_hk_indicator_eniu(symbol)`
-    pub async fn stock_hk_indicator_eniu(&self, _symbol: &str) -> Result<Vec<serde_json::Value>> {
-        Err(Error::unsupported_market(
-            "stock_hk_indicator_eniu requires Eniu API authentication, not yet implemented",
+    /// `indicator` accepts `港股`, `市盈率`, `市净率`, `股息率`, `ROE`, or `市值`.
+    pub async fn stock_hk_indicator_eniu_with_indicator(
+        &self,
+        symbol: &str,
+        indicator: &str,
+    ) -> Result<Vec<serde_json::Value>> {
+        let url = if indicator == "港股" {
+            "https://eniu.com/static/data/stock_list.json".to_string()
+        } else {
+            let path = match indicator {
+                "市净率" => "pbh",
+                "股息率" => "dvh",
+                "ROE" => "roeh",
+                "市值" => "marketvalueh",
+                _ => "peh",
+            };
+            format!("https://eniu.com/chart/{path}/{symbol}")
+        };
+        let response = crate::util::send_and_check(self.get(&url).header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
         ))
+        .await?;
+        let data: serde_json::Value = response.json().await.map_err(Error::from)?;
+        // The indicator endpoints return an object of equal-length arrays
+        // ({"date": [...], "pe": [...], "price": [...]}), while the stock-list
+        // endpoint returns an array. Transpose the former into row objects so
+        // callers get the same shape as upstream `pd.DataFrame(data_json)`.
+        let rows = if let Some(array) = data.as_array() {
+            array.clone()
+        } else if let Some(object) = data.as_object() {
+            let length = object
+                .values()
+                .filter_map(|value| value.as_array().map(Vec::len))
+                .max()
+                .unwrap_or(0);
+            (0..length)
+                .map(|index| {
+                    let mut row = serde_json::Map::new();
+                    for (key, value) in object {
+                        if let Some(item) = value.as_array().and_then(|array| array.get(index)) {
+                            row.insert(key.clone(), item.clone());
+                        }
+                    }
+                    serde_json::Value::Object(row)
+                })
+                .collect()
+        } else {
+            Vec::new()
+        };
+        if indicator == "港股" {
+            return Ok(rows
+                .into_iter()
+                .filter(|row| row["stock_id"].as_str().is_some_and(|id| id.contains("hk")))
+                .collect());
+        }
+        if rows.is_empty() {
+            return Err(Error::not_found(format!(
+                "Eniu returned no data for {symbol} ({indicator})"
+            )));
+        }
+        Ok(rows)
+    }
+
+    /// Get Eniu HK price-to-earnings history.
+    ///
+    /// This compatibility method uses the upstream default indicator (`市盈率`).
+    pub async fn stock_hk_indicator_eniu(&self, symbol: &str) -> Result<Vec<serde_json::Value>> {
+        self.stock_hk_indicator_eniu_with_indicator(symbol, "市盈率")
+            .await
     }
 
     /// Get HK sector rankings from Eastmoney.

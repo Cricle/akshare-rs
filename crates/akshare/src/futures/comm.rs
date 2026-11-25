@@ -3,28 +3,56 @@
 //! Sources: openctp, Jin10 (金十数据), 9qihuo (九期网)
 
 use crate::client::AkShareClient;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::types::Row;
+use crate::util::{parse_html_tables, send_and_check_text};
 
 impl AkShareClient {
     /// openctp futures fee reference table.
     pub async fn futures_fees_info_openctp(&self) -> Result<Vec<Row>> {
-        let url = "http://openctp.cn/fees.html";
-        let body = self
-            .get(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        // Parse HTML table
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("openctp"));
-        row.insert("html_len".into(), serde_json::json!(body.len()));
-        items.push(row);
-        Ok(items)
+        let body = send_and_check_text(
+            self.get("http://openctp.cn/fees.html")
+                .header("User-Agent", "Mozilla/5.0"),
+            None,
+        )
+        .await?;
+        let table = parse_html_tables(&body)
+            .into_iter()
+            .find(|table| {
+                table
+                    .iter()
+                    .any(|row| row.iter().any(|cell| cell.trim() == "合约代码"))
+            })
+            .ok_or_else(|| Error::decode("openctp fee table not found"))?;
+        let header_index = table
+            .iter()
+            .position(|row| row.iter().any(|cell| cell.trim() == "合约代码"))
+            .ok_or_else(|| Error::decode("openctp fee header not found"))?;
+        let headers = &table[header_index];
+        let mut result = Vec::new();
+        for row in table.iter().skip(header_index + 1) {
+            if row.iter().all(|cell| cell.trim().is_empty()) {
+                continue;
+            }
+            let mut out = Row::new();
+            for (index, value) in row.iter().enumerate() {
+                let key = headers
+                    .get(index)
+                    .map(String::as_str)
+                    .filter(|key| !key.trim().is_empty())
+                    .unwrap_or("");
+                if !key.is_empty() {
+                    out.insert(key.to_string(), serde_json::json!(value.trim()));
+                }
+            }
+            if !out.is_empty() {
+                result.push(out);
+            }
+        }
+        if result.is_empty() {
+            return Err(Error::not_found("openctp fee table returned no rows"));
+        }
+        Ok(result)
     }
 
     /// Jin10 futures commission data.
@@ -143,47 +171,17 @@ impl AkShareClient {
     ///
     /// Returns fee information for the given symbol or exchange.
     pub async fn futures_fees_info(&self, symbol: &str) -> Result<Vec<Row>> {
-        // Try 9qihuo first
-        let url = "https://www.9qihuo.com/qihuoshouxufei";
-        let body = self
-            .get(url)
-            .query(&[("q", symbol)])
-            .header("User-Agent", "Mozilla/5.0")
-            .header("Referer", "https://www.9qihuo.com/")
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("9qihuo"));
-        row.insert("symbol".into(), serde_json::json!(symbol));
-        row.insert("html_len".into(), serde_json::json!(body.len()));
-        items.push(row);
-        Ok(items)
+        Err(Error::unavailable(format!(
+            "9qihuo fee page requires HTML table parsing for {symbol}"
+        )))
     }
 
     /// 9qihuo futures commission data.
     ///
     /// `symbol`: exchange name or "所有"
     pub async fn futures_comm_info(&self, _symbol: &str) -> Result<Vec<Row>> {
-        let url = "https://www.9qihuo.com/qihuoshouxufei";
-        let body = self
-            .get(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .header("Referer", "https://www.9qihuo.com/")
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        // Parse HTML table
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("9qihuo"));
-        row.insert("html_len".into(), serde_json::json!(body.len()));
-        items.push(row);
-        Ok(items)
+        Err(Error::unavailable(
+            "9qihuo fee page requires HTML table parsing",
+        ))
     }
 }

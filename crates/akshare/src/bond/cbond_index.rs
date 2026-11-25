@@ -212,11 +212,7 @@ impl AkShareClient {
         }
 
         if items.is_empty() {
-            let mut row = Row::new();
-            row.insert("note".into(), serde_json::json!("CBond index listing API"));
-            row.insert("indicators".into(), serde_json::json!(INDICATOR_MAP.len()));
-            row.insert("periods".into(), serde_json::json!(PERIOD_MAP.len()));
-            items.push(row);
+            return Err(Error::not_found("CBond index listing returned no data"));
         }
         Ok(items)
     }

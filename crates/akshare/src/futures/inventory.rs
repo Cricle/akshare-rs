@@ -5,6 +5,7 @@
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::Row;
+use crate::util::today_iso;
 
 impl AkShareClient {
     /// Eastmoney futures inventory data.
@@ -98,21 +99,93 @@ impl AkShareClient {
     /// 99qh futures inventory data.
     ///
     /// `symbol`: Chinese name (e.g., "豆一")
-    pub async fn futures_inventory_99(&self, _symbol: &str) -> Result<Vec<Row>> {
-        let url = "https://www.99qh.com/data/stockIn";
-        let body = self
-            .get(url)
+    pub async fn futures_inventory_99(&self, symbol: &str) -> Result<Vec<Row>> {
+        let page = self
+            .get("https://www.99qh.com/data/stockIn")
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
             .text()
             .await?;
-
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("99qh"));
-        row.insert("html_len".into(), serde_json::json!(body.len()));
-        items.push(row);
-        Ok(items)
+        let marker = r#"id="__NEXT_DATA__""#;
+        let start = page
+            .find(marker)
+            .and_then(|index| page[index..].find('>').map(|offset| index + offset + 1))
+            .ok_or_else(|| Error::decode("99qh stock inventory missing __NEXT_DATA__"))?;
+        let end = page[start..]
+            .find("</script>")
+            .map(|offset| start + offset)
+            .ok_or_else(|| Error::decode("99qh stock inventory malformed __NEXT_DATA__"))?;
+        let root: serde_json::Value = serde_json::from_str(&page[start..end])
+            .map_err(|err| Error::decode(format!("99qh inventory JSON: {err}")))?;
+        let products = root["props"]["pageProps"]["data"]["varietyListData"]
+            .as_array()
+            .ok_or_else(|| Error::decode("99qh inventory product data missing"))?;
+        let product_id = products
+            .iter()
+            .flat_map(|variety| variety["productList"].as_array().into_iter().flatten())
+            .find(|product| product["name"].as_str() == Some(symbol))
+            .and_then(|product| {
+                product["productId"]
+                    .as_str()
+                    .map(str::to_string)
+                    .or_else(|| product["productId"].as_i64().map(|value| value.to_string()))
+            })
+            .ok_or_else(|| {
+                Error::invalid_input(format!("unknown 99qh inventory symbol: {symbol}"))
+            })?;
+        let token = self
+            .get("https://centerapi.fx168api.com/app/common/v.js")
+            .header("Origin", "https://www.99qh.com")
+            .header("Referer", "https://www.99qh.com")
+            .send()
+            .await?
+            .headers()
+            .get("_pcc")
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_string)
+            .ok_or_else(|| Error::decode("99qh inventory token missing"))?;
+        let today = today_iso();
+        let root: serde_json::Value = self
+            .get("https://centerapi.fx168api.com/app/qh/api/stock/trend")
+            .query(&[
+                ("productId", product_id.as_str()),
+                ("type", "1"),
+                ("pageNo", "1"),
+                ("pageSize", "5000"),
+                ("startDate", ""),
+                ("endDate", today.as_str()),
+                ("appCategory", "web"),
+            ])
+            .header("_pcc", token)
+            .header("site-channel", "003")
+            .header("Origin", "https://www.99qh.com")
+            .header("Referer", "https://www.99qh.com")
+            .send()
+            .await?
+            .json()
+            .await?;
+        let rows = root["data"]["list"].as_array().cloned().unwrap_or_default();
+        let mut result = Vec::new();
+        for item in rows {
+            let Some(values) = item.as_array() else {
+                continue;
+            };
+            if values.len() < 3 {
+                continue;
+            }
+            let mut row = Row::new();
+            row.insert("日期".into(), values[0].clone());
+            row.insert("收盘价".into(), values[1].clone());
+            row.insert("库存".into(), values[2].clone());
+            result.push(row);
+        }
+        result.sort_by(|left, right| left["日期"].to_string().cmp(&right["日期"].to_string()));
+        if result.is_empty() {
+            return Err(Error::not_found(format!(
+                "no 99qh inventory data for {symbol}"
+            )));
+        }
+        Ok(result)
     }
 }

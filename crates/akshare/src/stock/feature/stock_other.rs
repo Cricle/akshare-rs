@@ -15,7 +15,120 @@ use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
 use crate::types::value_ext::ValueExt;
-use crate::util::fmt_date;
+use crate::util::{fmt_date, read_spreadsheet_rows, today_yyyymmdd};
+
+/// SSE Stock Connect exchange-rate query.
+async fn sse_rate_rows(
+    client: &AkShareClient,
+    sql_id: &str,
+    buy_label: &str,
+    sell_label: &str,
+) -> Result<Vec<ExchangeRateEntry>> {
+    let current_date = today_yyyymmdd();
+    let json: serde_json::Value = client
+        .get("https://query.sse.com.cn/commonSoaQuery.do")
+        .query(&[
+            ("isPagination", "true"),
+            ("updateDate", "20120601"),
+            ("updateDateEnd", current_date.as_str()),
+            ("sqlId", sql_id),
+            ("pageHelp.cacheSize", "1"),
+            ("pageHelp.pageSize", "10000"),
+            ("pageHelp.pageNo", "1"),
+            ("pageHelp.beginPage", "1"),
+            ("pageHelp.endPage", "1"),
+        ])
+        .header("Host", "query.sse.com.cn")
+        .header("Referer", "https://www.sse.com.cn/")
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+        )
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+    let rows = json["result"].as_array().cloned().unwrap_or_default();
+    Ok(rows
+        .iter()
+        .map(|row| {
+            let mut data = serde_json::Map::new();
+            data.insert("适用日期".into(), row["validDate"].clone());
+            data.insert(buy_label.to_string(), row["buyPrice"].clone());
+            data.insert(sell_label.to_string(), row["sellPrice"].clone());
+            data.insert("货币种类".into(), row["currencyType"].clone());
+            ExchangeRateEntry {
+                data: serde_json::Value::Object(data),
+            }
+        })
+        .collect())
+}
+
+fn json_number_or_text(value: &str) -> serde_json::Value {
+    let trimmed = value.trim();
+    match trimmed.parse::<f64>() {
+        Ok(number) => serde_json::json!(number),
+        Err(_) => serde_json::json!(trimmed),
+    }
+}
+
+/// SZSE Stock Connect exchange-rate XLSX report.
+async fn szse_rate_rows(client: &AkShareClient, tab_key: &str) -> Result<Vec<ExchangeRateEntry>> {
+    let bytes = client
+        .get("https://www.szse.cn/api/report/ShowReport")
+        .query(&[
+            ("SHOWTYPE", "xlsx"),
+            ("CATALOGID", "SGT_LSHL"),
+            ("TABKEY", tab_key),
+            ("random", "0.9184251620553985"),
+        ])
+        .header("Referer", "https://www.szse.cn/")
+        .header("User-Agent", "Mozilla/5.0")
+        .send()
+        .await?
+        .error_for_status()?
+        .bytes()
+        .await?;
+    let mut rows = read_spreadsheet_rows(&bytes)?;
+    if rows.is_empty() {
+        return Ok(Vec::new());
+    }
+    let headers = rows.remove(0);
+    let date_index = headers.iter().position(|h| h.trim() == "适用日期");
+    let mut entries: Vec<(String, ExchangeRateEntry)> = rows
+        .into_iter()
+        .filter(|row| !row.iter().all(|cell| cell.trim().is_empty()))
+        .map(|row| {
+            let mut data = serde_json::Map::new();
+            for (index, header) in headers.iter().enumerate() {
+                let header = header.trim();
+                if header.is_empty() {
+                    continue;
+                }
+                let value = row.get(index).map(String::as_str).unwrap_or("");
+                let value = if header == "适用日期" || header == "货币种类" {
+                    serde_json::json!(value.trim())
+                } else {
+                    json_number_or_text(value)
+                };
+                data.insert(header.to_string(), value);
+            }
+            let sort_key = date_index
+                .and_then(|index| row.get(index))
+                .map(|value| value.trim().to_string())
+                .unwrap_or_default();
+            (
+                sort_key,
+                ExchangeRateEntry {
+                    data: serde_json::Value::Object(data),
+                },
+            )
+        })
+        .collect();
+    entries.sort_by(|left, right| left.0.cmp(&right.0));
+    Ok(entries.into_iter().map(|(_, entry)| entry).collect())
+}
 
 impl AkShareClient {
     /// 东方财富-股票账户统计
@@ -255,6 +368,12 @@ impl AkShareClient {
     }
 
     /// 东方财富-筹码分布
+    ///
+    /// Rust port of the deterministic `CYQCalculator` JavaScript used by
+    /// upstream `akshare/stock/flow/stock_cyq_em.py`. Upstream never sets the
+    /// calculator's `this.range`, so every row uses the full window of klines
+    /// from the first record through the current one. The last 90 rows are
+    /// returned, matching upstream's `temp_df.iloc[-90:, :]`.
     pub async fn stock_cyq(&self, symbol: &str, adjust: &str) -> Result<Vec<CyqData>> {
         let adjust_code = match adjust {
             "qfq" => "1",
@@ -266,21 +385,16 @@ impl AkShareClient {
         let klines = self
             .kline_fetch(&secid, "101", adjust_code, 210, &[])
             .await?;
-        // Return simplified chip data based on kline data
-        // Full CYQ calculation requires JavaScript execution
-        Ok(klines
+        let candles: Vec<CyqCandle> = klines
             .iter()
-            .map(|s| CyqData {
-                date: s.split(',').next().unwrap_or("").to_string(),
-                benefit_part: 0.0,
-                avg_cost: 0.0,
-                pct_90_low: 0.0,
-                pct_90_high: 0.0,
-                pct_90_concentration: 0.0,
-                pct_70_low: 0.0,
-                pct_70_high: 0.0,
-                pct_70_concentration: 0.0,
-            })
+            .filter_map(|line| parse_cyq_candle(line))
+            .collect();
+        if candles.is_empty() {
+            return Err(Error::decode("stock_cyq: no valid kline rows"));
+        }
+        let start = candles.len().saturating_sub(90);
+        Ok((start..candles.len())
+            .map(|i| compute_cyq(&candles[..=i]))
             .collect())
     }
 
@@ -319,19 +433,23 @@ impl AkShareClient {
         Ok(arr.into_iter().map(|v| EbsLg { data: v }).collect())
     }
 
-    /// 新浪-ESG评级
+    /// 新浪-ESG评级（秩鼎）
     pub async fn stock_esg_rate(&self, symbol: &str) -> Result<Vec<EsgRateSina>> {
-        let url = format!("https://finance.sina.com.cn/esg/stock/{symbol}");
-        let resp = self
-            .get(&url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?;
-        let _text = resp.text().await.map_err(Error::from)?;
-        Ok(vec![EsgRateSina {
-            data: serde_json::json!({"symbol": symbol, "note": "ESG parsing requires HTML extraction"}),
-        }])
+        let ratings = self.stock_esg_zd().await?;
+        let code = symbol
+            .trim()
+            .strip_prefix("sh")
+            .or_else(|| symbol.trim().strip_prefix("sz"))
+            .or_else(|| symbol.trim().strip_prefix("SH"))
+            .or_else(|| symbol.trim().strip_prefix("SZ"))
+            .unwrap_or(symbol.trim());
+        Ok(ratings
+            .into_iter()
+            .filter(|rating| rating.code == code || rating.code == symbol)
+            .map(|rating| EsgRateSina {
+                data: serde_json::to_value(rating).unwrap_or(serde_json::Value::Null),
+            })
+            .collect())
     }
 
     /// 同花顺-分红配送明细
@@ -381,9 +499,9 @@ impl AkShareClient {
 
     /// 同花顺-IPO受益
     pub async fn stock_ipo_benefit(&self) -> Result<Vec<IpoBenefitThs>> {
-        Ok(vec![IpoBenefitThs {
-            data: serde_json::json!({"note": "THS API requires hexin-v token"}),
-        }])
+        Err(Error::unavailable(
+            "stock_ipo_benefit requires THS hexin-v authentication",
+        ))
     }
 
     /// 巨潮-IPO概况
@@ -621,15 +739,19 @@ impl AkShareClient {
 
     /// JS实时价格
     pub async fn stock_price_js(&self, symbol: &str) -> Result<Vec<PriceJs>> {
-        let url = format!("https://qt.gtimg.cn/q={symbol}");
-        let resp = self
-            .get(&url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-            .map_err(Error::from)?;
-        let _text = resp.text().await.map_err(Error::from)?;
-        Ok(vec![])
+        let quote = self.a_share_quote(symbol).await?;
+        Ok(vec![PriceJs {
+            code: quote.symbol.clone(),
+            name: quote.symbol,
+            price: quote.close,
+            change_pct: if quote.open > 0.0 {
+                (quote.close - quote.open) / quote.open * 100.0
+            } else {
+                0.0
+            },
+            volume: quote.volume as f64,
+            amount: 0.0,
+        }])
     }
 
     /// 巨潮-公司概况
@@ -796,30 +918,28 @@ impl AkShareClient {
 
     /// 港股通-参考汇率(上交所)
     pub async fn stock_sgt_reference_exchange_rate_sse(&self) -> Result<Vec<ExchangeRateEntry>> {
-        Ok(vec![ExchangeRateEntry {
-            data: serde_json::json!({"note": "SSE reference rate API"}),
-        }])
+        sse_rate_rows(self, "FW_HGT_GGTHL", "参考汇率买入价", "参考汇率卖出价").await
     }
 
     /// 港股通-参考汇率(深交所)
     pub async fn stock_sgt_reference_exchange_rate_szse(&self) -> Result<Vec<ExchangeRateEntry>> {
-        Ok(vec![ExchangeRateEntry {
-            data: serde_json::json!({"note": "SZSE reference rate API"}),
-        }])
+        szse_rate_rows(self, "tab1").await
     }
 
     /// 港股通-结算汇率(上交所)
     pub async fn stock_sgt_settlement_exchange_rate_sse(&self) -> Result<Vec<ExchangeRateEntry>> {
-        Ok(vec![ExchangeRateEntry {
-            data: serde_json::json!({"note": "SSE settlement rate API"}),
-        }])
+        sse_rate_rows(
+            self,
+            "FW_HGT_JSHDBL",
+            "买入结算汇兑比率",
+            "卖出结算汇兑比率",
+        )
+        .await
     }
 
     /// 港股通-结算汇率(深交所)
     pub async fn stock_sgt_settlement_exchange_rate_szse(&self) -> Result<Vec<ExchangeRateEntry>> {
-        Ok(vec![ExchangeRateEntry {
-            data: serde_json::json!({"note": "SZSE settlement rate API"}),
-        }])
+        szse_rate_rows(self, "tab2").await
     }
 
     /// 巨潮-股本变动
@@ -1514,4 +1634,216 @@ impl AkShareClient {
             })
             .collect())
     }
+}
+
+// ---------------------------------------------------------------------------
+// Chip distribution (筹码分布) — deterministic port of upstream CYQCalculator
+// ---------------------------------------------------------------------------
+
+const CYQ_FACTOR: usize = 150;
+
+#[derive(Debug, Clone)]
+struct CyqCandle {
+    date: String,
+    open: f64,
+    close: f64,
+    high: f64,
+    low: f64,
+    /// Turnover rate as a fraction in `[0, 1]` (upstream `hsl / 100`, capped at 1).
+    turnover: f64,
+}
+
+/// Parse one Eastmoney kline CSV row: `date,open,close,high,low,volume,...,hsl`.
+fn parse_cyq_candle(line: &str) -> Option<CyqCandle> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return None;
+    }
+    let parse = |idx: usize| -> f64 {
+        parts
+            .get(idx)
+            .and_then(|s| s.trim().parse::<f64>().ok())
+            .unwrap_or(0.0)
+    };
+    let hsl = parse(10);
+    // JS: Math.min(1, eles.hsl / 100 || 0)
+    let turnover = if hsl.is_nan() {
+        0.0
+    } else {
+        (hsl / 100.0).min(1.0)
+    };
+    Some(CyqCandle {
+        date: parts[0].to_string(),
+        open: parse(1),
+        close: parse(2),
+        high: parse(3),
+        low: parse(4),
+        turnover,
+    })
+}
+
+/// Compute one chip-distribution row over `window` (first kline through current).
+fn compute_cyq(window: &[CyqCandle]) -> CyqData {
+    let factor = CYQ_FACTOR;
+    let mut maxprice = 0.0_f64;
+    let mut minprice = 0.0_f64;
+    for candle in window {
+        maxprice = if maxprice == 0.0 {
+            candle.high
+        } else {
+            maxprice.max(candle.high)
+        };
+        minprice = if minprice == 0.0 {
+            candle.low
+        } else {
+            minprice.min(candle.low)
+        };
+    }
+
+    let accuracy = ((maxprice - minprice) / (factor - 1) as f64).max(0.01);
+    let mut xdata = vec![0.0_f64; factor];
+
+    for candle in window {
+        let avg = (candle.open + candle.close + candle.high + candle.low) / 4.0;
+        let turnover = candle.turnover;
+        let high = candle.high;
+        let low = candle.low;
+
+        let h = ((high - minprice) / accuracy).floor();
+        let l = ((low - minprice) / accuracy).ceil();
+        let gpoint0 = if high == low {
+            (factor - 1) as f64
+        } else {
+            2.0 / (high - low)
+        };
+        let gpoint1 = ((avg - minprice) / accuracy).floor();
+
+        for value in &mut xdata {
+            *value *= 1.0 - turnover;
+        }
+
+        if high == low {
+            let idx = gpoint1 as i64;
+            if (0..factor as i64).contains(&idx) {
+                xdata[idx as usize] += gpoint0 * turnover / 2.0;
+            }
+        } else {
+            let mut j = l as i64;
+            while j <= h as i64 {
+                if (0..factor as i64).contains(&j) {
+                    let curprice = minprice + accuracy * j as f64;
+                    if curprice <= avg {
+                        if (avg - low).abs() < 1e-8 {
+                            xdata[j as usize] += gpoint0 * turnover;
+                        } else {
+                            xdata[j as usize] +=
+                                (curprice - low) / (avg - low) * gpoint0 * turnover;
+                        }
+                    } else if (high - avg).abs() < 1e-8 {
+                        xdata[j as usize] += gpoint0 * turnover;
+                    } else {
+                        xdata[j as usize] += (high - curprice) / (high - avg) * gpoint0 * turnover;
+                    }
+                }
+                j += 1;
+            }
+        }
+    }
+
+    let current_price = window.last().map_or(0.0, |c| c.close);
+    let total_chips: f64 = xdata.iter().map(|&x| js_precision12(x)).sum();
+
+    let below: f64 = xdata
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| current_price >= minprice + *i as f64 * accuracy)
+        .map(|(_, &x)| js_precision12(x))
+        .sum();
+    let benefit_part = if total_chips == 0.0 {
+        0.0
+    } else {
+        below / total_chips
+    };
+
+    let avg_cost = js_to_fixed2(get_cost_by_chip(
+        &xdata,
+        minprice,
+        accuracy,
+        total_chips * 0.5,
+    ));
+    let (pct_90_low, pct_90_high, pct_90_concentration) =
+        compute_percent_chips(&xdata, minprice, accuracy, total_chips, 0.9);
+    let (pct_70_low, pct_70_high, pct_70_concentration) =
+        compute_percent_chips(&xdata, minprice, accuracy, total_chips, 0.7);
+
+    CyqData {
+        date: window.last().map_or_else(String::new, |c| c.date.clone()),
+        benefit_part,
+        avg_cost,
+        pct_90_low,
+        pct_90_high,
+        pct_90_concentration,
+        pct_70_low,
+        pct_70_high,
+        pct_70_concentration,
+    }
+}
+
+fn compute_percent_chips(
+    xdata: &[f64],
+    minprice: f64,
+    accuracy: f64,
+    total_chips: f64,
+    percent: f64,
+) -> (f64, f64, f64) {
+    // Upstream: ps = [(1 - percent) / 2, (1 + percent) / 2]
+    let low = get_cost_by_chip(
+        xdata,
+        minprice,
+        accuracy,
+        total_chips * ((1.0 - percent) / 2.0),
+    );
+    let high = get_cost_by_chip(
+        xdata,
+        minprice,
+        accuracy,
+        total_chips * ((1.0 + percent) / 2.0),
+    );
+    let concentration = if low + high == 0.0 {
+        0.0
+    } else {
+        (high - low) / (low + high)
+    };
+    (js_to_fixed2(low), js_to_fixed2(high), concentration)
+}
+
+/// Upstream `getCostByChip`: first bin whose cumulative chips exceed `chip`.
+fn get_cost_by_chip(xdata: &[f64], minprice: f64, accuracy: f64, chip: f64) -> f64 {
+    let mut result = 0.0;
+    let mut sum = 0.0;
+    for (i, &raw) in xdata.iter().enumerate() {
+        let x = js_precision12(raw);
+        if sum + x > chip {
+            result = minprice + i as f64 * accuracy;
+            break;
+        }
+        sum += x;
+    }
+    result
+}
+
+/// JavaScript `value.toPrecision(12) / 1`.
+fn js_precision12(value: f64) -> f64 {
+    if value == 0.0 || !value.is_finite() {
+        return value;
+    }
+    format!("{value:.11e}").parse::<f64>().unwrap_or(value)
+}
+
+/// JavaScript `value.toFixed(2) / 1`.
+fn js_to_fixed2(value: f64) -> f64 {
+    if !value.is_finite() {
+        return value;
+    }
+    format!("{value:.2}").parse::<f64>().unwrap_or(0.0)
 }

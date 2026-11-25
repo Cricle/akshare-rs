@@ -5,6 +5,7 @@ use serde::Deserialize;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::{CandlePoint, TradeCalendarItem};
+use crate::util::send_and_check_json;
 
 #[derive(Debug, Deserialize)]
 struct TushareResponse {
@@ -65,13 +66,8 @@ impl AkShareClient {
             "fields": fields,
         });
 
-        let resp: TushareResponse = self
-            .post("https://api.tushare.pro")
-            .json(&body)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let resp: TushareResponse =
+            send_and_check_json(self.post("https://api.tushare.pro").json(&body)).await?;
 
         if resp.code != Some(0) {
             let msg = resp

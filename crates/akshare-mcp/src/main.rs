@@ -119,6 +119,7 @@ async fn main() -> anyhow::Result<()> {
             disable,
         } => {
             let cfg = config::Config::load(Path::new(&config))?;
+            cfg.validate_http_security()?;
             let mcp_key = cfg.http.mcp_key.clone();
             let tools_cfg = build_tools_config(&categories, &enable, &disable, cfg.tools);
 

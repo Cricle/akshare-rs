@@ -5,6 +5,7 @@
 use crate::client::AkShareClient;
 use crate::error::Result;
 use crate::types::{ForeignCommodityQuote, Row};
+use crate::util::send_and_check_text;
 
 fn parse_f64(s: &str) -> f64 {
     s.trim().parse::<f64>().unwrap_or(0.0)
@@ -91,14 +92,13 @@ impl AkShareClient {
         let list_param = subscribe_list.join(",");
         let url = format!("https://hq.sinajs.cn/?list={list_param}");
 
-        let body = self
-            .get(&url)
-            .header("Referer", "https://finance.sina.com.cn/")
-            .header("Host", "hq.sinajs.cn")
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = send_and_check_text(
+            self.get(&url)
+                .header("Referer", "https://finance.sina.com.cn/")
+                .header("Host", "hq.sinajs.cn"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
         let code_to_name: std::collections::HashMap<&str, &str> =
             exchange_symbol_map().into_iter().collect();

@@ -74,8 +74,6 @@ impl AkShareClient {
 
     /// Fetch ETF historical data from Sina Finance.
     pub async fn fund_etf_hist_sina(&self, symbol: &str) -> Result<Vec<crate::types::CandlePoint>> {
-        Err(Error::decode(format!(
-            "sina ETF hist for {symbol} requires JS decryption; use fund_etf_hist instead"
-        )))
+        self.fund_etf_hist(symbol, 5000).await
     }
 }

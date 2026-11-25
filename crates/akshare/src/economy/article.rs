@@ -6,6 +6,8 @@
 //! - FF: Fama-French Data Library
 //! - RV: Oxford-Man Realized Library; Risk Lab (dachxiu.chicagobooth.edu)
 
+use std::io::{Cursor, Read};
+
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::MacroDataPoint;
@@ -189,51 +191,29 @@ impl AkShareClient {
 
     /// Fama-French factor data (CRR version).
     ///
-    /// Returns the Fama-French 3-factor or 5-factor data from the
-    /// Chicago Booth Risk Research Laboratory.
+    /// Downloads the Fama/French 3-factor research data archive from the
+    /// Kenneth R. French Data Library. The archive contains a CSV whose first
+    /// section holds monthly factors (`YYYYMM,Mkt-RF,SMB,HML,RF`) followed by
+    /// an annual section that is ignored.
     pub async fn article_ff_crr(&self) -> Result<Vec<MacroDataPoint>> {
-        let url = "https://dachxiu.chicagobooth.edu/FF/F-F_Research_Data_Factors_CSV.zip";
-        let body = self.get(url).send().await?.bytes().await?;
+        let url = "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_CSV.zip";
+        let bytes = self
+            .get(url)
+            .send()
+            .await?
+            .error_for_status()?
+            .bytes()
+            .await?;
 
-        // Attempt to read as text (the zip may fail, so try CSV directly)
-        let text = String::from_utf8_lossy(&body);
-        let mut items = Vec::new();
-        for (idx, line) in text.lines().enumerate() {
-            if idx == 0 || line.trim().is_empty() {
-                continue;
-            }
-            let fields: Vec<&str> = line.split(',').collect();
-            if fields.len() < 5 {
-                continue;
-            }
-            let date = fields[0].trim().to_string();
-            if date.len() != 6 {
-                continue;
-            }
-            let formatted = format!("{}-{}-01", &date[..4], &date[4..]);
-            if let Ok(mkt_rf) = fields[1].trim().parse::<f64>() {
-                items.push(MacroDataPoint {
-                    date: formatted.clone(),
-                    value: mkt_rf,
-                    name: "Mkt-RF".to_string(),
-                });
-            }
-            if let Ok(smb) = fields[2].trim().parse::<f64>() {
-                items.push(MacroDataPoint {
-                    date: formatted.clone(),
-                    value: smb,
-                    name: "SMB".to_string(),
-                });
-            }
-            if let Ok(hml) = fields[3].trim().parse::<f64>() {
-                items.push(MacroDataPoint {
-                    date: formatted,
-                    value: hml,
-                    name: "HML".to_string(),
-                });
-            }
-        }
-        Ok(items)
+        // The endpoint normally returns a ZIP archive; tolerate a bare CSV so
+        // mirrors that serve the extracted file keep working.
+        let text = if bytes.starts_with(b"PK") {
+            let (_, data) = read_first_zip_entry(&bytes, "FF factor archive")?;
+            crate::util::decode_text(&data, None, None)
+        } else {
+            crate::util::decode_text(&bytes, None, None)
+        };
+        parse_ff_factors_csv(&text)
     }
 
     /// Risk Lab realized volatility from Dacheng Xiu's data (Chicago Booth).
@@ -329,6 +309,99 @@ fn parse_fred_csv(body: &str, name_prefix: &str) -> Vec<MacroDataPoint> {
     items
 }
 
+/// Read the first non-directory entry of a ZIP archive.
+fn read_first_zip_entry(bytes: &[u8], source: &str) -> Result<(String, Vec<u8>)> {
+    let mut archive = zip::ZipArchive::new(Cursor::new(bytes))
+        .map_err(|e| Error::decode(format!("{source} ZIP: {e}")))?;
+    for index in 0..archive.len() {
+        let mut file = archive
+            .by_index(index)
+            .map_err(|e| Error::decode(format!("{source} ZIP entry: {e}")))?;
+        if file.is_dir() {
+            continue;
+        }
+        let name = file
+            .name()
+            .map_err(|e| Error::decode(format!("{source} ZIP entry name: {e}")))?
+            .to_string();
+        let mut data = Vec::new();
+        file.read_to_end(&mut data)
+            .map_err(|e| Error::decode(format!("{source} ZIP read: {e}")))?;
+        return Ok((name, data));
+    }
+    Err(Error::not_found(format!("{source} ZIP has no files")))
+}
+
+/// Parse the monthly section of a Fama-French research-data CSV.
+///
+/// The file starts with description lines, then a header row such as
+/// `,Mkt-RF,SMB,HML,RF`, then monthly rows with a `YYYYMM` first column. A
+/// trailing annual section (4-digit years) is deliberately skipped.
+fn parse_ff_factors_csv(text: &str) -> Result<Vec<MacroDataPoint>> {
+    let mut reader = csv::ReaderBuilder::new()
+        .has_headers(false)
+        .flexible(true)
+        .from_reader(text.as_bytes());
+
+    let mut factors: Vec<(usize, String)> = Vec::new();
+    let mut records = reader.records();
+    for record in records.by_ref() {
+        let record = record.map_err(|e| Error::decode(format!("FF factor CSV: {e}")))?;
+        let first = record.get(0).unwrap_or("").trim();
+        if first.is_empty()
+            && record
+                .iter()
+                .any(|field| field.trim().eq_ignore_ascii_case("Mkt-RF"))
+        {
+            for (index, field) in record.iter().enumerate().skip(1) {
+                let name = field.trim();
+                if !name.is_empty() {
+                    factors.push((index, name.to_string()));
+                }
+            }
+            break;
+        }
+    }
+    if factors.is_empty() {
+        return Err(Error::decode("FF factor CSV: factor header row not found"));
+    }
+
+    let mut items = Vec::new();
+    for record in records {
+        let record = record.map_err(|e| Error::decode(format!("FF factor CSV: {e}")))?;
+        let period = record.get(0).unwrap_or("").trim();
+        if !period.chars().all(|c| c.is_ascii_digit()) || period.len() != 6 {
+            // Blank separator or the annual-factors section.
+            break;
+        }
+        let date = format!("{}-{}-01", &period[..4], &period[4..]);
+        for (index, name) in &factors {
+            if name == "RF" {
+                continue;
+            }
+            let Some(raw) = record.get(*index) else {
+                continue;
+            };
+            let raw = raw.trim();
+            if raw.is_empty() {
+                continue;
+            }
+            let Ok(value) = raw.parse::<f64>() else {
+                continue;
+            };
+            items.push(MacroDataPoint {
+                date: date.clone(),
+                value,
+                name: name.clone(),
+            });
+        }
+    }
+    if items.is_empty() {
+        return Err(Error::not_found("FF factor CSV: no monthly factor rows"));
+    }
+    Ok(items)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -352,5 +425,37 @@ mod tests {
     fn test_parse_fred_csv_header_only() {
         let items = parse_fred_csv("DATE,VALUE\n", "test");
         assert!(items.is_empty());
+    }
+
+    #[test]
+    fn test_parse_ff_factors_csv_monthly_section() {
+        let csv = "This file was created using the 202609 CRSP database.\n\
+The 1-month TBill rate data is from Ibbotson Associates.\n\
+\n\
+,Mkt-RF,SMB,HML,RF\n\
+192607,   2.89,  -2.42,  -2.75,   0.22\n\
+192608,   2.64,  -1.44,   4.13,   0.25\n\
+\n\
+Annual Factors: January-December\n\
+,Mkt-RF,SMB,HML,RF\n\
+1927,  29.47,  -2.09,  -4.02,   3.12\n";
+        let items = parse_ff_factors_csv(csv).unwrap();
+        assert_eq!(items.len(), 6);
+        assert_eq!(items[0].date, "1926-07-01");
+        assert_eq!(items[0].name, "Mkt-RF");
+        assert!((items[0].value - 2.89).abs() < 1e-9);
+        assert_eq!(items[1].name, "SMB");
+        assert!((items[1].value + 2.42).abs() < 1e-9);
+        assert_eq!(items[2].name, "HML");
+        assert_eq!(items[3].date, "1926-08-01");
+        // RF is not a factor and the annual section must not leak in.
+        assert!(!items.iter().any(|item| item.name == "RF"));
+        assert!(!items.iter().any(|item| item.date.starts_with("1927")));
+    }
+
+    #[test]
+    fn test_parse_ff_factors_csv_missing_header() {
+        let err = parse_ff_factors_csv("no factor header here\n").unwrap_err();
+        assert!(err.to_string().contains("header"));
     }
 }

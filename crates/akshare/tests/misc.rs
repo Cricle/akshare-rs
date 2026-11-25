@@ -2588,7 +2588,7 @@ async fn test_futures_hold_pos_misc() {
     mock_any_get_text(
         &server,
         ".*",
-        "<html><table><tr><td>test data</td></tr></table></html>",
+        "<html><table><tr><th>名次</th><th>会员简称</th><th>成交量</th><th>比上交易增减</th></tr><tr><td>1</td><td>测试会员</td><td>100</td><td>5</td></tr></table></html>",
     )
     .await;
     let client = mock_client(&server);
@@ -2611,6 +2611,7 @@ async fn test_futures_spot_price_daily_misc() {
         .futures_spot_price_daily("20240301", "20240315")
         .await;
     assert!(result.is_ok());
+    assert!(result.unwrap().is_empty());
 }
 
 // ============================================================================

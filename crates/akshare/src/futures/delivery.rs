@@ -3,7 +3,7 @@
 //! Covers SHFE, DCE, and CZCE delivery statistics.
 
 use crate::client::AkShareClient;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::types::Row;
 
 impl AkShareClient {
@@ -85,177 +85,118 @@ impl AkShareClient {
     }
 
     /// DCE delivery statistics.
-    pub async fn futures_delivery_dce(&self, date: &str) -> Result<Vec<Row>> {
-        let url = "http://www.dce.com.cn/publicweb/quotesdata/delivery.html";
-        let _body = self
-            .post(url)
-            .query(&[
-                ("deliveryQuotes.variety", "all"),
-                ("year", ""),
-                ("month", ""),
-                ("deliveryQuotes.begin_month", date),
-                (
-                    "deliveryQuotes.end_month",
-                    &format!("{}", date.parse::<i64>().unwrap_or(0) + 1),
-                ),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        // Parse HTML table - basic extraction
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("dce"));
-        row.insert("date".into(), serde_json::json!(date));
-        row.insert(
-            "note".into(),
-            serde_json::json!("HTML table data - use raw endpoint"),
-        );
-        items.push(row);
-        Ok(items)
+    pub async fn futures_delivery_dce(&self, _date: &str) -> Result<Vec<Row>> {
+        Err(Error::unavailable(
+            "DCE delivery endpoint requires HTML table parsing",
+        ))
     }
 
     /// DCE futures-to-spot (期转现) data.
-    pub async fn futures_to_spot_dce(&self, date: &str) -> Result<Vec<Row>> {
-        let url = "http://www.dce.com.cn/publicweb/quotesdata/ftsDeal.html";
-        let _body = self
-            .post(url)
-            .query(&[
-                ("ftsDealQuotes.variety", "all"),
-                ("year", ""),
-                ("month", ""),
-                ("ftsDealQuotes.begin_month", date),
-                ("ftsDealQuotes.end_month", date),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("dce"));
-        row.insert("date".into(), serde_json::json!(date));
-        row.insert(
-            "note".into(),
-            serde_json::json!("HTML table data - use raw endpoint"),
-        );
-        items.push(row);
-        Ok(items)
+    pub async fn futures_to_spot_dce(&self, _date: &str) -> Result<Vec<Row>> {
+        Err(Error::unavailable(
+            "DCE futures-to-spot endpoint requires HTML table parsing",
+        ))
     }
 
     /// CZCE delivery matching data.
     pub async fn futures_delivery_match_czce(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..4];
+        let ext = if date > "20251101" { "xlsx" } else { "xls" };
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataDelsettle.xls"
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataDelsettle.{ext}"
         );
-        let _body = self
+        let bytes = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
+            .error_for_status()?
             .bytes()
             .await?;
-
-        // XLS binary data - return note for now
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("czce"));
-        row.insert("date".into(), serde_json::json!(date));
-        row.insert(
-            "note".into(),
-            serde_json::json!("XLS binary data - requires xls parser"),
-        );
-        items.push(row);
-        Ok(items)
+        let rows = crate::util::read_spreadsheet_rows(&bytes)?;
+        Ok(rows
+            .into_iter()
+            .skip(1)
+            .filter(|row| !row.iter().all(|cell| cell.trim().is_empty()))
+            .map(|row| {
+                let mut out = Row::new();
+                for (index, value) in row.into_iter().enumerate() {
+                    out.insert(format!("column_{index}"), serde_json::json!(value));
+                }
+                out.insert("date".into(), serde_json::json!(date));
+                out
+            })
+            .collect())
     }
 
     /// CZCE monthly delivery data.
     pub async fn futures_delivery_czce(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..4];
+        let ext = if date > "20251101" { "xlsx" } else { "xls" };
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataSettlematched.xls"
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataSettlematched.{ext}"
         );
-        let _body = self
+        let bytes = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
+            .error_for_status()?
             .bytes()
             .await?;
-
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("czce"));
-        row.insert("date".into(), serde_json::json!(date));
-        row.insert(
-            "note".into(),
-            serde_json::json!("XLS binary data - requires xls parser"),
-        );
-        items.push(row);
-        Ok(items)
+        let rows = crate::util::read_spreadsheet_rows(&bytes)?;
+        Ok(rows
+            .into_iter()
+            .skip(1)
+            .filter(|row| !row.iter().all(|cell| cell.trim().is_empty()))
+            .map(|row| {
+                let mut out = Row::new();
+                for (index, value) in row.into_iter().enumerate() {
+                    out.insert(format!("column_{index}"), serde_json::json!(value));
+                }
+                out.insert("date".into(), serde_json::json!(date));
+                out
+            })
+            .collect())
     }
 
     /// DCE delivery match data for a given date.
     ///
     /// Returns delivery matching (交割配对) data from DCE.
-    pub async fn futures_delivery_match_dce(&self, date: &str) -> Result<Vec<Row>> {
-        let url = "http://www.dce.com.cn/publicweb/quotesdata/deliveryMatch.html";
-        let body = self
-            .post(url)
-            .query(&[
-                ("deliveryMatchQuotes.variety", "all"),
-                ("year", ""),
-                ("month", ""),
-                ("deliveryMatchQuotes.begin_month", date),
-                (
-                    "deliveryMatchQuotes.end_month",
-                    &format!("{}", date.parse::<i64>().unwrap_or(0) + 1),
-                ),
-            ])
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await?
-            .text()
-            .await?;
-
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("dce"));
-        row.insert("date".into(), serde_json::json!(date));
-        row.insert("html_len".into(), serde_json::json!(body.len()));
-        items.push(row);
-        Ok(items)
+    pub async fn futures_delivery_match_dce(&self, _date: &str) -> Result<Vec<Row>> {
+        Err(Error::unavailable(
+            "DCE delivery matching endpoint requires HTML table parsing",
+        ))
     }
 
     /// CZCE futures-to-spot statistics.
     pub async fn futures_to_spot_czce(&self, date: &str) -> Result<Vec<Row>> {
         let year = &date[..4];
+        let ext = if date > "20251101" { "xlsx" } else { "xls" };
         let url = format!(
-            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataTrdtrades.xls"
+            "http://www.czce.com.cn/cn/DFSStaticFiles/Future/{year}/{date}/FutureDataTrdtrades.{ext}"
         );
-        let _body = self
+        let bytes = self
             .get(&url)
             .header("User-Agent", "Mozilla/5.0")
             .send()
             .await?
+            .error_for_status()?
             .bytes()
             .await?;
-
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("source".into(), serde_json::json!("czce"));
-        row.insert("date".into(), serde_json::json!(date));
-        row.insert(
-            "note".into(),
-            serde_json::json!("XLS binary data - requires xls parser"),
-        );
-        items.push(row);
-        Ok(items)
+        let rows = crate::util::read_spreadsheet_rows(&bytes)?;
+        Ok(rows
+            .into_iter()
+            .skip(1)
+            .filter(|row| !row.iter().all(|cell| cell.trim().is_empty()))
+            .map(|row| {
+                let mut out = Row::new();
+                for (index, value) in row.into_iter().enumerate() {
+                    out.insert(format!("column_{index}"), serde_json::json!(value));
+                }
+                out.insert("date".into(), serde_json::json!(date));
+                out
+            })
+            .collect())
     }
 }

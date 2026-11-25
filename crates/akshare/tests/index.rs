@@ -922,7 +922,7 @@ async fn test_index_analysis_monthly_sw() {
 }
 
 // ============================================================================
-// us_sina.rs (stub — requires JS decoding)
+// us_sina.rs (KLC_K2 decoder)
 // ============================================================================
 
 #[tokio::test]
@@ -930,7 +930,17 @@ async fn test_index_us_stock_sina() {
     let server = MockServer::start().await;
     let client = mock_client(&server);
     let result = client.index_us_stock("SPX").await;
+    // No mock is mounted, so the fetch itself fails.
     assert!(result.is_err());
+}
+
+#[tokio::test]
+async fn test_index_us_stock_unsupported_variant() {
+    let server = MockServer::start().await;
+    mock_any_get_text(&server, ".*", "var KLC_K2_$X=\"AAAA\";").await;
+    let client = mock_client(&server);
+    let err = client.index_us_stock(".INX").await.unwrap_err();
+    assert_eq!(err.kind(), akshare::ErrorKind::Unavailable);
 }
 
 // ============================================================================

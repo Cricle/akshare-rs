@@ -304,9 +304,13 @@ impl ServerHandler for AkShareMcpService {
                     .map(|(name, desc)| serde_json::json!({ "name": name, "description": desc }))
                     .collect();
 
-                Ok(CallToolResult::success(vec![Content::text(
-                    serde_json::to_string_pretty(&results).unwrap(),
-                )]))
+                let serialized = serde_json::to_string_pretty(&results).map_err(|e| {
+                    McpError::internal_error(
+                        format!("failed to serialize tool search result: {e}"),
+                        None,
+                    )
+                })?;
+                Ok(CallToolResult::success(vec![Content::text(serialized)]))
             }
             "tools/call" => {
                 let args: ToolsCallParams = request
@@ -343,9 +347,10 @@ impl ServerHandler for AkShareMcpService {
                     .await
                     .map_err(|e| McpError::internal_error(e, None))?;
 
-                Ok(CallToolResult::success(vec![Content::text(
-                    serde_json::to_string_pretty(&result).unwrap(),
-                )]))
+                let serialized = serde_json::to_string_pretty(&result).map_err(|e| {
+                    McpError::internal_error(format!("failed to serialize tool result: {e}"), None)
+                })?;
+                Ok(CallToolResult::success(vec![Content::text(serialized)]))
             }
             _ => Err(McpError::invalid_params(
                 format!(

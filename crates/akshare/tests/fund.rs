@@ -495,12 +495,16 @@ async fn test_fund_announcement_personnel_em() {
 #[tokio::test]
 async fn test_fund_aum_hist_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({"ok": true});
-    mock_any_get(&server, ".*", body).await;
+    let body = r#"<html><table><tr><th>序号</th><th>基金公司</th><th>总规模</th><th>股票</th><th>混合</th><th>债券</th><th>指数</th><th>QDII</th><th>货币</th></tr><tr><td>1</td><td>测试基金公司</td><td>100</td><td>20</td><td>30</td><td>40</td><td>5</td><td>2</td><td>3</td></tr></table></html>"#;
+    mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    // This always returns Err (HTML table parsing not supported)
-    let result = client.fund_aum_hist("2024").await;
-    assert!(result.is_err());
+    let result = client
+        .fund_aum_hist("2024")
+        .await
+        .expect("AUM history should parse");
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].company, "测试基金公司");
+    assert_eq!(result[0].total, 100.0);
 }
 
 #[tokio::test]
@@ -1258,15 +1262,13 @@ async fn test_fund_info_index_em() {
 #[tokio::test]
 async fn test_fund_rating_em() {
     let server = MockServer::start().await;
-    let body = serde_json::json!({
-        "datas": [
-            { "FCODE": "000001", "SHORTNAME": "华夏成长", "SYL_1N": "10.50" }
-        ]
-    });
-    mock_any_get(&server, ".*", body).await;
+    let body = r#"<div id="fundinfo"><script>var a=0;var b=0;var c=0;var d=0;var e=0;var data="000001|华夏成长|混合型|基金经理|x|基金公司|x|5|x|x|x|x|3|x|4|x|2|x|0.15|x|x|x";</script></div>"#;
+    mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
     let result = client.fund_rating(10).await;
     assert!(result.is_ok());
+    let items = result.unwrap();
+    assert_eq!(items[0]["code"], "000001");
 }
 
 #[tokio::test]
@@ -1362,15 +1364,13 @@ async fn test_fund_position_est_lg() {
 #[tokio::test]
 async fn test_fund_aum_em() {
     let server = MockServer::start().await;
-    mock_any_get_text(
-        &server,
-        ".*",
-        "<html><table><tr><td>row1</td></tr></table></html>",
-    )
-    .await;
+    let body = r#"<html><table><tr><th>序号</th><th>基金公司</th><th>成立时间</th><th>全部管理规模</th><th>全部基金数</th><th>全部经理数</th></tr><tr><td>1</td><td>测试基金公司</td><td>2000-01-01</td><td>1,234.56 11-23</td><td>10</td><td>3</td></tr></table></html>"#;
+    mock_any_get_text(&server, ".*", body).await;
     let client = mock_client(&server);
-    let result = client.fund_aum().await;
-    assert!(result.is_ok());
+    let result = client.fund_aum().await.expect("AUM table should parse");
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].company, "测试基金公司");
+    assert_eq!(result[0].total_scale, 1234.56);
 }
 
 #[tokio::test]

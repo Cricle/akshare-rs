@@ -959,12 +959,22 @@ impl AkShareClient {
         self.china_goods_index().await
     }
 
-    /// CNBS macro leverage ratio data (中国宏观杠杆率).
-    /// NOTE: The CNBS endpoint returns an Excel (.xlsx) file which requires
-    /// a dedicated Excel parsing crate (e.g. calamine). This stub returns
-    /// an empty vec until that dependency is added.
+    /// CNBS/NIFD macro leverage ratio data (中国宏观杠杆率).
+    ///
+    /// Upstream: `akshare.macro.macro_cnbs.macro_china_leverage_nifd`, which
+    /// downloads `http://www.nifd.cn/cdata/handler/download.ashx`, reads the
+    /// `Data` worksheet with the English header row, and returns one row per
+    /// period with eight leverage-ratio columns.
+    ///
+    /// The wide upstream frame is flattened into long `MacroDataPoint`s: each
+    /// period emits one point per available column, with `name` set to the
+    /// upstream Chinese column label and `date` normalized to `YYYY-MM`.
     pub async fn macro_cnbs(&self) -> Result<Vec<MacroDataPoint>> {
-        Ok(Vec::new())
+        let url = "http://www.nifd.cn/cdata/handler/download.ashx";
+        let response = crate::util::send_and_check(self.get(url)).await?;
+        let bytes = response.bytes().await.map_err(crate::Error::from)?;
+        let rows = crate::util::read_spreadsheet_sheet_rows(&bytes, Some("Data"))?;
+        cnbs_rows_to_points(&rows)
     }
 
     /// Sina Finance - central bank balance sheet (央行货币当局资产负债).
@@ -1335,5 +1345,195 @@ impl AkShareClient {
                 }
             })
             .collect())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// CNBS / NIFD leverage-ratio workbook helpers
+// ---------------------------------------------------------------------------
+
+/// NIFD `Data` sheet columns (English workbook header -> upstream CN label).
+///
+/// Order mirrors `macro_china_leverage_nifd`'s `column_order`.
+const CNBS_COLUMNS: [(&str, &str); 8] = [
+    ("Household", "居民部门"),
+    ("Non-financial corporations", "非金融企业部门"),
+    ("General government", "政府部门"),
+    ("Central government", "中央政府"),
+    ("Local government", "地方政府"),
+    ("Non financial sector", "实体经济部门"),
+    ("Financial sector(asset side)", "金融部门资产方"),
+    ("Financial sector(liability side)", "金融部门负债方"),
+];
+
+fn cnbs_normalize_header(value: &str) -> String {
+    value
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_ascii_lowercase()
+}
+
+/// Normalize the NIFD `Period` cell to `YYYY-MM`.
+fn cnbs_period(raw: &str) -> String {
+    let raw = raw.trim();
+    if raw.is_empty() {
+        return String::new();
+    }
+
+    let normalized = raw.replace('/', "-");
+    let mut parts = normalized.split('-');
+    if let (Some(year), Some(month)) = (parts.next(), parts.next())
+        && year.len() == 4
+        && year.chars().all(|c| c.is_ascii_digit())
+        && let Ok(month) = month.trim().parse::<u32>()
+        && (1..=12).contains(&month)
+    {
+        return format!("{year}-{month:02}");
+    }
+
+    // Some exports store the quarter-end date as a bare Excel serial number.
+    if let Ok(serial) = raw.parse::<f64>()
+        && (20_000.0..80_000.0).contains(&serial)
+    {
+        let iso = crate::util::excel_serial_to_iso(serial);
+        return iso.get(0..7).unwrap_or(&iso).to_string();
+    }
+
+    raw.get(0..7).unwrap_or(raw).to_string()
+}
+
+/// Flatten the NIFD wide workbook rows into long `MacroDataPoint`s.
+fn cnbs_rows_to_points(rows: &[Vec<String>]) -> Result<Vec<MacroDataPoint>> {
+    let header_index = rows
+        .iter()
+        .position(|row| {
+            row.iter()
+                .any(|cell| cnbs_normalize_header(cell) == "period")
+        })
+        .ok_or_else(|| {
+            crate::Error::decode("NIFD CNBS workbook is missing the `Period` header row")
+        })?;
+
+    let headers: Vec<String> = rows[header_index]
+        .iter()
+        .map(|cell| cnbs_normalize_header(cell))
+        .collect();
+    let period_index = headers
+        .iter()
+        .position(|header| header == "period")
+        .ok_or_else(|| crate::Error::decode("NIFD CNBS workbook is missing the Period column"))?;
+
+    let columns: Vec<(usize, &str)> = CNBS_COLUMNS
+        .iter()
+        .filter_map(|(upstream, label)| {
+            let wanted = cnbs_normalize_header(upstream);
+            headers
+                .iter()
+                .position(|header| header == &wanted)
+                .map(|index| (index, *label))
+        })
+        .collect();
+
+    if columns.is_empty() {
+        return Err(crate::Error::decode(
+            "NIFD CNBS workbook has no recognized leverage-ratio columns",
+        ));
+    }
+
+    let mut points = Vec::new();
+    for row in &rows[header_index + 1..] {
+        let date = row.get(period_index).map_or("", String::as_str);
+        let date = cnbs_period(date);
+        if date.is_empty() {
+            continue;
+        }
+        for (index, label) in &columns {
+            let Some(raw) = row.get(*index) else {
+                continue;
+            };
+            let raw = raw.trim().replace(',', "");
+            if raw.is_empty() {
+                continue;
+            }
+            if let Ok(value) = raw.parse::<f64>()
+                && value.is_finite()
+            {
+                points.push(MacroDataPoint {
+                    date: date.clone(),
+                    value,
+                    name: (*label).to_string(),
+                });
+            }
+        }
+    }
+
+    if points.is_empty() {
+        return Err(crate::Error::not_found(
+            "NIFD CNBS workbook returned no leverage-ratio rows",
+        ));
+    }
+    Ok(points)
+}
+
+#[cfg(test)]
+mod cnbs_tests {
+    use super::*;
+
+    #[test]
+    fn cnbs_period_normalizes_dates() {
+        assert_eq!(cnbs_period("2005-03-31"), "2005-03");
+        assert_eq!(cnbs_period("2005/3/31"), "2005-03");
+        assert_eq!(cnbs_period("38442"), "2005-03");
+        assert_eq!(cnbs_period(""), "");
+    }
+
+    #[test]
+    fn cnbs_rows_flatten_to_long_points() {
+        let rows = vec![
+            vec!["中国宏观杠杆率数据".to_string(), String::new()],
+            vec![
+                "Period".to_string(),
+                "Household".to_string(),
+                "Non-financial corporations".to_string(),
+                "General government".to_string(),
+                "Central government ".to_string(),
+                "Local government".to_string(),
+                "Non financial sector".to_string(),
+                "Financial sector(asset side)".to_string(),
+                "Financial sector(liability side)".to_string(),
+            ],
+            vec![
+                "2005-03-31".to_string(),
+                "17.6".to_string(),
+                "104.6".to_string(),
+                "26.4".to_string(),
+                "18".to_string(),
+                "8.4".to_string(),
+                "148.6".to_string(),
+                "20.9".to_string(),
+                "21.1".to_string(),
+            ],
+        ];
+
+        let points = cnbs_rows_to_points(&rows).expect("rows should parse");
+        assert_eq!(points.len(), 8);
+        assert_eq!(points[0].date, "2005-03");
+        assert_eq!(points[0].name, "居民部门");
+        assert_eq!(points[0].value, 17.6);
+        assert_eq!(points[3].name, "中央政府");
+        assert_eq!(points[3].value, 18.0);
+        assert_eq!(points[7].name, "金融部门负债方");
+        assert_eq!(points[7].value, 21.1);
+    }
+
+    #[test]
+    fn cnbs_rows_skip_blank_cells() {
+        let rows = vec![
+            vec!["Period".to_string(), "Household".to_string()],
+            vec!["2024-06-30".to_string(), "".to_string()],
+        ];
+        let error = cnbs_rows_to_points(&rows).expect_err("no values should be found");
+        assert!(error.to_string().contains("no leverage-ratio rows"));
     }
 }

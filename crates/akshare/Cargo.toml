@@ -54,7 +54,8 @@ all = ["equity", "derivatives", "funds", "macro", "fx-commodity", "misc", "marke
 default = ["all"]
 
 [dependencies]
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "charset"] }
+encoding_rs = "0.8"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 chrono = "0.4"
@@ -63,6 +64,8 @@ tokio = { version = "1", features = ["time"] }
 sha2 = "0.10"
 calamine = "0.37"
 rust_decimal = { version = "1", features = ["serde-with-str"] }
+zip = { version = "9", default-features = false, features = ["deflate"] }
+csv = "1"
 
 # Optional deps for market-client feature
 reqwest-middleware = { version = "0.4", features = ["json"], optional = true }

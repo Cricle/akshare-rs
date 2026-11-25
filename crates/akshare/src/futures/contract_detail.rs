@@ -5,33 +5,78 @@ use std::sync::LazyLock;
 use crate::client::AkShareClient;
 use crate::error::{Error, Result};
 use crate::types::Row;
+use crate::util::{parse_html_tables, send_and_check_text};
 
 static RE_ALPHA: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"[a-zA-Z]+").unwrap());
 static RE_FUTURES_ID: LazyLock<regex::Regex> =
     LazyLock::new(|| regex::Regex::new(r"#(futures_\w+)").unwrap());
 
+/// Parse the contract-specification table from a Sina futures quote page.
+///
+/// Sina lays the specifications out as three `item/value` pairs per row (six
+/// cells). Every pair is flattened into one `item`/`value` row so callers get a
+/// single uniform schema.
+pub(crate) fn parse_sina_contract_detail(html: &str) -> Vec<Row> {
+    let tables = parse_html_tables(html);
+    let table = tables.iter().find(|table| {
+        table.iter().any(|row| {
+            row.iter().any(|cell| {
+                matches!(
+                    cell.trim(),
+                    "交易品种" | "交易单位" | "交易代码" | "报价单位"
+                )
+            })
+        })
+    });
+    let Some(table) = table else {
+        return Vec::new();
+    };
+
+    let mut items = Vec::new();
+    for row in table {
+        for pair in row.chunks(2) {
+            if pair.len() < 2 {
+                continue;
+            }
+            let item = pair[0].trim();
+            let value = pair[1].trim();
+            if item.is_empty() || value.is_empty() {
+                continue;
+            }
+            let mut r = Row::new();
+            r.insert("item".into(), serde_json::json!(item));
+            r.insert("value".into(), serde_json::json!(value));
+            items.push(r);
+        }
+    }
+    items
+}
+
 impl AkShareClient {
     /// Futures contract detail from Sina Finance.
     ///
     /// Fetches contract specifications from the Sina futures page.
     pub async fn futures_contract_detail_sina(&self, symbol: &str) -> Result<Vec<Row>> {
+        let symbol = symbol.trim();
+        if symbol.is_empty() {
+            return Err(Error::invalid_input("symbol must not be empty"));
+        }
         let url = format!("https://finance.sina.com.cn/futures/quotes/{symbol}.shtml");
-        let body = self
-            .get(&url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await?
-            .text()
-            .await?;
+        let body = send_and_check_text(
+            self.get(&url)
+                .header("User-Agent", "Mozilla/5.0")
+                .header("Referer", "https://finance.sina.com.cn"),
+            Some(encoding_rs::GB18030),
+        )
+        .await?;
 
-        // Parse HTML table - extract key/value pairs
-        let mut items = Vec::new();
-        let mut row = Row::new();
-        row.insert("symbol".into(), serde_json::json!(symbol));
-        row.insert("source".into(), serde_json::json!("sina"));
-        row.insert("html_len".into(), serde_json::json!(body.len()));
-        items.push(row);
+        let items = parse_sina_contract_detail(&body);
+        if items.is_empty() {
+            return Err(Error::not_found(format!(
+                "Sina futures contract detail not found for {symbol}"
+            )));
+        }
         Ok(items)
     }
 
@@ -115,7 +160,8 @@ impl AkShareClient {
 
         // Step 2: Fetch contract info
         let info_url = format!("https://futsse-static.eastmoney.com/redis?msgid={inner_id}_info");
-        let info_body = self.get(&info_url).send().await?.text().await?;
+        let info_body =
+            send_and_check_text(self.get(&info_url), Some(encoding_rs::GB18030)).await?;
 
         let data: serde_json::Value = serde_json::from_str(&info_body)?;
 
@@ -146,5 +192,61 @@ impl AkShareClient {
             }
         }
         Ok(items)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_sina_contract_detail_pairs() {
+        let html = r#"
+        <html><body>
+        <table><tr><td>导航</td><td>其它内容</td></tr></table>
+        <table>
+          <tr>
+            <td>交易品种</td><td>聚氯乙烯</td>
+            <td>交易单位</td><td>5吨/手</td>
+            <td>报价单位</td><td>元(人民币/吨)</td>
+          </tr>
+          <tr>
+            <td>最小变动价位</td><td>5元/吨</td>
+            <td>交易代码</td><td>V</td>
+            <td>上市交易所</td><td>大连商品交易所</td>
+          </tr>
+        </table>
+        </body></html>
+        "#;
+
+        let items = parse_sina_contract_detail(html);
+        assert_eq!(items.len(), 6);
+        assert_eq!(items[0]["item"], "交易品种");
+        assert_eq!(items[0]["value"], "聚氯乙烯");
+        assert_eq!(items[2]["item"], "报价单位");
+        assert_eq!(items[2]["value"], "元(人民币/吨)");
+        assert_eq!(items[5]["item"], "上市交易所");
+        assert_eq!(items[5]["value"], "大连商品交易所");
+    }
+
+    #[test]
+    fn ignores_rows_without_complete_pairs() {
+        let html = r#"
+        <table>
+          <tr><td>交易代码</td><td>RB</td><td>孤立单元格</td></tr>
+          <tr><td></td><td>空标签</td></tr>
+        </table>
+        "#;
+
+        let items = parse_sina_contract_detail(html);
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0]["item"], "交易代码");
+        assert_eq!(items[0]["value"], "RB");
+    }
+
+    #[test]
+    fn returns_empty_without_detail_table() {
+        let html = "<table><tr><td>无关</td><td>内容</td></tr></table>";
+        assert!(parse_sina_contract_detail(html).is_empty());
     }
 }
